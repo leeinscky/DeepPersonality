@@ -1,8 +1,8 @@
 import numpy as np
 
-
-def concordance_correlation_coefficient(y_true, y_pred):
-    """ Concordance correlation coefficient.
+# 计算Concordance correlation coefficient (CCC) ，用于评估两个变量之间的相关性，值越大，相关性越强，值越小，相关性越弱，值为0，表示两个变量之间没有相关性，值为1，表示两个变量之间完全相关，值为-1，表示两个变量之间完全负相关
+def concordance_correlation_coefficient(y_true, y_pred): 
+    """ Concordance correlation coefficient. 
 
     The concordance correlation coefficient is a measure of inter-rater agreement.
     It measures the deviation of the relationship between predicted and true values
@@ -45,9 +45,11 @@ def concordance_correlation_coefficient(y_true, y_pred):
     return numerator / denominator
 
 
-def compute_pcc(outputs, labels):
+def compute_pcc(outputs, labels, dataset_name=''): # pcc: Pearson correlation coefficient (PCC) is a measure of the linear correlation between two variables X and Y.
     from scipy.stats import pearsonr
     keys = ['O', 'C', 'E', 'A', 'N']
+    if dataset_name == 'UDIVA':
+        keys = ['known_label', 'unknown_label']
     pcc_dic = {}
     pcc_sum = 0
     for i, key in enumerate(keys):
@@ -59,8 +61,10 @@ def compute_pcc(outputs, labels):
     return pcc_dic, mean
 
 
-def compute_ccc(outputs, labels):
+def compute_ccc(outputs, labels, dataset_name=''):
     keys = ['O', 'C', 'E', 'A', 'N']
+    if dataset_name == 'UDIVA':
+        keys = ['known_label', 'unknown_label']
     ccc_dic = {}
     ccc_sum = 0
     for i, key in enumerate(keys):

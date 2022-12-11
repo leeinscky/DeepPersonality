@@ -4,8 +4,8 @@ DATA_LOADER_REGISTRY = Registry("DATA_LOADER")
 
 
 def build_dataloader(cfg):
-    name = cfg.DATA_LOADER.NAME
-    dataloader = DATA_LOADER_REGISTRY.get(name)
+    name = cfg.DATA_LOADER.NAME # 'NAME': 'bimodal_resnet_data_loader'
+    dataloader = DATA_LOADER_REGISTRY.get(name) # 在 dpcv/data/datasets/audio_visual_data.py里有 def bimodal_resnet_data_loader(cfg, mode) 函数定义
     dataset_name = cfg.DATA_LOADER.DATASET
 
     if dataset_name:

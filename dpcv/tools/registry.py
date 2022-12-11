@@ -68,6 +68,7 @@ class Registry(Iterable[Tuple[str, Any]]):
 
     def get(self, name: str) -> Any:
         ret = self._obj_map.get(name)
+        # print('[DeepPersonality/dpcv/tools/registry.py]  def get - self._obj_map:', self._obj_map)
         if ret is None:
             raise KeyError(
                 "No object named '{}' found in '{}' registry!".format(name, self._name)

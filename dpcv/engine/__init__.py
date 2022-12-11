@@ -1,5 +1,6 @@
 from .bi_modal_trainer import (
     BiModalTrainer,
+    BiModalTrainerUdiva,
     BimodalLSTMTrain,
     ImgModalLSTMTrain,
     ImageListTrainer,

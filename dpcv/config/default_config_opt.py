@@ -56,6 +56,9 @@ __C.DATA_LOADER.SECOND_STAGE = CfgNode()
 __C.DATA_LOADER.SECOND_STAGE.METHOD = ""
 __C.DATA_LOADER.SECOND_STAGE.TYPE = ""
 
+# name of dataset type 
+__C.DATA_LOADER.DATASET_NAME = ""
+
 # ------------------------------------------ step 3 : model config node ------------------------------------------------
 __C.MODEL = CfgNode()
 __C.MODEL.NAME = "se_resnet50"

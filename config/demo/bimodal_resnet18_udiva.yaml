@@ -1,0 +1,33 @@
+DATA:
+  ROOT: "datasets"
+  TRAIN_IMG_DATA: "udiva_tiny/train/recordings/animals_recordings_train_img" 
+  VALID_IMG_DATA: "udiva_tiny/val/recordings/animals_recordings_val_img" 
+  TEST_IMG_DATA: "udiva_tiny/test/recordings/animals_recordings_test_img" 
+  TRAIN_AUD_DATA: "udiva_tiny/train/recordings/animals_recordings_train_wav"
+  VALID_AUD_DATA: "udiva_tiny/val/recordings/animals_recordings_val_wav"
+  TEST_AUD_DATA: "udiva_tiny/test/recordings/animals_recordings_test_wav"
+  TRAIN_LABEL_DATA: "udiva_tiny/train/label/sessions_train.pkl"
+  VALID_LABEL_DATA: "udiva_tiny/val/label/sessions_val.pkl"
+  TEST_LABEL_DATA: "udiva_tiny/test/label/sessions_test.pkl"
+DATA_LOADER:
+  NAME: "bimodal_resnet_data_loader_udiva"
+  TRANSFORM: "standard_frame_transform"
+  TRAIN_BATCH_SIZE: 1
+  VALID_BATCH_SIZE: 1
+  NUM_WORKERS: 0
+  DATASET_NAME: "UDIVA"
+MODEL:
+  NAME: "audiovisual_resnet_udiva"
+LOSS:
+  NAME: "mean_square_error"
+SOLVER:
+  NAME: "sgd"
+  SCHEDULER: "multi_step_scale"
+  LR_INIT: 0.001
+  WEIGHT_DECAY: 0.0005
+  MOMENTUM: 0.9
+  MILESTONE: [100, 200]
+TRAIN:
+  TRAINER: "BiModalTrainerUdiva"
+  MAX_EPOCH: 2
+  OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"

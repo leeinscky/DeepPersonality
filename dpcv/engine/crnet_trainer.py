@@ -71,7 +71,7 @@ class CRNetTrainer(BiModalTrainer):
             self.clt.record_train_acc(acc_avg_list)
 
     def valid(self, data_loader, model, loss_f, epoch_idx):
-        model.eval()
+        model.eval() # 
         if not model.train_guider:
             with torch.no_grad():
                 loss_batch_list = []
