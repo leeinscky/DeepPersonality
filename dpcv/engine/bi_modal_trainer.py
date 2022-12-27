@@ -340,7 +340,7 @@ class BiModalTrainerUdiva(object):
             # labels = ret['label']
 
             # 待问：这里该怎么处理？
-            outputs = model(*inputs)
+            outputs = model(*inputs) # *inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             # fc1_output = model(*fc1_input)
             # fc2_output = model(*fc2_input)
@@ -528,11 +528,6 @@ class BiModalTrainerUdiva(object):
                 torch.save(video_extract, save_to_file)
 
     def data_fmt(self, data):
-        for k, v in data.items():
-            data[k] = v.to(self.device)
-        img_in, aud_in, labels = data["image"], data["audio"], data["label"]
-        return (aud_in, img_in), labels
-        
         # # 处理audio_visual_data_udiva.py的__getitem__返回的sample
         # fc1_img_in, fc1_aud_in = data["fc1_image"], data["fc1_audio"]
         # fc2_img_in, fc2_aud_in = data["fc2_image"], data["fc2_audio"]
@@ -542,6 +537,11 @@ class BiModalTrainerUdiva(object):
         # ret['fc2_in'] = (fc2_aud_in, fc2_img_in)
         # ret['label'] = data["label"]
         # return ret
+
+        for k, v in data.items():
+            data[k] = v.to(self.device)
+        img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+        return (aud_in, img_in), labels
 
     def full_test_data_fmt(self, data):
         images, wav, label = data["image"], data["audio"], data["label"]

@@ -20,13 +20,13 @@ class AudioVisualResNet18(nn.Module): # nn.Module是所有神经网络模块的�
     def __init__(self, init_weights=True, return_feat=False):
         super(AudioVisualResNet18, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
         self.return_feature = return_feat
-        self.audio_branch = AudioVisualResNetUdiva(
+        self.audio_branch = AudioVisualResNet(
             in_channels=1, init_stage=AudInitStage, # in_channels=1表示输入的通道数为1，init_stage=AudInitStage表示使用AudInitStage这个类作为初始化层
             block=BiModalBasicBlock, conv=[aud_conv1x9, aud_conv1x1], # block是一个类，conv是一个函数
             channels=[32, 64, 128, 256], # 32, 64, 128, 256 are the number of channels in each layer, which is the number of filters in each layer, 这里的32, 64, 128, 256是每一层的卷积核的个数，也就是每一层的通道数
             layers=[2, 2, 2, 2] # 2, 2, 2, 2 are the number of layers in each layer, 这里的2, 2, 2, 2是每一层的卷积层数
         )
-        self.visual_branch = AudioVisualResNetUdiva(
+        self.visual_branch = AudioVisualResNet(
             in_channels=3, init_stage=VisInitStage,
             block=BiModalBasicBlock, conv=[vis_conv3x3, vis_conv1x1],
             channels=[32, 64, 128, 256],
@@ -99,10 +99,10 @@ class AudioVisualResNet18Udiva(nn.Module): # nn.Module是所有神经网络模�
 
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
-        # 将音频分支和视频分支的输出进行拼接
+        # 将音频分支和视频分支的输出进行cat拼接，然后输入全连接层，最后输入激活函数中得到最终输出
         feat = torch.cat([aud_x, vis_x], dim=-1) # torch.cat是用来拼接tensor的，这里的dim=-1表示的是拼接的维度，这里的feat的shape是[batch_size, 512]，也就是把aud_x和vis_x拼接在了一起
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
-        x = self.linear(feat) # self.linear = nn.Linear(512, 5) 这里的x的shape是[batch_size, 5]，也就是把feat输入到全连接层中，全连接层的输出是5个类别的概率，这里的5表示的是5个类别。
+        x = self.linear(feat) # self.linear = nn.Linear(512, 5) 这里的x的shape是[batch_size, 5]，也就是把feat输入到全连接层中，全连接层的输出是5个类别的概率，这里的5表示的是5个类别。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 5]
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape, ' x=', x)
         x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape, ' x=', x)
