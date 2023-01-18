@@ -29,15 +29,17 @@ def main ():
     linux_animals_recordings_val_img = '/home/zl525/rds/hpc-work/udiva_tiny_hpc/val/recordings/animals_recordings_val_img'
     linux_animals_recordings_test_img = '/home/zl525/rds/hpc-work/udiva_tiny_hpc/test/recordings/animals_recordings_test_img'
     
-    video_dir = mac_animals_recordings_train_img
-    # 遍历文件夹下的所有文件夹
-    for file  in  os.listdir(video_dir):
-        # 如果当前遍历到的文件夹里没有FC1_A和FC2_A两个子文件夹并且没有.DS_Store文件夹，就执行shell 命令
-        if  (not os.path.exists(os.path.join(video_dir, file,  'FC1_A' )) and not os.path.exists(os.path.join(video_dir, file,  'FC2_A' ))) and file !=  '.DS_Store' :
-            # 执行shell 命令
-            print( '准备执行命令：python ./video_to_image.py --video-dir '  + os.path.join(video_dir, file) +  ' --output-dir '  + os.path.join(video_dir, file))
-            os.system( 'python ./video_to_image.py --video-dir '  + os.path.join(video_dir, file) +  ' --output-dir '  + os.path.join(video_dir, file))
-            print( '当前命令执行完毕' )
+    video_dir_list = [linux_animals_recordings_train_img, linux_animals_recordings_val_img, linux_animals_recordings_test_img]
+    
+    for video_dir in video_dir_list:
+        # 遍历文件夹下的所有文件夹
+        for file  in  os.listdir(video_dir):
+            # 如果当前遍历到的文件夹里没有FC1_A和FC2_A两个子文件夹并且没有.DS_Store文件夹，就执行shell 命令
+            if  (not os.path.exists(os.path.join(video_dir, file,  'FC1_A' )) and not os.path.exists(os.path.join(video_dir, file,  'FC2_A' ))) and file !=  '.DS_Store' :
+                # 执行shell 命令
+                print( '准备执行命令：python ./video_to_image.py --video-dir '  + os.path.join(video_dir, file) +  ' --output-dir '  + os.path.join(video_dir, file))
+                os.system( 'python3 ./video_to_image.py --video-dir '  + os.path.join(video_dir, file) +  ' --output-dir '  + os.path.join(video_dir, file))
+                print( '当前命令执行完毕' )
 
 if  __name__   ==   '__main__' :
     main()
