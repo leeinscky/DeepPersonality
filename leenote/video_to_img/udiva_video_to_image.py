@@ -1,9 +1,11 @@
+# 处理UDIVA数据集，将视频转换为图片
+
 import cv2
 import os
 import zipfile
 from pathlib import Path
 
-
+'''
 def process():
     data_dir = "./chalearn/test"
     video_list = os.listdir(data_dir)
@@ -53,6 +55,7 @@ def frame_sample(video, save_dir):
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+'''
 
 def crop_to_square(img):
     h, w, _ = img.shape
@@ -65,48 +68,60 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
     """
     Creating folder to save all frames from the video
     """
-    cap = cv2.VideoCapture(video_path)
+    try:
+        cap = cv2.VideoCapture(video_path)
+        # file_name = (os.path.basename(video).split('.mp4'))[0]
+        file_name = Path(video_path).stem
+        # print('[frame_extract] after Path(video_path).stem')
+        # try:
+        # if not os.path.exists(save_dir + file_name):
+        #     os.makedirs(save_dir + file_name)
 
-    # file_name = (os.path.basename(video).split('.mp4'))[0]
-    file_name = Path(video_path).stem
-    # try:
-    # if not os.path.exists(save_dir + file_name):
-    #     os.makedirs(save_dir + file_name)
+        save_path = Path(save_dir).joinpath(file_name)
+        # print('[frame_extract] after Path(save_dir).joinpath(file_name), save_path = ', save_path)
+        os.makedirs(save_path, exist_ok=True) # exist_ok=True, if the directory exists, do nothing
+        # print('[frame_extract] after os.makedirs')
+        # if not save_path.exists():
+        #     save_path.mkdir()
+        # except OSError:
+        #     print('Error: Creating directory of data')
 
-    save_path = Path(save_dir).joinpath(file_name)
-    os.makedirs(save_path, exist_ok=True)
-    # if not save_path.exists():
-    #     save_path.mkdir()
-    # except OSError:
-    #     print('Error: Creating directory of data')
-
-    length = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    count = 0
+        fps = cap.get(cv2.CAP_PROP_FPS) # 查看视频的帧率 CAP_PROP_FPS=5
+        length = cap.get(cv2.CAP_PROP_FRAME_COUNT) # 获取视频的总帧数，参考：https://blog.csdn.net/zhicai_liu/article/details/110518578
+        print(f"video:{str(video_path)} length = {length}, fps = {fps}")
+        # 打印结果：video:/home/zl525/rds/hpc-work/datasets/udiva_full/train/recordings/talk_recordings_train_img/023191/FC1_T.mp4 length = 8079.0, fps = 25.0
+    except Exception as e:
+        print('[frame_extract] exception = ', e)
+        return None
+    
     # Running a loop to each frame and saving it in the created folder
+    count = 0
     while cap.isOpened():
-        count += 1
         if length == count:
             break
         ret, frame = cap.read()
         if frame is None:
             continue
-        if transform is not None:
-            frame = transform(frame)
-
-        # Resizing it to w, h = resize to save the disk space and fit into the model
-        frame = cv2.resize(frame, resize, interpolation=cv2.INTER_CUBIC)
-        # Saves image of the current frame to a jpg file
-        name = f"{str(save_path)}/frame_{str(count)}.jpg"
-        if os.path.exists(name):
-            continue
-        cv2.imwrite(name, frame)
-        if count % 200 == 0:
-            print(f"video:{str(video_path)} saved image {count}")
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if ret:
+            count += 1
+            if count % fps == 0: # 如果count是fps的倍数，就保存frame图片，即每隔1秒抽取一帧
+                if transform is not None:
+                    frame = transform(frame)
+                # Resizing it to w, h = resize to save the disk space and fit into the model
+                frame = cv2.resize(frame, resize, interpolation=cv2.INTER_CUBIC)
+                # Saves image of the current frame to a jpg file
+                name = f"{str(save_path)}/frame_{str(count)}.jpg"
+                if os.path.exists(name):
+                    continue
+                cv2.imwrite(name, frame) # 保存图片
+                if count % 1000 == 0: # 如果count是200的倍数，打印一下
+                    print(f"video:{str(video_path)} saved image {count}")
+            if cv2.waitKey(1) & 0xFF == ord('q'): # 如果按下q键，退出
+                break
 
 
 def long_time_task(video, parent_dir):
+    # print('start running long_time_task function')
     print(f"execute {video} ...")
     return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
 
@@ -142,7 +157,7 @@ if __name__ == "__main__":
             saved_dir = Path(video).parent
         print('video_path:', video_path)
         print('saved_dir:', saved_dir)
-        p.apply_async(long_time_task, args=(video_path, saved_dir))
+        p.apply_async(long_time_task, args=(video_path, saved_dir)) # 异步执行
         print('---------------------')
         # frame_extract(video_path=video_path, save_dir=saved_dir, resize=(256, 256), transform=crop_to_square)
     print('Waiting for all subprocesses done...')

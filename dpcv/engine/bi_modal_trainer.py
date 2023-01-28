@@ -277,7 +277,7 @@ class BiModalTrainerUdiva(object):
         print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
-        '''
+        ''' data_loader的调用逻辑如下
         # data_loader: 上一层级调用该函数时传入了: self.data_loader["train"], self.data_loader = self.build_dataloader(),  build_dataloader 函数返回的是 data_loader_dicts，
         然后：
         data_loader_dicts = {
@@ -339,8 +339,8 @@ class BiModalTrainerUdiva(object):
             # fc2_input = ret['fc2_in']
             # labels = ret['label']
 
-            # 待问：这里该怎么处理？
-            outputs = model(*inputs) # *inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+            # 这里该怎么处理一对视频融合？我们在数据预处理时就将一对视频的数据进行了早期融合，所以这里不需要再对两个视频分支进行融合了，模型输出的结果是融合后的结果
+            outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             # fc1_output = model(*fc1_input)
             # fc2_output = model(*fc2_input)

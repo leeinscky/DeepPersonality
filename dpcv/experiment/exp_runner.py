@@ -96,6 +96,7 @@ class ExpRunner:
     def train_epochs(self, cfg):
         # cfg = self.cfg.TRAIN
         for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
+            # 训练用到的文件路径 self.trainer: dpcv/engine/bi_modal_trainer.py;  self.model: dpcv/modeling/networks/audio_visual_residual.py;  self.data_loader["train"]:  备注：结合config/demo/bimodal_resnet18_udiva.yaml里的信息就可以看到class类名
             self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
             if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
                 self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
