@@ -229,35 +229,26 @@ class AudioVisualDataUdiva(VideoDataUdiva):
 
 
 class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16):
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __init__')
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
-        self.sample_size = sample_size
+        self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 结束执行 __init__')
 
-    def __getitem__(self, idx): # idx means the index of video in the video directory
+    def __getitem__(self, idx): # idx means the index of session in the directory
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
         label = self.get_ocean_label(idx)  # label是True或者False, 代表关系Known是True或者False
-        
-        # img = self.get_image_data(idx) # img是一个PIL.Image.Image对象, 代表该video的一帧图像, 例如：PIL.Image.Image object, mode=RGB, size=224x224, 代表该video的一帧图像的大小是224x224, 且是RGB三通道的, 也就是说该video的一帧图像是224x224x3的
-        fc1_img, fc2_img = self.get_image_data(idx)
-        
-        # wav = self.get_wave_data(idx) # wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：array([[[ 0.        ,  0.        ,  0.        , ...,  0.        ,  0.        ,  0.        ]]], dtype=float32), 代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
+        fc1_img_tensor_list, fc2_img_tensor_list = self.get_image_data(idx)
         fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：array([[[ 0.        ,  0.        ,  0.        , ...,  0.        ,  0.        ,  0.        ]]], dtype=float32), 代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
-
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - transform之前 type(img)=', type(img), 'img=', img) # type(img)= <class 'PIL.Image.Image'> img= <PIL.Image.Image image mode=RGB size=256x256 at 0x7FC8AA03EB20>
-        if self.transform: # self.transform是一个Compose对象, 代表对img和wav的一系列变换, 对于bimodal_resnet_data_loader， transforms = build_transform_spatial(cfg)，'TRANSFORM': 'standard_frame_transform', 参考 dpcv/data/transforms/transform.py 里的def standard_frame_transform()
-            # 原始逻辑: 将img单独进行transform
-            # img = self.transform(img) # img是一个torch.Tensor对象, 代表该video的一帧图像, 例如：tensor([[[ 0.0000,  0.0000,  0.0000,  ...,  0.0000,  0.0000,  0.0000],
-            
-            # 修改后逻辑: 将fc1_img和fc2_img分别进行transform, 然后将两个transform后的tensor进行拼接
-            fc1_img_tensor = self.transform(fc1_img) # shape: (3, 224, 224)
-            fc2_img_tensor = self.transform(fc2_img) # shape: (3, 224, 224)
-            # concatenate the fc1_img_tensor and fc2_img_tensor 
-            img = torch.cat((fc1_img_tensor, fc2_img_tensor), 0) # shape: (6, 224, 224)  torch.cat 是将两个tensor进行拼接, 0表示按照第0维进行拼接, 拼接后的tensor的shape为(6, 224, 224)
-        # print('[deeppårsonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之前 type(label)=', type(label), 'label=', label) # type(label)= <class 'list'> label= [0.5111111111111111, 0.4563106796116505, 0.4018691588785047, 0.3626373626373627, 0.4166666666666667]
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之前 type(wav)=', type(wav), 'wav=', wav) # type(wav)= <class 'numpy.ndarray'> wav= [[[-1.0260781e-03 -2.3528279e-03 -2.2199661e-03 ...  9.4422154e-05 2.8776360e-04 -7.4460535e-05]]]
+        img_tensor_list = []
+        for i in range(len(fc1_img_tensor_list)):
+            fc1_img_tensor = fc1_img_tensor_list[i]
+            fc2_img_tensor = fc2_img_tensor_list[i]
+            img = torch.cat((fc1_img_tensor, fc2_img_tensor), 0) # concatenate the fc1_img_tensor and fc2_img_tensor
+            # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , img.shape = ', img.shape) # img.shape =  torch.Size([6, 224, 224])
+            img_tensor_list.append(img)
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list))
 
         fc1_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
         fc2_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
@@ -269,9 +260,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(label)=', type(label), 'label=', label, ' label.shape=', label.shape) # type(label)= <class 'torch.Tensor'> label= tensor([0.5111, 0.4563, 0.4019, 0.3626, 0.4167])
 
         # 返回的sample原始逻辑（也适用于将2个视频的帧的tensor拼接后的逻辑）
-        sample = {"image": img, "audio": wav, "label": label} # 非udiva的shape: img.shape()=torch.Size([3, 224, 224]) wav.shape()=torch.Size([1, 1, 50176]) label.shape()=torch.Size([5])  # udiva的shape: img.shape()= torch.Size([6, 224, 224]) wav.shape()= torch.Size([1, 2, 50176]) label.shape()= torch.Size([1])
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ 函数返回的结果中 , img.shape()=', img.shape, 'wav.shape()=', wav.shape, 'label.shape()=', label.shape) # 
-        # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个视频对应的img，wav，label，至于为什么只有1帧image, 因为get_image_data函数只返回了1帧image，而没有返回多帧image
+        sample = {"image": img_tensor_list, "audio": wav, "label": label} # 非udiva的shape: img.shape()=torch.Size([3, 224, 224]) wav.shape()=torch.Size([1, 1, 50176]) label.shape()=torch.Size([5])  # udiva的shape: img.shape()= torch.Size([6, 224, 224]) wav.shape()= torch.Size([1, 2, 50176]) label.shape()= torch.Size([1])
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ 函数返回的结果中 , len(img_tensor_list)=', len(img_tensor_list), 'wav.shape()=', wav.shape, 'label.shape()=', label.shape) # 
+        # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
         
         return sample # sample是一个dict对象, 例如：{'image': tensor([[[ 0.0000,  0.0000,  0.0000,  ...,  0.0000,  0.0000,  0.0000],
 
@@ -291,61 +282,64 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             # judge file is a directory and start with FC2 and not end with .mp4
             if os.path.isdir(os.path.join(img_dir_path, file)) and file.startswith("FC2") and not file.endswith(".mp4"):
                 fc2_img_dir_path = os.path.join(img_dir_path, file)
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
         # 打印结果: get_image_data fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
-        # get fc1 image
+        ########### get fc1 image - start ###########
         fc1_img_paths = glob.glob(fc1_img_dir_path + "/*.jpg") # fc1_img_paths是FC1_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc1_img_paths): 7228
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
-        #从所有的frame中按照，取出sample_size个frame，即随机取出sample_size个图片. 例如：一共有9293帧图片 随机取出sample_size = 100个图片. 那么公差=9293/100=92.93，即每隔92.93个图片取一个图片
-        simple_fc1_frames = np.linspace(0, len(fc1_img_paths), self.sample_size, endpoint=False, dtype=np.int16) #从所有的frame中   np.linspace 返回等差数列，endpoint=False表示不包含最后一个数 例如：np.linspace(0, 10, 5, endpoint=False) 结果为：array([0., 2., 4., 6., 8.])，即不包含10，只包含0-8，共5个数，间隔为2，即等差数列
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data simple_fc1_frames:', simple_fc1_frames) # self.sample_size = 100
-        selected_fc1 = random.choice(simple_fc1_frames)
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data selected_fc1:', selected_fc1)
-        # show the selected fc1 image
-        # show_selected_fc1 = mpimg.imread(fc1_img_paths[selected_fc1])
-        # plt.imshow(show_selected_fc1) # show the image
-        # plt.show()
-        try:
-            fc1_img = Image.open(fc1_img_paths[selected_fc1]).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
-        except:
-            print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc1_img_paths:', fc1_img_paths)
+        # 将fc1_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
+        fc1_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, after sort, fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
+        # 在0，len(fc1_img_paths)-sample_size 之间，生成一个随机数frame_idx，表示索引为frame_idx的图片帧
+        frame_idx = random.randint(0, (len(fc1_img_paths) - self.sample_size + 1)) # 如果一共16帧, sample_size=4, 那么随机数取值范围是[0,13], 13=16-4+1
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, frame_idx:', frame_idx)
+        # 在 fc1_img_paths 取出从frame_idx开始的sample_size个图片帧
+        sample_fc1_frames = fc1_img_paths[frame_idx:frame_idx + self.sample_size] # 从所有的frame中按照frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, sample_fc1_frames:', sample_fc1_frames, 'len(sample_fc1_frames):', len(sample_fc1_frames))
+        # 遍历sample_fc1_frames里的每个图片帧，将其转换为RGB模式
+        fc1_img_tensor_list = []
+        for i, fc1_frame_path in enumerate(sample_fc1_frames):
+            # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, enumerate(sample_fc1_frames), fc1_frame_path:', fc1_frame_path, 'i:', i)
+            try:
+                fc1_img = Image.open(fc1_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
+            except Exception as e:
+                print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception:', e, 'fc1_frame_path:', fc1_frame_path)
+            # 将图片转换为tensor
+            if self.transform:
+                fc1_img_tensor = self.transform(fc1_img)
+            # 将图片tensor添加到fc1_imgs中
+            fc1_img_tensor_list.append(fc1_img_tensor)
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, fc1_img_tensor_list:', fc1_img_tensor_list, 'len(fc1_img_tensor_list):', len(fc1_img_tensor_list))
+        ########### get fc1 image - done ###########
         
-        # get fc2 image
-        fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg")
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc2_img_paths:', fc2_img_paths)
-        simple_fc2_frames = np.linspace(0, len(fc2_img_paths), self.sample_size, endpoint=False, dtype=np.int16) 
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data simple_fc2_frames:', simple_fc2_frames) # self.sample_size = 100
-        # selected_fc2 = random.choice(simple_fc2_frames)
-        selected_fc2 = selected_fc1 # 保证fc1和fc2的图片对应于同一个时刻
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data selected_fc2:', selected_fc2)
-        # show the selected fc2 image
-        # show_selected_fc2 = mpimg.imread(fc2_img_paths[selected_fc2])
-        # plt.imshow(show_selected_fc2) # show the image
-        # plt.show()
-        try:
-            fc2_img = Image.open(fc2_img_paths[selected_fc2]).convert("RGB")
-        except:
-            print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc2_img_paths:', fc2_img_paths)
-
-        # # merge fc1 image and fc2 image ，merge是为了 生成一个2*img_size的图片，即将fc1和fc2的图片拼接在一起，方便后续处理
-        # fc1_img = fc1_img.resize((self.img_size, self.img_size))
-        # fc2_img = fc2_img.resize((self.img_size, self.img_size))
-        # img = Image.new('RGB', (self.img_size * 2, self.img_size))
-        # img.paste(fc1_img, (0, 0))
-        # img.paste(fc2_img, (self.img_size, 0))
-
-        return fc1_img, fc2_img
-
-        # img_paths = glob.glob(img_dir_path + "/*.jpg") # glob.glob()返回所有匹配的文件路径列表
-        # sample_frames = np.linspace(0, len(img_paths), self.sample_size, endpoint=False, dtype=np.int16) # np.linspace()返回在指定的间隔内返回均匀间隔的数字, np.int16是指定返回的数据类型是int16
-        # selected = random.choice(sample_frames) # random.choice()从序列中获取一个随机元素, 这里的序列是sample_frames, 也就是说从sample_frames中随机选取一个元素, 例如：sample_frames=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], 那么selected就是0, 1, 2, 3, 4, 5, 6, 7, 8, 9中的一个
-        # # img_path = random.choice(img_paths)
-        # try:
-        #     img = Image.open(img_paths[selected]).convert("RGB") # Image.open()打开一个图像文件, convert("RGB")将图像转换为RGB模式, 也就是说将图像转换为三通道, 例如：PIL.Image.Image object, mode=RGB, size=224x224, means the image size is 224x224, and is RGB three channels, 如果不转换为RGB模式, 那么就是单通道, 例如：PIL.Image.Image object, mode=L, size=224x224, means the image size is 224x224, and is L one channel, L means luminance, 亮度, 也就是灰度图, 也就是黑白图.
-        #     return img
-        # except:
-        #     print(img_paths)
+        ########### get fc2 image - start###########
+        fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg") # fc2_img_paths是FC2_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc2_img_paths): 7228
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
+        # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
+        fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, after sort, fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, frame_idx:', frame_idx)
+        # 在 fc2_img_paths 取出从frame_idx开始的sample_size个图片帧
+        sample_fc2_frames = fc2_img_paths[frame_idx:frame_idx + self.sample_size] # 从所有的frame中按照frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
+        # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
+        fc2_img_tensor_list = []
+        for i, fc2_frame_path in enumerate(sample_fc2_frames):
+            # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, enumerate(sample_fc2_frames), fc2_frame_path:', fc2_frame_path, 'i:', i)
+            try:
+                fc2_img = Image.open(fc2_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
+            except Exception as e:
+                print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception:', e, 'fc2_frame_path:', fc2_frame_path)
+            # 将图片转换为tensor
+            if self.transform:
+                fc2_img_tensor = self.transform(fc2_img)
+            # 将图片tensor添加到fc2_imgs中
+            fc2_img_tensor_list.append(fc2_img_tensor)
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, fc2_img_tensor_list:', fc2_img_tensor_list, 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list))
+        ########### get fc2 image - done ###########
+        
+        return fc1_img_tensor_list, fc2_img_tensor_list
 
     def get_wave_data(self, idx):
         # get wave data, return numpy.ndarray object, for example: numpy.ndarray object, shape=(1, 1, 128), means the wave data is 1x1x128, 音频数据是1x1x128，1代表1个声道，1代表1个采样点，128代表128个采样点，也就是说音频数据是128个采样点，每个采样点是1个声道，每个声道是1个采样点。
@@ -375,7 +369,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         except:
             # 看日志发现程序在这里执行了，说明len(fc1_wav_ft) - 50176 < 0
             n = 0
-        fc1_wav_tmp = fc1_wav_ft[..., n: n + 50176] # 日志：fc1_wav_tmp.shape: (1, 1, 50176)  n: n + 50176 表示从n开始，取50176个采样点，每个采样点是1个声道，每个声道是1个采样点。
+        fc1_wav_tmp = fc1_wav_ft[..., n: n + 50176] # 日志：fc1_wav_tmp.shape: (1, 1, 50176)  n: n + 50176 表示从n开始，取连续的50176个采样点。
         print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp:', fc1_wav_tmp, 'fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
         if fc1_wav_tmp.shape[-1] < 50176: # 如果采样点数小于50176，就用0填充  实际程序没有进入这个if语句
             fc1_wav_fill = np.zeros((1, 1, 50176)) # fc1_wav_fill.shape: (1, 1, 50176) np.zeros((1, 1, 50176)) 表示生成一个1行1列50176个元素的矩阵，每个元素都是0
