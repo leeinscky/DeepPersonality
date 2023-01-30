@@ -1,11 +1,35 @@
 DATA:
   ROOT: "datasets"
-  TRAIN_IMG_DATA: "udiva_tiny/train/recordings/animals_recordings_train_img" 
-  VALID_IMG_DATA: "udiva_tiny/val/recordings/animals_recordings_val_img" 
-  TEST_IMG_DATA: "udiva_tiny/test/recordings/animals_recordings_test_img" 
-  TRAIN_AUD_DATA: "udiva_tiny/train/recordings/animals_recordings_train_wav"
-  VALID_AUD_DATA: "udiva_tiny/val/recordings/animals_recordings_val_wav"
-  TEST_AUD_DATA: "udiva_tiny/test/recordings/animals_recordings_test_wav"
+  ANIMALS_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/animals_recordings_train_img"
+  GHOST_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/ghost_recordings_train_img"
+  LEGO_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/lego_recordings_train_img"
+  TALK_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/talk_recordings_train_img"
+
+  ANIMALS_VAL_IMG_DATA: "udiva_tiny/val/recordings/animals_recordings_val_img"
+  GHOST_VAL_IMG_DATA: "udiva_tiny/val/recordings/ghost_recordings_val_img"
+  LEGO_VAL_IMG_DATA: "udiva_tiny/val/recordings/lego_recordings_val_img"
+  TALK_VAL_IMG_DATA: "udiva_tiny/val/recordings/talk_recordings_val_img"
+
+  ANIMALS_TEST_IMG_DATA: "udiva_tiny/test/recordings/animals_recordings_test_img"
+  GHOST_TEST_IMG_DATA: "udiva_tiny/test/recordings/ghost_recordings_test_img"
+  LEGO_TEST_IMG_DATA: "udiva_tiny/test/recordings/lego_recordings_test_img"
+  TALK_TEST_IMG_DATA: "udiva_tiny/test/recordings/talk_recordings_test_img"
+
+  ANIMALS_TRAIN_AUD_DATA: "udiva_tiny/train/recordings/animals_recordings_train_wav"
+  GHOST_TRAIN_AUD_DATA: "udiva_tiny/train/recordings/ghost_recordings_train_wav"
+  LEGO_TRAIN_AUD_DATA: "udiva_tiny/train/recordings/lego_recordings_train_wav"
+  TALK_TRAIN_AUD_DATA: "udiva_tiny/train/recordings/talk_recordings_train_wav"
+
+  ANIMALS_VAL_AUD_DATA: "udiva_tiny/val/recordings/animals_recordings_val_wav"
+  GHOST_VAL_AUD_DATA: "udiva_tiny/val/recordings/ghost_recordings_val_wav"
+  LEGO_VAL_AUD_DATA: "udiva_tiny/val/recordings/lego_recordings_val_wav"
+  TALK_VAL_AUD_DATA: "udiva_tiny/val/recordings/talk_recordings_val_wav"
+
+  ANIMALS_TEST_AUD_DATA: "udiva_tiny/test/recordings/animals_recordings_test_wav"
+  GHOST_TEST_AUD_DATA: "udiva_tiny/test/recordings/ghost_recordings_test_wav"
+  LEGO_TEST_AUD_DATA: "udiva_tiny/test/recordings/lego_recordings_test_wav"
+  TALK_TEST_AUD_DATA: "udiva_tiny/test/recordings/talk_recordings_test_wav"
+
   TRAIN_LABEL_DATA: "udiva_tiny/train/label/sessions_train.pkl"
   VALID_LABEL_DATA: "udiva_tiny/val/label/sessions_val.pkl"
   TEST_LABEL_DATA: "udiva_tiny/test/label/sessions_test.pkl"

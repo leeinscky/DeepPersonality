@@ -17,14 +17,14 @@ from random import shuffle
 class AudioVisualData(VideoData):
 
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py]- class AudioVisualData(VideoData) 开始执行 __init__')
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py]- class AudioVisualData(VideoData) 开始执行 __init__')
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py]- class AudioVisualData(VideoData) 结束执行 __init__')
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py]- class AudioVisualData(VideoData) 结束执行 __init__')
 
     def __getitem__(self, idx):
-        print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py] - class AudioVisualData(VideoData) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data.py] - class AudioVisualData(VideoData) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
         label = self.get_ocean_label(idx)  # label是一个list，长度为5，每个元素是一个0-1之间的浮点数, 代表该video的5个personality维度的分数, 例如：[0.5, 0.5, 0.5, 0.5, 0.5], 代表该video的5个personality维度的分数都是0.5, 也就是说该video的personality维度的分数都是中性的
         img = self.get_image_data(idx) # img是一个PIL.Image.Image对象, 代表该video的一帧图像, 例如：PIL.Image.Image object, mode=RGB, size=224x224, 代表该video的一帧图像的大小是224x224, 且是RGB三通道的, 也就是说该video的一帧图像是224x224x3的
         wav = self.get_wave_data(idx) # wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：array([[[ 0.        ,  0.        ,  0.        , ...,  0.        ,  0.        ,  0.        ]]], dtype=float32), 代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的

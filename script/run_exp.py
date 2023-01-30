@@ -38,15 +38,15 @@ def main():
     args = setup()
     # print('args: ', args)
     # print('cfg: ', cfg)
-    print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')
+    # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')
     runner = ExpRunner(cfg)
-    print('[DeepPersonality/script/run_exp.py] - 结束执行 runner = ExpRunner(cfg)')
-    print('[DeepPersonality/script/run_exp.py] - 开始执行 runner.run()')
+    # print('[DeepPersonality/script/run_exp.py] - 结束执行 runner = ExpRunner(cfg)')
+    # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner.run()')
     # print('runner: ', runner)
     if args.test_only:
         return runner.test()
     runner.run()
-    print('[DeepPersonality/script/run_exp.py] - 结束执行 runner.run()')
+    # print('[DeepPersonality/script/run_exp.py] - 结束执行 runner.run()')
 
     ''' print结果
 	args:  Namespace(bs=None, cfg_file='./config/demo/bimodal_resnet18.yaml', lr=None, max_epoch=None, resume=None, set_cfgs=None, test_only=False, weight=None)

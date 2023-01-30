@@ -48,13 +48,17 @@ def main ():
                     # print('img_path: ', img_path, ', wav_path: ', wav_path)
                     ############# 方式1，处理还没生成的文件夹 开始 ##############
                     # 如果当前遍历到的文件夹没有.DS_Store文件夹,且session_id文件夹名称没有出现在recordings_wav文件夹中，就执行shell 命令
-                    if session_id != '.DS_Store' and session_id not in os.listdir(task_dir_wav_full_path):
+                    
+                    # 判断task_dir_wav_full_path路径下是否存在session_id文件夹, 注意需要用session_id.name 而不是session_id，因为session_id是一个对象，而不是字符串
+                    if session_id.name != '.DS_Store' and session_id.name not in os.listdir(task_dir_wav_full_path):
                         # 执行shell 命令
-                        print('\n\nsession_id: ', session_id, ', 根据.mp4文件提取出.wav文件, 命令: python ./video_to_wave.py --video-dir ' + img_path + ' --output-dir ' + wav_path)
-                        os.system('python ./video_to_wave.py --video-dir ' + img_path + ' --output-dir ' + wav_path)
+                        print('\n\nsession_id: ', session_id.name, ', 根据.mp4文件提取出.wav文件, 命令: python ./video_to_wave.py --video-dir ' + img_path + ' --output-dir ' + wav_path)
+                        # os.system('python ./video_to_wave.py --video-dir ' + img_path + ' --output-dir ' + wav_path)
                         
-                        print('\nsession_id: ', session_id, ', 根据.wav文件生成.wav.npy文件, 命令: python raw_audio_process.py --mode librosa --audio-dir ' + wav_path + ' --output-dir ' + wav_path)
-                        os.system('python raw_audio_process.py --mode librosa --audio-dir ' + wav_path + ' --output-dir ' + wav_path)
+                        print('\nsession_id: ', session_id.name, ', 根据.wav文件生成.wav.npy文件, 命令: python raw_audio_process.py --mode librosa --audio-dir ' + wav_path + ' --output-dir ' + wav_path)
+                        # os.system('python raw_audio_process.py --mode librosa --audio-dir ' + wav_path + ' --output-dir ' + wav_path)
+                    else:
+                        print(f'session_id: {session_id.name} 已经存在于{task_dir_wav_full_path}，不需要再处理了')
                     ############# 方式1，处理没有的文件夹 结束 ##############
                     
                     

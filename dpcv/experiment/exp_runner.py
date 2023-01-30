@@ -31,54 +31,54 @@ class ExpRunner:
         step 3: select optimizer for gradient descent algorithm
         step 4: prepare trainer for typical training in pytorch manner
         """
-        print('[DeepPersonality/dpcv/experiment/exp_runner.py] def __init__ - start')
+        # print('[DeepPersonality/dpcv/experiment/exp_runner.py] def __init__ - start')
         self.cfg = cfg
         self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR)
         self.log_cfg_info()
         if not feature_extract:
             self.data_loader = self.build_dataloader()
-            print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - data_loader: ', self.data_loader)
+            # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - data_loader: ', self.data_loader)
 
         self.model = self.build_model()
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.model:', self.model)
         self.loss_f = self.build_loss_function()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.loss_f:', self.loss_f)
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.loss_f:', self.loss_f)
 
         self.optimizer = self.build_solver()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.optimizer:', self.optimizer)
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.optimizer:', self.optimizer)
         self.scheduler = self.build_scheduler()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.scheduler:', self.scheduler)
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.scheduler:', self.scheduler)
 
         self.collector = TrainSummary()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.collector:', self.collector)
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 准备执行：self.trainer = self.build_trainer()')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.collector:', self.collector)
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 准备执行：self.trainer = self.build_trainer()')
         self.trainer = self.build_trainer()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 结束执行：self.trainer = self.build_trainer()')
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.trainer:', self.trainer)
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - end')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 结束执行：self.trainer = self.build_trainer()')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.trainer:', self.trainer)
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - end')
 
     def build_dataloader(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_dataloader')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_dataloader')
         return build_dataloader(self.cfg)
 
     def build_model(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_model')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_model')
         return build_model(self.cfg)
 
     def build_loss_function(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_loss_function')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_loss_function')
         return build_loss_func(self.cfg)
 
     def build_solver(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_solver')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_solver')
         return build_solver(self.cfg, self.model)
 
     def build_scheduler(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_scheduler')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_scheduler')
         return build_scheduler(self.cfg, self.optimizer)
 
     def build_trainer(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] 开始执行 def build_trainer')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] 开始执行 def build_trainer')
         return build_trainer(self.cfg, self.collector, self.logger)
 
     def before_train(self, cfg):
@@ -176,12 +176,12 @@ class ExpRunner:
         return
 
     def run(self):
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - train start ======================')
+        print('========================start training.. ========================')
         self.train()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - train end ======================')
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test start ======================')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - train end ======================')
+        print('========================start test... ===========================')
         self.test()
-        print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
+        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
 
     def log_cfg_info(self):
         """

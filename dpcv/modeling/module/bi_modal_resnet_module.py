@@ -38,7 +38,7 @@ def aud_conv1x1(in_planes, out_planes, stride=1):
 class VisInitStage(nn.Module):
     def __init__(self, in_channels=3, out_channels=64):
         super(VisInitStage, self).__init__()
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] VisInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] VisInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels)
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
@@ -55,7 +55,7 @@ class VisInitStage(nn.Module):
 class AudInitStage(nn.Module):
     def __init__(self, in_channels=1, out_channels=64):
         super(AudInitStage, self).__init__()
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] AudInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels) # in_channels:  2 out_channels:  32
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] AudInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels) # in_channels:  2 out_channels:  32
         self.conv1 = nn.Conv2d(
             in_channels, out_channels, kernel_size=(1, 49), stride=(1, 4), padding=(0, 24), bias=False)
             # in_channels: Number of channels in the input  输入音频的通道数=2
@@ -113,7 +113,7 @@ class AudioVisualResNet(nn.Module):
                  layers=[2, 2, 2, 2],  # default resnet18 layers setting
                  out_spatial=(1, 1),
                  zero_init_residual=False):
-        print('[dpcv/modeling/networks/bi_modal_resnet_module.py] class AudioVisualResNet 开始执行构造函数 init...  所有初始化的参数: in_channels: ', in_channels, 'init_stage: ', init_stage, 'block: ', block, 'conv: ', conv, 'channels: ', channels, 'layers: ', layers, 'out_spatial: ', out_spatial, 'zero_init_residual: ', zero_init_residual)
+        # print('[dpcv/modeling/networks/bi_modal_resnet_module.py] class AudioVisualResNet 开始执行构造函数 init...  所有初始化的参数: in_channels: ', in_channels, 'init_stage: ', init_stage, 'block: ', block, 'conv: ', conv, 'channels: ', channels, 'layers: ', layers, 'out_spatial: ', out_spatial, 'zero_init_residual: ', zero_init_residual)
         super(AudioVisualResNet, self).__init__() # init the super class, nn.Module, to get all the methods, attributes, etc. of nn.Module, and then add more attributes and methods, such as self.init_stage, self.layer1, self.layer2, self.layer3, self.layer4, self.avgpool
 
         assert init_stage.__name__ in ["AudInitStage", "VisInitStage"], \
@@ -158,19 +158,19 @@ class AudioVisualResNet(nn.Module):
 
     def forward(self, x): # forward will be called when you call the model, so the input x is the input of the model, and the output is the output of the model
         # 输入的数据维度 audio: x.shape =  torch.Size([8, 1, 1, 50176]) or visual: torch.Size([8, 3, 224, 224])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 输入的数据维度 x.shape = ', x.shape) 
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 输入的数据维度 x.shape = ', x.shape) 
         x = self.init_stage(x) # 经过init_stage后的数据维度 audio: x.shape =  torch.Size([8, 32, 1, 3136]) or visual: torch.Size([8, 32, 56, 56])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过init_stage后的数据维度 x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过init_stage后的数据维度 x.shape = ', x.shape)
         x = self.layer1(x) # 经过 layer1 后的数据维度 x.shape =  torch.Size([8, 32, 1, 3136]) or torch.Size([8, 32, 56, 56])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer1 后的数据维度 x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer1 后的数据维度 x.shape = ', x.shape)
         x = self.layer2(x) # 经过 layer2 后的数据维度 x.shape =  torch.Size([8, 64, 1, 784]) or torch.Size([8, 64, 28, 28])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer2 后的数据维度 x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer2 后的数据维度 x.shape = ', x.shape)
         x = self.layer3(x) # 经过 layer3 后的数据维度 x.shape =  torch.Size([8, 128, 1, 196]) or torch.Size([8, 128, 14, 14])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer3 后的数据维度 x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer3 后的数据维度 x.shape = ', x.shape)
         x = self.layer4(x) # 经过 layer4 后的数据维度 x.shape =  torch.Size([8, 256, 1, 49]) or torch.Size([8, 256, 7, 7])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer4 后的数据维度 x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 layer4 后的数据维度 x.shape = ', x.shape)
         x = self.avgpool(x) # 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape =  torch.Size([8, 256, 1, 1]) or torch.Size([8, 256, 1, 1])
-        print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape = ', x.shape)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module.py] - class AudioVisualResNet(nn.Module): 正在执行forward逻辑, 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape = ', x.shape)
         # x_out = x_avg.view(x_avg.size(0), -1)
 
         return x

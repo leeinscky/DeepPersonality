@@ -39,7 +39,7 @@ def aud_conv1x1_udiva(in_planes, out_planes, stride=1):
 class VisInitStageUdiva(nn.Module):
     def __init__(self, in_channels=3, out_channels=64):
         super(VisInitStageUdiva, self).__init__()
-        print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] VisInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels)
+        # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] VisInitStage类: in_channels: ', in_channels, 'out_channels: ', out_channels)
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.ReLU(inplace=True)
@@ -56,7 +56,7 @@ class VisInitStageUdiva(nn.Module):
 class AudInitStageUdiva(nn.Module):
     def __init__(self, in_channels=1, out_channels=64):
         super(AudInitStageUdiva, self).__init__()
-        print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] AudInitStage类: 执行初始化函数__init__: in_channels: ', in_channels, 'out_channels: ', out_channels) # in_channels:  2 out_channels:  32
+        # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] AudInitStage类: 执行初始化函数__init__: in_channels: ', in_channels, 'out_channels: ', out_channels) # in_channels:  2 out_channels:  32
         self.conv1 = nn.Conv2d(
             in_channels, out_channels, kernel_size=(1, 49), stride=(1, 4), padding=(0, 24), bias=False)
             # in_channels: Number of channels in the input  输入音频的通道数=2
@@ -114,7 +114,7 @@ class AudioVisualResNetUdiva(nn.Module):
                  out_spatial=(1, 1),
                  zero_init_residual=False,
                  branch_type='audio'):
-        print('[dpcv/modeling/networks/bi_modal_resnet_module_udiva.py] class AudioVisualResNetUdiva 开始执行构造函数 init...  所有初始化的参数: in_channels: ', in_channels, 'init_stage: ', init_stage, 'block: ', block, 'conv: ', conv, 'channels: ', channels, 'layers: ', layers, 'out_spatial: ', out_spatial, 'zero_init_residual: ', zero_init_residual)
+        # print('[dpcv/modeling/networks/bi_modal_resnet_module_udiva.py] class AudioVisualResNetUdiva 开始执行构造函数 init...  所有初始化的参数: in_channels: ', in_channels, 'init_stage: ', init_stage, 'block: ', block, 'conv: ', conv, 'channels: ', channels, 'layers: ', layers, 'out_spatial: ', out_spatial, 'zero_init_residual: ', zero_init_residual)
         super(AudioVisualResNetUdiva, self).__init__() # init the super class, nn.Module, to get all the methods, attributes, etc. of nn.Module, and then add more attributes and methods, such as self.init_stage, self.layer1, self.layer2, self.layer3, self.layer4, self.avgpool
 
         assert init_stage.__name__ in ["AudInitStageUdiva", "VisInitStageUdiva"], \
@@ -163,19 +163,19 @@ class AudioVisualResNetUdiva(nn.Module):
     def forward(self, x): # forward will be called when you call the model, so the input x is the input of the model, and the output is the output of the model
         # 输入的数据维度 audio: x.shape =  torch.Size([8, 2, 1, 50176])=[batchsize, fc1+fc2=2, 1, 50176] or visual: torch.Size([8, 16, 6, 224, 224]) = [batchsize, sample_size=16frames, 3*2(fc1+fc2)=6, 224, 224]
         if self.branch_type == 'audio': # 音频文件因为没有16帧这一个维度（包含在最后一维度里面了:256000=16秒*采样率16000），和img不一样，所以不需要输入LSTM网络。
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 输入的数据维度 x.shape = ', x.shape)  # x.shape =  torch.Size([batchsize, fc1+fc2=2, 1, 256000=16秒*采样率16000])
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 输入的数据维度 x.shape = ', x.shape)  # x.shape =  torch.Size([batchsize, fc1+fc2=2, 1, 256000=16秒*采样率16000])
             x = self.init_stage(x) # 经过init_stage后的数据维度 audio: x.shape =  torch.Size([8, 32, 1, 3136]) or visual: torch.Size([8, 32, 56, 56])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过init_stage后的数据维度 x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过init_stage后的数据维度 x.shape = ', x.shape)
             x = self.layer1(x) # 经过 layer1 后的数据维度 x.shape =  torch.Size([8, 32, 1, 3136]) or torch.Size([8, 32, 56, 56])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer1 后的数据维度 x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer1 后的数据维度 x.shape = ', x.shape)
             x = self.layer2(x) # 经过 layer2 后的数据维度 x.shape =  torch.Size([8, 64, 1, 784]) or torch.Size([8, 64, 28, 28])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer2 后的数据维度 x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer2 后的数据维度 x.shape = ', x.shape)
             x = self.layer3(x) # 经过 layer3 后的数据维度 x.shape =  torch.Size([8, 128, 1, 196]) or torch.Size([8, 128, 14, 14])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer3 后的数据维度 x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer3 后的数据维度 x.shape = ', x.shape)
             x = self.layer4(x) # 经过 layer4 后的数据维度 x.shape =  torch.Size([8, 256, 1, 49]) or torch.Size([8, 256, 7, 7])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer4 后的数据维度 x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 layer4 后的数据维度 x.shape = ', x.shape)
             x = self.avgpool(x) # 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape =  torch.Size([8, 256, 1, 1]) or torch.Size([8, 256, 1, 1])
-            print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape = ', x.shape)
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 经过 avgpool 后的数据维度（即最终输出的数据维度） x.shape = ', x.shape)
         elif self.branch_type == 'visual':
             hidden = None
             for frame_id in range(x.size(1)):
@@ -186,11 +186,11 @@ class AudioVisualResNetUdiva(nn.Module):
                     x_frame_feature = self.layer3(x_frame_feature)
                     x_frame_feature = self.layer4(x_frame_feature)
                     x_frame_feature = self.avgpool(x_frame_feature)
-                    print(f'[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): x_frame_feature.shape = ', x_frame_feature.shape, ' x_frame_feature.unsqueeze(0).shape = ', x_frame_feature.unsqueeze(0).shape) # x_frame_feature.shape =  torch.Size([batch_size, 256, 1, 1])  x_frame_feature.unsqueeze(0).shape =  torch.Size([1, batch_size, 256, 1, 1])
+                    # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): x_frame_feature.shape = ', x_frame_feature.shape, ' x_frame_feature.unsqueeze(0).shape = ', x_frame_feature.unsqueeze(0).shape) # x_frame_feature.shape =  torch.Size([batch_size, 256, 1, 1])  x_frame_feature.unsqueeze(0).shape =  torch.Size([1, batch_size, 256, 1, 1])
                 x_frame_feature = x_frame_feature.view(x_frame_feature.size(0), -1) # 将x_frame_feature的维度从 torch.Size([batch_size, 256, 1, 1]) 转换为 torch.Size([batch_size, 256])
-                print(f'[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): after x_frame_feature.shape = ', x_frame_feature.shape) # after x_frame_feature.shape = torch.Size([batch_size, 256])
+                # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): after x_frame_feature.shape = ', x_frame_feature.shape) # after x_frame_feature.shape = torch.Size([batch_size, 256])
                 out, hidden = self.lstm(x_frame_feature.unsqueeze(0), hidden) # LSTM forward函数的第一个参数inputs的各个参数为：1、seq_len=1 2、batch_size 3、input_size=embedding_size=256
-                print(f'[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): out.shape = ', out.shape, ' hidden[0].shape = ', hidden[0].shape) # out.shape =  torch.Size([1, 2=batch_size, 256])  hidden[0].shape =  torch.Size([3, 2=batch_size, 256])
+                # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): out.shape = ', out.shape, ' hidden[0].shape = ', hidden[0].shape) # out.shape =  torch.Size([1, 2=batch_size, 256])  hidden[0].shape =  torch.Size([3, 2=batch_size, 256])
             x = out[-1, :, :] # -1 表示最后一个序列，即最后一个时间步的输出
-            print(f'[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): final x.shape = ', x.shape) # final x.shape =  torch.Size([batch_size, 256])
+            # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): final x.shape = ', x.shape) # final x.shape =  torch.Size([batch_size, 256])
         return x

@@ -13,13 +13,13 @@ import wandb
 class BiModalTrainer(object):
     """base trainer for bi-modal input"""
     def __init__(self, cfg, collector, logger):
-        print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
+        # print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
         self.cfg = cfg
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
         self.tb_writer = SummaryWriter(cfg.OUTPUT_DIR)
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         '''
@@ -53,7 +53,7 @@ class BiModalTrainer(object):
         AudioVisualData 类里有个函数:def __getitem__(self, idx). 该函数返回的是: sample = {"image": img, "audio": wav, "label": label}, 其中: img, wav, label 都是 torch.Tensor 类型, img.shape() =  torch.Size([3, 224, 224]) wav.shape() =  torch.Size([1, 1, 50176]) label.shape() =  torch.Size([5])
         '''
         
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 开始执行BiModal模型的train方法')
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 开始执行BiModal模型的train方法')
         lr = optimizer.param_groups[0]['lr']
         self.logger.info(f"Training: learning rate:{lr}")
         self.tb_writer.add_scalar("lr", lr, epoch_idx)
@@ -61,17 +61,17 @@ class BiModalTrainer(object):
         model.train()
         loss_list = []
         acc_avg_list = []
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... len(data_loader)=', len(data_loader), 'type(data_loader): ', type(data_loader)) # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'>
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... len(data_loader)=', len(data_loader), 'type(data_loader): ', type(data_loader)) # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'>
         final_i = 0 
         # 通过 看日志发现当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
         for i, data in enumerate(data_loader): # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'> 一共有7个batch, 每个batch的大小是8, 所以一共有56个样本。
             final_i = i
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在训练... i=', i)
-            if i == 0:
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([8, 3, 224, 224]) 8对应config里的batch_size，即8张帧image，3对应RGB，224对应图片的大小，3x224x224代表图片的大小
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([8, 1, 1, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([8, 5]) 8对应config里的batch_size，5对应5个维度的personality
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在训练... i=', i)
+            # if i == 0:
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([8, 3, 224, 224]) 8对应config里的batch_size，即8张帧image，3对应RGB，224对应图片的大小，3x224x224代表图片的大小
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([8, 1, 1, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([8, 5]) 8对应config里的batch_size，5对应5个维度的personality
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() i=', i, '  data=', data)
             epo_iter_num = len(data_loader)
             iter_start_time = time.time()
@@ -109,7 +109,7 @@ class BiModalTrainer(object):
                         eta_string,    
                     )
                 )
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 训练结束, data_loader里的元素个数为: final_i=', final_i)
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 训练结束, data_loader里的元素个数为: final_i=', final_i)
         self.clt.record_train_loss(loss_list)
         self.clt.record_train_acc(acc_avg_list)
 
@@ -120,12 +120,12 @@ class BiModalTrainer(object):
             acc_batch_list = []
             ocean_acc_epoch = []
             for i, data in enumerate(data_loader):
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i)
-                if i == 0:
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([4, 3, 224, 224]) 4对应config里的BATCH_SIZE
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([4, 1, 1, 50176]) 4对应config里的BATCH_SIZE
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i)
+                # if i == 0:
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([4, 3, 224, 224]) 4对应config里的BATCH_SIZE
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([4, 1, 1, 50176]) 4对应config里的BATCH_SIZE
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu())
@@ -269,13 +269,13 @@ class BiModalTrainer(object):
 class BiModalTrainerUdiva(object):
     """base trainer for bi-modal input"""
     def __init__(self, cfg, collector, logger):
-        print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
+        # print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
         self.cfg = cfg
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
         self.tb_writer = SummaryWriter(cfg.OUTPUT_DIR)
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         ''' data_loader的调用逻辑如下
@@ -309,7 +309,7 @@ class BiModalTrainerUdiva(object):
         AudioVisualData 类里有个函数:def __getitem__(self, idx). 该函数返回的是: sample = {"image": img, "audio": wav, "label": label}, 其中: img, wav, label 都是 torch.Tensor 类型, img.shape() =  torch.Size([3, 224, 224]) wav.shape() =  torch.Size([1, 1, 50176]) label.shape() =  torch.Size([5])
         '''
         
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 开始执行BiModal模型的train方法')
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 开始执行BiModal模型的train方法')
         lr = optimizer.param_groups[0]['lr']
         self.logger.info(f"Training: learning rate:{lr}")
         self.tb_writer.add_scalar("lr", lr, epoch_idx)
@@ -317,23 +317,25 @@ class BiModalTrainerUdiva(object):
         model.train()
         loss_list = []
         acc_avg_list = []
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... len(data_loader)=', len(data_loader), 'type(data_loader): ', type(data_loader)) # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'>
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... len(data_loader)=', len(data_loader), 'type(data_loader): ', type(data_loader)) # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'>
         final_i = 0 
         # 通过 看日志发现当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
-        for i, data in enumerate(data_loader): # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'> 一共有7个batch, 每个batch的大小是8, 所以一共有56个样本。
+        for i, data in enumerate(data_loader): # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'> 一共有7个batch, 每个batch的大小是8, 所以一共有56个样本。 i代表第几个batch, data代表第i个batch的数据
             final_i = i
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i)
-            if i == 0:
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([batch_size, 3*2(由于torch.cat)=6, 224, 224])
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([batch_size, 1, 1*2(由于torch.cat)=2, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([1(batch_size), 1]) 8对应config里的batch_size，1对应1个关系的标签
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i)
+            # if i == 0:
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([batch_size, 3*2(由于torch.cat)=6, 224, 224])
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([batch_size, 1, 1*2(由于torch.cat)=2, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([1(batch_size), 1]) 8对应config里的batch_size，1对应1个关系的标签
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() i=', i, '  data=', data)
             epo_iter_num = len(data_loader)
             iter_start_time = time.time()
 
             # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             inputs, labels = self.data_fmt(data) # inputs是一个元组，包含了image (data['image']: torch.Size([batchsize, 6, 224, 224])) 和audio(data['audio']: torch.Size([batchsize, 1, 2, 50176]))的输入，labels: torch.Size([1(batch_size), 1])
+            # 查看输入数据inputs labels 和 模型models在哪个device上 参考：https://www.cnblogs.com/picassooo/p/13736843.html
+            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据所在的设备, inputs[0].device=', inputs[0].device, ', inputs[1].device=', inputs[1].device, ', labels.device=', labels.device, ', 模型model所在的设备=', next(model.parameters()).device)
             
             # ret = self.data_fmt(data)
             # fc1_input = ret['fc1_in']
@@ -342,17 +344,17 @@ class BiModalTrainerUdiva(object):
 
             # 这里该怎么处理一对视频融合？我们在数据预处理时就将一对视频的数据进行了早期融合，所以这里不需要再对两个视频分支进行融合了，模型输出的结果是融合后的结果
             outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             # fc1_output = model(*fc1_input)
             # fc2_output = model(*fc2_input)
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  fc1_output=', fc1_output, '  fc2_output', fc2_output, '  labels.size()=', labels.size())
             
             optimizer.zero_grad() # 梯度清零，即将梯度变为0  # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0005), SGD即随机梯度下降, lr是学习率，momentum是动量，weight_decay是权重衰减, 全称是Stochastic Gradient Descent，即随机梯度下降，即每次迭代时，随机选取一个batch的样本来进行梯度下降，而不是像梯度下降那样，每次迭代时，使用所有的样本来进行梯度下降，这样会使得每次迭代的计算量变大，而且每次迭代的结果也不稳定，而随机梯度下降则可以避免这个问题，但是随机梯度下降的结果也不稳定，因此，可以结合动量和权重衰减来使得随机梯度下降的结果更加稳定，即动量是为了使得每次迭代的结果更加稳定，而权重衰减是为了防止过拟合。
             loss = loss_f(outputs.cpu(), labels.cpu()) # loss_f = nn.MSELoss()  即 mean_square_error，即均方误差，即预测值与真实值的差的平方的均值，即 (y_pred - y_true)^2，其中y_pred是预测值，y_true是真实值
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
             self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
             loss.backward() # loss.backward()是将loss反向传播，即计算loss对每个参数的梯度，即loss对每个参数的偏导数
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  经过backward函数后, loss=', loss, '  loss.item()=', loss.item())
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  经过backward函数后, loss=', loss, '  loss.item()=', loss.item())
             optimizer.step() # step()是将梯度更新到参数上，即将loss对每个参数的偏导数更新到参数上， 即 w = w - lr * gradient, 其中lr是学习率，gradient是loss对每个参数的偏导数，即loss对每个参数的梯度， w是模型的参数
 
             iter_end_time = time.time()
@@ -360,11 +362,11 @@ class BiModalTrainerUdiva(object):
 
             loss_list.append(loss.item())
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0) # torch.abs 计算 tensor 的每个元素的绝对值, torch.abs(outputs.cpu() - labels.cpu())是预测值与真实值的差的绝对值, 即预测值与真实值的差的绝对值的平均值即为acc_avg, 即acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean(), clip(min=0)是将acc_avg的最小值限制在0以上
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg=', acc_avg)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg=', acc_avg)
             acc_avg = acc_avg.detach().numpy() # detach()是将acc_avg从计算图中分离出来后，再转换成numpy类型的float类型，即tensor转换成float类型
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, ' 经过acc_avg.detach().numpy()后, acc_avg=', acc_avg)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, ' 经过acc_avg.detach().numpy()后, acc_avg=', acc_avg)
             acc_avg_list.append(acc_avg)
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg_list=', acc_avg_list)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg_list=', acc_avg_list)
 
             # log to wandb
             wandb.log({
@@ -389,7 +391,7 @@ class BiModalTrainerUdiva(object):
                         eta_string,                          # ETA
                     )
                 )
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 训练结束, data_loader里的元素个数为: final_i=', final_i)
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 训练结束, data_loader里的元素个数为: final_i=', final_i)
         self.clt.record_train_loss(loss_list) # 将loss_list里的loss值记录到self.clt里
         self.clt.record_train_acc(acc_avg_list) # 将acc_avg_list里的acc_avg值记录到self.clt里
 
@@ -400,12 +402,12 @@ class BiModalTrainerUdiva(object):
             acc_batch_list = []
             ocean_acc_epoch = []
             for i, data in enumerate(data_loader):
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i)
-                if i == 0:
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([4, 3, 224, 224]) 4对应config里的BATCH_SIZE
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([4, 1, 1, 50176]) 4对应config里的BATCH_SIZE
-                    print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i)
+                # if i == 0:
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([4, 3, 224, 224]) 4对应config里的BATCH_SIZE
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([4, 1, 1, 50176]) 4对应config里的BATCH_SIZE
+                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu())
@@ -459,7 +461,7 @@ class BiModalTrainerUdiva(object):
             for data in tqdm(data_loader): # 遍历data_loader
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
 
                 outputs = outputs.cpu().detach()
                 labels = labels.cpu().detach()
@@ -467,7 +469,7 @@ class BiModalTrainerUdiva(object):
                 label_list.append(labels)
                 mse = mse_func(outputs, labels).mean(dim=0) #torch.nn.MSELoss(reduction="none") 表示不对损失求均值，所以这里需要再求一次均值  MSE全称是均方误差，是回归问题中常用的损失函数，其计算公式为：MSE=1/n∑(y-y')^2，其中y是真实值，y'是预测值，n是样本的个数， MSE越小，说明模型的预测效果越好，MSE越大，说明模型的预测效果越差，MSE的取值范围是[0,+∞)，MSE越接近0，说明模型的预测效果越好，MSE越接近+∞，说明模型的预测效果越差。
                 ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0).clip(min=0)
-                print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... mse=', mse, 'ocean_acc_batch=', ocean_acc_batch)
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... mse=', mse, 'ocean_acc_batch=', ocean_acc_batch)
                 mse_ls.append(mse)
                 ocean_acc.append(ocean_acc_batch)
                 count += 1
@@ -477,10 +479,10 @@ class BiModalTrainerUdiva(object):
                 #     "test_ocean_acc_batch": ocean_acc_batch,
                 #     "test_iteration": count,
                 # })
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_acc =', ocean_acc) # ocean_acc = [tensor([0.5024, 0.5014]), tensor([0.4976, 0.4985])]
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_acc =', ocean_acc) # ocean_acc = [tensor([0.5024, 0.5014]), tensor([0.4976, 0.4985])]
             ocean_mse = torch.stack(mse_ls, dim=0).mean(dim=0).numpy() # torch.stack() 将mse_ls中的每个元素都堆叠起来，dim=0表示按照第0维进行堆叠，即按照行堆叠，最后的结果是一个矩阵，矩阵的行数是mse_ls中元素的个数，列数是每个元素的列数
             ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images 
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... after .mean(dim=0).numpy(), ocean_mse=', ocean_mse, ' ocean_acc=', ocean_acc) # after .mean(dim=0).numpy(), ocean_mse= [0.25000432 0.2500581 ]  ocean_acc= [0.5000013  0.49994403]
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... after .mean(dim=0).numpy(), ocean_mse=', ocean_mse, ' ocean_acc=', ocean_acc) # after .mean(dim=0).numpy(), ocean_mse= [0.25000432 0.2500581 ]  ocean_acc= [0.5000013  0.49994403]
             ocean_mse_mean = ocean_mse.mean() 
             ocean_acc_avg = ocean_acc.mean()
             dataset_output = torch.cat(output_list, dim=0).numpy()
@@ -493,7 +495,7 @@ class BiModalTrainerUdiva(object):
             #                 [0. 1.]]
         ocean_mse_mean_rand = np.round(ocean_mse_mean, 4) # round to 4 decimal places , 保留4位小数, 参考：https://www.geeksforgeeks.org/numpy-round_-python/
         ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_mean_rand=', ocean_mse_mean_rand, '  ocean_acc_avg_rand=', ocean_acc_avg_rand) # ocean_mse_mean_rand= 0.25   ocean_acc_avg_rand= 0.5
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_mean_rand=', ocean_mse_mean_rand, '  ocean_acc_avg_rand=', ocean_acc_avg_rand) # ocean_mse_mean_rand= 0.25   ocean_acc_avg_rand= 0.5
 
         self.tb_writer.add_scalar("test_acc", ocean_acc_avg_rand)
         # wandb.log({
@@ -503,10 +505,10 @@ class BiModalTrainerUdiva(object):
         keys = ["known_label", "unknown_label"]
         ocean_mse_dict, ocean_acc_dict = {}, {}
         for i, k in enumerate(keys):
-            print('当前循环 i=', i, '  k=', k, '  ocean_mse[i]=', ocean_mse[i], '  ocean_acc[i]=', ocean_acc[i])
+            # print('[dpcv/engine/bi_modal_trainer.py] 当前循环 i=', i, '  k=', k, '  ocean_mse[i]=', ocean_mse[i], '  ocean_acc[i]=', ocean_acc[i]) # 当前循环 i= 0   k= known_label   ocean_mse[i]= 0.25002003   ocean_acc[i]= 0.4999911  ; 当前循环 i= 1   k= unknown_label   ocean_mse[i]= 0.24997127   ocean_acc[i]= 0.5000472
             ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
             ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
-        print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_dict=', ocean_mse_dict, '  ocean_acc_dict=', ocean_acc_dict)
+        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_dict=', ocean_mse_dict, '  ocean_acc_dict=', ocean_acc_dict)
         
         # ocean_acc_avg_rand 遍历data_loader时每次迭代得到的预测准确率，然后计算得到平均值
         # ocean_acc_dict 遍历data_loader时每次迭代得到的预测准确率所组成的字典

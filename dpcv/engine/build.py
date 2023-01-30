@@ -7,8 +7,8 @@ print('[DeepPersonality/dpcv/engine/build.py] 执行：TRAINER_REGISTRY = Regist
 
 
 def build_trainer(cfg, collector, logger):
-    print('[DeepPersonality/dpcv/engine/build.py] - 开始执行 def build_trainer(cfg, collector, logger)')
+    # print('[DeepPersonality/dpcv/engine/build.py] - 开始执行 def build_trainer(cfg, collector, logger)')
     name = cfg.TRAIN.TRAINER # 'TRAINER': 'BiModalTrainer',
     trainer_cls = TRAINER_REGISTRY.get(name)
-    print('[DeepPersonality/dpcv/engine/build.py] - 结束执行 def build_trainer(cfg, collector, logger)')
+    # print('[DeepPersonality/dpcv/engine/build.py] - 结束执行 def build_trainer(cfg, collector, logger)')
     return trainer_cls(cfg.TRAIN, collector, logger)

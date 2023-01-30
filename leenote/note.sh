@@ -9,6 +9,23 @@
         # 后台跑命令
         nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva.yaml --max_epoch 100 >nohup.out 2>&1 &
 
+# 提交任务到HPC上 在GPU上跑
+    # 参考/home/zl525/code/DeepPersonality/leenote/slurm_submit_deep 文件的最后一行
+    cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep
+
+    # 运行记录：
+    Submitted batch job 13669083
+
+
+# 替换print，将下面的两行的第一行替换成第二行即可注释所有print信息
+  print('[
+  # print('[
+
+但是不要替换Exception这里的print信息
+    except Exception as e:
+        printxx
+解决办法: 在print后面加上return None
+
 # 创建数据集软链接
     ln -s [源文件或目录] [目标文件或目录] # https://www.cnblogs.com/sueyyyy/p/10985443.html
     例子：当前路径创建test 引向/var/www/test 文件夹: ln –s  /var/www/test  test
