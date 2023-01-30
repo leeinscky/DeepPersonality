@@ -12,6 +12,7 @@ from dpcv.evaluation.summary import TrainSummary
 from dpcv.checkpoint.save import save_model, resume_training, load_model
 from dpcv.evaluation.metrics import compute_pcc, compute_ccc
 from dpcv.tools.logger import make_logger
+import wandb
 
 
 class ExpRunner:
@@ -165,6 +166,13 @@ class ExpRunner:
             os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
             torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
             torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
+        wandb.log({
+            "test_mse": mse[1],         # 最终测试得到的mse均值，评价模型效果以这个为准
+            "test_acc":ocean_acc_avg,   # 最终测试得到的acc均值，评价模型效果以这个为准
+            "test_pcc":pcc_mean,        # 最终测试得到的pcc均值，评价模型效果以这个为准
+            "test_ccc":ccc_mean,        # 最终测试得到的ccc均值，评价模型效果以这个为准
+            })
+        
         return
 
     def run(self):

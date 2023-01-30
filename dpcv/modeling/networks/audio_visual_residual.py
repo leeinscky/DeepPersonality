@@ -123,13 +123,15 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
             in_channels=2, init_stage=AudInitStageUdiva, # in_channels=1表示输入的通道数为1，init_stage=AudInitStage表示使用AudInitStage这个类作为初始化层
             block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], # block是一个类，conv是一个函数
             channels=[32, 64, 128, 256], # 32, 64, 128, 256 are the number of channels in each layer, which is the number of filters in each layer, 这里的32, 64, 128, 256是每一层的卷积核的个数，也就是每一层的通道数
-            layers=[2, 2, 2, 2] # 2, 2, 2, 2 are the number of layers in each layer, 这里的2, 2, 2, 2是每一层的卷积层数
+            layers=[2, 2, 2, 2], # 2, 2, 2, 2 are the number of layers in each layer, 这里的2, 2, 2, 2是每一层的卷积层数
+            branch_type='audio'
         )
         self.visual_branch = AudioVisualResNetUdiva(
             in_channels=6, init_stage=VisInitStageUdiva,
             block=BiModalBasicBlockUdiva, conv=[vis_conv3x3_udiva, vis_conv1x1_udiva],
             channels=[32, 64, 128, 256],
-            layers=[2, 2, 2, 2]
+            layers=[2, 2, 2, 2],
+            branch_type='visual'
         )
         self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
 
@@ -137,15 +139,15 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
             initialize_weights(self)
         print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
 
-    def forward(self, aud_input, vis_input): # forward函数是必须要定义的，这个函数是用来定义网络的前向传播的，这里的aud_input和vis_input是输入的音频和视频数据, aud_input的shape是[batch_size, 1, 1, 50176], vis_input的shape是[batch_size, 3, 224, 224]
+    def forward(self, aud_input, vis_input): # forward函数是必须要定义的，这个函数是用来定义网络的前向传播的，这里的aud_input和vis_input是输入的音频和视频数据, aud_input的shape是[batch_size, 1, 1, 50176], vis_input是一个list，里面的每个元素是一个tensor: [batch_size, 3, 224, 224]
         # 将音频和视频数据分别输入到音频分支和视频分支中，得到音频分支和视频分支的输出
-        print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
+        print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' len(vis_input)', len(vis_input), ' vis_input.shape: ', vis_input.shape) # aud_input.shape:  torch.Size([1, 2=1*2个视频, 1, 256000=16秒*采样率16000])  len(vis_input) 1  vis_input.shape:  torch.Size([1, sample_size, 6=3*2个视频, 224, 224])
         aud_x = self.audio_branch(aud_input) # aud_x的shape是[batch_size, 256, 1, 1]
         vis_x = self.visual_branch(vis_input) # vis_x的shape是[batch_size, 256, 1, 1]
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
         aud_x = aud_x.view(aud_x.size(0), -1) #view函数是用来改变tensor的形状的，这里的aud_x.size(0)表示的是batch_size, -1表示的是自动计算剩下的维度的大小，这里的aud_x的shape是[batch_size, 256]，也就是把aud_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
-        vis_x = vis_x.view(vis_x.size(0), -1) # 这里的vis_x的shape是[batch_size, 256]，也就是把vis_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
+        # vis_x = vis_x.view(vis_x.size(0), -1) # 这里的vis_x的shape是[batch_size, 256]，也就是把vis_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
 
         print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 

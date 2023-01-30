@@ -36,7 +36,7 @@ class RawAudioProcessor():
     def librosa_extract(self, wav_file_path, video_name):
         try:
             # sample rate 16000 Hz
-            wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832)
+            wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]  # output_shape = (1, 1, 244832) 16000指的是采样率，即每秒钟采集的样本数=16000(16000 samples are recorded per second.) librosa.load函数可以读取音频文件 [None, None, :]表示增加两个维度，第一个维度为1，第二个维度为1，第三个维度为xxx
             # wav_ft = librosa.load(wav_path, 3279)[0][None, None, :]  # output_shape = (1, 1, 50176)
 
             np.save(f"{self.saved_file}/{video_name}.npy", wav_ft)

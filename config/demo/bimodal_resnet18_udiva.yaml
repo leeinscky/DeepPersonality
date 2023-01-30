@@ -12,12 +12,12 @@ DATA:
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "standard_frame_transform"
-  TRAIN_BATCH_SIZE: 1
+  TRAIN_BATCH_SIZE: 2
   VALID_BATCH_SIZE: 1
   NUM_WORKERS: 0
   DATASET_NAME: "UDIVA"
 MODEL:
-  NAME: "audiovisual_resnet_udiva"
+  NAME: "audiovisual_resnet_lstm_udiva"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -29,5 +29,5 @@ SOLVER:
   MILESTONE: [100, 200]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
-  MAX_EPOCH: 2
+  MAX_EPOCH: 1
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"

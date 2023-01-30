@@ -234,6 +234,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
+        self.frame_idx = 0
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 结束执行 __init__')
 
     def __getitem__(self, idx): # idx means the index of session in the directory
@@ -242,25 +243,27 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         fc1_img_tensor_list, fc2_img_tensor_list = self.get_image_data(idx)
         fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：array([[[ 0.        ,  0.        ,  0.        , ...,  0.        ,  0.        ,  0.        ]]], dtype=float32), 代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
         img_tensor_list = []
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
         for i in range(len(fc1_img_tensor_list)):
             fc1_img_tensor = fc1_img_tensor_list[i]
             fc2_img_tensor = fc2_img_tensor_list[i]
             img = torch.cat((fc1_img_tensor, fc2_img_tensor), 0) # concatenate the fc1_img_tensor and fc2_img_tensor
             # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , img.shape = ', img.shape) # img.shape =  torch.Size([6, 224, 224])
             img_tensor_list.append(img)
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list))
+        img = torch.stack(img_tensor_list) # 将img_tensor_list中的tensor拼接在一起, 拼接后的维度为(16,6,224,224)，即将16个6x224x224的tensor拼接在一起
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list), ', img.shape = ', img.shape) # len(img_tensor_list) =  16 , img.shape =  torch.Size([16, 6, 224, 224])
 
         fc1_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
         fc2_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
         # 将两个tensor拼接在一起 concatenate the fc1_wav and fc2_wav, 拼接后的维度为(2,1,50176)，即将两个(1,1,50176)的tensor拼接在一起
         wav = torch.cat((fc1_wav, fc2_wav), 0) # shape=(2,1,50176) 
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(wav)=', type(wav), 'wav=', wav) # type(wav)= <class 'torch.Tensor'> wav= tensor([[[-1.0261e-03, -2.3528e-03, -2.2200e-03,  ...,  9.4422e-05, 2.8776e-04, -7.4461e-05]]])
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 wav.shape=', wav.shape, ', fc1_wav.shape=', fc1_wav.shape, ', fc2_wav.shape=', fc2_wav.shape) # wav.shape= torch.Size([2, 1, 256000]) fc1_wav.shape= torch.Size([1, 1, 256000]) fc2_wav.shape= torch.Size([1, 1, 256000])
 
         label = torch.as_tensor(label, dtype=img.dtype)
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(label)=', type(label), 'label=', label, ' label.shape=', label.shape) # type(label)= <class 'torch.Tensor'> label= tensor([0.5111, 0.4563, 0.4019, 0.3626, 0.4167])
 
         # 返回的sample原始逻辑（也适用于将2个视频的帧的tensor拼接后的逻辑）
-        sample = {"image": img_tensor_list, "audio": wav, "label": label} # 非udiva的shape: img.shape()=torch.Size([3, 224, 224]) wav.shape()=torch.Size([1, 1, 50176]) label.shape()=torch.Size([5])  # udiva的shape: img.shape()= torch.Size([6, 224, 224]) wav.shape()= torch.Size([1, 2, 50176]) label.shape()= torch.Size([1])
+        sample = {"image": img, "audio": wav, "label": label} # 非udiva的shape: img.shape()=torch.Size([3, 224, 224]) wav.shape()=torch.Size([1, 1, 50176]) label.shape()=torch.Size([5])  # udiva的shape: img.shape()= torch.Size([6, 224, 224]) wav.shape()= torch.Size([1, 2, 50176]) label.shape()= torch.Size([1])
         print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ 函数返回的结果中 , len(img_tensor_list)=', len(img_tensor_list), 'wav.shape()=', wav.shape, 'label.shape()=', label.shape) # 
         # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
         
@@ -292,11 +295,11 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         fc1_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, after sort, fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
         # 在0，len(fc1_img_paths)-sample_size 之间，生成一个随机数frame_idx，表示索引为frame_idx的图片帧
-        frame_idx = random.randint(0, (len(fc1_img_paths) - self.sample_size + 1)) # 如果一共16帧, sample_size=4, 那么随机数取值范围是[0,13], 13=16-4+1
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, frame_idx:', frame_idx)
+        self.frame_idx = random.randint(0, (len(fc1_img_paths) - self.sample_size)) # 如果一共16帧,索引值候选范围:从index=0到15, 共16个, sample_size=4, 那么frame_index=随机数，且取值范围是[0,12], 12=16-4
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, self.frame_idx:', self.frame_idx, ' img_dir_path=', img_dir_path)
         # 在 fc1_img_paths 取出从frame_idx开始的sample_size个图片帧
-        sample_fc1_frames = fc1_img_paths[frame_idx:frame_idx + self.sample_size] # 从所有的frame中按照frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, sample_fc1_frames:', sample_fc1_frames, 'len(sample_fc1_frames):', len(sample_fc1_frames))
+        sample_fc1_frames = fc1_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片，包含self.frame_idx，不包含self.frame_idx+sample_size，左闭右开
+        print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, sample_fc1_frames:', sample_fc1_frames, 'len(sample_fc1_frames):', len(sample_fc1_frames))
         # 遍历sample_fc1_frames里的每个图片帧，将其转换为RGB模式
         fc1_img_tensor_list = []
         for i, fc1_frame_path in enumerate(sample_fc1_frames):
@@ -319,9 +322,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
         fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, after sort, fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, frame_idx:', frame_idx)
-        # 在 fc2_img_paths 取出从frame_idx开始的sample_size个图片帧
-        sample_fc2_frames = fc2_img_paths[frame_idx:frame_idx + self.sample_size] # 从所有的frame中按照frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, self.frame_idx:', self.frame_idx)
+        # 在 fc2_img_paths 取出从self.frame_idx开始的sample_size个图片帧
+        sample_fc2_frames = fc2_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
         # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
         fc2_img_tensor_list = []
@@ -361,34 +364,46 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 fc2_wav_path = os.path.join(wav_dir_path, file)
                 print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
         
-        # process fc1 wave data
+        ########### process fc1 wave data ###########
         fc1_wav_ft = np.load(fc1_wav_path) # fc1_wav_ft.shape: (1, 1, 4626530) len(fc1_wav_ft):  1
         print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
-        try:
-            n = np.random.randint(0, len(fc1_wav_ft) - 50176) # np.random.randint 生成一个随机整数，范围是[0, len(fc1_wav_ft) - 50176)
-        except:
-            # 看日志发现程序在这里执行了，说明len(fc1_wav_ft) - 50176 < 0
-            n = 0
-        fc1_wav_tmp = fc1_wav_ft[..., n: n + 50176] # 日志：fc1_wav_tmp.shape: (1, 1, 50176)  n: n + 50176 表示从n开始，取连续的50176个采样点。
-        print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp:', fc1_wav_tmp, 'fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
-        if fc1_wav_tmp.shape[-1] < 50176: # 如果采样点数小于50176，就用0填充  实际程序没有进入这个if语句
-            fc1_wav_fill = np.zeros((1, 1, 50176)) # fc1_wav_fill.shape: (1, 1, 50176) np.zeros((1, 1, 50176)) 表示生成一个1行1列50176个元素的矩阵，每个元素都是0
-            fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # fc1_wav_tmp.shape[-1] 表示取fc1_wav_tmp的最后一个维度的元素个数，也就是50176，也就是取fc1_wav_tmp的前50176个元素，然后赋值给fc1_wav_fill的前50176个元素
+        # 举例：animals_recordings_test_wav/008105/FC1_A.wav   时长:6分20秒=380秒    其对应的fc1_wav_ft.shape: (1, 1, 6073598)   6073598/380=15983.1526316，即每秒采样15983.1526316个采样点，为什么不完全等于16000呢？通过运行soxi -D FC1_A.wav，得到其精确的时长=379.599819秒，因此 379.599819*16000=6073597.104，四舍五入为6073598，能匹配！！
+        # 举例：animals_recordings_val_wav/001081/FC1_A.wav    时长:10分07秒=607秒   其对应的fc1_wav_ft.shape: (1, 1, 9707799)   9707799/607=15993.0790774，即每秒采样15993.0790774个采样点, 精确时间: 606.737415秒, 因此 606.737415*16000=9707798.64，四舍五入为9707799，能匹配！！
+        # 举例：animals_recordings_val_wav/001080/FC1_A.wav    时长:8分59秒=539秒    其对应的fc1_wav_ft.shape: (1, 1, 8621477)   8621477/539=15995.3191095，即每秒采样15995.3191095个采样点
+        # 举例：animals_recordings_train_wav/055125/FC1_A.wav  时长:6分25秒=385秒    其对应的fc1_wav_ft.shape: (1, 1, 6161648)   6161648/385=16004.2805195，即每秒采样16004.2805195个采样点
+        # 举例：animals_recordings_train_wav/058110/FC1_A.wav  时长:7分07秒=427秒    其对应的fc1_wav_ft.shape: (1, 1, 6824438)   6824438/427=15982.2903981，即每秒采样15982.2903981个采样点
+        # 结合 leenote/video_to_wav/raw_audio_process.py 里的librosa_extract函数，wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]，即当wav转为npy时，采样率为16000，所以每秒采样16000个点，所以每个npy文件的第三个维度值就是时长*16000
+        
+        # 从音频中的第self.frame_idx秒开始，取时长为self.sample_size秒的音频片段, 即从第self.frame_idx*16000个采样点开始，取连续的self.sample_size*16000个采样点
+        start_point = self.frame_idx * 16000
+        end_point = start_point + self.sample_size * 16000
+        if end_point > fc1_wav_ft.shape[-1]: # 如果end_point > fc1_wav_ft.shape[-1]，则说明从采样的那一秒往后加sample_size秒会超过音频的最后一秒，因此只需要取到音频的最后一秒（最后一个采样点）即可
+            end_point = fc1_wav_ft.shape[-1]
+        print('fc1 start_point:', start_point, 'end_point:', end_point)
+        fc1_wav_tmp = fc1_wav_ft[..., start_point: end_point] # fc1_wav_tmp.shape: 
+
+        # print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
+        if fc1_wav_tmp.shape[-1] < self.sample_size * 16000: # 如果采样点数小于self.sample_size * 16000，就用0填充剩余的采样点
+            fc1_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
+            fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # 将fc1_wav_tmp的采样点填充到fc1_wav_fill的前fc1_wav_tmp.shape[-1]个采样点
             fc1_wav_tmp = fc1_wav_fill # 赋值给fc1_wav_tmp
         
-        
-        # process fc2 wave data
+        ########### process fc2 wave data ###########
         fc2_wav_ft = np.load(fc2_wav_path)
-        try:
-            n = np.random.randint(0, len(fc2_wav_ft) - 50176)
-        except:
-            n = 0
-        fc2_wav_tmp = fc2_wav_ft[..., n: n + 50176]
-        if fc2_wav_tmp.shape[-1] < 50176:
-            fc2_wav_fill = np.zeros((1, 1, 50176))
+        
+        start_point = self.frame_idx * 16000
+        end_point = start_point + self.sample_size * 16000
+        if end_point > fc2_wav_ft.shape[-1]: 
+            end_point = fc2_wav_ft.shape[-1]
+        print('fc2 start_point:', start_point, 'end_point:', end_point)
+        fc2_wav_tmp = fc2_wav_ft[..., start_point: end_point]
+        
+        if fc2_wav_tmp.shape[-1] < self.sample_size * 16000:
+            fc2_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
             fc2_wav_fill[..., :fc2_wav_tmp.shape[-1]] = fc2_wav_tmp
             fc2_wav_tmp = fc2_wav_fill
 
+        # print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape, 'fc2_wav_tmp.shape:', fc2_wav_tmp.shape) # fc1_wav_tmp.shape: (1, 1, 256000) fc2_wav_tmp.shape: (1, 1, 256000)
         return fc1_wav_tmp, fc2_wav_tmp
 
 

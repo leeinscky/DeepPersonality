@@ -11,11 +11,11 @@ from dpcv.config.default_config_opt import cfg, cfg_from_file, cfg_from_list
 # from torch.utils.tensorboard import SummaryWriter
 from dpcv.experiment.exp_runner import ExpRunner
 
-
+import wandb
 
 def setup():
     args = parse_args()
-
+    wandb.init(config=args, project="DeepPersonality", settings=wandb.Settings(start_method="fork"))
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 

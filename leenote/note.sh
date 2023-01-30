@@ -5,72 +5,9 @@
 
     远程：
         conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva.yaml
-
-    img_dir_ls 打印结果：
-        [DeepPersonality/dpcv/data/datasets/bi_modal_data.py] self.img_dir_ls:  
-        [
-            'datasets/ChaLearn2016_tiny/train_data/-AmMDnVl4s8.003', 
-            'datasets/ChaLearn2016_tiny/train_data/2kqPuht5jTg.002', 
-            'datasets/ChaLearn2016_tiny/train_data/4CSV8L7aVik.000', 
-            'datasets/ChaLearn2016_tiny/train_data/50gokPvvMs8.000', 
-            'datasets/ChaLearn2016_tiny/train_data/6KKNrufnL80.000', 
-            'datasets/ChaLearn2016_tiny/train_data/83cmR2fkyy8.005', 
-            'datasets/ChaLearn2016_tiny/train_data/98fnGDVky00.005', 
-            'datasets/ChaLearn2016_tiny/train_data/9KAqOrdiZ4I.002', 
-            'datasets/ChaLearn2016_tiny/train_data/9hqH1PJ6cG8.001', 
-            'datasets/ChaLearn2016_tiny/train_data/A3StIKMjn4k.002', 
-            'datasets/ChaLearn2016_tiny/train_data/BWAEpai6FK0.003', 
-            'datasets/ChaLearn2016_tiny/train_data/C_NtwmmF2Ys.000', 
-            'datasets/ChaLearn2016_tiny/train_data/DnTtbAR_Qyw.004', 
-            'datasets/ChaLearn2016_tiny/train_data/F0_EI_X5JVk.003', 
-            'datasets/ChaLearn2016_tiny/train_data/HegkSmkiBos.005', 
-            'datasets/ChaLearn2016_tiny/train_data/JBdLI6AhJrw.000', 
-            'datasets/ChaLearn2016_tiny/train_data/JIYZTruMpiI.003', 
-            'datasets/ChaLearn2016_tiny/train_data/JiXJeI5_jGM.000', 
-            'datasets/ChaLearn2016_tiny/train_data/KJ643kfjqLY.003', 
-            'datasets/ChaLearn2016_tiny/train_data/L9sG80PI1Gw.003', 
-            'datasets/ChaLearn2016_tiny/train_data/L_gmlaz-0s4.003', 
-            'datasets/ChaLearn2016_tiny/train_data/MOXPVzRBDPo.002', 
-            'datasets/ChaLearn2016_tiny/train_data/NDBCrVvp0Vg.003', 
-            'datasets/ChaLearn2016_tiny/train_data/OWZ-qVZG14A.002', 
-            'datasets/ChaLearn2016_tiny/train_data/Q2AI4XpApFs.002', 
-            'datasets/ChaLearn2016_tiny/train_data/Qz_cjgCtDcM.003', 
-            'datasets/ChaLearn2016_tiny/train_data/RlUuWWWFrhM.005', 
-            'datasets/ChaLearn2016_tiny/train_data/T6CMGXdPUTA.001', 
-            'datasets/ChaLearn2016_tiny/train_data/TPk6KiHuPag.004', 
-            'datasets/ChaLearn2016_tiny/train_data/Tr3A7WODEuM.001', 
-            'datasets/ChaLearn2016_tiny/train_data/Uu-NbXUPr-A.001', 
-            'datasets/ChaLearn2016_tiny/train_data/W0FCCk0a0tg.001', 
-            'datasets/ChaLearn2016_tiny/train_data/WT1YjeADatU.001', 
-            'datasets/ChaLearn2016_tiny/train_data/Yj36y7ELRZE.004', 
-            'datasets/ChaLearn2016_tiny/train_data/_uNup91ZYw0.002', 
-            'datasets/ChaLearn2016_tiny/train_data/bt-ev53zZWE.004', 
-            'datasets/ChaLearn2016_tiny/train_data/dd0z9mErfSo.003', 
-            'datasets/ChaLearn2016_tiny/train_data/eD4b8sM-Tpw.000', 
-            'datasets/ChaLearn2016_tiny/train_data/eI_7SimPnnQ.001', 
-            'datasets/ChaLearn2016_tiny/train_data/geXpIfaFzF4.001', 
-            'datasets/ChaLearn2016_tiny/train_data/in-HuMgiDCE.001', 
-            'datasets/ChaLearn2016_tiny/train_data/jDdRrqRcSzM.002', 
-            'datasets/ChaLearn2016_tiny/train_data/jTkEWnuDnbA.001', 
-            'datasets/ChaLearn2016_tiny/train_data/jwcSbw4NDn0.005', 
-            'datasets/ChaLearn2016_tiny/train_data/myhEW1aZRg4.000', 
-            'datasets/ChaLearn2016_tiny/train_data/n8IiQJyqjiE.003', 
-            'datasets/ChaLearn2016_tiny/train_data/nGGtTu6dSJE.000', 
-            'datasets/ChaLearn2016_tiny/train_data/nOFHZ_s7Et4.005', 
-            'datasets/ChaLearn2016_tiny/train_data/nZz1hK90gwA.004', 
-            'datasets/ChaLearn2016_tiny/train_data/okSmKH2k5lE.002', 
-            'datasets/ChaLearn2016_tiny/train_data/om-9kFEKJIs.004', 
-            'datasets/ChaLearn2016_tiny/train_data/opEoJBrcmbI.002', 
-            'datasets/ChaLearn2016_tiny/train_data/vMtF0akNUK4.000', 
-            'datasets/ChaLearn2016_tiny/train_data/vr5FWHUkYRM.001', 
-            'datasets/ChaLearn2016_tiny/train_data/vrMlwwTLWIE.005', 
-            'datasets/ChaLearn2016_tiny/train_data/wTo1uZns2X8.000', 
-            'datasets/ChaLearn2016_tiny/train_data/x0CZuHnJ0Hs.005', 
-            'datasets/ChaLearn2016_tiny/train_data/yOzHZOg95Ug.003', 
-            'datasets/ChaLearn2016_tiny/train_data/yOzHZOg95Ug.005', 
-            'datasets/ChaLearn2016_tiny/train_data/yftfxiDNXko.002'
-        ]
-
+        alias rundeep='conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva.yaml'
+        # 后台跑命令
+        nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva.yaml --max_epoch 100 >nohup.out 2>&1 &
 
 # 创建数据集软链接
     ln -s [源文件或目录] [目标文件或目录] # https://www.cnblogs.com/sueyyyy/p/10985443.html

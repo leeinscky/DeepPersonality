@@ -2,6 +2,7 @@
 *.history
 *nohup.out
 datasets/*
+wandb/*
 
 # output dir
 ExpManager/
