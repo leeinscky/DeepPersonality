@@ -126,7 +126,7 @@ class AudioVisualDataUdiva(VideoDataUdiva):
         try:
             fc1_img = Image.open(fc1_img_paths[selected_fc1]).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
         except:
-            print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc1_img_paths:', fc1_img_paths)
+            # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc1_img_paths:', fc1_img_paths)
             return None
         
         # get fc2 image
@@ -144,7 +144,7 @@ class AudioVisualDataUdiva(VideoDataUdiva):
         try:
             fc2_img = Image.open(fc2_img_paths[selected_fc2]).convert("RGB")
         except:
-            print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc2_img_paths:', fc2_img_paths)
+            # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception: fc2_img_paths:', fc2_img_paths)
             return None
 
         # # merge fc1 image and fc2 image ，merge是为了 生成一个2*img_size的图片，即将fc1和fc2的图片拼接在一起，方便后续处理
@@ -243,7 +243,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
         label = self.get_ocean_label(idx)  # label是True或者False, 代表关系Known是True或者False
         fc1_img_tensor_list, fc2_img_tensor_list = self.get_image_data(idx)
-        fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：array([[[ 0.        ,  0.        ,  0.        , ...,  0.        ,  0.        ,  0.        ]]], dtype=float32), 代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
+        fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
         img_tensor_list = []
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
         for i in range(len(fc1_img_tensor_list)):
@@ -276,8 +276,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # get image data, return PIL.Image.Image object, for example: PIL.Image.Image object, mode=RGB, size=224x224, means the image size is 224x224, and is RGB three channels
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 get_image_data')
         img_dir_path = self.img_dir_ls[idx]
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- img_dir_path=', img_dir_path)
         # img_dir_path 是session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
-        # 对session路径下的FC1_A 文件夹和FC2_A文件夹分别进行提取帧，获得2个图片
+        # 对session路径下的FC1_A 文件夹和FC2_A文件夹分别进行提取帧
         fc1_img_dir_path, fc2_img_dir_path = '', ''
         for file in os.listdir(img_dir_path):
             # print('file:', file, 'type:', type(file))
@@ -309,7 +310,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             try:
                 fc1_img = Image.open(fc1_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
             except Exception as e:
-                print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception:', e, 'fc1_frame_path:', fc1_frame_path)
+                # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]exception:', e, 'fc1_frame_path:', fc1_frame_path)
                 return None
             # 将图片转换为tensor
             if self.transform:
@@ -353,8 +354,20 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data 函数开始执行')
         
         img_dir_path = self.img_dir_ls[idx] # img_dir_path 是训练集图像帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data, img_dir_path:', img_dir_path)
         session_id = os.path.basename(img_dir_path) # session_id 是训练集图像帧session的名称，例如 '055128'
-        wav_dir_path = os.path.join(self.data_root, self.audio_dir, session_id) # wav_dir_path 是训练集音频帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/055128'
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data, session_id:', session_id)
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data, self.audio_dir:', self.audio_dir)
+        
+        # 原始的生成wav_dir_path的方式
+        # wav_dir_path = os.path.join(self.data_root, self.audio_dir, session_id) # wav_dir_path 是训练集音频帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/055128'
+        
+        # 修改后的生成wav_dir_path的方式
+        # 构造wav所在的路径，需要和img的路径保持一致，为同一task的同一个session，即如果 img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134，那么 wav_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        # 将 img_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        wav_dir_path = img_dir_path.replace('_img', '_wav')
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-get_wave_data, img_dir_path:', img_dir_path, 'session_id:', session_id, 'wav_dir_path:', wav_dir_path)
+        
         fc1_wav_path, fc2_wav_path = '', ''
         for file in os.listdir(wav_dir_path):
             # print('file:', file, 'type:', type(file)) # datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/128129/FC1_A.wav.npy 
@@ -508,7 +521,7 @@ def make_data_loader(cfg, mode):
 
     return data_loader
 
-
+""" 
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_data_loader_udiva(cfg, mode):
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
@@ -572,6 +585,7 @@ def bimodal_resnet_data_loader_udiva(cfg, mode):
     )
     return data_loader
 
+ """
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
@@ -581,14 +595,14 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         train_img_data = [
             cfg.DATA.ANIMALS_TRAIN_IMG_DATA,
             cfg.DATA.GHOST_TRAIN_IMG_DATA,
-            # cfg.DATA.LEGO_TRAIN_IMG_DATA,
-            # cfg.DATA.TALK_TRAIN_IMG_DATA,
+            cfg.DATA.LEGO_TRAIN_IMG_DATA,
+            cfg.DATA.TALK_TRAIN_IMG_DATA,
         ]
         train_aud_data = [
             cfg.DATA.ANIMALS_TRAIN_AUD_DATA,
             cfg.DATA.GHOST_TRAIN_AUD_DATA,
-            # cfg.DATA.LEGO_TRAIN_AUD_DATA,
-            # cfg.DATA.TALK_TRAIN_AUD_DATA,
+            cfg.DATA.LEGO_TRAIN_AUD_DATA,
+            cfg.DATA.TALK_TRAIN_AUD_DATA,
         ]
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
@@ -603,14 +617,14 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         val_img_data = [
             cfg.DATA.ANIMALS_VAL_IMG_DATA,
             cfg.DATA.GHOST_VAL_IMG_DATA,
-            # cfg.DATA.LEGO_VAL_IMG_DATA,
-            # cfg.DATA.TALK_VAL_IMG_DATA,
+            cfg.DATA.LEGO_VAL_IMG_DATA,
+            cfg.DATA.TALK_VAL_IMG_DATA,
         ]
         val_aud_data = [
             cfg.DATA.ANIMALS_VAL_AUD_DATA,
             cfg.DATA.GHOST_VAL_AUD_DATA,
-            # cfg.DATA.LEGO_VAL_AUD_DATA,
-            # cfg.DATA.TALK_VAL_AUD_DATA,
+            cfg.DATA.LEGO_VAL_AUD_DATA,
+            cfg.DATA.TALK_VAL_AUD_DATA,
         ]
         
         dataset = AudioVisualLstmDataUdiva(
@@ -626,14 +640,14 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         test_img_data = [
             cfg.DATA.ANIMALS_TEST_IMG_DATA,
             cfg.DATA.GHOST_TEST_IMG_DATA,
-            # cfg.DATA.LEGO_TEST_IMG_DATA,
-            # cfg.DATA.TALK_TEST_IMG_DATA,
+            cfg.DATA.LEGO_TEST_IMG_DATA,
+            cfg.DATA.TALK_TEST_IMG_DATA,
         ]
         test_aud_data = [
             cfg.DATA.ANIMALS_TEST_AUD_DATA,
             cfg.DATA.GHOST_TEST_AUD_DATA,
-            # cfg.DATA.LEGO_TEST_AUD_DATA,
-            # cfg.DATA.TALK_TEST_AUD_DATA,
+            cfg.DATA.LEGO_TEST_AUD_DATA,
+            cfg.DATA.TALK_TEST_AUD_DATA,
         ]
         
         return ALLSampleAudioVisualDataUdiva(
@@ -647,14 +661,14 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         test_img_data = [
             cfg.DATA.ANIMALS_TEST_IMG_DATA,
             cfg.DATA.GHOST_TEST_IMG_DATA,
-            # cfg.DATA.LEGO_TEST_IMG_DATA,
-            # cfg.DATA.TALK_TEST_IMG_DATA,
+            cfg.DATA.LEGO_TEST_IMG_DATA,
+            cfg.DATA.TALK_TEST_IMG_DATA,
         ]
         test_aud_data = [
             cfg.DATA.ANIMALS_TEST_AUD_DATA,
             cfg.DATA.GHOST_TEST_AUD_DATA,
-            # cfg.DATA.LEGO_TEST_AUD_DATA,
-            # cfg.DATA.TALK_TEST_AUD_DATA,
+            cfg.DATA.LEGO_TEST_AUD_DATA,
+            cfg.DATA.TALK_TEST_AUD_DATA,
         ]
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,

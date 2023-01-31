@@ -335,7 +335,7 @@ class BiModalTrainerUdiva(object):
             # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             inputs, labels = self.data_fmt(data) # inputs是一个元组，包含了image (data['image']: torch.Size([batchsize, 6, 224, 224])) 和audio(data['audio']: torch.Size([batchsize, 1, 2, 50176]))的输入，labels: torch.Size([1(batch_size), 1])
             # 查看输入数据inputs labels 和 模型models在哪个device上 参考：https://www.cnblogs.com/picassooo/p/13736843.html
-            print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据所在的设备, inputs[0].device=', inputs[0].device, ', inputs[1].device=', inputs[1].device, ', labels.device=', labels.device, ', 模型model所在的设备=', next(model.parameters()).device)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据所在的设备, inputs[0].device=', inputs[0].device, ', inputs[1].device=', inputs[1].device, ', labels.device=', labels.device, ', 模型model所在的设备=', next(model.parameters()).device)
             
             # ret = self.data_fmt(data)
             # fc1_input = ret['fc1_in']

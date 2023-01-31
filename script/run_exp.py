@@ -28,6 +28,9 @@ def setup():
         cfg.SOLVER.LR_INIT = args.lr
     if args.test_only:
         cfg.TEST.TEST_ONLY = True
+    if args.bs:
+        cfg.DATA_LOADER.TRAIN_BATCH_SIZE = int(args.bs)
+        cfg.DATA_LOADER.VALID_BATCH_SIZE = int(args.bs) // 2
 
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
@@ -36,6 +39,8 @@ def setup():
 
 def main():
     args = setup()
+    wandb.config.epoch = cfg.TRAIN.MAX_EPOCH
+    wandb.config.cfg = cfg
     # print('args: ', args)
     # print('cfg: ', cfg)
     # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')

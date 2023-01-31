@@ -19,7 +19,7 @@ class VideoDataUdiva(Dataset):
         if parse_img_dir:
             self.img_dir_ls = self.parse_data_dir(img_dir)  # every directory name indeed a video # img_dir_ls是一个列表，包含了所有视频的路径，每个路径是一个字符串，例如'datasets/ChaLearn2016_tiny/train_data/-AmMDnVl4s8.003'
             # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]__init__函数 self.img_dir_ls: ', self.img_dir_ls) # 打印结果在最下方，img_dir_ls是  self.img_dir_ls:  ['datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129']
-        print('=============================================================')
+        # print('=============================================================')
         if parse_aud_dir:
             self.aud_file_ls = self.parse_data_dir(audio_dir)
             # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]__init__函数 self.aud_file_ls: ', self.aud_file_ls)
@@ -40,7 +40,7 @@ class VideoDataUdiva(Dataset):
         #         print('img_dir_i=', dir_i)
         #         if dir_i.endswith('_img'):
         #             img_data_dir_list.append(dir_i)
-        #     print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 img_dir_list: ', img_data_dir_list)
+        #     # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 img_dir_list: ', img_data_dir_list)
         #     data_dir = img_data_dir_list
         # elif file_type == 'aud':
         #     # 将data_dir下所有以_aud结尾的文件夹的路径存入aud_data_dir_list
@@ -49,29 +49,36 @@ class VideoDataUdiva(Dataset):
         #         print('aud_dir_i=', dir_i)
         #         if dir_i.endswith('_aud'):
         #             aud_data_dir_list.append(dir_i)
-        #     print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 aud_dir_list: ', aud_data_dir_list)
+        #     # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 aud_dir_list: ', aud_data_dir_list)
         #     data_dir = aud_data_dir_list
         
-        print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir: ', data_dir) # data_dir:   udiva_tiny/train/recordings
+        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir: ', data_dir) # data_dir:   udiva_tiny/train/recordings
         if isinstance(data_dir, list):
-            print('is list')
             data_dir_path = []
             for dir_i in data_dir:
-                print('is list-dir_i=', dir_i)
                 data_dir_ls = sorted(os.listdir(os.path.join(self.data_root, dir_i)))
                 data_dir_path.extend([os.path.join(self.data_root, dir_i, item) for item in data_dir_ls])
         else:
-            print('is not list')
             data_dir_ls = sorted(os.listdir(os.path.join(self.data_root, data_dir))) # data_dir_ls:  ['055125', '055128', '058110', '059134', '128129']
             data_dir_path = [os.path.join(self.data_root, data_dir, item) for item in data_dir_ls] 
-        print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_ls: ', data_dir_ls)
-        print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_path: ', data_dir_path)
-        # data_dir_path:  [
+        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_ls: ', data_dir_ls)
+        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_path: ', data_dir_path)
+        # 修改逻辑前 data_dir_path:  [
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055125', 
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/058110', 
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134', 
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129']
+            
+        # 修改逻辑后 data_dir_path: [
+            # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055125', 
+            # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 
+            # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/058110', 
+            # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134', 
+            # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129', 
+            # 'datasets/udiva_tiny/train/recordings/ghost_recordings_train_img/055125', 
+            # 'datasets/udiva_tiny/train/recordings/ghost_recordings_train_img/055128']
+            
         return data_dir_path
 
     def parse_annotation(self, label_file):
@@ -97,7 +104,7 @@ class VideoDataUdiva(Dataset):
 
     def get_ocean_label(self, index): 
         # index是一个整数，表示video目录里的第几个video样本，从0开始，这个函数返回的是一个列表，包含了这个视频的所有5个个性标签值
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, index: ', index) # index:  7
+        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, index: ', index, ', self.img_dir_ls: ', self.img_dir_ls) # index:  7
         session_path = self.img_dir_ls[index] # session_path: 
         session_id = f"{os.path.basename(session_path)}" # session_id:
         # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_path: ', session_path) # session_path:  

@@ -91,7 +91,7 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
         print(f"video:{str(video_path)} length = {length}, fps = {fps}")
         # 打印结果：video:/home/zl525/rds/hpc-work/datasets/udiva_full/train/recordings/talk_recordings_train_img/023191/FC1_T.mp4 length = 8079.0, fps = 25.0
     except Exception as e:
-        print('[frame_extract] exception = ', e)
+        # print('[frame_extract] exception = ', e)
         return None
     
     # Running a loop to each frame and saving it in the created folder

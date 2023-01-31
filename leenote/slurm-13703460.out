@@ -1,0 +1,779 @@
+Loading rhel8/default-amp
+  Loading requirement: dot rhel8/slurm singularity/current rhel8/global
+    cuda/11.4 libpciaccess/0.16/gcc-9.4.0-6fonbj6
+    libiconv/1.16/gcc-9.4.0-ahebbov libxml2/2.9.12/gcc-9.4.0-gnknt5e
+    ncurses/6.2/gcc-9.4.0-aiirok7 hwloc/2.5.0/gcc-9.4.0-7sqomga
+    libevent/2.1.12/gcc-9.4.0-hgny7cm numactl/2.0.14/gcc-9.4.0-52dwc6n
+    cuda/11.4.0/gcc-9.4.0-3hnxhjt gdrcopy/2.2/gcc-9.4.0-e4igtfp
+    knem/1.1.4/gcc-9.4.0-bpbxgva libnl/3.3.0/gcc-9.4.0-whwhrwb
+    rdma-core/34.0/gcc-9.4.0-5eo5n2u ucx/1.11.1/gcc-9.4.0-lktqyl4
+    openmpi/4.1.1/gcc-9.4.0-epagguv
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230131_081837-hj2c7wa2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lunar-kumquat-74
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/hj2c7wa2
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SESSION":"talk",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":0,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":32,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":16
+    },
+    "LOSS":{
+        "NAME":"mean_square_error"
+    },
+    "MODEL":{
+        "NAME":"audiovisual_resnet_lstm_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.001,
+        "MILESTONE":[
+            100,
+            200
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"sgd",
+        "RESET_LR":false,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":true,
+        "COMPUTE_PCC":true,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "LOG_INTERVAL":10,
+        "MAX_EPOCH":10,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/cuda/__init__.py:106: UserWarning: 
+NVIDIA A100-SXM4-80GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA A100-SXM4-80GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: / 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run lunar-kumquat-74 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/hj2c7wa2
+wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230131_081837-hj2c7wa2/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 143, in <module>
+    main()
+  File "./script/run_exp.py", line 47, in main
+    runner = ExpRunner(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 42, in __init__
+    self.model = self.build_model()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 66, in build_model
+    return build_model(self.cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/build.py", line 15, in build_model
+    model = NETWORK_REGISTRY.get(name)(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/audio_visual_residual.py", line 238, in audiovisual_resnet_lstm_udiva
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 852, in to
+    return self._apply(convert)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 189, in _apply
+    self.flatten_parameters()
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 175, in flatten_parameters
+    torch._cudnn_rnn_flatten_weight(
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230131_081914-buifdwjv
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run bright-rooster-75
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/buifdwjv
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SESSION":"talk",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":0,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":8
+    },
+    "LOSS":{
+        "NAME":"mean_square_error"
+    },
+    "MODEL":{
+        "NAME":"audiovisual_resnet_lstm_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.001,
+        "MILESTONE":[
+            100,
+            200
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"sgd",
+        "RESET_LR":false,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":true,
+        "COMPUTE_PCC":true,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "LOG_INTERVAL":10,
+        "MAX_EPOCH":100,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/cuda/__init__.py:106: UserWarning: 
+NVIDIA A100-SXM4-80GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA A100-SXM4-80GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.029 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.029 MB uploaded (0.000 MB deduped)wandb: 🚀 View run bright-rooster-75 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/buifdwjv
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230131_081914-buifdwjv/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 143, in <module>
+    main()
+  File "./script/run_exp.py", line 47, in main
+    runner = ExpRunner(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 42, in __init__
+    self.model = self.build_model()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 66, in build_model
+    return build_model(self.cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/build.py", line 15, in build_model
+    model = NETWORK_REGISTRY.get(name)(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/audio_visual_residual.py", line 238, in audiovisual_resnet_lstm_udiva
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 852, in to
+    return self._apply(convert)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 189, in _apply
+    self.flatten_parameters()
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 175, in flatten_parameters
+    torch._cudnn_rnn_flatten_weight(
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230131_081927-fcygbzrj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vibrant-tiger-76
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/fcygbzrj
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SESSION":"talk",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":0,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":32,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":16
+    },
+    "LOSS":{
+        "NAME":"mean_square_error"
+    },
+    "MODEL":{
+        "NAME":"audiovisual_resnet_lstm_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.001,
+        "MILESTONE":[
+            100,
+            200
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"sgd",
+        "RESET_LR":false,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":true,
+        "COMPUTE_PCC":true,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "LOG_INTERVAL":10,
+        "MAX_EPOCH":100,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/cuda/__init__.py:106: UserWarning: 
+NVIDIA A100-SXM4-80GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA A100-SXM4-80GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run vibrant-tiger-76 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/fcygbzrj
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230131_081927-fcygbzrj/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 143, in <module>
+    main()
+  File "./script/run_exp.py", line 47, in main
+    runner = ExpRunner(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 42, in __init__
+    self.model = self.build_model()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 66, in build_model
+    return build_model(self.cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/build.py", line 15, in build_model
+    model = NETWORK_REGISTRY.get(name)(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/audio_visual_residual.py", line 238, in audiovisual_resnet_lstm_udiva
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 852, in to
+    return self._apply(convert)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 189, in _apply
+    self.flatten_parameters()
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 175, in flatten_parameters
+    torch._cudnn_rnn_flatten_weight(
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230131_081940-cqsf4qp7
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run incandescent-rocket-77
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/cqsf4qp7
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SESSION":"talk",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":0,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":32,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":16
+    },
+    "LOSS":{
+        "NAME":"mean_square_error"
+    },
+    "MODEL":{
+        "NAME":"audiovisual_resnet_lstm_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.001,
+        "MILESTONE":[
+            100,
+            200
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"sgd",
+        "RESET_LR":false,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":true,
+        "COMPUTE_PCC":true,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "LOG_INTERVAL":10,
+        "MAX_EPOCH":200,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/cuda/__init__.py:106: UserWarning: 
+NVIDIA A100-SXM4-80GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA A100-SXM4-80GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: / 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run incandescent-rocket-77 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/cqsf4qp7
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230131_081940-cqsf4qp7/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 143, in <module>
+    main()
+  File "./script/run_exp.py", line 47, in main
+    runner = ExpRunner(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 42, in __init__
+    self.model = self.build_model()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 66, in build_model
+    return build_model(self.cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/build.py", line 15, in build_model
+    model = NETWORK_REGISTRY.get(name)(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/audio_visual_residual.py", line 238, in audiovisual_resnet_lstm_udiva
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 852, in to
+    return self._apply(convert)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 189, in _apply
+    self.flatten_parameters()
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 175, in flatten_parameters
+    torch._cudnn_rnn_flatten_weight(
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230131_081952-jrt8la8u
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run auspicious-horse-78
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/jrt8la8u
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SESSION":"talk",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":0,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":32,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":16
+    },
+    "LOSS":{
+        "NAME":"mean_square_error"
+    },
+    "MODEL":{
+        "NAME":"audiovisual_resnet_lstm_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.001,
+        "MILESTONE":[
+            100,
+            200
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"sgd",
+        "RESET_LR":false,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":true,
+        "COMPUTE_PCC":true,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "LOG_INTERVAL":10,
+        "MAX_EPOCH":300,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/cuda/__init__.py:106: UserWarning: 
+NVIDIA A100-SXM4-80GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the NVIDIA A100-SXM4-80GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run auspicious-horse-78 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/jrt8la8u
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230131_081952-jrt8la8u/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 143, in <module>
+    main()
+  File "./script/run_exp.py", line 47, in main
+    runner = ExpRunner(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 42, in __init__
+    self.model = self.build_model()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 66, in build_model
+    return build_model(self.cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/build.py", line 15, in build_model
+    model = NETWORK_REGISTRY.get(name)(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/audio_visual_residual.py", line 238, in audiovisual_resnet_lstm_udiva
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 852, in to
+    return self._apply(convert)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 530, in _apply
+    module._apply(fn)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 189, in _apply
+    self.flatten_parameters()
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/rnn.py", line 175, in flatten_parameters
+    torch._cudnn_rnn_flatten_weight(
+RuntimeError: CUDA error: no kernel image is available for execution on the device
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
+Changed directory to /home/zl525/code/DeepPersonality/leenote.
+
+JobID: 13703460
+======
+Time: Tue Jan 31 08:20:01 GMT 2023
+Running on master node: gpu-q-68
+Current directory: /home/zl525/code/DeepPersonality/leenote
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_CTYPE = "UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+
+Nodes allocated:
+================
+gpu-q-68
+
+numtasks=4, numnodes=1, mpi_tasks_per_node=4 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+ 
+
