@@ -1,5 +1,6 @@
 DATA:
   ROOT: "datasets"
+  SESSION: "TALK"
   ANIMALS_TRAIN_IMG_DATA: "udiva_full/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_full/train/recordings/ghost_recordings_train_img"
   LEGO_TRAIN_IMG_DATA: "udiva_full/train/recordings/lego_recordings_train_img"
@@ -45,12 +46,12 @@ MODEL:
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
-  NAME: "sgd"
+  NAME: "adam"
   SCHEDULER: "multi_step_scale"
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [100, 200]
+  MILESTONE: [4, 10, 15]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 5

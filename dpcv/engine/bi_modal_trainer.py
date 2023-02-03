@@ -313,7 +313,8 @@ class BiModalTrainerUdiva(object):
         lr = optimizer.param_groups[0]['lr']
         self.logger.info(f"Training: learning rate:{lr}")
         self.tb_writer.add_scalar("lr", lr, epoch_idx)
-
+        optimizer.zero_grad() # 梯度清零，即将梯度变为0  # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0005), SGD即随机梯度下降, lr是学习率，momentum是动量，weight_decay是权重衰减, 全称是Stochastic Gradient Descent，即随机梯度下降，即每次迭代时，随机选取一个batch的样本来进行梯度下降，而不是像梯度下降那样，每次迭代时，使用所有的样本来进行梯度下降，这样会使得每次迭代的计算量变大，而且每次迭代的结果也不稳定，而随机梯度下降则可以避免这个问题，但是随机梯度下降的结果也不稳定，因此，可以结合动量和权重衰减来使得随机梯度下降的结果更加稳定，即动量是为了使得每次迭代的结果更加稳定，而权重衰减是为了防止过拟合。
+        
         model.train()
         loss_list = []
         acc_avg_list = []
@@ -349,7 +350,7 @@ class BiModalTrainerUdiva(object):
             # fc2_output = model(*fc2_input)
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  fc1_output=', fc1_output, '  fc2_output', fc2_output, '  labels.size()=', labels.size())
             
-            optimizer.zero_grad() # 梯度清零，即将梯度变为0  # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0005), SGD即随机梯度下降, lr是学习率，momentum是动量，weight_decay是权重衰减, 全称是Stochastic Gradient Descent，即随机梯度下降，即每次迭代时，随机选取一个batch的样本来进行梯度下降，而不是像梯度下降那样，每次迭代时，使用所有的样本来进行梯度下降，这样会使得每次迭代的计算量变大，而且每次迭代的结果也不稳定，而随机梯度下降则可以避免这个问题，但是随机梯度下降的结果也不稳定，因此，可以结合动量和权重衰减来使得随机梯度下降的结果更加稳定，即动量是为了使得每次迭代的结果更加稳定，而权重衰减是为了防止过拟合。
+            
             loss = loss_f(outputs.cpu(), labels.cpu()) # loss_f = nn.MSELoss()  即 mean_square_error，即均方误差，即预测值与真实值的差的平方的均值，即 (y_pred - y_true)^2，其中y_pred是预测值，y_true是真实值
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
             self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
@@ -361,6 +362,7 @@ class BiModalTrainerUdiva(object):
             iter_time = iter_end_time - iter_start_time
 
             loss_list.append(loss.item())
+            # acc_avg的公式里用1来减去是因为 we use 1 - |y_pred - y_true| as the accuracy metric, beacause we want to penalize the model more when the prediction is far from the ground truth.
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0) # torch.abs 计算 tensor 的每个元素的绝对值, torch.abs(outputs.cpu() - labels.cpu())是预测值与真实值的差的绝对值, 即预测值与真实值的差的绝对值的平均值即为acc_avg, 即acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean(), clip(min=0)是将acc_avg的最小值限制在0以上
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg=', acc_avg)
             acc_avg = acc_avg.detach().numpy() # detach()是将acc_avg从计算图中分离出来后，再转换成numpy类型的float类型，即tensor转换成float类型
@@ -412,9 +414,7 @@ class BiModalTrainerUdiva(object):
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu())
                 loss_batch_list.append(loss.item())
-                ocean_acc_batch = ( # ocean acc on a batch
-                    1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())
-                ).mean(dim=0).clip(min=0)
+                ocean_acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0).clip(min=0) # ocean acc on a batch
                 ocean_acc_epoch.append(ocean_acc_batch)
                 acc_batch_avg = ocean_acc_batch.mean()
                 acc_batch_list.append(acc_batch_avg)

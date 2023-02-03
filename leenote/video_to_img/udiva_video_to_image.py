@@ -64,7 +64,7 @@ def crop_to_square(img):
     return img
 
 
-def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
+def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame_num=1):
     """
     Creating folder to save all frames from the video
     """
@@ -104,7 +104,8 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
             continue
         if ret:
             count += 1
-            if count % fps == 0: # 如果count是fps的倍数，就保存frame图片，即每隔1秒抽取一帧
+            # 如果count是fps的倍数，就保存frame图片，即每隔1秒抽取一帧。 如果每秒抽n帧，那么就是count % (fps / n) == 0 举例：每秒抽取5帧，那么就是count % (fps/5) == 0, fps=25, 那么就是count % 5 == 0, 即每隔5个连续的帧抽取一帧，即每隔0.2秒抽取一帧
+            if count % (fps / frame_num) == 0:
                 if transform is not None:
                     frame = transform(frame)
                 # Resizing it to w, h = resize to save the disk space and fit into the model
@@ -120,10 +121,10 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None):
                 break
 
 
-def long_time_task(video, parent_dir):
+def long_time_task(video, parent_dir, frame_num):
     # print('start running long_time_task function')
     print(f"execute {video} ...")
-    return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
+    return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square, frame_num=frame_num)
 
 if __name__ == "__main__":
     import argparse
@@ -133,6 +134,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='extract image frames from videos')
     parser.add_argument('-v', '--video-dir', help="path to video directory", default=None, type=str)
     parser.add_argument("-o", "--output-dir", default=None, type=str, help="path to the extracted frames")
+    parser.add_argument("-f", "--frame-num", default=1, type=str, help="number of frames to extract per second")
     args = parser.parse_args()
 
     # def long_time_task(video, parent_dir):
@@ -140,15 +142,15 @@ if __name__ == "__main__":
     #     return frame_extract(video_path=video, save_dir=parent_dir, resize=(256, 256), transform=crop_to_square)
 
     p = Pool(8)
-    v_path = args.video_dir
     # path = Path("/root/personality/datasets/chalearn2021/train/lego_train")
-    path = Path(v_path)
-    print('path:', path)
+    path = Path(args.video_dir)
+    print('session path:',path)
     i = 0
     video_pts = list(path.rglob("*.mp4"))
     print('video_pts:', video_pts)
+    frame_num = int(args.frame_num) # 每秒抽取的帧数, 默认为1即每秒抽取1帧, 如果为5, 则每秒抽取5帧
     for video in tqdm(video_pts):
-        print('i:', i)
+        print('video index: ', i)
         i += 1
         video_path = str(video)
         if args.output_dir is not None:
@@ -157,7 +159,8 @@ if __name__ == "__main__":
             saved_dir = Path(video).parent
         print('video_path:', video_path)
         print('saved_dir:', saved_dir)
-        p.apply_async(long_time_task, args=(video_path, saved_dir)) # 异步执行
+        print('extract ', frame_num, ' frames per second')
+        p.apply_async(long_time_task, args=(video_path, saved_dir, frame_num)) # 异步执行
         print('---------------------')
         # frame_extract(video_path=video_path, save_dir=saved_dir, resize=(256, 256), transform=crop_to_square)
     print('Waiting for all subprocesses done...')

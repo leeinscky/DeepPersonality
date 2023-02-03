@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import wandb
 
 # 非udiva数据使用下列三个导入
 from dpcv.modeling.module.bi_modal_resnet_module import AudioVisualResNet, AudInitStage
@@ -133,8 +134,9 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
             layers=[2, 2, 2, 2],
             branch_type='visual'
         )
-        self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
-
+        # self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
+        self.linear = nn.Linear(256, 2)
+        self.bn = nn.BatchNorm1d(2) # nn.BatchNorm1d是对输入的特征进行归一化处理的，这里的512表示的是输入的特征维度
         if init_weights:
             initialize_weights(self)
         # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
@@ -153,9 +155,15 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
 
         # 将音频分支和视频分支的输出进行cat拼接，然后输入全连接层，最后输入激活函数中得到最终输出
         feat = torch.cat([aud_x, vis_x], dim=-1) # torch.cat是用来拼接tensor的，这里的dim=-1表示的是拼接的维度，这里的feat的shape是[batch_size, 512]，也就是把aud_x和vis_x拼接在了一起
+        # feat = vis_x
         # print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
-        x = self.linear(feat) # self.linear = nn.Linear(512, 5) 这里的x的shape是[batch_size, 5]，也就是把feat输入到全连接层中，全连接层的输出是5个类别的概率，这里的5表示的是5个类别。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 5]
+        x = self.linear(feat) # self.linear = nn.Linear(512, 2) x的shape是[batch_size, 2]，也就是把feat输入到全连接层中，全连接层的输出是2个类别的概率。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 2]
         # print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape, ' x=', x)
+        # add batch normalization
+        # x = self.bn(x)
+        # wandb.config.note = "not use batch normalization"
+        # wandb.config.note = "use only visual branch, not use batch normalization"
+        # print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... x经过batch normalization处理后, 得到的输出数据的维度为 x.shape: ', x.shape, ' x=', x)
         x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
         # print('[dpcv/modeling/networks/audio_visual_residual.py] 正在执行forward逻辑... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape, ' x=', x)
         # x = torch.tanh(x)
@@ -163,7 +171,6 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
         if self.return_feature: 
             return x, feat
         return x
-
 
 
 class VisualResNet18(nn.Module):

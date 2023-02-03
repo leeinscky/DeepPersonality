@@ -1,4 +1,5 @@
 import os
+from matplotlib import test
 import torch
 import glob
 from torch.utils.data import DataLoader
@@ -15,6 +16,7 @@ from .build import DATA_LOADER_REGISTRY
 from random import shuffle
 import matplotlib.pyplot as plt # plt 用于显示图片
 import matplotlib.image as mpimg # mpimg 用于读取图片
+import wandb
 
 class AudioVisualDataUdiva(VideoDataUdiva):
 
@@ -231,12 +233,13 @@ class AudioVisualDataUdiva(VideoDataUdiva):
 
 
 class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16):
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=48):
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __init__')
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         self.frame_idx = 0
+        wandb.config.sample_size = sample_size
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 结束执行 __init__')
 
     def __getitem__(self, idx): # idx means the index of session in the directory
@@ -592,18 +595,27 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
     transforms = build_transform_spatial(cfg) # TRANSFORM: "standard_frame_transform"
     if mode == "train":
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行训练集的dataloader初始化...')
+        
+        # 如果 cfg.DATA.SESSION 字符串里包含了 'ANIMALS' 关键词，那么就在list里添加cfg.DATA.ANIMALS_TRAIN_IMG_DATA, 否则就不添加
+        # 如果 cfg.DATA.SESSION 字符串里包含了 'GHOST' 关键词，那么就在list里添加cfg.DATA.GHOST_TRAIN_IMG_DATA, 否则就不添加
+        # 如果 cfg.DATA.SESSION 字符串里包含了 'LEGO' 关键词，那么就在list里添加cfg.DATA.LEGO_TRAIN_IMG_DATA, 否则就不添加
+        # 如果 cfg.DATA.SESSION 字符串里包含了 'TALK' 关键词，那么就在list里添加cfg.DATA.TALK_TRAIN_IMG_DATA, 否则就不添加
         train_img_data = [
-            cfg.DATA.ANIMALS_TRAIN_IMG_DATA,
-            cfg.DATA.GHOST_TRAIN_IMG_DATA,
-            cfg.DATA.LEGO_TRAIN_IMG_DATA,
-            cfg.DATA.TALK_TRAIN_IMG_DATA,
+            cfg.DATA.ANIMALS_TRAIN_IMG_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TRAIN_IMG_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TRAIN_IMG_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TRAIN_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
         train_aud_data = [
-            cfg.DATA.ANIMALS_TRAIN_AUD_DATA,
-            cfg.DATA.GHOST_TRAIN_AUD_DATA,
-            cfg.DATA.LEGO_TRAIN_AUD_DATA,
-            cfg.DATA.TALK_TRAIN_AUD_DATA,
+            cfg.DATA.ANIMALS_TRAIN_AUD_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TRAIN_AUD_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TRAIN_AUD_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TRAIN_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
+        # 去掉list里的None元素
+        train_img_data = [x for x in train_img_data if x is not None]
+        train_aud_data = [x for x in train_aud_data if x is not None]
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- train_img_data = ', train_img_data, ', train_aud_data = ', train_aud_data, ', len(train_img_data)=', len(train_img_data), ' len(train_aud_data)=', len(train_aud_data))
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
             train_img_data, 
@@ -615,17 +627,19 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
     elif mode == "valid":
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行验证集的dataloader初始化...')
         val_img_data = [
-            cfg.DATA.ANIMALS_VAL_IMG_DATA,
-            cfg.DATA.GHOST_VAL_IMG_DATA,
-            cfg.DATA.LEGO_VAL_IMG_DATA,
-            cfg.DATA.TALK_VAL_IMG_DATA,
+            cfg.DATA.ANIMALS_VAL_IMG_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_VAL_IMG_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_VAL_IMG_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_VAL_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
         val_aud_data = [
-            cfg.DATA.ANIMALS_VAL_AUD_DATA,
-            cfg.DATA.GHOST_VAL_AUD_DATA,
-            cfg.DATA.LEGO_VAL_AUD_DATA,
-            cfg.DATA.TALK_VAL_AUD_DATA,
+            cfg.DATA.ANIMALS_VAL_AUD_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_VAL_AUD_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_VAL_AUD_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_VAL_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
+        val_img_data = [x for x in val_img_data if x is not None]
+        val_aud_data = [x for x in val_aud_data if x is not None]
         
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
@@ -638,17 +652,19 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
     elif mode == "full_test":
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行测试集的dataloader初始化...')
         test_img_data = [
-            cfg.DATA.ANIMALS_TEST_IMG_DATA,
-            cfg.DATA.GHOST_TEST_IMG_DATA,
-            cfg.DATA.LEGO_TEST_IMG_DATA,
-            cfg.DATA.TALK_TEST_IMG_DATA,
+            cfg.DATA.ANIMALS_TEST_IMG_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TEST_IMG_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TEST_IMG_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TEST_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
         test_aud_data = [
-            cfg.DATA.ANIMALS_TEST_AUD_DATA,
-            cfg.DATA.GHOST_TEST_AUD_DATA,
-            cfg.DATA.LEGO_TEST_AUD_DATA,
-            cfg.DATA.TALK_TEST_AUD_DATA,
+            cfg.DATA.ANIMALS_TEST_AUD_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TEST_AUD_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TEST_AUD_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TEST_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
+        test_img_data = [x for x in test_img_data if x is not None]
+        test_aud_data = [x for x in test_aud_data if x is not None]
         
         return ALLSampleAudioVisualDataUdiva(
             cfg.DATA.ROOT,
@@ -659,17 +675,20 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         )
     else:
         test_img_data = [
-            cfg.DATA.ANIMALS_TEST_IMG_DATA,
-            cfg.DATA.GHOST_TEST_IMG_DATA,
-            cfg.DATA.LEGO_TEST_IMG_DATA,
-            cfg.DATA.TALK_TEST_IMG_DATA,
+            cfg.DATA.ANIMALS_TEST_IMG_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TEST_IMG_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TEST_IMG_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TEST_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
         test_aud_data = [
-            cfg.DATA.ANIMALS_TEST_AUD_DATA,
-            cfg.DATA.GHOST_TEST_AUD_DATA,
-            cfg.DATA.LEGO_TEST_AUD_DATA,
-            cfg.DATA.TALK_TEST_AUD_DATA,
+            cfg.DATA.ANIMALS_TEST_AUD_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
+            cfg.DATA.GHOST_TEST_AUD_DATA if 'GHOST' in cfg.DATA.SESSION else None,
+            cfg.DATA.LEGO_TEST_AUD_DATA if 'LEGO' in cfg.DATA.SESSION else None,
+            cfg.DATA.TALK_TEST_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,
         ]
+        test_img_data = [x for x in test_img_data if x is not None]
+        test_aud_data = [x for x in test_aud_data if x is not None]
+        
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
             test_img_data,

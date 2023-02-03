@@ -71,6 +71,7 @@ class ExpRunner:
 
     def build_solver(self):
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_solver')
+        # 优化器的定义逻辑在 dpcv/modeling/solver/optimize.py
         return build_solver(self.cfg, self.model)
 
     def build_scheduler(self):

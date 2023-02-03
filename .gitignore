@@ -4,6 +4,8 @@
 datasets/*
 wandb/*
 nohup*
+leenote/slurm-*
+leenote/machine.file.*
 
 # output dir
 ExpManager/
