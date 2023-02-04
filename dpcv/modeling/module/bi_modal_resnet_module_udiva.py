@@ -161,6 +161,7 @@ class AudioVisualResNetUdiva(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x): # forward will be called when you call the model, so the input x is the input of the model, and the output is the output of the model
+        # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - 模型的输入数据 x.shape = ', x.shape)
         # 输入的数据维度 audio: x.shape =  torch.Size([8, 2, 1, 50176])=[batchsize, fc1+fc2=2, 1, 50176] or visual: torch.Size([8, 16, 6, 224, 224]) = [batchsize, sample_size=16frames, 3*2(fc1+fc2)=6, 224, 224]
         if self.branch_type == 'audio': # 音频文件因为没有16帧这一个维度（包含在最后一维度里面了:256000=16秒*采样率16000），和img不一样，所以不需要输入LSTM网络。
             # print('[dpcv/modeling/module/bi_modal_resnet_module_udiva.py] - class AudioVisualResNetUdiva(nn.Module): 正在执行forward逻辑, 输入的数据维度 x.shape = ', x.shape)  # x.shape =  torch.Size([batchsize, fc1+fc2=2, 1, 256000=16秒*采样率16000])

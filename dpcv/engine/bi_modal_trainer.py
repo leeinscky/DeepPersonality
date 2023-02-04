@@ -267,14 +267,16 @@ class BiModalTrainer(object):
 
 @TRAINER_REGISTRY.register()
 class BiModalTrainerUdiva(object):
-    """base trainer for bi-modal input"""
+    """trainer for Udiva bi-modal input"""
     def __init__(self, cfg, collector, logger):
         # print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
         self.cfg = cfg
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
-        self.tb_writer = SummaryWriter(cfg.OUTPUT_DIR)
+        # 在 cfg.OUTPUT_DIR 路径后加上 /tensorboard_events
+        tb_writer_dir = os.path.join(cfg.OUTPUT_DIR, "tensorboard_events")
+        self.tb_writer = SummaryWriter(tb_writer_dir)
         # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
@@ -325,11 +327,10 @@ class BiModalTrainerUdiva(object):
             final_i = i
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i)
             # if i == 0:
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
+                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([batch_size, 3*2(由于torch.cat)=6, 224, 224])
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([batch_size, 1, 1*2(由于torch.cat)=2, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([1(batch_size), 1]) 8对应config里的batch_size，1对应1个关系的标签
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() i=', i, '  data=', data)
             epo_iter_num = len(data_loader)
             iter_start_time = time.time()
 
@@ -337,23 +338,20 @@ class BiModalTrainerUdiva(object):
             inputs, labels = self.data_fmt(data) # inputs是一个元组，包含了image (data['image']: torch.Size([batchsize, 6, 224, 224])) 和audio(data['audio']: torch.Size([batchsize, 1, 2, 50176]))的输入，labels: torch.Size([1(batch_size), 1])
             # 查看输入数据inputs labels 和 模型models在哪个device上 参考：https://www.cnblogs.com/picassooo/p/13736843.html
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据所在的设备, inputs[0].device=', inputs[0].device, ', inputs[1].device=', inputs[1].device, ', labels.device=', labels.device, ', 模型model所在的设备=', next(model.parameters()).device)
+            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据 type(inputs): ', type(inputs), ', len(inputs): ', len(inputs))
             
-            # ret = self.data_fmt(data)
-            # fc1_input = ret['fc1_in']
-            # fc2_input = ret['fc2_in']
-            # labels = ret['label']
-
             # 这里该怎么处理一对视频融合？我们在数据预处理时就将一对视频的数据进行了早期融合，所以这里不需要再对两个视频分支进行融合了，模型输出的结果是融合后的结果
+            # print('input data is ready, model start to train...')
             outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
+            # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             # fc1_output = model(*fc1_input)
             # fc2_output = model(*fc2_input)
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  fc1_output=', fc1_output, '  fc2_output', fc2_output, '  labels.size()=', labels.size())
             
-            
             loss = loss_f(outputs.cpu(), labels.cpu()) # loss_f = nn.MSELoss()  即 mean_square_error，即均方误差，即预测值与真实值的差的平方的均值，即 (y_pred - y_true)^2，其中y_pred是预测值，y_true是真实值
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
             self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
+            # print('loss is ready, start to backward...')
             loss.backward() # loss.backward()是将loss反向传播，即计算loss对每个参数的梯度，即loss对每个参数的偏导数
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  经过backward函数后, loss=', loss, '  loss.item()=', loss.item())
             optimizer.step() # step()是将梯度更新到参数上，即将loss对每个参数的偏导数更新到参数上， 即 w = w - lr * gradient, 其中lr是学习率，gradient是loss对每个参数的偏导数，即loss对每个参数的梯度， w是模型的参数
@@ -374,6 +372,7 @@ class BiModalTrainerUdiva(object):
             wandb.log({
                 "train_loss":  float(loss.item()),
                 "train_acc": float(acc_avg),
+                "learning rate": lr,
                 "epoch": epoch_idx + 1,
             })
 
@@ -412,6 +411,7 @@ class BiModalTrainerUdiva(object):
                     # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
+                # print('[bi_modal_trainer.py]valid.. outputs.size()=', outputs.size(), '  outputs=', outputs, '  labels.size()=', labels.size(), '  labels=', labels)
                 loss = loss_f(outputs.cpu(), labels.cpu())
                 loss_batch_list.append(loss.item())
                 ocean_acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0).clip(min=0) # ocean acc on a batch
@@ -588,9 +588,20 @@ class BiModalTrainerUdiva(object):
 
         for k, v in data.items():
             data[k] = v.to(self.device)
-        img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+        
+        if self.cfg.BIMODAL_OPTION == 1:
+            aud_in = None
+            img_in, labels = data["image"], data["label"]
+        elif self.cfg.BIMODAL_OPTION == 2:
+            aud_in, labels = data["audio"], data["label"]
+            img_in = None
+        elif self.cfg.BIMODAL_OPTION == 3:
+            img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+        else:
+            raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
+    
         return (aud_in, img_in), labels
-
+    
     def full_test_data_fmt(self, data):
         images, wav, label = data["image"], data["audio"], data["label"]
         images_in = torch.stack(images, 0).to(self.device)
@@ -618,7 +629,8 @@ class BimodalLSTMTrainVisual(BiModalTrainer):
         for k, v in data.items():
             data[k] = v.to(self.device)
         img_in,  labels = data["image"],  data["label"]
-        img_in = img_in.view(-1, 3, 112, 112)
+        # img_in的维度是[batch_size, 6(帧序列), 3, 112, 112]，经过view后变成[batch_size*6, 3, 112, 112]
+        img_in = img_in.view(-1, 3, 112, 112) 
         # aud_in = aud_in.view(-1, 68)
         return (img_in,), labels
 

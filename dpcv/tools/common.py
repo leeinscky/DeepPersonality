@@ -76,6 +76,18 @@ def parse_args():
         default=None,
         nargs=argparse.REMAINDER,
     )
+    parser.add_argument(
+        '--sample_size',
+        type=int,
+        default=None,
+        help='extract sample_size frames per video',
+    )
+    parser.add_argument(
+        '--wandb',
+        type=int,
+        default=1,
+        help='use wandb to log',
+    )
     args = parser.parse_args()
     return args
 

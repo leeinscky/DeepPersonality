@@ -1,9 +1,10 @@
-# Udiva测试命令
+####### Udiva测试命令 #######
 mac本地：
     conda activate DeepPersonality && cd /Users/lizejian/cambridge/mphil_project/learn/udiva/DeepPersonality && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18.yaml
     # test阶段中断的解决办法：find . -name ".DS_Store" -delete  # https://github.com/fastai/fastai/issues/488
 
 远程：
+    参考：/home/zl525/code/DeepPersonality/leenote/train.sh
     conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/
     conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva.yaml
     
@@ -14,35 +15,17 @@ mac本地：
 
     #################### udiva full数据集 全量数据集 ####################
     alias rundeepfull='conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml'
+    cd /home/zl525/code/DeepPersonality/ && python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 1 --bs 32
 
 # 模板
 conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup python3 ./script/run_exp.py \
---cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 50 --bs 50 --lr 0.00001 >nohup_full_epo50_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
+--cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 50 --bs 16 --lr 0.001 >nohup_full_epo50_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 
+####### 提交任务到HPC的CPU上 在CPU上跑 #######
+    cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
 
-# epochs=10, batch_size=16
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 10 --bs 16 >nohup_full_epo10_bs16.out 2>&1 &
-sshcamhpc: [1] 64305 done https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/pep79rxl?workspace=user-1009694687
-
-# epochs=100, batch_size=16
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 100 --bs 16 >nohup_full_epo100_bs16_01302355.out 2>&1 &
-    # sshhpccpu login-e-10: [1] 22987 running
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 100 --bs 16 >nohup_full_epo100_bs16_01310021.out 2>&1 &
-    # COMPUTERLAB-SL3-CPU -p skylake: zl525@cpu-e-824 [1] 244128 running
-
-
-# epochs=150, batch_size=16
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 150 --bs 16 --lr 0.0001 >nohup_full_epo150_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
-    # login-e-16 [1] 2987
-
-# epochs=10, batch_size=32
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 10 --bs 32 >nohup_full_epo10_bs32.out 2>&1 &
-
-# epochs=10, batch_size=48
-nohup python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 10 --bs 48 >nohup_full_epo10_bs48.out 2>&1 &
-
-echo "test `date +'%Y-%m-%d-%H:%M:%S'`"
-
+    # 运行记录：
+    13879091
 
 ####### 提交任务到HPC上 在GPU上跑 #######
     # 参考/home/zl525/code/DeepPersonality/leenote/slurm_submit_deep 文件的最后一行
@@ -50,16 +33,13 @@ echo "test `date +'%Y-%m-%d-%H:%M:%S'`"
 
     # 运行记录：
     Submitted batch job 13703460  failed torch版本和A100 GPU不兼容
-    Submitted batch job 13713610
+    Submitted batch job 13855836
 
 
-####### 提交任务到HPC的CPU上 在CPU上跑 #######
-    cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
+# 一些结果相对比较好的保存模型
+resume="results/demo/unified_frame_images/bimodal_resnet_udiva/02-03_21-46/checkpoint_0.pkl"
+resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimodal_resnet_udiva/02-04_02-10/checkpoint_0.pkl"
 
-    # 运行记录：
-    Submitted batch job 13703745  crashed  wandb: beaming-paper-72 thriving-wish-73 https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/vr4htvxa?workspace=user-1009694687 https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/n9wot3lb?workspace=user-1009694687
-    Submitted batch job 13718079  日志：/home/zl525/code/DeepPersonality/leenote/slurm-13718079.out
-    Submitted batch job 13729734
 
 # 替换print，将下面的两行的第一行替换成第二行即可注释所有print信息
   print('[

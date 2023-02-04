@@ -84,6 +84,21 @@ class ExpRunner:
 
     def before_train(self, cfg):
         # cfg = self.cfg.TRAIN
+        
+        # 手动加载预训练模型用于测试 
+        # # DeepPersonality代码库提供的预训练模型ResNet：checkpoint_297.pkl  Reference: https://github.com/liaorongfan/DeepPersonality
+        # checkpoint_path = 'dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl'
+        # checkpoint = torch.load(checkpoint_path, map_location=lambda storage, loc: storage) # lambda storage, loc: storage表示的是将模型加载到内存中
+        # # 将 visual_branch.init_stage.conv1.weight 的shape从torch.Size([32, 3, 7, 7]) 改为 torch.Size([32, 6, 7, 7]), 即将3通道的图像改为6通道的图像, 通过复制3通道的图像，得到6通道的图像
+        # checkpoint["model_state_dict"]['visual_branch.init_stage.conv1.weight'] = torch.cat((checkpoint["model_state_dict"]['visual_branch.init_stage.conv1.weight'], checkpoint["model_state_dict"]['visual_branch.init_stage.conv1.weight']), 1) # 1表示沿着第1个维度进行拼接，即沿着通道维度进行拼接
+        # checkpoint["model_state_dict"].pop('audio_branch.init_stage.conv1.weight') # 如果不pop掉这些key，会报错：size mismatch for ....
+        # # checkpoint["model_state_dict"].pop('visual_branch.init_stage.conv1.weight')
+        # checkpoint["model_state_dict"].pop('linear.weight')
+        # checkpoint["model_state_dict"].pop('linear.bias')
+        # self.model.load_state_dict(checkpoint["model_state_dict"], strict=False)
+        # wandb.config.update({"resume": checkpoint_path}, allow_val_change=True)
+        # wandb.config.note = "use checkpoint:{}".format(checkpoint_path)
+        
         if cfg.RESUME:
             self.model, self.optimizer, epoch = resume_training(cfg.RESUME, self.model, self.optimizer)
             cfg.START_EPOCH = epoch
@@ -103,8 +118,16 @@ class ExpRunner:
             if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
                 self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
             self.scheduler.step() # 每个epoch都进行学习率调整
-
-            if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  if epoch % 1 == 0 即每个epoch都进行验证
+            
+            # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
+            
+            # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
+            if (epoch+1) in [4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]:
+                print('current epoch:', epoch+1, ', save model with specific epoch')
+                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            
+            if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
+                print('current epoch:', epoch+1, ', save model with best valid acc')
                 save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 self.collector.update_best_epoch(epoch)
             if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch
@@ -114,7 +137,7 @@ class ExpRunner:
         # cfg = self.cfg.TRAIN
         # self.collector.draw_epo_info(log_dir=self.log_dir)
         self.logger.info(
-            "{} done, best acc: {} in :{}".format(
+            "{} done, best acc: {} in epoch:{}".format(
                 datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
                 self.collector.best_valid_acc,
                 self.collector.best_epoch,
@@ -158,10 +181,12 @@ class ExpRunner:
         if cfg.COMPUTE_PCC: # "COMPUTE_PCC":true 计算皮尔逊相关系数，即线性相关系数，值域[-1,1]，1表示完全正相关，-1表示完全负相关，0表示不相关，0.8表示强相关
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label, self.cfg.DATA_LOADER.DATASET_NAME)
             self.logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
+            wandb.log({"test_pcc":pcc_mean})
 
         if cfg.COMPUTE_CCC: # "COMPUTE_CCC":true 计算皮尔逊相关系数，即线性相关系数，值域[-1,1]，1表示完全正相关，-1表示完全负相关，0表示不相关，0.8表示强相关
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label, self.cfg.DATA_LOADER.DATASET_NAME)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
+            wandb.log({"test_ccc":ccc_mean})
 
         if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":""
             os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
@@ -170,18 +195,18 @@ class ExpRunner:
         wandb.log({
             "test_mse": mse[1],         # 最终测试得到的mse均值，评价模型效果以这个为准
             "test_acc":ocean_acc_avg,   # 最终测试得到的acc均值，评价模型效果以这个为准
-            "test_pcc":pcc_mean,        # 最终测试得到的pcc均值，评价模型效果以这个为准
-            "test_ccc":ccc_mean,        # 最终测试得到的ccc均值，评价模型效果以这个为准
+            # "test_pcc":pcc_mean,        # 最终测试得到的pcc均值，评价模型效果以这个为准
+            # "test_ccc":ccc_mean,        # 最终测试得到的ccc均值，评价模型效果以这个为准
             })
         
         return
 
     def run(self):
-        print('========================start training.. ========================')
+        print('================================== start training... ==================================')
         self.train()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - train end ======================')
-        print('========================start test... ===========================')
+        print('================================== start test...     ==================================')
         self.test()
+        print('================================== done test ...     ==================================')
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
 
     def log_cfg_info(self):

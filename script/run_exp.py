@@ -30,6 +30,8 @@ def setup():
         cfg.TEST.TEST_ONLY = True
     if args.bs:
         cfg.DATA_LOADER.TRAIN_BATCH_SIZE = int(args.bs)
+    if args.sample_size:
+        cfg.DATA.SAMPLE_SIZE = args.sample_size
 
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)

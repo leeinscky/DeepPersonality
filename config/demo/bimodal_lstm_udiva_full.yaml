@@ -39,11 +39,11 @@ DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "standard_frame_transform"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 8
+  VALID_BATCH_SIZE: 3
   NUM_WORKERS: 1
   DATASET_NAME: "UDIVA"
 MODEL:
-  NAME: "audiovisual_resnet_lstm_udiva"
+  NAME: "get_img_modal_lstm_model_udiva"
 LOSS:
   NAME: "mean_square_error"
 SOLVER:
@@ -59,3 +59,6 @@ TRAIN:
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
   BIMODAL_OPTION: 1
   LOG_INTERVAL: 1
+TEST:
+  COMPUTE_PCC: False
+  COMPUTE_CCC: False

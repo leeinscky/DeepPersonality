@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt # plt 用于显示图片
 import matplotlib.image as mpimg # mpimg 用于读取图片
 import wandb
 
+# '''
 class AudioVisualDataUdiva(VideoDataUdiva):
 
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
@@ -230,23 +231,46 @@ class AudioVisualDataUdiva(VideoDataUdiva):
         #     wav_fill[..., :wav_tmp.shape[-1]] = wav_tmp
         #     wav_tmp = wav_fill
         # return wav_tmp
-
+# '''
 
 class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=48):
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __init__')
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None):
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         self.frame_idx = 0
         wandb.config.sample_size = sample_size
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- class AudioVisualDataUdiva(VideoDataUdiva) 结束执行 __init__')
+        self.cfg = config
+        # print('[Ddeeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-AudioVisualLstmDataUdiva self.cfg:', self.cfg, ', config:', config)
+        self.img_dtype = None # TODO 应该设置为np.float32？
 
     def __getitem__(self, idx): # idx means the index of session in the directory
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
+        sample = {} # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
+        # cfg.TRAIN.BIMODAL_OPTION == 1 表示仅仅使用视觉数据，cfg.TRAIN.BIMODAL_OPTION == 2 表示仅仅使用语音数据，cfg.TRAIN.BIMODAL_OPTION == 3 表示同时使用视觉和语音数据
+        if self.cfg.TRAIN.BIMODAL_OPTION == 1:
+            img = self.get_visual_input(idx)
+            sample['image'] = img
+        elif self.cfg.TRAIN.BIMODAL_OPTION == 2:
+            wav = self.get_audio_input(idx)
+            sample['audio'] = wav
+        elif self.cfg.TRAIN.BIMODAL_OPTION == 3:
+            img = self.get_visual_input(idx)
+            wav = self.get_audio_input(idx)
+            sample['image'] = img
+            sample['audio'] = wav
+
+        ### get label data ###
         label = self.get_ocean_label(idx)  # label是True或者False, 代表关系Known是True或者False
+        label = torch.as_tensor(label, dtype=self.img_dtype)
+        sample['label'] = label
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(label)=', type(label), 'label=', label, ' label.shape=', label.shape) # type(label)= <class 'torch.Tensor'> label= tensor([0.5111, 0.4563, 0.4019, 0.3626, 0.4167])
+
+        return sample # sample是一个dict对象, 例如：{'image': tensor([[[ 0.0000,  0.0000,  0.0000,  ...,  0.0000,  0.0000,  0.0000],
+
+    def get_visual_input(self, idx):
+        ### get image data ###
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
         fc1_img_tensor_list, fc2_img_tensor_list = self.get_image_data(idx)
-        fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象, 代表该video的一帧音频, 例如：代表该video的一帧音频是50176维的, 也就是说该video的一帧音频是50176x1x1的, 且是float32类型的, 且是三维的
         img_tensor_list = []
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
         for i in range(len(fc1_img_tensor_list)):
@@ -256,23 +280,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , img.shape = ', img.shape) # img.shape =  torch.Size([6, 224, 224])
             img_tensor_list.append(img)
         img = torch.stack(img_tensor_list) # 将img_tensor_list中的tensor拼接在一起, 拼接后的维度为(16,6,224,224)，即将16个6x224x224的tensor拼接在一起
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list), ', img.shape = ', img.shape) # len(img_tensor_list) =  16 , img.shape =  torch.Size([16, 6, 224, 224])
-
-        fc1_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
-        fc2_wav = torch.as_tensor(fc1_wav, dtype=img.dtype) # shape=(1,1,50176)
-        # 将两个tensor拼接在一起 concatenate the fc1_wav and fc2_wav, 拼接后的维度为(2,1,50176)，即将两个(1,1,50176)的tensor拼接在一起
-        wav = torch.cat((fc1_wav, fc2_wav), 0) # shape=(2,1,50176) 
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 wav.shape=', wav.shape, ', fc1_wav.shape=', fc1_wav.shape, ', fc2_wav.shape=', fc2_wav.shape) # wav.shape= torch.Size([2, 1, 256000]) fc1_wav.shape= torch.Size([1, 1, 256000]) fc2_wav.shape= torch.Size([1, 1, 256000])
-
-        label = torch.as_tensor(label, dtype=img.dtype)
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(label)=', type(label), 'label=', label, ' label.shape=', label.shape) # type(label)= <class 'torch.Tensor'> label= tensor([0.5111, 0.4563, 0.4019, 0.3626, 0.4167])
-
-        # 返回的sample原始逻辑（也适用于将2个视频的帧的tensor拼接后的逻辑）
-        sample = {"image": img, "audio": wav, "label": label} # 非udiva的shape: img.shape()=torch.Size([3, 224, 224]) wav.shape()=torch.Size([1, 1, 50176]) label.shape()=torch.Size([5])  # udiva的shape: img.shape()= torch.Size([6, 224, 224]) wav.shape()= torch.Size([1, 2, 50176]) label.shape()= torch.Size([1])
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ 函数返回的结果中 , len(img_tensor_list)=', len(img_tensor_list), 'wav.shape()=', wav.shape, 'label.shape()=', label.shape) # 
-        # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
-        
-        return sample # sample是一个dict对象, 例如：{'image': tensor([[[ 0.0000,  0.0000,  0.0000,  ...,  0.0000,  0.0000,  0.0000],
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list), ', img.shape = ', img.shape, ', img.dtype=', img.dtype)  # len(img_tensor_list) =  16 , img.shape =  torch.Size([sample_size=16, 3*2=6, 224, 224]) img.dtype= torch.float32
+        self.img_dtype = img.dtype
+        return img
 
     def get_image_data(self, idx):
         # print('[ deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py ] - get_image_data 函数开始执行')
@@ -280,6 +290,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 get_image_data')
         img_dir_path = self.img_dir_ls[idx]
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- img_dir_path=', img_dir_path)
+        # img_dir_path = 'datasets/udiva_full/train/recordings/talk_recordings_train_img/025044' # 手动指定img_dir_path测试
         # img_dir_path 是session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
         # 对session路径下的FC1_A 文件夹和FC2_A文件夹分别进行提取帧
         fc1_img_dir_path, fc2_img_dir_path = '', ''
@@ -294,14 +305,23 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
         # 打印结果: get_image_data fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
-        ########### get fc1 image - start ###########
         fc1_img_paths = glob.glob(fc1_img_dir_path + "/*.jpg") # fc1_img_paths是FC1_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc1_img_paths): 7228
+        fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg") # fc2_img_paths是FC2_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc2_img_paths): 7228
+        # print('[audio_visual_data_udiva.py]- get_image_data, len(fc1_img_paths):', len(fc1_img_paths), 'len(fc2_img_paths):', len(fc2_img_paths))
+        ########### get fc1 image - start ###########
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
         # 将fc1_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
         fc1_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, after sort, fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
+        
+        # 由于 fc1_img_paths 和 fc2_img_paths 里的帧个数有时候不完全一样(因为只提取人脸，视频里并非每一帧都能检测到完整的人脸)，所以这里要取两者中较小的那个值
+        smaller_len = min(len(fc1_img_paths), len(fc2_img_paths))
+        # 如果 self.sample_size 比 smaller_len还大，那么就把 self.sample_size 设置为 smaller_len，即取这个session里的所有帧作为输入
+        if self.sample_size > smaller_len:
+            self.sample_size = smaller_len
         # 在0，len(fc1_img_paths)-sample_size 之间，生成一个随机数frame_idx，表示索引为frame_idx的图片帧
-        self.frame_idx = random.randint(0, (len(fc1_img_paths) - self.sample_size)) # 如果一共16帧,索引值候选范围:从index=0到15, 共16个, sample_size=4, 那么frame_index=随机数，且取值范围是[0,12], 12=16-4
+        # print('test smaller_len:', smaller_len, 'self.sample_size:', self.sample_size)
+        self.frame_idx = random.randint(0, (smaller_len - self.sample_size)) # 如果一共16帧,索引值候选范围:从index=0到15, 共16个, sample_size=4, 那么frame_index=随机数，且取值范围是[0,12], 12=16-4
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, self.frame_idx:', self.frame_idx, ' img_dir_path=', img_dir_path)
         # 在 fc1_img_paths 取出从frame_idx开始的sample_size个图片帧
         sample_fc1_frames = fc1_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片，包含self.frame_idx，不包含self.frame_idx+sample_size，左闭右开
@@ -324,7 +344,6 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         ########### get fc1 image - done ###########
         
         ########### get fc2 image - start###########
-        fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg") # fc2_img_paths是FC2_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc2_img_paths): 7228
         # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
         # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
         fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
@@ -347,10 +366,19 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 fc2_img_tensor = self.transform(fc2_img)
             # 将图片tensor添加到fc2_imgs中
             fc2_img_tensor_list.append(fc2_img_tensor)
-        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data, fc2_img_tensor_list:', fc2_img_tensor_list, 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list))
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]- get_image_data len(fc1_img_tensor_list):', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list))
         ########### get fc2 image - done ###########
         
         return fc1_img_tensor_list, fc2_img_tensor_list
+
+    def get_audio_input(self, idx):
+        ### get audio data ###
+        fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象
+        fc1_wav = torch.as_tensor(fc1_wav, dtype=self.img_dtype) # shape=(1,1,50176)
+        fc2_wav = torch.as_tensor(fc1_wav, dtype=self.img_dtype) # shape=(1,1,50176)
+        wav = torch.cat((fc1_wav, fc2_wav), 0) # shape=(2,1,50176)  # 将两个tensor拼接在一起 concatenate the fc1_wav and fc2_wav, 拼接后的维度为(2,1,50176)，即将两个(1,1,50176)的tensor拼接在一起
+        # print('[deeppersonality/dpcv/data/datasets/audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 wav.shape=', wav.shape, ', fc1_wav.shape=', fc1_wav.shape, ', fc2_wav.shape=', fc2_wav.shape) # wav.shape= torch.Size([2, 1, 256000]) fc1_wav.shape= torch.Size([1, 1, 256000]) fc2_wav.shape= torch.Size([1, 1, 256000])
+        return wav
 
     def get_wave_data(self, idx):
         # get wave data, return numpy.ndarray object, for example: numpy.ndarray object, shape=(1, 1, 128), means the wave data is 1x1x128, 音频数据是1x1x128，1代表1个声道，1代表1个采样点，128代表128个采样点，也就是说音频数据是128个采样点，每个采样点是1个声道，每个声道是1个采样点。
@@ -589,6 +617,7 @@ def bimodal_resnet_data_loader_udiva(cfg, mode):
     return data_loader
 
  """
+
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
@@ -621,7 +650,9 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
             train_img_data, 
             train_aud_data, 
             cfg.DATA.TRAIN_LABEL_DATA,
-            transforms
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
         )
         batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
     elif mode == "valid":
@@ -646,7 +677,9 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
             val_img_data,
             val_aud_data,
             cfg.DATA.VALID_LABEL_DATA, # 'VALID_LABEL_DATA': 'ChaLearn2016_tiny/annotation/annotation_validation.pkl',
-            transforms
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
     elif mode == "full_test":
@@ -671,7 +704,7 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
             test_img_data,
             test_aud_data,
             cfg.DATA.TEST_LABEL_DATA, # 'TEST_LABEL_DATA': 'ChaLearn2016_tiny/annotation/annotation_test.pkl',
-            transforms
+            transforms,
         )
     else:
         test_img_data = [
@@ -694,9 +727,12 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
             test_img_data,
             test_aud_data,
             cfg.DATA.TEST_LABEL_DATA,
-            transforms
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+    # print('[audio_visual_data_udiva.py] batch_size: ', batch_size, ' mode: ', mode)
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,

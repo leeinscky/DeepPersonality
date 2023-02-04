@@ -46,7 +46,7 @@ class TemporalData(VideoData):
         imgs = sorted(imgs, key=lambda x: int(Path(x).stem[5:]))
         if len(imgs) > 10:
             separate = np.linspace(0, len(imgs) - 1, 7, endpoint=True, dtype=np.int16)
-            selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)]
+            selected = [random.randint(separate[idx], separate[idx + 1]) for idx in range(6)] # selected 一共有6个，因为separate有7个，同时separate的最后一个是len(imgs)-1，所以separate的最后一个不用取，所以range(6)
             img_array_ls = []
             for idx in selected:
                 img_pt = imgs[idx]

@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:4
 #! How much wallclock time will be required?
-#SBATCH --time=12:00:00
+#SBATCH --time=2:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -88,7 +88,7 @@ echo "> Python version : $(which python)"
 
 echo "==================== Run program ===================="
 cd /home/zl525/code/DeepPersonality/leenote/
-sh main_slurm.sh
+sh main_slurm_gpu.sh
 
 ###############################################################
 ### You should not have to change anything below this line ####

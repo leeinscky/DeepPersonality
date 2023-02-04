@@ -20,6 +20,8 @@ __C.DATA = CfgNode()
 __C.DATA.ROOT = "datasets"
 __C.DATA.TYPE = "frame"
 __C.DATA.SESSION = "talk"
+# number of frames to sample from a video for each iteration
+__C.DATA.SAMPLE_SIZE = 16
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"
@@ -120,6 +122,7 @@ __C.TRAIN.RESUME = ""
 __C.TRAIN.LOG_INTERVAL = 10
 __C.TRAIN.VALID_INTERVAL = 1
 __C.TRAIN.OUTPUT_DIR = "results"
+__C.TRAIN.BIMODAL_OPTION = 1 # 1: image only, 2: audio only, 3: image + audio
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False
