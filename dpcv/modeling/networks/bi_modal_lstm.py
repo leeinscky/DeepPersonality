@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 from .build import NETWORK_REGISTRY
-
+import wandb
 
 class BiModelLSTM(nn.Module):
     def __init__(self, init_weights=True, true_personality=False):
@@ -163,9 +163,41 @@ class ImgLSTMUdiva(nn.Module):
         
         x = x.permute(1, 0, 2)  
         # print('[bi_modal_lstm.py] 6-x.shape', x.shape) # torch.Size([bs, sample_size, 2])
-        
-        y = torch.sigmoid(x).mean(dim=1)
+        # print('未激活前的输出x:', x) # x是得分，得分越大，表示越可能是该类别，得分越小，表示越不可能是该类别 正数表示该类别的概率越大，负数表示该类别的概率越小
+
+        # use sigmoid as activation function
+        # y = torch.sigmoid(x).mean(dim=1) 
+        # wandb.config.activation='sigmoid'
         # print('[bi_modal_lstm.py] 7-y.shape', y.shape) # torch.Size([bs, 2])
+        
+        # use softmax as activation function
+        # y_temp = torch.softmax(x, dim=2)
+        # print('y_temp:', y_temp, ' y_temp.shape', y_temp.shape)
+        y = torch.softmax(x, dim=2).mean(dim=1) # shape of y: [bs, 2]
+        wandb.config.activation='softmax'
+        # print('y:', y, ' y.shape', y.shape)
+        
+        '''
+        print('----Sigmoid函数----------') # sigmoid 作为最后一层输出的话，那就不能吧最后一层的输出看作成一个分布了，因为加起来不为 1 https://blog.csdn.net/qq_38765642/article/details/109851437
+        print('torch.sigmoid(x):', torch.sigmoid(x))
+        print('torch.sigmoid(x).mean(dim=1):', y)
+        
+        # 测试1: 将激活函数换为softmax函数
+        y_soft = torch.softmax(x, dim=2).mean(dim=1)
+        
+        # 测试2: 将激活函数换为relu函数
+        y_relu = torch.relu(x).mean(dim=1) 
+        
+        # 测试3: 将激活函数换为tanh函数
+        y_tanh = torch.tanh(x).mean(dim=1)
+        
+        print('----Softmax: 也是一种sigmoid函数------')
+        print('y_soft:', y_soft)
+        print('----Relu: f(x)=max(0,x)-------------')
+        print('y_relu:', y_relu)
+        print('----Tanh: f(x)=tanh(x)-------------')
+        print('y_tanh:', y_tanh)
+        '''
         
         return y
 

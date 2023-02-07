@@ -15,3 +15,8 @@ def l1_loss():
 @LOSS_FUNC_REGISTRY.register()
 def smooth_l1_loss():
     return nn.SmoothL1Loss()
+
+@LOSS_FUNC_REGISTRY.register()
+def binary_cross_entropy():
+    print('Using BCELoss')
+    return nn.BCELoss()

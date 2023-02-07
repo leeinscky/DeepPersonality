@@ -3,12 +3,13 @@
 
 cd /home/zl525/code/DeepPersonality/
 
+# 注意：CPU机器上，如果sample_size=超过180，那么就不能同时跑多个实验，即当sample_size超过180时，一个CPU机器上只能跑一个实验
 
 #### ===================== new: bimodal_lstm_udiva_full.yaml ===================== ####
-sample_size=200
-epoch=50
-batch_size=16
-learning_rate=0.0001
+sample_size=80
+epoch=5000
+batch_size=1
+learning_rate=0.001
 cfg_file=./config/demo/bimodal_lstm_udiva_full.yaml
 
 nohup python3 ./script/run_exp.py --cfg_file $cfg_file \

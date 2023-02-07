@@ -348,7 +348,66 @@ class BiModalTrainerUdiva(object):
             # fc2_output = model(*fc2_input)
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  fc1_output=', fc1_output, '  fc2_output', fc2_output, '  labels.size()=', labels.size())
             
+            # print('[dpcv/engine/bi_modal_trainer.py] print outputs, labels, outputs.size(), labels.size()')
+            # print(outputs)
+            # print('-----')
+            # print(labels)
+            # print('outputs.size()=', outputs.size(), ', labels.size()=', labels.size()) # outputs.size()= torch.Size([batch_size, 2]) , labels.size()= torch.Size([batch_size, 2])
+            
             loss = loss_f(outputs.cpu(), labels.cpu()) # loss_f = nn.MSELoss()  即 mean_square_error，即均方误差，即预测值与真实值的差的平方的均值，即 (y_pred - y_true)^2，其中y_pred是预测值，y_true是真实值
+            
+            # print('loss=', loss)
+            
+            # batch_size = 3时
+            # tensor([[0.4946, 0.5024],
+            #         [0.4945, 0.5026],
+            #         [0.4944, 0.5025]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[0., 1.],
+            #         [0., 1.],
+            #         [1., 0.]])
+            # loss= tensor(0.2487, grad_fn=<MseLossBackward0>)
+            
+            
+            # tensor([[0.2553, 0.7423],
+            #         [0.2523, 0.7545],
+            #         [0.2578, 0.7498]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[0., 1.],
+            #         [1., 0.],
+            #         [0., 1.]])
+            # loss= tensor(0.2315, grad_fn=<MseLossBackward0>) 
+            
+            # batch_size = 1时
+            # tensor([[0.5033, 0.4948]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[0., 1.]])
+            # loss= tensor(0.2542, grad_fn=<MseLossBackward0>) 计算过程: 0.5033-0=0.5033, 0.4948-1=-0.5052, 0.5033^2=0.25331089, -0.5052^2=0.25522704, 0.25331089+0.25522704=0.50853793, 0.50853793/2=0.254268965
+                        
+            # tensor([[0.3009, 0.6966]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[1., 0.]])
+            # loss= tensor(0.4870, grad_fn=<MseLossBackward0>)
+            
+            # 使用BCELoss时，batch_size = 3时
+            # tensor([[0.5133, 0.4925],
+            #         [0.5132, 0.4929],
+            #         [0.5132, 0.4926]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[0., 1.],
+            #         [1., 0.],
+            #         [1., 0.]])
+            # outputs.size()= torch.Size([3, 2]) , labels.size()= torch.Size([3, 2])
+            # loss= tensor(0.6867, grad_fn=<BinaryCrossEntropyBackward0>)
+            
+            # 使用BCELoss时，batch_size = 1时
+            # tensor([[0.4929, 0.4921]], grad_fn=<MeanBackward1>)
+            # -----
+            # tensor([[0., 1.]])
+            # outputs.size()= torch.Size([1, 2]) , labels.size()= torch.Size([1, 2])
+            # loss= tensor(0.6941, grad_fn=<BinaryCrossEntropyBackward0>) # 计算过程: 0.4929*log(0.4929)+(1-0.4929)*log(1-0.4929)=0.6941
+            
+            
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
             self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
             # print('loss is ready, start to backward...')
@@ -362,7 +421,58 @@ class BiModalTrainerUdiva(object):
             loss_list.append(loss.item())
             # acc_avg的公式里用1来减去是因为 we use 1 - |y_pred - y_true| as the accuracy metric, beacause we want to penalize the model more when the prediction is far from the ground truth.
             acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0) # torch.abs 计算 tensor 的每个元素的绝对值, torch.abs(outputs.cpu() - labels.cpu())是预测值与真实值的差的绝对值, 即预测值与真实值的差的绝对值的平均值即为acc_avg, 即acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean(), clip(min=0)是将acc_avg的最小值限制在0以上
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg=', acc_avg)
+            # print('outputs:', outputs.cpu().detach().numpy(), 'labels:', labels.cpu().detach().numpy(), 'acc_avg:', acc_avg.detach().numpy(), ', abs(outputs-labels):', torch.abs(outputs.cpu() - labels.cpu()).detach().numpy(), ' 1-abs:', (1 - torch.abs(outputs.cpu() - labels.cpu())).detach().numpy())
+            '''
+            acc_avg计算示例(batch_size=1):
+                1. outputs: [[0.4764987  0.52350134]] labels: [[1. 0.]] acc_avg: 0.4764987,
+                    abs(outputs-labels): [[0.5235013  0.52350134]]  1-abs: [[0.47649872 0.47649866]], 平均值:0.47649872+0.47649866=0.9529974/2=0.4764987
+                2. outputs: [[0.73084384 0.26915607]] labels: [[0. 1.]] acc_avg: 0.26915613,
+                    abs(outputs-labels): [[0.73084384 0.7308439 ]]  1-abs: [[0.26915616 0.2691561 ]], 平均值:0.26915616+0.2691561=0.53831226/2=0.26915613
+                3. outputs: [[0.22885753 0.7711425 ]] labels: [[0. 1.]] acc_avg: 0.7711425,
+                    abs(outputs-labels): [[0.22885753 0.22885752]]  1-abs: [[0.7711425 0.7711425]]
+            
+            acc_avg计算示例(batch_size=2):
+                1. 
+                outputs: [[0.31670436 0.68329555]
+                          [0.3105736  0.6894264 ]]
+                labels: [[0. 1.] [0. 1.]] 
+                acc_avg: 0.686361 , 
+                abs(outputs-labels): [[0.31670436 0.31670445]
+                                      [0.3105736  0.31057358]]  
+                1-abs:  [[0.6832956  0.68329555]
+                        [0.6894264  0.6894264 ]] # acc平均值: 0.6832956+0.68329555+0.6894264+0.6894264/4=2.74544395/4=0.6863609875
+                2. 
+                outputs: [[0.29868743 0.70131254]
+                        [0.275699   0.72430104]] 
+                labels: [[1. 0.]
+                        [1. 0.]] 
+                acc_avg: 0.28719324 , 
+                abs(outputs-labels): [[0.70131254 0.70131254]
+                                      [0.724301   0.72430104]]  
+                1-abs: [[0.29868746 0.29868746]
+                        [0.27569902 0.27569896]] # acc平均值: 0.29868746+0.29868746+0.27569902+0.27569896/4=1.1487729/4=0.287193225
+
+                3. 
+                outputs: [[0.39302874 0.60697126]
+                        [0.34609628 0.6539037 ]] 
+                labels: [[1. 0.]
+                        [0. 1.]] 
+                acc_avg: 0.5234662 , 
+                abs(outputs-labels): [[0.60697126 0.60697126]
+                                      [0.34609628 0.34609628]]  
+                1-abs: [[0.39302874 0.39302874]
+                        [0.6539037  0.6539037 ]] # acc平均值: 0.39302874+0.39302874+0.6539037+0.6539037/4=2.09386488/4=0.52346622
+            '''
+
+            
+            # # 修改acc_avg的计算逻辑：outputs的第一维度是batch size，对于每个batch size，其shape为[2], 2是因为有2个输出. 如果第一个输出大于第二个输出，则预测的tensor为[1, 0], 如果第二个输出大于第一个输出，则预测的tensor为[0, 1]。如果预测的tensor与真实的tensor相等，则预测正确，否则预测错误
+            # acc_avg = 0
+            # for j in range(outputs.size()[0]):
+            #     if torch.argmax(outputs[j]) == torch.argmax(labels[j]): # torch.argmax()是返回tensor中最大值的索引
+            #         acc_avg += 1
+            # acc_avg = acc_avg / outputs.size()[0]
+                        
+            
             acc_avg = acc_avg.detach().numpy() # detach()是将acc_avg从计算图中分离出来后，再转换成numpy类型的float类型，即tensor转换成float类型
             # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, ' 经过acc_avg.detach().numpy()后, acc_avg=', acc_avg)
             acc_avg_list.append(acc_avg)

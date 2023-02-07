@@ -4,9 +4,9 @@
 
 cd /home/zl525/code/DeepPersonality/
 
-sample_size=4
+sample_size=3
 epoch=1
-batch_size=3
+batch_size=2
 learning_rate=0.001
 
 python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_lstm_udiva_full.yaml \

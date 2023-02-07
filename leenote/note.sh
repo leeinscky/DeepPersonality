@@ -25,7 +25,7 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
     cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
 
     # 运行记录：
-    13879091
+    Submitted batch job 13891140
 
 ####### 提交任务到HPC上 在GPU上跑 #######
     # 参考/home/zl525/code/DeepPersonality/leenote/slurm_submit_deep 文件的最后一行
@@ -34,6 +34,63 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
     # 运行记录：
     Submitted batch job 13703460  failed torch版本和A100 GPU不兼容
     Submitted batch job 13855836
+
+####### 调参总结 #######
+参考:
+    train loss与test loss结果分析 原文链接：https://blog.csdn.net/ytusdc/article/details/107738749
+    train loss 不断下降，test loss不断下降，说明网络仍在学习;
+    train loss 不断下降，test loss趋于不变，说明网络过拟合;
+    train loss 趋于不变，test loss不断下降，说明数据集100%有问题;
+    train loss 趋于不变，test loss趋于不变，说明学习遇到瓶颈，需要减小学习率或批量数目;
+    train loss 不断上升，test loss不断上升，说明网络结构设计不当，训练超参数设置不当，数据集经过清洗等问题。
+
+    验证集loss不断上升，训练集loss一直下降：
+        - 一般情况下，训练集loss下降，测试集loss上升是因为过拟合问题。20个epoch就出现过拟合，应该是训练样本严重不足或者训练样本相似性过高，建议找一些比较大的开源数据集来跑。
+        - 解决办法：打乱数据，增加数据，数据增广，加正则项等等都是方法 https://www.zhihu.com/question/399992175/answer/1271494711
+
+    为什么会发生train loss上升？
+        - 数据有坏点 起始学习率 batchsize太小 https://www.zhihu.com/question/396221084/answer/1236081752
+
+    batch size
+        - 过小，会导致模型损失波动大，难以收敛，过大时，模型前期由于梯度的平均，导致收敛速度过慢。来源：loss下降很慢……，训练曲线如图，有人帮忙分析一下嘛？卡这很长时间了、非常感谢各位 ? - 搬砖人的回答 - 知乎 https://www.zhihu.com/question/472162326/answer/2308198711
+
+
+sample_size=50 bs=8 lr=0.5  val loss 下降收敛了 val acc 上升趋势 auspicious-festival-241  且val acc准确率很高
+sample_size=50 bs=8 lr=0.2  train loss 震荡 train acc 震荡 val loss 下降收敛了 val acc 上升趋势 bright-monkey-253
+sample_size=50 bs=8 lr=0.1  val loss 上升 val acc 下降 但是train loss下降趋势不错 fortuitous-cake-240
+
+下一步: 重复 lr=0.1 - 0.5 之间的值，看看哪个效果最好
+
+发现：
+ 根据 dpcv/engine/bi_modal_trainer.py里关于acc的计算逻辑，
+    - 如果batch_size=1，那么acc就是一个样本的平均准确率，从0.2-0.8都有可能，波动大
+    - 如果batch_size=8，那么acc就是8个样本的平均准确率，但是这8个样本中有的样本acc接近1，有的样本acc接近0，所以acc的平均值为0.5，
+ 因此，可以发现，当batch_size越小，acc波动就越大，从0.2-0.8都有可能，当batch_size越大，acc越接近0.5，因为很多极值被平均掉了。
+ 请问，这种准确率的计算方式是否准确？？ batchsize越大越好还是越小越好？？
+
+关于batch size的解释：
+    https://www.zhihu.com/question/32673260/answer/376970624
+    
+    Batch size会影响模型性能，过大或者过小都不合适。
+    1. 是什么？设置过大的批次（batch）大小，可能会对训练时网络的准确性产生负面影响，因为它降低了梯度下降的随机性。
+    2. 怎么做？要在可接受的训练时间内，确定最小的批次大小。一个能合理利用GPU并行性能的批次大小可能不会达到最佳的准确率，
+        因为在有些时候，较大的批次大小可能需要训练更多迭代周期才能达到相同的正确率。在开始时，要大胆地尝试很小的批次大小，如16、8，甚至是1。
+    3. 为什么？较小的批次大小能带来有更多起伏、更随机的权重更新。这有两个积极的作用，一是能帮助训练“跳出之前可能卡住它的局部最小值，
+        二是能让训练在平坦的最小值结束，这通常会带来更好的泛化性能。
+
+    太大的batch size 容易陷入sharp minima，泛化性不好
+    
+    研究表明大的batchsize收敛到sharp minimum，而小的batchsize收敛到flat minimum，后者具有更好的泛化能力。两者的区别就在于变化的趋势，一个快一个慢，
+    如下图，造成这个现象的主要原因是小的batchsize带来的噪声有助于逃离sharp minimum。
+    对此实际上是有两个建议：
+        - 如果增加了学习率，那么batch size最好也跟着增加，这样收敛更稳定。
+        - 尽量使用大的学习率，因为很多研究都表明更大的学习率有利于提高泛化能力。如果真的要衰减，可以尝试其他办法，比如增加batch size，学习率对模型的收敛影响真的很大，慎重调整。
+    作者：初识CV 链接：https://www.zhihu.com/question/32673260/answer/1877223574
+
+    batch_size设的大一些，收敛得快，也就是需要训练的次数少，准确率上升得也很稳定，但是实际使用起来精度不高。
+    batch_size设的小一些，收敛得慢，而且可能准确率来回震荡，所以还要把基础学习速率降低一些；但是实际使用起来精度较高。
+    一般我只尝试batch_size=64或者batch_size=1两种情况。
+    作者：江何 链接：https://www.zhihu.com/question/32673260/answer/238851203
 
 
 # 一些结果相对比较好的保存模型

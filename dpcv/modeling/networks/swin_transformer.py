@@ -14,8 +14,8 @@ import torch.nn as nn
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 from easydict import EasyDict as CN
-from dpcv.modeling.module.weight_init_helper import initialize_weights
-from .build import NETWORK_REGISTRY
+# from dpcv.modeling.module.weight_init_helper import initialize_weights
+# from .build import NETWORK_REGISTRY
 
 def swin_config():
     _C = CN()
@@ -611,6 +611,7 @@ class SwinTransformer(nn.Module):
         return {'relative_position_bias_table'}
 
     def forward_features(self, x):
+        print('x.shape', x.shape)
         x = self.patch_embed(x)
         if self.ape:
             x = x + self.absolute_pos_embed
@@ -666,7 +667,7 @@ def get_swin_transformer_model(cfg=None):
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
-@NETWORK_REGISTRY.register()
+#@NETWORK_REGISTRY.register()
 def swin_transformer_model(cfg=None):
     config = swin_config()
     model = SwinTransformer(
@@ -691,7 +692,7 @@ def swin_transformer_model(cfg=None):
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 
-@NETWORK_REGISTRY.register()
+#@NETWORK_REGISTRY.register()
 def swin_transformer_true_personality(cfg=None):
     config = swin_config()
     model = SwinTransformer(
@@ -718,6 +719,7 @@ def swin_transformer_true_personality(cfg=None):
 
 if __name__ == "__main__":
     model = get_swin_transformer_model()
-    xin = torch.randn(8, 3, 224, 224).cuda()
+    # xin = torch.randn(8, 3, 224, 224).cuda()
+    xin = torch.randn(8, 3, 224, 224)
     y = model(xin)
     print(y)

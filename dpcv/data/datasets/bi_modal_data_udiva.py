@@ -11,18 +11,18 @@ from random import shuffle
 class VideoDataUdiva(Dataset):
     """base class for bi-modal input data"""
     def __init__(self, data_root, img_dir, label_file, audio_dir=None, parse_img_dir=True, parse_aud_dir=False):
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py] - 开始执行 def __init__')
+        # print('[bi_modal_data_udiva.py] - 开始执行 def __init__')
         self.data_root = data_root
         self.img_dir = img_dir
         self.audio_dir = audio_dir
         self.annotation = self.parse_annotation(label_file) # self.annotation是一个字典，包含了五个键值对（5种personality），每个键值对对应一个字典，字典的键是视频名，值是对应的分数
         if parse_img_dir:
             self.img_dir_ls = self.parse_data_dir(img_dir)  # every directory name indeed a video # img_dir_ls是一个列表，包含了所有视频的路径，每个路径是一个字符串，例如'datasets/ChaLearn2016_tiny/train_data/-AmMDnVl4s8.003'
-            # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]__init__函数 self.img_dir_ls: ', self.img_dir_ls) # 打印结果在最下方，img_dir_ls是  self.img_dir_ls:  ['datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129']
+            # print('[bi_modal_data_udiva.py]__init__函数 self.img_dir_ls: ', self.img_dir_ls) # 打印结果在最下方，img_dir_ls是  self.img_dir_ls:  ['datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129']
         # print('=============================================================')
         if parse_aud_dir:
             self.aud_file_ls = self.parse_data_dir(audio_dir)
-            # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]__init__函数 self.aud_file_ls: ', self.aud_file_ls)
+            # print('[bi_modal_data_udiva.py]__init__函数 self.aud_file_ls: ', self.aud_file_ls)
 
     def parse_data_dir(self, data_dir):
         """
@@ -40,7 +40,7 @@ class VideoDataUdiva(Dataset):
         #         print('img_dir_i=', dir_i)
         #         if dir_i.endswith('_img'):
         #             img_data_dir_list.append(dir_i)
-        #     # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 img_dir_list: ', img_data_dir_list)
+        #     # print('[bi_modal_data_udiva.py]parse_data_dir函数 img_dir_list: ', img_data_dir_list)
         #     data_dir = img_data_dir_list
         # elif file_type == 'aud':
         #     # 将data_dir下所有以_aud结尾的文件夹的路径存入aud_data_dir_list
@@ -49,10 +49,10 @@ class VideoDataUdiva(Dataset):
         #         print('aud_dir_i=', dir_i)
         #         if dir_i.endswith('_aud'):
         #             aud_data_dir_list.append(dir_i)
-        #     # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 aud_dir_list: ', aud_data_dir_list)
+        #     # print('[bi_modal_data_udiva.py]parse_data_dir函数 aud_dir_list: ', aud_data_dir_list)
         #     data_dir = aud_data_dir_list
         
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir: ', data_dir) # data_dir:   udiva_tiny/train/recordings
+        # print('[bi_modal_data_udiva.py]parse_data_dir函数 data_dir: ', data_dir) # data_dir:   udiva_tiny/train/recordings
         if isinstance(data_dir, list):
             data_dir_path = []
             for dir_i in data_dir:
@@ -61,8 +61,8 @@ class VideoDataUdiva(Dataset):
         else:
             data_dir_ls = sorted(os.listdir(os.path.join(self.data_root, data_dir))) # data_dir_ls:  ['055125', '055128', '058110', '059134', '128129']
             data_dir_path = [os.path.join(self.data_root, data_dir, item) for item in data_dir_ls] 
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_ls: ', data_dir_ls)
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_data_dir函数 data_dir_path: ', data_dir_path)
+        # print('[bi_modal_data_udiva.py]parse_data_dir函数 data_dir_ls: ', data_dir_ls)
+        # print('[bi_modal_data_udiva.py]parse_data_dir函数 data_dir_path: ', data_dir_path)
         # 修改逻辑前 data_dir_path:  [
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055125', 
             # 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 
@@ -99,26 +99,27 @@ class VideoDataUdiva(Dataset):
             label_path = os.path.join(self.data_root, label_file)
             with open(label_path, "rb") as f:
                 annotation = pickle.load(f, encoding="latin1")
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]parse_annotation函数 - annotation: ', annotation)
+        # print('[bi_modal_data_udiva.py]parse_annotation函数 - annotation: ', annotation)
         return annotation
 
     def get_ocean_label(self, index): 
         # index是一个整数，表示video目录里的第几个video样本，从0开始，这个函数返回的是一个列表，包含了这个视频的所有5个个性标签值
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, index: ', index, ', self.img_dir_ls: ', self.img_dir_ls) # index:  7
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, index: ', index, ', self.img_dir_ls: ', self.img_dir_ls) # index:  7
         session_path = self.img_dir_ls[index] # session_path: 
         session_id = f"{os.path.basename(session_path)}" # session_id:
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_path: ', session_path) # session_path:  
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_id: ', session_id, 'type: ', type(session_id)) #  session_id:  
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation: ', self.annotation, 'type: ', type(self.annotation)) #  self.annotation:  
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_path: ', session_path) # session_path:  
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_id: ', session_id, 'type: ', type(session_id)) #  session_id:  
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation: ', self.annotation, 'type: ', type(self.annotation))
        
         # get the type of self.annotation[session_id]
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation[session_id]: ', self.annotation[session_id], 'type of self.annotation[session_id]: ', type(self.annotation[session_id])) #  self.annotation[session_id]:
-        # conver the type of self.annotation[session_id] to list
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation[session_id]: ', self.annotation[session_id], 'type of self.annotation[session_id]: ', type(self.annotation[session_id]))
+        
+        # convert the type of self.annotation[session_id] to list
         self.annotation[session_id] = list(self.annotation[session_id])
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation[session_id]: ', self.annotation[session_id], 'type of self.annotation[session_id]: ', type(self.annotation[session_id])) #  self.annotation[session_id]:
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation[session_id]: ', self.annotation[session_id], 'type of self.annotation[session_id]: ', type(self.annotation[session_id]))
         
         relation = self.annotation[session_id]
-        # print('[DeepPersonality/dpcv/data/datasets/bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, relation: ', relation)
+        # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, relation: ', relation)
         return relation
 
     def __getitem__(self, index):

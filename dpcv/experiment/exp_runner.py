@@ -121,17 +121,17 @@ class ExpRunner:
             
             # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
             
-            # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
-            if (epoch+1) in [4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100]:
-                print('current epoch:', epoch+1, ', save model with specific epoch')
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            # # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
+            # if (epoch+1) in [40]:
+            #     print('current epoch:', epoch+1, ', save model with specific epoch')
+            #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
             
-            if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
-                print('current epoch:', epoch+1, ', save model with best valid acc')
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
-                self.collector.update_best_epoch(epoch)
-            if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            # if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
+            #     print('current epoch:', epoch+1, ', save model with best valid acc')
+            #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            #     self.collector.update_best_epoch(epoch)
+            # if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch
+            #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
 
     def after_train(self, cfg):
         # cfg = self.cfg.TRAIN

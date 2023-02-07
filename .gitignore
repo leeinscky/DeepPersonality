@@ -6,6 +6,7 @@ wandb/*
 nohup*
 leenote/slurm-*
 leenote/machine.file.*
+leenote/wandb/*
 
 
 # output dir
