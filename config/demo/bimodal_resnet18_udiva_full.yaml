@@ -39,23 +39,23 @@ DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "standard_frame_transform"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 8
+  VALID_BATCH_SIZE: 4
   NUM_WORKERS: 1
   DATASET_NAME: "UDIVA"
 MODEL:
   NAME: "audiovisual_resnet_lstm_udiva"
 LOSS:
-  NAME: "mean_square_error"
+  NAME: "binary_cross_entropy"
 SOLVER:
   NAME: "adam"
   SCHEDULER: "multi_step_scale"
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [4, 10, 15]
+  MILESTONE: [10, 20, 30]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 5
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
-  BIMODAL_OPTION: 1
+  BIMODAL_OPTION: 2
   LOG_INTERVAL: 1

@@ -1,0 +1,3662 @@
+rhel8/default-icl(17):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-compilers/2022.1.0/gcc'
+rhel8/default-icl(18):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-mpi/2021.6.0/intel'
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.13.10 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230215_185000-uj2azvcg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run cherubic-ring-370
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/uj2azvcg
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":16,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":1,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":8,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":4
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"resnet50_3d_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.01,
+        "MILESTONE":[
+            15,
+            20,
+            30,
+            35,
+            38,
+            40,
+            42,
+            44,
+            46,
+            48,
+            50,
+            52,
+            54,
+            56,
+            70,
+            100
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":5000,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/resnet_3d_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+change learning rate form [0.01] to [0.01]
+Training: learning rate:0.01
+Using BCELoss
+================================== start training... ==================================
+Train: Epo[001/5000] Iter[001/014] IterTime:[28.39s] LOSS: 0.7898 ACC:0.4559 ETA:552h:3m:35s 
+Train: Epo[001/5000] Iter[002/014] IterTime:[28.82s] LOSS: 1.5169 ACC:0.8749 ETA:560h:33m:7s 
+Train: Epo[001/5000] Iter[003/014] IterTime:[28.85s] LOSS: 27.2056 ACC:0.6250 ETA:561h:6m:52s 
+Train: Epo[001/5000] Iter[004/014] IterTime:[27.94s] LOSS: 39.4566 ACC:0.3746 ETA:543h:25m:0s 
+Train: Epo[001/5000] Iter[005/014] IterTime:[27.63s] LOSS: 19.9144 ACC:0.2501 ETA:537h:19m:17s 
+Train: Epo[001/5000] Iter[006/014] IterTime:[27.82s] LOSS: 11.2640 ACC:0.5001 ETA:541h:4m:7s 
+Train: Epo[001/5000] Iter[007/014] IterTime:[29.26s] LOSS: 13.8752 ACC:0.6090 ETA:569h:0m:2s 
+Train: Epo[001/5000] Iter[008/014] IterTime:[28.17s] LOSS: 0.4386 ACC:0.8514 ETA:547h:43m:58s 
+Train: Epo[001/5000] Iter[009/014] IterTime:[27.88s] LOSS: 1.7367 ACC:0.6074 ETA:542h:9m:20s 
+Train: Epo[001/5000] Iter[010/014] IterTime:[27.91s] LOSS: 0.4866 ACC:0.6694 ETA:542h:42m:42s 
+Train: Epo[001/5000] Iter[011/014] IterTime:[28.98s] LOSS: 8.8935 ACC:0.5576 ETA:563h:35m:12s 
+Train: Epo[001/5000] Iter[012/014] IterTime:[27.79s] LOSS: 1.7640 ACC:0.4936 ETA:540h:18m:28s 
+Train: Epo[001/5000] Iter[013/014] IterTime:[26.97s] LOSS: 13.7498 ACC:0.4040 ETA:524h:23m:58s 
+Train: Epo[001/5000] Iter[014/014] IterTime:[27.70s] LOSS: 23.0524 ACC:0.2585 ETA:538h:40m:59s 
+tensor([[0.4982, 0.5018],
+        [0.5985, 0.4015],
+        [0.4738, 0.5262],
+        [0.5121, 0.4879],
+        [0.5148, 0.4852],
+        [0.4889, 0.5111],
+        [0.6061, 0.3939],
+        [0.5855, 0.4145]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:0.7898 ***********
+tensor([[2.3183e-04, 9.9977e-01],
+        [2.6067e-04, 9.9974e-01],
+        [7.8790e-06, 9.9999e-01],
+        [2.5904e-04, 9.9974e-01],
+        [7.7580e-09, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [5.6161e-09, 1.0000e+00],
+        [5.3765e-06, 9.9999e-01]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:1.5169 ***********
+tensor([[8.4442e-09, 1.0000e+00],
+        [2.9664e-08, 1.0000e+00],
+        [3.0711e-32, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [3.0999e-08, 1.0000e+00],
+        [3.7131e-08, 1.0000e+00],
+        [1.2720e-08, 1.0000e+00],
+        [1.4199e-20, 1.0000e+00]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:27.2056 ***********
+tensor([[9.7441e-04, 9.9903e-01],
+        [1.6421e-04, 9.9984e-01],
+        [1.7111e-03, 9.9829e-01],
+        [1.6768e-03, 9.9832e-01],
+        [0.0000e+00, 1.0000e+00],
+        [1.1623e-03, 9.9884e-01],
+        [0.0000e+00, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:39.4566 ***********
+Valid: Epoch[001/5000] Train Mean_Acc: 53.80% Valid Mean_Acc:43.75% OCEAN_ACC:[0.4375 0.4375]
+
+Training: learning rate:0.01
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:75.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[002/5000] Iter[001/014] IterTime:[28.16s] LOSS: 15.0037 ACC:0.3766 ETA:547h:33m:12s 
+Train: Epo[002/5000] Iter[002/014] IterTime:[28.39s] LOSS: 2.5334 ACC:0.4882 ETA:552h:3m:20s 
+Train: Epo[002/5000] Iter[003/014] IterTime:[28.80s] LOSS: 4.7824 ACC:0.2784 ETA:560h:4m:48s 
+Train: Epo[002/5000] Iter[004/014] IterTime:[27.54s] LOSS: 15.4800 ACC:0.4033 ETA:535h:26m:15s 
+Train: Epo[002/5000] Iter[005/014] IterTime:[27.47s] LOSS: 17.1097 ACC:0.2312 ETA:534h:2m:32s 
+Train: Epo[002/5000] Iter[006/014] IterTime:[27.05s] LOSS: 2.2041 ACC:0.6349 ETA:525h:56m:5s 
+Train: Epo[002/5000] Iter[007/014] IterTime:[26.92s] LOSS: 16.3612 ACC:0.2942 ETA:523h:20m:11s 
+Train: Epo[002/5000] Iter[008/014] IterTime:[29.10s] LOSS: 2.6187 ACC:0.5027 ETA:565h:44m:54s 
+Train: Epo[002/5000] Iter[009/014] IterTime:[27.56s] LOSS: 10.8646 ACC:0.3763 ETA:535h:49m:53s 
+Train: Epo[002/5000] Iter[010/014] IterTime:[27.11s] LOSS: 13.8951 ACC:0.5083 ETA:527h:1m:37s 
+Train: Epo[002/5000] Iter[011/014] IterTime:[26.92s] LOSS: 0.7920 ACC:0.6578 ETA:523h:25m:55s 
+Train: Epo[002/5000] Iter[012/014] IterTime:[28.73s] LOSS: 13.0787 ACC:0.5195 ETA:558h:35m:47s 
+Train: Epo[002/5000] Iter[013/014] IterTime:[26.99s] LOSS: 7.7664 ACC:0.6525 ETA:524h:46m:21s 
+Train: Epo[002/5000] Iter[014/014] IterTime:[27.18s] LOSS: 15.3902 ACC:0.5002 ETA:528h:28m:53s 
+tensor([[0.9884, 0.0116],
+        [0.9943, 0.0057],
+        [0.9946, 0.0054],
+        [0.9943, 0.0057],
+        [0.9945, 0.0055],
+        [0.9949, 0.0051],
+        [0.0000, 1.0000],
+        [0.9946, 0.0054]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, train loss:15.0037 ***********
+tensor([[7.8780e-05, 9.9992e-01],
+        [9.9381e-01, 6.1917e-03],
+        [0.0000e+00, 1.0000e+00],
+        [9.9345e-01, 6.5500e-03],
+        [8.8644e-01, 1.1356e-01],
+        [9.9345e-01, 6.5502e-03],
+        [9.9334e-01, 6.6623e-03],
+        [9.9337e-01, 6.6330e-03]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:2.5334 ***********
+tensor([[9.9491e-01, 5.0940e-03],
+        [9.9962e-01, 3.7734e-04],
+        [7.7925e-01, 2.2075e-01],
+        [0.0000e+00, 1.0000e+00],
+        [9.9960e-01, 3.9829e-04],
+        [5.8855e-44, 1.0000e+00],
+        [9.9963e-01, 3.6933e-04],
+        [9.9961e-01, 3.8812e-04]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:4.7824 ***********
+tensor([[0.0000e+00, 1.0000e+00],
+        [9.9952e-01, 4.8047e-04],
+        [0.0000e+00, 1.0000e+00],
+        [9.9921e-01, 7.8521e-04],
+        [9.9952e-01, 4.8096e-04],
+        [9.9949e-01, 5.1128e-04],
+        [2.3117e-01, 7.6883e-01],
+        [9.9389e-01, 6.1096e-03]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:15.4800 ***********
+Valid: Epoch[002/5000] Train Mean_Acc: 45.89% Valid Mean_Acc:31.25% OCEAN_ACC:[0.3125 0.3125]
+
+Training: learning rate:0.01
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, val loss:75.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:100.0000 ***********
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[003/5000] Iter[001/014] IterTime:[28.72s] LOSS: 15.4604 ACC:0.5002 ETA:558h:20m:18s 
+Train: Epo[003/5000] Iter[002/014] IterTime:[27.36s] LOSS: 13.5742 ACC:0.7500 ETA:531h:53m:0s 
+Train: Epo[003/5000] Iter[003/014] IterTime:[27.24s] LOSS: 15.4040 ACC:0.6250 ETA:529h:33m:15s 
+Train: Epo[003/5000] Iter[004/014] IterTime:[26.69s] LOSS: 16.5981 ACC:0.6250 ETA:518h:51m:49s 
+Train: Epo[003/5000] Iter[005/014] IterTime:[28.58s] LOSS: 20.4533 ACC:0.7500 ETA:555h:39m:23s 
+Train: Epo[003/5000] Iter[006/014] IterTime:[28.45s] LOSS: 30.4251 ACC:0.6250 ETA:553h:1m:37s 
+Train: Epo[003/5000] Iter[007/014] IterTime:[28.95s] LOSS: 23.3633 ACC:0.6250 ETA:562h:45m:47s 
+Train: Epo[003/5000] Iter[008/014] IterTime:[27.94s] LOSS: 30.0883 ACC:0.5000 ETA:543h:7m:43s 
+Train: Epo[003/5000] Iter[009/014] IterTime:[26.78s] LOSS: 15.0097 ACC:0.7500 ETA:520h:28m:33s 
+Train: Epo[003/5000] Iter[010/014] IterTime:[27.45s] LOSS: 11.0671 ACC:0.6250 ETA:533h:37m:25s 
+Train: Epo[003/5000] Iter[011/014] IterTime:[27.11s] LOSS: 2.5674 ACC:0.2221 ETA:526h:56m:48s 
+Train: Epo[003/5000] Iter[012/014] IterTime:[26.70s] LOSS: 40.6570 ACC:0.3750 ETA:519h:1m:43s 
+Train: Epo[003/5000] Iter[013/014] IterTime:[26.93s] LOSS: 51.2247 ACC:0.3750 ETA:523h:30m:51s 
+Train: Epo[003/5000] Iter[014/014] IterTime:[26.54s] LOSS: 35.9151 ACC:0.6250 ETA:515h:52m:2s 
+tensor([[2.1951e-10, 1.0000e+00],
+        [8.7031e-06, 9.9999e-01],
+        [9.7771e-05, 9.9990e-01],
+        [1.0813e-03, 9.9892e-01],
+        [0.0000e+00, 1.0000e+00],
+        [4.9014e-04, 9.9951e-01],
+        [1.2699e-05, 9.9999e-01],
+        [0.0000e+00, 1.0000e+00]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:15.4604 ***********
+tensor([[9.9915e-08, 1.0000e+00],
+        [4.6410e-12, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [7.9054e-08, 1.0000e+00],
+        [1.1572e-31, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [9.7065e-08, 1.0000e+00],
+        [1.8525e-04, 9.9981e-01]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:13.5742 ***********
+tensor([[5.2792e-06, 9.9999e-01],
+        [8.2081e-06, 9.9999e-01],
+        [5.5281e-06, 9.9999e-01],
+        [3.3846e-41, 1.0000e+00],
+        [5.7350e-06, 9.9999e-01],
+        [1.2137e-05, 9.9999e-01],
+        [1.4784e-05, 9.9999e-01],
+        [0.0000e+00, 1.0000e+00]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, train loss:15.4040 ***********
+tensor([[1.8379e-14, 1.0000e+00],
+        [4.1658e-10, 1.0000e+00],
+        [2.9446e-06, 1.0000e+00],
+        [1.1684e-19, 1.0000e+00],
+        [6.9629e-09, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [0.0000e+00, 1.0000e+00],
+        [5.4641e-10, 1.0000e+00]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:16.5981 ***********
+Valid: Epoch[003/5000] Train Mean_Acc: 56.94% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[004/5000] Iter[001/014] IterTime:[28.21s] LOSS: 62.5000 ACC:0.3750 ETA:548h:19m:10s 
+Train: Epo[004/5000] Iter[002/014] IterTime:[26.70s] LOSS: 75.0000 ACC:0.2500 ETA:518h:56m:50s 
+Train: Epo[004/5000] Iter[003/014] IterTime:[27.07s] LOSS: 62.5000 ACC:0.3750 ETA:526h:12m:27s 
+Train: Epo[004/5000] Iter[004/014] IterTime:[29.08s] LOSS: 37.5000 ACC:0.6250 ETA:565h:14m:54s 
+Train: Epo[004/5000] Iter[005/014] IterTime:[27.18s] LOSS: 37.5000 ACC:0.6250 ETA:528h:16m:25s 
+Train: Epo[004/5000] Iter[006/014] IterTime:[28.08s] LOSS: 75.0000 ACC:0.2500 ETA:545h:44m:35s 
+Train: Epo[004/5000] Iter[007/014] IterTime:[28.76s] LOSS: 50.0000 ACC:0.5000 ETA:558h:59m:47s 
+Train: Epo[004/5000] Iter[008/014] IterTime:[28.26s] LOSS: 75.0000 ACC:0.2500 ETA:549h:12m:46s 
+Train: Epo[004/5000] Iter[009/014] IterTime:[28.62s] LOSS: 62.5000 ACC:0.3750 ETA:556h:11m:7s 
+Train: Epo[004/5000] Iter[010/014] IterTime:[27.71s] LOSS: 75.0000 ACC:0.2500 ETA:538h:36m:50s 
+Train: Epo[004/5000] Iter[011/014] IterTime:[27.06s] LOSS: 50.0000 ACC:0.5000 ETA:525h:49m:40s 
+Train: Epo[004/5000] Iter[012/014] IterTime:[27.17s] LOSS: 62.5000 ACC:0.3750 ETA:527h:56m:32s 
+Train: Epo[004/5000] Iter[013/014] IterTime:[27.99s] LOSS: 50.0000 ACC:0.5000 ETA:544h:0m:20s 
+Train: Epo[004/5000] Iter[014/014] IterTime:[27.16s] LOSS: 75.0000 ACC:0.2500 ETA:527h:48m:51s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:37.5000 ***********
+Valid: Epoch[004/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[005/5000] Iter[001/014] IterTime:[27.80s] LOSS: 75.0000 ACC:0.2500 ETA:540h:11m:28s 
+Train: Epo[005/5000] Iter[002/014] IterTime:[27.04s] LOSS: 25.0000 ACC:0.7500 ETA:525h:32m:44s 
+Train: Epo[005/5000] Iter[003/014] IterTime:[26.38s] LOSS: 100.0000 ACC:0.0000 ETA:512h:42m:8s 
+Train: Epo[005/5000] Iter[004/014] IterTime:[26.69s] LOSS: 62.5000 ACC:0.3750 ETA:518h:42m:14s 
+Train: Epo[005/5000] Iter[005/014] IterTime:[27.01s] LOSS: 87.5000 ACC:0.1250 ETA:524h:53m:41s 
+Train: Epo[005/5000] Iter[006/014] IterTime:[26.80s] LOSS: 62.5000 ACC:0.3750 ETA:520h:48m:3s 
+Train: Epo[005/5000] Iter[007/014] IterTime:[27.00s] LOSS: 37.5000 ACC:0.6250 ETA:524h:34m:7s 
+Train: Epo[005/5000] Iter[008/014] IterTime:[27.13s] LOSS: 62.5000 ACC:0.3750 ETA:527h:4m:34s 
+Train: Epo[005/5000] Iter[009/014] IterTime:[27.15s] LOSS: 62.5000 ACC:0.3750 ETA:527h:36m:56s 
+Train: Epo[005/5000] Iter[010/014] IterTime:[26.45s] LOSS: 62.5000 ACC:0.3750 ETA:513h:51m:58s 
+Train: Epo[005/5000] Iter[011/014] IterTime:[26.44s] LOSS: 62.5000 ACC:0.3750 ETA:513h:47m:34s 
+Train: Epo[005/5000] Iter[012/014] IterTime:[26.14s] LOSS: 50.0000 ACC:0.5000 ETA:507h:53m:10s 
+Train: Epo[005/5000] Iter[013/014] IterTime:[27.30s] LOSS: 75.0000 ACC:0.2500 ETA:530h:25m:26s 
+Train: Epo[005/5000] Iter[014/014] IterTime:[26.53s] LOSS: 50.0000 ACC:0.5000 ETA:515h:28m:7s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, train loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:100.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[005/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[006/5000] Iter[001/014] IterTime:[27.52s] LOSS: 50.0000 ACC:0.5000 ETA:534h:41m:27s 
+Train: Epo[006/5000] Iter[002/014] IterTime:[27.38s] LOSS: 62.5000 ACC:0.3750 ETA:531h:55m:15s 
+Train: Epo[006/5000] Iter[003/014] IterTime:[27.06s] LOSS: 75.0000 ACC:0.2500 ETA:525h:41m:30s 
+Train: Epo[006/5000] Iter[004/014] IterTime:[27.29s] LOSS: 50.0000 ACC:0.5000 ETA:530h:12m:39s 
+Train: Epo[006/5000] Iter[005/014] IterTime:[26.70s] LOSS: 62.5000 ACC:0.3750 ETA:518h:38m:13s 
+Train: Epo[006/5000] Iter[006/014] IterTime:[26.84s] LOSS: 50.0000 ACC:0.5000 ETA:521h:23m:9s 
+Train: Epo[006/5000] Iter[007/014] IterTime:[27.35s] LOSS: 62.5000 ACC:0.3750 ETA:531h:23m:32s 
+Train: Epo[006/5000] Iter[008/014] IterTime:[27.03s] LOSS: 75.0000 ACC:0.2500 ETA:525h:9m:21s 
+Train: Epo[006/5000] Iter[009/014] IterTime:[27.07s] LOSS: 50.0000 ACC:0.5000 ETA:525h:55m:49s 
+Train: Epo[006/5000] Iter[010/014] IterTime:[27.00s] LOSS: 50.0000 ACC:0.5000 ETA:524h:35m:52s 
+Train: Epo[006/5000] Iter[011/014] IterTime:[27.20s] LOSS: 50.0000 ACC:0.5000 ETA:528h:18m:32s 
+Train: Epo[006/5000] Iter[012/014] IterTime:[26.76s] LOSS: 75.0000 ACC:0.2500 ETA:519h:46m:23s 
+Train: Epo[006/5000] Iter[013/014] IterTime:[26.98s] LOSS: 37.5000 ACC:0.6250 ETA:524h:3m:51s 
+Train: Epo[006/5000] Iter[014/014] IterTime:[26.81s] LOSS: 100.0000 ACC:0.0000 ETA:520h:48m:31s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[006/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[007/5000] Iter[001/014] IterTime:[27.65s] LOSS: 75.0000 ACC:0.2500 ETA:537h:6m:20s 
+Train: Epo[007/5000] Iter[002/014] IterTime:[27.01s] LOSS: 62.5000 ACC:0.3750 ETA:524h:40m:36s 
+Train: Epo[007/5000] Iter[003/014] IterTime:[27.71s] LOSS: 50.0000 ACC:0.5000 ETA:538h:18m:48s 
+Train: Epo[007/5000] Iter[004/014] IterTime:[28.72s] LOSS: 75.0000 ACC:0.2500 ETA:557h:56m:17s 
+Train: Epo[007/5000] Iter[005/014] IterTime:[27.74s] LOSS: 62.5000 ACC:0.3750 ETA:538h:49m:27s 
+Train: Epo[007/5000] Iter[006/014] IterTime:[27.74s] LOSS: 75.0000 ACC:0.2500 ETA:538h:44m:24s 
+Train: Epo[007/5000] Iter[007/014] IterTime:[26.83s] LOSS: 62.5000 ACC:0.3750 ETA:521h:7m:34s 
+Train: Epo[007/5000] Iter[008/014] IterTime:[26.92s] LOSS: 50.0000 ACC:0.5000 ETA:522h:50m:51s 
+Train: Epo[007/5000] Iter[009/014] IterTime:[26.50s] LOSS: 75.0000 ACC:0.2500 ETA:514h:44m:45s 
+Train: Epo[007/5000] Iter[010/014] IterTime:[27.21s] LOSS: 62.5000 ACC:0.3750 ETA:528h:27m:52s 
+Train: Epo[007/5000] Iter[011/014] IterTime:[27.05s] LOSS: 62.5000 ACC:0.3750 ETA:525h:26m:29s 
+Train: Epo[007/5000] Iter[012/014] IterTime:[28.80s] LOSS: 75.0000 ACC:0.2500 ETA:559h:19m:24s 
+Train: Epo[007/5000] Iter[013/014] IterTime:[28.65s] LOSS: 50.0000 ACC:0.5000 ETA:556h:24m:27s 
+Train: Epo[007/5000] Iter[014/014] IterTime:[28.45s] LOSS: 37.5000 ACC:0.6250 ETA:552h:30m:14s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:75.0000 ***********
+Valid: Epoch[007/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[008/5000] Iter[001/014] IterTime:[27.84s] LOSS: 62.5000 ACC:0.3750 ETA:540h:44m:7s 
+Train: Epo[008/5000] Iter[002/014] IterTime:[26.74s] LOSS: 50.0000 ACC:0.5000 ETA:519h:19m:59s 
+Train: Epo[008/5000] Iter[003/014] IterTime:[26.24s] LOSS: 62.5000 ACC:0.3750 ETA:509h:30m:39s 
+Train: Epo[008/5000] Iter[004/014] IterTime:[26.88s] LOSS: 50.0000 ACC:0.5000 ETA:522h:2m:6s 
+Train: Epo[008/5000] Iter[005/014] IterTime:[28.70s] LOSS: 62.5000 ACC:0.3750 ETA:557h:23m:47s 
+Train: Epo[008/5000] Iter[006/014] IterTime:[28.17s] LOSS: 75.0000 ACC:0.2500 ETA:547h:3m:0s 
+Train: Epo[008/5000] Iter[007/014] IterTime:[27.67s] LOSS: 50.0000 ACC:0.5000 ETA:537h:21m:29s 
+Train: Epo[008/5000] Iter[008/014] IterTime:[27.39s] LOSS: 75.0000 ACC:0.2500 ETA:531h:57m:23s 
+Train: Epo[008/5000] Iter[009/014] IterTime:[28.16s] LOSS: 75.0000 ACC:0.2500 ETA:546h:47m:43s 
+Train: Epo[008/5000] Iter[010/014] IterTime:[28.02s] LOSS: 50.0000 ACC:0.5000 ETA:544h:8m:22s 
+Train: Epo[008/5000] Iter[011/014] IterTime:[27.95s] LOSS: 50.0000 ACC:0.5000 ETA:542h:49m:55s 
+Train: Epo[008/5000] Iter[012/014] IterTime:[27.76s] LOSS: 75.0000 ACC:0.2500 ETA:539h:4m:52s 
+Train: Epo[008/5000] Iter[013/014] IterTime:[28.54s] LOSS: 62.5000 ACC:0.3750 ETA:554h:13m:9s 
+Train: Epo[008/5000] Iter[014/014] IterTime:[27.39s] LOSS: 62.5000 ACC:0.3750 ETA:531h:49m:19s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[008/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, val loss:50.0000 ***********
+Train: Epo[009/5000] Iter[001/014] IterTime:[29.08s] LOSS: 62.5000 ACC:0.3750 ETA:564h:40m:12s 
+Train: Epo[009/5000] Iter[002/014] IterTime:[28.26s] LOSS: 62.5000 ACC:0.3750 ETA:548h:39m:50s 
+Train: Epo[009/5000] Iter[003/014] IterTime:[28.54s] LOSS: 62.5000 ACC:0.3750 ETA:554h:4m:18s 
+Train: Epo[009/5000] Iter[004/014] IterTime:[28.59s] LOSS: 62.5000 ACC:0.3750 ETA:555h:6m:43s 
+Train: Epo[009/5000] Iter[005/014] IterTime:[28.45s] LOSS: 75.0000 ACC:0.2500 ETA:552h:22m:52s 
+Train: Epo[009/5000] Iter[006/014] IterTime:[27.71s] LOSS: 75.0000 ACC:0.2500 ETA:538h:0m:20s 
+Train: Epo[009/5000] Iter[007/014] IterTime:[27.13s] LOSS: 25.0000 ACC:0.7500 ETA:526h:43m:11s 
+Train: Epo[009/5000] Iter[008/014] IterTime:[27.02s] LOSS: 87.5000 ACC:0.1250 ETA:524h:37m:52s 
+Train: Epo[009/5000] Iter[009/014] IterTime:[26.75s] LOSS: 50.0000 ACC:0.5000 ETA:519h:16m:2s 
+Train: Epo[009/5000] Iter[010/014] IterTime:[26.55s] LOSS: 75.0000 ACC:0.2500 ETA:515h:23m:59s 
+Train: Epo[009/5000] Iter[011/014] IterTime:[26.65s] LOSS: 62.5000 ACC:0.3750 ETA:517h:28m:45s 
+Train: Epo[009/5000] Iter[012/014] IterTime:[26.87s] LOSS: 75.0000 ACC:0.2500 ETA:521h:37m:13s 
+Train: Epo[009/5000] Iter[013/014] IterTime:[26.97s] LOSS: 62.5000 ACC:0.3750 ETA:523h:33m:15s 
+Train: Epo[009/5000] Iter[014/014] IterTime:[26.88s] LOSS: 37.5000 ACC:0.6250 ETA:521h:48m:24s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[009/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[010/5000] Iter[001/014] IterTime:[27.58s] LOSS: 37.5000 ACC:0.6250 ETA:535h:26m:9s 
+Train: Epo[010/5000] Iter[002/014] IterTime:[28.86s] LOSS: 50.0000 ACC:0.5000 ETA:560h:10m:3s 
+Train: Epo[010/5000] Iter[003/014] IterTime:[28.55s] LOSS: 87.5000 ACC:0.1250 ETA:554h:17m:31s 
+Train: Epo[010/5000] Iter[004/014] IterTime:[28.25s] LOSS: 62.5000 ACC:0.3750 ETA:548h:24m:3s 
+Train: Epo[010/5000] Iter[005/014] IterTime:[28.33s] LOSS: 62.5000 ACC:0.3750 ETA:549h:52m:21s 
+Train: Epo[010/5000] Iter[006/014] IterTime:[27.98s] LOSS: 37.5000 ACC:0.6250 ETA:543h:5m:58s 
+Train: Epo[010/5000] Iter[007/014] IterTime:[28.83s] LOSS: 62.5000 ACC:0.3750 ETA:559h:36m:55s 
+Train: Epo[010/5000] Iter[008/014] IterTime:[28.32s] LOSS: 50.0000 ACC:0.5000 ETA:549h:47m:32s 
+Train: Epo[010/5000] Iter[009/014] IterTime:[28.37s] LOSS: 62.5000 ACC:0.3750 ETA:550h:38m:16s 
+Train: Epo[010/5000] Iter[010/014] IterTime:[27.88s] LOSS: 75.0000 ACC:0.2500 ETA:541h:11m:17s 
+Train: Epo[010/5000] Iter[011/014] IterTime:[26.88s] LOSS: 75.0000 ACC:0.2500 ETA:521h:46m:21s 
+Train: Epo[010/5000] Iter[012/014] IterTime:[28.92s] LOSS: 50.0000 ACC:0.5000 ETA:561h:24m:40s 
+Train: Epo[010/5000] Iter[013/014] IterTime:[28.36s] LOSS: 50.0000 ACC:0.5000 ETA:550h:24m:1s 
+Train: Epo[010/5000] Iter[014/014] IterTime:[27.84s] LOSS: 87.5000 ACC:0.1250 ETA:540h:20m:49s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[010/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[011/5000] Iter[001/014] IterTime:[29.65s] LOSS: 75.0000 ACC:0.2500 ETA:575h:31m:55s 
+Train: Epo[011/5000] Iter[002/014] IterTime:[28.12s] LOSS: 25.0000 ACC:0.7500 ETA:545h:49m:40s 
+Train: Epo[011/5000] Iter[003/014] IterTime:[26.66s] LOSS: 75.0000 ACC:0.2500 ETA:517h:30m:59s 
+Train: Epo[011/5000] Iter[004/014] IterTime:[26.73s] LOSS: 50.0000 ACC:0.5000 ETA:518h:50m:13s 
+Train: Epo[011/5000] Iter[005/014] IterTime:[26.95s] LOSS: 62.5000 ACC:0.3750 ETA:523h:0m:21s 
+Train: Epo[011/5000] Iter[006/014] IterTime:[26.99s] LOSS: 75.0000 ACC:0.2500 ETA:523h:47m:50s 
+Train: Epo[011/5000] Iter[007/014] IterTime:[27.35s] LOSS: 87.5000 ACC:0.1250 ETA:530h:47m:57s 
+Train: Epo[011/5000] Iter[008/014] IterTime:[27.12s] LOSS: 50.0000 ACC:0.5000 ETA:526h:25m:30s 
+Train: Epo[011/5000] Iter[009/014] IterTime:[27.27s] LOSS: 37.5000 ACC:0.6250 ETA:529h:8m:57s 
+Train: Epo[011/5000] Iter[010/014] IterTime:[27.13s] LOSS: 62.5000 ACC:0.3750 ETA:526h:35m:19s 
+Train: Epo[011/5000] Iter[011/014] IterTime:[27.12s] LOSS: 50.0000 ACC:0.5000 ETA:526h:13m:3s 
+Train: Epo[011/5000] Iter[012/014] IterTime:[27.03s] LOSS: 62.5000 ACC:0.3750 ETA:524h:29m:52s 
+Train: Epo[011/5000] Iter[013/014] IterTime:[27.32s] LOSS: 50.0000 ACC:0.5000 ETA:530h:5m:12s 
+Train: Epo[011/5000] Iter[014/014] IterTime:[27.51s] LOSS: 87.5000 ACC:0.1250 ETA:533h:45m:56s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, train loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[011/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, val loss:100.0000 ***********
+Train: Epo[012/5000] Iter[001/014] IterTime:[27.36s] LOSS: 37.5000 ACC:0.6250 ETA:530h:59m:48s 
+Train: Epo[012/5000] Iter[002/014] IterTime:[29.03s] LOSS: 62.5000 ACC:0.3750 ETA:563h:24m:48s 
+Train: Epo[012/5000] Iter[003/014] IterTime:[28.85s] LOSS: 75.0000 ACC:0.2500 ETA:559h:45m:9s 
+Train: Epo[012/5000] Iter[004/014] IterTime:[27.92s] LOSS: 75.0000 ACC:0.2500 ETA:541h:43m:52s 
+Train: Epo[012/5000] Iter[005/014] IterTime:[28.21s] LOSS: 62.5000 ACC:0.3750 ETA:547h:20m:57s 
+Train: Epo[012/5000] Iter[006/014] IterTime:[28.52s] LOSS: 87.5000 ACC:0.1250 ETA:553h:28m:0s 
+Train: Epo[012/5000] Iter[007/014] IterTime:[27.24s] LOSS: 50.0000 ACC:0.5000 ETA:528h:38m:13s 
+Train: Epo[012/5000] Iter[008/014] IterTime:[27.44s] LOSS: 50.0000 ACC:0.5000 ETA:532h:27m:8s 
+Train: Epo[012/5000] Iter[009/014] IterTime:[26.62s] LOSS: 50.0000 ACC:0.5000 ETA:516h:31m:5s 
+Train: Epo[012/5000] Iter[010/014] IterTime:[26.90s] LOSS: 75.0000 ACC:0.2500 ETA:521h:54m:43s 
+Train: Epo[012/5000] Iter[011/014] IterTime:[26.70s] LOSS: 62.5000 ACC:0.3750 ETA:518h:5m:40s 
+Train: Epo[012/5000] Iter[012/014] IterTime:[26.73s] LOSS: 75.0000 ACC:0.2500 ETA:518h:41m:3s 
+Train: Epo[012/5000] Iter[013/014] IterTime:[27.03s] LOSS: 37.5000 ACC:0.6250 ETA:524h:25m:57s 
+Train: Epo[012/5000] Iter[014/014] IterTime:[26.88s] LOSS: 75.0000 ACC:0.2500 ETA:521h:33m:54s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:75.0000 ***********
+Valid: Epoch[012/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[013/5000] Iter[001/014] IterTime:[27.30s] LOSS: 87.5000 ACC:0.1250 ETA:529h:41m:52s 
+Train: Epo[013/5000] Iter[002/014] IterTime:[27.12s] LOSS: 50.0000 ACC:0.5000 ETA:526h:15m:4s 
+Train: Epo[013/5000] Iter[003/014] IterTime:[26.50s] LOSS: 50.0000 ACC:0.5000 ETA:514h:5m:45s 
+Train: Epo[013/5000] Iter[004/014] IterTime:[26.66s] LOSS: 50.0000 ACC:0.5000 ETA:517h:18m:4s 
+Train: Epo[013/5000] Iter[005/014] IterTime:[27.18s] LOSS: 62.5000 ACC:0.3750 ETA:527h:20m:26s 
+Train: Epo[013/5000] Iter[006/014] IterTime:[26.82s] LOSS: 25.0000 ACC:0.7500 ETA:520h:23m:15s 
+Train: Epo[013/5000] Iter[007/014] IterTime:[27.28s] LOSS: 50.0000 ACC:0.5000 ETA:529h:12m:36s 
+Train: Epo[013/5000] Iter[008/014] IterTime:[26.81s] LOSS: 50.0000 ACC:0.5000 ETA:520h:6m:20s 
+Train: Epo[013/5000] Iter[009/014] IterTime:[26.64s] LOSS: 62.5000 ACC:0.3750 ETA:516h:51m:17s 
+Train: Epo[013/5000] Iter[010/014] IterTime:[27.00s] LOSS: 75.0000 ACC:0.2500 ETA:523h:43m:19s 
+Train: Epo[013/5000] Iter[011/014] IterTime:[26.67s] LOSS: 62.5000 ACC:0.3750 ETA:517h:21m:54s 
+Train: Epo[013/5000] Iter[012/014] IterTime:[26.97s] LOSS: 100.0000 ACC:0.0000 ETA:523h:6m:38s 
+Train: Epo[013/5000] Iter[013/014] IterTime:[26.51s] LOSS: 62.5000 ACC:0.3750 ETA:514h:13m:7s 
+Train: Epo[013/5000] Iter[014/014] IterTime:[26.90s] LOSS: 75.0000 ACC:0.2500 ETA:521h:51m:38s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[013/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[014/5000] Iter[001/014] IterTime:[27.27s] LOSS: 25.0000 ACC:0.7500 ETA:528h:55m:14s 
+Train: Epo[014/5000] Iter[002/014] IterTime:[27.92s] LOSS: 62.5000 ACC:0.3750 ETA:541h:30m:56s 
+Train: Epo[014/5000] Iter[003/014] IterTime:[26.77s] LOSS: 50.0000 ACC:0.5000 ETA:519h:11m:41s 
+Train: Epo[014/5000] Iter[004/014] IterTime:[26.71s] LOSS: 50.0000 ACC:0.5000 ETA:518h:4m:24s 
+Train: Epo[014/5000] Iter[005/014] IterTime:[26.81s] LOSS: 62.5000 ACC:0.3750 ETA:520h:4m:35s 
+Train: Epo[014/5000] Iter[006/014] IterTime:[26.79s] LOSS: 62.5000 ACC:0.3750 ETA:519h:42m:18s 
+Train: Epo[014/5000] Iter[007/014] IterTime:[27.48s] LOSS: 87.5000 ACC:0.1250 ETA:533h:0m:57s 
+Train: Epo[014/5000] Iter[008/014] IterTime:[27.17s] LOSS: 62.5000 ACC:0.3750 ETA:527h:0m:0s 
+Train: Epo[014/5000] Iter[009/014] IterTime:[26.70s] LOSS: 87.5000 ACC:0.1250 ETA:517h:49m:7s 
+Train: Epo[014/5000] Iter[010/014] IterTime:[27.22s] LOSS: 75.0000 ACC:0.2500 ETA:527h:53m:44s 
+Train: Epo[014/5000] Iter[011/014] IterTime:[26.70s] LOSS: 100.0000 ACC:0.0000 ETA:517h:56m:0s 
+Train: Epo[014/5000] Iter[012/014] IterTime:[27.38s] LOSS: 50.0000 ACC:0.5000 ETA:530h:59m:18s 
+Train: Epo[014/5000] Iter[013/014] IterTime:[26.91s] LOSS: 62.5000 ACC:0.3750 ETA:521h:49m:14s 
+Train: Epo[014/5000] Iter[014/014] IterTime:[26.84s] LOSS: 37.5000 ACC:0.6250 ETA:520h:32m:0s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[014/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.01
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[015/5000] Iter[001/014] IterTime:[27.70s] LOSS: 62.5000 ACC:0.3750 ETA:537h:16m:26s 
+Train: Epo[015/5000] Iter[002/014] IterTime:[27.78s] LOSS: 62.5000 ACC:0.3750 ETA:538h:48m:56s 
+Train: Epo[015/5000] Iter[003/014] IterTime:[28.85s] LOSS: 75.0000 ACC:0.2500 ETA:559h:24m:45s 
+Train: Epo[015/5000] Iter[004/014] IterTime:[28.16s] LOSS: 50.0000 ACC:0.5000 ETA:546h:1m:34s 
+Train: Epo[015/5000] Iter[005/014] IterTime:[26.70s] LOSS: 75.0000 ACC:0.2500 ETA:517h:42m:49s 
+Train: Epo[015/5000] Iter[006/014] IterTime:[26.80s] LOSS: 62.5000 ACC:0.3750 ETA:519h:47m:23s 
+Train: Epo[015/5000] Iter[007/014] IterTime:[27.02s] LOSS: 62.5000 ACC:0.3750 ETA:524h:4m:27s 
+Train: Epo[015/5000] Iter[008/014] IterTime:[26.85s] LOSS: 62.5000 ACC:0.3750 ETA:520h:45m:51s 
+Train: Epo[015/5000] Iter[009/014] IterTime:[27.25s] LOSS: 37.5000 ACC:0.6250 ETA:528h:26m:50s 
+Train: Epo[015/5000] Iter[010/014] IterTime:[26.64s] LOSS: 62.5000 ACC:0.3750 ETA:516h:35m:45s 
+Train: Epo[015/5000] Iter[011/014] IterTime:[26.80s] LOSS: 62.5000 ACC:0.3750 ETA:519h:35m:8s 
+Train: Epo[015/5000] Iter[012/014] IterTime:[27.12s] LOSS: 62.5000 ACC:0.3750 ETA:525h:48m:44s 
+Train: Epo[015/5000] Iter[013/014] IterTime:[26.61s] LOSS: 75.0000 ACC:0.2500 ETA:515h:55m:49s 
+Train: Epo[015/5000] Iter[014/014] IterTime:[26.83s] LOSS: 37.5000 ACC:0.6250 ETA:520h:11m:30s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[015/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[016/5000] Iter[001/014] IterTime:[28.03s] LOSS: 75.0000 ACC:0.2500 ETA:543h:24m:22s 
+Train: Epo[016/5000] Iter[002/014] IterTime:[27.27s] LOSS: 62.5000 ACC:0.3750 ETA:528h:45m:34s 
+Train: Epo[016/5000] Iter[003/014] IterTime:[26.84s] LOSS: 87.5000 ACC:0.1250 ETA:520h:27m:26s 
+Train: Epo[016/5000] Iter[004/014] IterTime:[26.73s] LOSS: 37.5000 ACC:0.6250 ETA:518h:11m:22s 
+Train: Epo[016/5000] Iter[005/014] IterTime:[27.65s] LOSS: 37.5000 ACC:0.6250 ETA:536h:7m:43s 
+Train: Epo[016/5000] Iter[006/014] IterTime:[27.67s] LOSS: 37.5000 ACC:0.6250 ETA:536h:28m:29s 
+Train: Epo[016/5000] Iter[007/014] IterTime:[28.21s] LOSS: 62.5000 ACC:0.3750 ETA:546h:55m:22s 
+Train: Epo[016/5000] Iter[008/014] IterTime:[28.95s] LOSS: 62.5000 ACC:0.3750 ETA:561h:21m:5s 
+Train: Epo[016/5000] Iter[009/014] IterTime:[28.16s] LOSS: 62.5000 ACC:0.3750 ETA:546h:1m:11s 
+Train: Epo[016/5000] Iter[010/014] IterTime:[27.06s] LOSS: 62.5000 ACC:0.3750 ETA:524h:32m:26s 
+Train: Epo[016/5000] Iter[011/014] IterTime:[28.44s] LOSS: 62.5000 ACC:0.3750 ETA:551h:23m:48s 
+Train: Epo[016/5000] Iter[012/014] IterTime:[27.57s] LOSS: 62.5000 ACC:0.3750 ETA:534h:33m:45s 
+Train: Epo[016/5000] Iter[013/014] IterTime:[28.03s] LOSS: 62.5000 ACC:0.3750 ETA:543h:25m:50s 
+Train: Epo[016/5000] Iter[014/014] IterTime:[26.99s] LOSS: 87.5000 ACC:0.1250 ETA:523h:16m:2s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:37.5000 ***********
+Valid: Epoch[016/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[017/5000] Iter[001/014] IterTime:[28.53s] LOSS: 87.5000 ACC:0.1250 ETA:553h:7m:46s 
+Train: Epo[017/5000] Iter[002/014] IterTime:[28.70s] LOSS: 62.5000 ACC:0.3750 ETA:556h:19m:3s 
+Train: Epo[017/5000] Iter[003/014] IterTime:[27.70s] LOSS: 75.0000 ACC:0.2500 ETA:537h:1m:48s 
+Train: Epo[017/5000] Iter[004/014] IterTime:[27.09s] LOSS: 50.0000 ACC:0.5000 ETA:525h:4m:9s 
+Train: Epo[017/5000] Iter[005/014] IterTime:[27.11s] LOSS: 50.0000 ACC:0.5000 ETA:525h:32m:44s 
+Train: Epo[017/5000] Iter[006/014] IterTime:[27.00s] LOSS: 37.5000 ACC:0.6250 ETA:523h:23m:33s 
+Train: Epo[017/5000] Iter[007/014] IterTime:[26.86s] LOSS: 37.5000 ACC:0.6250 ETA:520h:35m:15s 
+Train: Epo[017/5000] Iter[008/014] IterTime:[27.22s] LOSS: 75.0000 ACC:0.2500 ETA:527h:32m:44s 
+Train: Epo[017/5000] Iter[009/014] IterTime:[27.36s] LOSS: 50.0000 ACC:0.5000 ETA:530h:16m:40s 
+Train: Epo[017/5000] Iter[010/014] IterTime:[26.49s] LOSS: 87.5000 ACC:0.1250 ETA:513h:32m:8s 
+Train: Epo[017/5000] Iter[011/014] IterTime:[26.65s] LOSS: 37.5000 ACC:0.6250 ETA:516h:32m:18s 
+Train: Epo[017/5000] Iter[012/014] IterTime:[26.79s] LOSS: 62.5000 ACC:0.3750 ETA:519h:20m:7s 
+Train: Epo[017/5000] Iter[013/014] IterTime:[26.91s] LOSS: 87.5000 ACC:0.1250 ETA:521h:32m:25s 
+Train: Epo[017/5000] Iter[014/014] IterTime:[26.67s] LOSS: 62.5000 ACC:0.3750 ETA:517h:0m:11s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[017/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, val loss:100.0000 ***********
+Train: Epo[018/5000] Iter[001/014] IterTime:[27.34s] LOSS: 75.0000 ACC:0.2500 ETA:529h:59m:2s 
+Train: Epo[018/5000] Iter[002/014] IterTime:[27.14s] LOSS: 50.0000 ACC:0.5000 ETA:525h:57m:48s 
+Train: Epo[018/5000] Iter[003/014] IterTime:[28.00s] LOSS: 50.0000 ACC:0.5000 ETA:542h:41m:52s 
+Train: Epo[018/5000] Iter[004/014] IterTime:[27.43s] LOSS: 50.0000 ACC:0.5000 ETA:531h:40m:46s 
+Train: Epo[018/5000] Iter[005/014] IterTime:[27.07s] LOSS: 62.5000 ACC:0.3750 ETA:524h:36m:1s 
+Train: Epo[018/5000] Iter[006/014] IterTime:[27.16s] LOSS: 75.0000 ACC:0.2500 ETA:526h:27m:49s 
+Train: Epo[018/5000] Iter[007/014] IterTime:[27.13s] LOSS: 87.5000 ACC:0.1250 ETA:525h:52m:4s 
+Train: Epo[018/5000] Iter[008/014] IterTime:[27.17s] LOSS: 37.5000 ACC:0.6250 ETA:526h:36m:20s 
+Train: Epo[018/5000] Iter[009/014] IterTime:[27.23s] LOSS: 62.5000 ACC:0.3750 ETA:527h:42m:23s 
+Train: Epo[018/5000] Iter[010/014] IterTime:[26.77s] LOSS: 75.0000 ACC:0.2500 ETA:518h:47m:51s 
+Train: Epo[018/5000] Iter[011/014] IterTime:[26.92s] LOSS: 75.0000 ACC:0.2500 ETA:521h:41m:31s 
+Train: Epo[018/5000] Iter[012/014] IterTime:[26.61s] LOSS: 50.0000 ACC:0.5000 ETA:515h:35m:20s 
+Train: Epo[018/5000] Iter[013/014] IterTime:[26.96s] LOSS: 75.0000 ACC:0.2500 ETA:522h:30m:57s 
+Train: Epo[018/5000] Iter[014/014] IterTime:[26.70s] LOSS: 37.5000 ACC:0.6250 ETA:517h:23m:39s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:50.0000 ***********
+Valid: Epoch[018/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, val loss:100.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:50.0000 ***********
+Train: Epo[019/5000] Iter[001/014] IterTime:[27.59s] LOSS: 50.0000 ACC:0.5000 ETA:534h:43m:48s 
+Train: Epo[019/5000] Iter[002/014] IterTime:[26.88s] LOSS: 50.0000 ACC:0.5000 ETA:520h:55m:34s 
+Train: Epo[019/5000] Iter[003/014] IterTime:[26.69s] LOSS: 62.5000 ACC:0.3750 ETA:517h:13m:30s 
+Train: Epo[019/5000] Iter[004/014] IterTime:[26.89s] LOSS: 62.5000 ACC:0.3750 ETA:520h:59m:12s 
+Train: Epo[019/5000] Iter[005/014] IterTime:[26.46s] LOSS: 62.5000 ACC:0.3750 ETA:512h:40m:45s 
+Train: Epo[019/5000] Iter[006/014] IterTime:[26.99s] LOSS: 50.0000 ACC:0.5000 ETA:522h:58m:36s 
+Train: Epo[019/5000] Iter[007/014] IterTime:[26.43s] LOSS: 75.0000 ACC:0.2500 ETA:512h:12m:30s 
+Train: Epo[019/5000] Iter[008/014] IterTime:[26.59s] LOSS: 75.0000 ACC:0.2500 ETA:515h:13m:10s 
+Train: Epo[019/5000] Iter[009/014] IterTime:[27.31s] LOSS: 75.0000 ACC:0.2500 ETA:529h:11m:28s 
+Train: Epo[019/5000] Iter[010/014] IterTime:[26.81s] LOSS: 50.0000 ACC:0.5000 ETA:519h:27m:54s 
+Train: Epo[019/5000] Iter[011/014] IterTime:[26.96s] LOSS: 75.0000 ACC:0.2500 ETA:522h:17m:2s 
+Train: Epo[019/5000] Iter[012/014] IterTime:[26.47s] LOSS: 87.5000 ACC:0.1250 ETA:512h:53m:30s 
+Train: Epo[019/5000] Iter[013/014] IterTime:[26.38s] LOSS: 25.0000 ACC:0.7500 ETA:511h:9m:44s 
+Train: Epo[019/5000] Iter[014/014] IterTime:[26.69s] LOSS: 50.0000 ACC:0.5000 ETA:517h:8m:7s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[019/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[020/5000] Iter[001/014] IterTime:[27.86s] LOSS: 75.0000 ACC:0.2500 ETA:539h:47m:6s 
+Train: Epo[020/5000] Iter[002/014] IterTime:[27.13s] LOSS: 50.0000 ACC:0.5000 ETA:525h:32m:53s 
+Train: Epo[020/5000] Iter[003/014] IterTime:[27.07s] LOSS: 37.5000 ACC:0.6250 ETA:524h:27m:10s 
+Train: Epo[020/5000] Iter[004/014] IterTime:[27.54s] LOSS: 87.5000 ACC:0.1250 ETA:533h:35m:28s 
+Train: Epo[020/5000] Iter[005/014] IterTime:[26.65s] LOSS: 75.0000 ACC:0.2500 ETA:516h:17m:11s 
+Train: Epo[020/5000] Iter[006/014] IterTime:[27.12s] LOSS: 50.0000 ACC:0.5000 ETA:525h:26m:17s 
+Train: Epo[020/5000] Iter[007/014] IterTime:[29.01s] LOSS: 75.0000 ACC:0.2500 ETA:562h:3m:16s 
+Train: Epo[020/5000] Iter[008/014] IterTime:[28.57s] LOSS: 37.5000 ACC:0.6250 ETA:553h:23m:8s 
+Train: Epo[020/5000] Iter[009/014] IterTime:[27.25s] LOSS: 37.5000 ACC:0.6250 ETA:527h:51m:36s 
+Train: Epo[020/5000] Iter[010/014] IterTime:[26.88s] LOSS: 50.0000 ACC:0.5000 ETA:520h:46m:57s 
+Train: Epo[020/5000] Iter[011/014] IterTime:[26.99s] LOSS: 75.0000 ACC:0.2500 ETA:522h:47m:12s 
+Train: Epo[020/5000] Iter[012/014] IterTime:[26.58s] LOSS: 50.0000 ACC:0.5000 ETA:514h:50m:20s 
+Train: Epo[020/5000] Iter[013/014] IterTime:[27.07s] LOSS: 62.5000 ACC:0.3750 ETA:524h:22m:50s 
+Train: Epo[020/5000] Iter[014/014] IterTime:[26.90s] LOSS: 87.5000 ACC:0.1250 ETA:521h:7m:3s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:87.5000 ***********
+Valid: Epoch[020/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[021/5000] Iter[001/014] IterTime:[27.71s] LOSS: 50.0000 ACC:0.5000 ETA:536h:43m:2s 
+Train: Epo[021/5000] Iter[002/014] IterTime:[27.30s] LOSS: 50.0000 ACC:0.5000 ETA:528h:49m:27s 
+Train: Epo[021/5000] Iter[003/014] IterTime:[26.91s] LOSS: 50.0000 ACC:0.5000 ETA:521h:9m:4s 
+Train: Epo[021/5000] Iter[004/014] IterTime:[26.96s] LOSS: 87.5000 ACC:0.1250 ETA:522h:16m:39s 
+Train: Epo[021/5000] Iter[005/014] IterTime:[26.75s] LOSS: 75.0000 ACC:0.2500 ETA:518h:6m:52s 
+Train: Epo[021/5000] Iter[006/014] IterTime:[27.00s] LOSS: 87.5000 ACC:0.1250 ETA:522h:58m:13s 
+Train: Epo[021/5000] Iter[007/014] IterTime:[27.10s] LOSS: 37.5000 ACC:0.6250 ETA:524h:52m:23s 
+Train: Epo[021/5000] Iter[008/014] IterTime:[27.32s] LOSS: 62.5000 ACC:0.3750 ETA:529h:12m:11s 
+Train: Epo[021/5000] Iter[009/014] IterTime:[27.05s] LOSS: 62.5000 ACC:0.3750 ETA:523h:49m:51s 
+Train: Epo[021/5000] Iter[010/014] IterTime:[26.87s] LOSS: 50.0000 ACC:0.5000 ETA:520h:27m:28s 
+Train: Epo[021/5000] Iter[011/014] IterTime:[26.80s] LOSS: 62.5000 ACC:0.3750 ETA:518h:57m:36s 
+Train: Epo[021/5000] Iter[012/014] IterTime:[26.79s] LOSS: 87.5000 ACC:0.1250 ETA:518h:46m:35s 
+Train: Epo[021/5000] Iter[013/014] IterTime:[26.72s] LOSS: 50.0000 ACC:0.5000 ETA:517h:32m:14s 
+Train: Epo[021/5000] Iter[014/014] IterTime:[26.68s] LOSS: 75.0000 ACC:0.2500 ETA:516h:47m:1s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:87.5000 ***********
+Valid: Epoch[021/5000] Train Mean_Acc: 36.61% Valid Mean_Acc:68.75% OCEAN_ACC:[0.6875 0.6875]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[022/5000] Iter[001/014] IterTime:[28.08s] LOSS: 87.5000 ACC:0.1250 ETA:543h:50m:21s 
+Train: Epo[022/5000] Iter[002/014] IterTime:[28.76s] LOSS: 75.0000 ACC:0.2500 ETA:556h:57m:0s 
+Train: Epo[022/5000] Iter[003/014] IterTime:[27.85s] LOSS: 62.5000 ACC:0.3750 ETA:539h:21m:51s 
+Train: Epo[022/5000] Iter[004/014] IterTime:[27.98s] LOSS: 62.5000 ACC:0.3750 ETA:541h:45m:49s 
+Train: Epo[022/5000] Iter[005/014] IterTime:[27.93s] LOSS: 50.0000 ACC:0.5000 ETA:540h:58m:9s 
+Train: Epo[022/5000] Iter[006/014] IterTime:[27.85s] LOSS: 50.0000 ACC:0.5000 ETA:539h:19m:41s 
+Train: Epo[022/5000] Iter[007/014] IterTime:[27.42s] LOSS: 75.0000 ACC:0.2500 ETA:531h:2m:19s 
+Train: Epo[022/5000] Iter[008/014] IterTime:[27.20s] LOSS: 25.0000 ACC:0.7500 ETA:526h:48m:37s 
+Train: Epo[022/5000] Iter[009/014] IterTime:[26.77s] LOSS: 75.0000 ACC:0.2500 ETA:518h:18m:31s 
+Train: Epo[022/5000] Iter[010/014] IterTime:[27.04s] LOSS: 62.5000 ACC:0.3750 ETA:523h:32m:12s 
+Train: Epo[022/5000] Iter[011/014] IterTime:[26.77s] LOSS: 62.5000 ACC:0.3750 ETA:518h:17m:49s 
+Train: Epo[022/5000] Iter[012/014] IterTime:[26.89s] LOSS: 62.5000 ACC:0.3750 ETA:520h:38m:54s 
+Train: Epo[022/5000] Iter[013/014] IterTime:[26.88s] LOSS: 62.5000 ACC:0.3750 ETA:520h:27m:11s 
+Train: Epo[022/5000] Iter[014/014] IterTime:[27.03s] LOSS: 50.0000 ACC:0.5000 ETA:523h:24m:58s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[022/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:50.0000 ***********
+Train: Epo[023/5000] Iter[001/014] IterTime:[27.38s] LOSS: 50.0000 ACC:0.5000 ETA:530h:6m:36s 
+Train: Epo[023/5000] Iter[002/014] IterTime:[26.97s] LOSS: 75.0000 ACC:0.2500 ETA:522h:9m:56s 
+Train: Epo[023/5000] Iter[003/014] IterTime:[27.41s] LOSS: 75.0000 ACC:0.2500 ETA:530h:43m:21s 
+Train: Epo[023/5000] Iter[004/014] IterTime:[26.98s] LOSS: 75.0000 ACC:0.2500 ETA:522h:23m:42s 
+Train: Epo[023/5000] Iter[005/014] IterTime:[26.86s] LOSS: 50.0000 ACC:0.5000 ETA:519h:58m:33s 
+Train: Epo[023/5000] Iter[006/014] IterTime:[27.37s] LOSS: 75.0000 ACC:0.2500 ETA:529h:53m:28s 
+Train: Epo[023/5000] Iter[007/014] IterTime:[26.79s] LOSS: 62.5000 ACC:0.3750 ETA:518h:45m:53s 
+Train: Epo[023/5000] Iter[008/014] IterTime:[26.56s] LOSS: 50.0000 ACC:0.5000 ETA:514h:10m:3s 
+Train: Epo[023/5000] Iter[009/014] IterTime:[26.69s] LOSS: 37.5000 ACC:0.6250 ETA:516h:41m:24s 
+Train: Epo[023/5000] Iter[010/014] IterTime:[26.42s] LOSS: 75.0000 ACC:0.2500 ETA:511h:25m:58s 
+Train: Epo[023/5000] Iter[011/014] IterTime:[26.58s] LOSS: 75.0000 ACC:0.2500 ETA:514h:37m:42s 
+Train: Epo[023/5000] Iter[012/014] IterTime:[27.20s] LOSS: 62.5000 ACC:0.3750 ETA:526h:38m:39s 
+Train: Epo[023/5000] Iter[013/014] IterTime:[26.60s] LOSS: 50.0000 ACC:0.5000 ETA:514h:53m:29s 
+Train: Epo[023/5000] Iter[014/014] IterTime:[26.57s] LOSS: 50.0000 ACC:0.5000 ETA:514h:23m:35s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:75.0000 ***********
+Valid: Epoch[023/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, val loss:100.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:0.0000 ***********
+Train: Epo[024/5000] Iter[001/014] IterTime:[27.84s] LOSS: 75.0000 ACC:0.2500 ETA:539h:2m:37s 
+Train: Epo[024/5000] Iter[002/014] IterTime:[27.18s] LOSS: 37.5000 ACC:0.6250 ETA:526h:9m:52s 
+Train: Epo[024/5000] Iter[003/014] IterTime:[27.27s] LOSS: 62.5000 ACC:0.3750 ETA:527h:49m:3s 
+Train: Epo[024/5000] Iter[004/014] IterTime:[26.92s] LOSS: 87.5000 ACC:0.1250 ETA:521h:6m:57s 
+Train: Epo[024/5000] Iter[005/014] IterTime:[26.89s] LOSS: 75.0000 ACC:0.2500 ETA:520h:29m:10s 
+Train: Epo[024/5000] Iter[006/014] IterTime:[26.96s] LOSS: 62.5000 ACC:0.3750 ETA:521h:47m:6s 
+Train: Epo[024/5000] Iter[007/014] IterTime:[26.90s] LOSS: 75.0000 ACC:0.2500 ETA:520h:42m:9s 
+Train: Epo[024/5000] Iter[008/014] IterTime:[27.46s] LOSS: 62.5000 ACC:0.3750 ETA:531h:29m:22s 
+Train: Epo[024/5000] Iter[009/014] IterTime:[26.51s] LOSS: 50.0000 ACC:0.5000 ETA:513h:11m:22s 
+Train: Epo[024/5000] Iter[010/014] IterTime:[26.67s] LOSS: 87.5000 ACC:0.1250 ETA:516h:17m:38s 
+Train: Epo[024/5000] Iter[011/014] IterTime:[26.85s] LOSS: 50.0000 ACC:0.5000 ETA:519h:44m:4s 
+Train: Epo[024/5000] Iter[012/014] IterTime:[26.60s] LOSS: 62.5000 ACC:0.3750 ETA:514h:50m:4s 
+Train: Epo[024/5000] Iter[013/014] IterTime:[26.74s] LOSS: 37.5000 ACC:0.6250 ETA:517h:37m:15s 
+Train: Epo[024/5000] Iter[014/014] IterTime:[26.68s] LOSS: 37.5000 ACC:0.6250 ETA:516h:18m:58s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:87.5000 ***********
+Valid: Epoch[024/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, val loss:75.0000 ***********
+Train: Epo[025/5000] Iter[001/014] IterTime:[29.07s] LOSS: 50.0000 ACC:0.5000 ETA:562h:42m:18s 
+Train: Epo[025/5000] Iter[002/014] IterTime:[28.86s] LOSS: 75.0000 ACC:0.2500 ETA:558h:29m:7s 
+Train: Epo[025/5000] Iter[003/014] IterTime:[28.80s] LOSS: 50.0000 ACC:0.5000 ETA:557h:22m:11s 
+Train: Epo[025/5000] Iter[004/014] IterTime:[27.44s] LOSS: 75.0000 ACC:0.2500 ETA:531h:6m:52s 
+Train: Epo[025/5000] Iter[005/014] IterTime:[26.87s] LOSS: 62.5000 ACC:0.3750 ETA:520h:4m:48s 
+Train: Epo[025/5000] Iter[006/014] IterTime:[28.98s] LOSS: 87.5000 ACC:0.1250 ETA:560h:48m:23s 
+Train: Epo[025/5000] Iter[007/014] IterTime:[27.76s] LOSS: 50.0000 ACC:0.5000 ETA:537h:10m:31s 
+Train: Epo[025/5000] Iter[008/014] IterTime:[27.68s] LOSS: 75.0000 ACC:0.2500 ETA:535h:38m:11s 
+Train: Epo[025/5000] Iter[009/014] IterTime:[26.91s] LOSS: 50.0000 ACC:0.5000 ETA:520h:44m:21s 
+Train: Epo[025/5000] Iter[010/014] IterTime:[26.64s] LOSS: 75.0000 ACC:0.2500 ETA:515h:38m:5s 
+Train: Epo[025/5000] Iter[011/014] IterTime:[27.13s] LOSS: 25.0000 ACC:0.7500 ETA:524h:57m:41s 
+Train: Epo[025/5000] Iter[012/014] IterTime:[27.03s] LOSS: 87.5000 ACC:0.1250 ETA:523h:1m:34s 
+Train: Epo[025/5000] Iter[013/014] IterTime:[26.35s] LOSS: 50.0000 ACC:0.5000 ETA:509h:58m:37s 
+Train: Epo[025/5000] Iter[014/014] IterTime:[26.64s] LOSS: 50.0000 ACC:0.5000 ETA:515h:32m:55s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, train loss:75.0000 ***********
+Valid: Epoch[025/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[026/5000] Iter[001/014] IterTime:[27.19s] LOSS: 50.0000 ACC:0.5000 ETA:526h:13m:22s 
+Train: Epo[026/5000] Iter[002/014] IterTime:[28.97s] LOSS: 37.5000 ACC:0.6250 ETA:560h:33m:57s 
+Train: Epo[026/5000] Iter[003/014] IterTime:[27.83s] LOSS: 62.5000 ACC:0.3750 ETA:538h:26m:8s 
+Train: Epo[026/5000] Iter[004/014] IterTime:[27.65s] LOSS: 25.0000 ACC:0.7500 ETA:535h:2m:27s 
+Train: Epo[026/5000] Iter[005/014] IterTime:[28.37s] LOSS: 75.0000 ACC:0.2500 ETA:548h:53m:56s 
+Train: Epo[026/5000] Iter[006/014] IterTime:[27.73s] LOSS: 75.0000 ACC:0.2500 ETA:536h:37m:39s 
+Train: Epo[026/5000] Iter[007/014] IterTime:[26.92s] LOSS: 50.0000 ACC:0.5000 ETA:520h:49m:34s 
+Train: Epo[026/5000] Iter[008/014] IterTime:[26.83s] LOSS: 75.0000 ACC:0.2500 ETA:519h:5m:26s 
+Train: Epo[026/5000] Iter[009/014] IterTime:[26.70s] LOSS: 100.0000 ACC:0.0000 ETA:516h:33m:40s 
+Train: Epo[026/5000] Iter[010/014] IterTime:[26.83s] LOSS: 62.5000 ACC:0.3750 ETA:519h:6m:34s 
+Train: Epo[026/5000] Iter[011/014] IterTime:[26.94s] LOSS: 62.5000 ACC:0.3750 ETA:521h:13m:25s 
+Train: Epo[026/5000] Iter[012/014] IterTime:[26.51s] LOSS: 75.0000 ACC:0.2500 ETA:513h:0m:29s 
+Train: Epo[026/5000] Iter[013/014] IterTime:[26.40s] LOSS: 50.0000 ACC:0.5000 ETA:510h:50m:42s 
+Train: Epo[026/5000] Iter[014/014] IterTime:[26.40s] LOSS: 75.0000 ACC:0.2500 ETA:510h:46m:35s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, train loss:25.0000 ***********
+Valid: Epoch[026/5000] Train Mean_Acc: 37.50% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[027/5000] Iter[001/014] IterTime:[27.72s] LOSS: 75.0000 ACC:0.2500 ETA:536h:17m:41s 
+Train: Epo[027/5000] Iter[002/014] IterTime:[26.81s] LOSS: 37.5000 ACC:0.6250 ETA:518h:46m:42s 
+Train: Epo[027/5000] Iter[003/014] IterTime:[26.65s] LOSS: 50.0000 ACC:0.5000 ETA:515h:40m:22s 
+Train: Epo[027/5000] Iter[004/014] IterTime:[26.91s] LOSS: 87.5000 ACC:0.1250 ETA:520h:40m:20s 
+Train: Epo[027/5000] Iter[005/014] IterTime:[27.02s] LOSS: 50.0000 ACC:0.5000 ETA:522h:47m:35s 
+Train: Epo[027/5000] Iter[006/014] IterTime:[27.10s] LOSS: 62.5000 ACC:0.3750 ETA:524h:18m:23s 
+Train: Epo[027/5000] Iter[007/014] IterTime:[26.58s] LOSS: 50.0000 ACC:0.5000 ETA:514h:12m:23s 
+Train: Epo[027/5000] Iter[008/014] IterTime:[26.46s] LOSS: 50.0000 ACC:0.5000 ETA:511h:48m:24s 
+Train: Epo[027/5000] Iter[009/014] IterTime:[26.35s] LOSS: 75.0000 ACC:0.2500 ETA:509h:49m:30s 
+Train: Epo[027/5000] Iter[010/014] IterTime:[26.70s] LOSS: 62.5000 ACC:0.3750 ETA:516h:35m:58s 
+Train: Epo[027/5000] Iter[011/014] IterTime:[27.02s] LOSS: 62.5000 ACC:0.3750 ETA:522h:42m:31s 
+Train: Epo[027/5000] Iter[012/014] IterTime:[26.84s] LOSS: 75.0000 ACC:0.2500 ETA:519h:15m:54s 
+Train: Epo[027/5000] Iter[013/014] IterTime:[26.28s] LOSS: 62.5000 ACC:0.3750 ETA:508h:23m:58s 
+Train: Epo[027/5000] Iter[014/014] IterTime:[26.61s] LOSS: 62.5000 ACC:0.3750 ETA:514h:44m:16s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:87.5000 ***********
+Valid: Epoch[027/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:62.50% OCEAN_ACC:[0.625 0.625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, val loss:50.0000 ***********
+Train: Epo[028/5000] Iter[001/014] IterTime:[27.97s] LOSS: 62.5000 ACC:0.3750 ETA:541h:2m:54s 
+Train: Epo[028/5000] Iter[002/014] IterTime:[26.95s] LOSS: 37.5000 ACC:0.6250 ETA:521h:18m:29s 
+Train: Epo[028/5000] Iter[003/014] IterTime:[27.18s] LOSS: 62.5000 ACC:0.3750 ETA:525h:39m:26s 
+Train: Epo[028/5000] Iter[004/014] IterTime:[26.90s] LOSS: 62.5000 ACC:0.3750 ETA:520h:18m:42s 
+Train: Epo[028/5000] Iter[005/014] IterTime:[26.87s] LOSS: 75.0000 ACC:0.2500 ETA:519h:39m:0s 
+Train: Epo[028/5000] Iter[006/014] IterTime:[27.56s] LOSS: 50.0000 ACC:0.5000 ETA:533h:2m:16s 
+Train: Epo[028/5000] Iter[007/014] IterTime:[27.36s] LOSS: 25.0000 ACC:0.7500 ETA:529h:8m:18s 
+Train: Epo[028/5000] Iter[008/014] IterTime:[26.67s] LOSS: 50.0000 ACC:0.5000 ETA:515h:55m:3s 
+Train: Epo[028/5000] Iter[009/014] IterTime:[26.44s] LOSS: 62.5000 ACC:0.3750 ETA:511h:25m:19s 
+Train: Epo[028/5000] Iter[010/014] IterTime:[26.55s] LOSS: 75.0000 ACC:0.2500 ETA:513h:27m:28s 
+Train: Epo[028/5000] Iter[011/014] IterTime:[26.75s] LOSS: 75.0000 ACC:0.2500 ETA:517h:26m:7s 
+Train: Epo[028/5000] Iter[012/014] IterTime:[26.68s] LOSS: 75.0000 ACC:0.2500 ETA:515h:57m:50s 
+Train: Epo[028/5000] Iter[013/014] IterTime:[26.51s] LOSS: 62.5000 ACC:0.3750 ETA:512h:43m:57s 
+Train: Epo[028/5000] Iter[014/014] IterTime:[26.94s] LOSS: 75.0000 ACC:0.2500 ETA:521h:3m:58s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, train loss:37.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:2, train loss:62.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.]])
+*********** i:3, train loss:62.5000 ***********
+Valid: Epoch[028/5000] Train Mean_Acc: 39.29% Valid Mean_Acc:68.75% OCEAN_ACC:[0.6875 0.6875]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:0, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:1, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:2, val loss:25.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[029/5000] Iter[001/014] IterTime:[27.73s] LOSS: 75.0000 ACC:0.2500 ETA:536h:21m:11s 
+Train: Epo[029/5000] Iter[002/014] IterTime:[27.29s] LOSS: 87.5000 ACC:0.1250 ETA:527h:41m:19s 
+Train: Epo[029/5000] Iter[003/014] IterTime:[27.28s] LOSS: 50.0000 ACC:0.5000 ETA:527h:29m:19s 
+Train: Epo[029/5000] Iter[004/014] IterTime:[27.54s] LOSS: 75.0000 ACC:0.2500 ETA:532h:40m:37s 
+Train: Epo[029/5000] Iter[005/014] IterTime:[26.62s] LOSS: 50.0000 ACC:0.5000 ETA:514h:52m:12s 
+Train: Epo[029/5000] Iter[006/014] IterTime:[26.81s] LOSS: 75.0000 ACC:0.2500 ETA:518h:23m:1s 
+Train: Epo[029/5000] Iter[007/014] IterTime:[27.71s] LOSS: 62.5000 ACC:0.3750 ETA:535h:54m:39s 
+Train: Epo[029/5000] Iter[008/014] IterTime:[27.05s] LOSS: 37.5000 ACC:0.6250 ETA:523h:3m:34s 
+Train: Epo[029/5000] Iter[009/014] IterTime:[26.68s] LOSS: 62.5000 ACC:0.3750 ETA:515h:59m:56s 
+Train: Epo[029/5000] Iter[010/014] IterTime:[26.78s] LOSS: 50.0000 ACC:0.5000 ETA:517h:52m:58s 
+Train: Epo[029/5000] Iter[011/014] IterTime:[26.86s] LOSS: 25.0000 ACC:0.7500 ETA:519h:26m:4s 
+Train: Epo[029/5000] Iter[012/014] IterTime:[26.97s] LOSS: 75.0000 ACC:0.2500 ETA:521h:27m:27s 
+Train: Epo[029/5000] Iter[013/014] IterTime:[26.99s] LOSS: 62.5000 ACC:0.3750 ETA:521h:47m:37s 
+Train: Epo[029/5000] Iter[014/014] IterTime:[26.84s] LOSS: 75.0000 ACC:0.2500 ETA:518h:57m:54s 
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:0, train loss:75.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:1, train loss:87.5000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:2, train loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]], grad_fn=<SoftmaxBackward0>)
+tensor([[0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:3, train loss:75.0000 ***********
+Valid: Epoch[029/5000] Train Mean_Acc: 38.39% Valid Mean_Acc:56.25% OCEAN_ACC:[0.5625 0.5625]
+
+Training: learning rate:0.0001
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [0., 1.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:0, val loss:50.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+*********** i:1, val loss:0.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[0., 1.],
+        [0., 1.],
+        [0., 1.],
+        [0., 1.]])
+*********** i:2, val loss:100.0000 ***********
+tensor([[1., 0.],
+        [1., 0.],
+        [1., 0.],
+        [1., 0.]])
+tensor([[1., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 0.]])
+*********** i:3, val loss:25.0000 ***********
+Train: Epo[030/5000] Iter[001/014] IterTime:[27.59s] LOSS: 50.0000 ACC:0.5000 ETA:533h:32m:37s 
+Train: Epo[030/5000] Iter[002/014] IterTime:[26.56s] LOSS: 50.0000 ACC:0.5000 ETA:513h:31m:39s 
+Train: Epo[030/5000] Iter[003/014] IterTime:[26.69s] LOSS: 75.0000 ACC:0.2500 ETA:516h:2m:21s 
+Train: Epo[030/5000] Iter[004/014] IterTime:[26.29s] LOSS: 62.5000 ACC:0.3750 ETA:508h:13m:49s 
+Train: Epo[030/5000] Iter[005/014] IterTime:[29.08s] LOSS: 75.0000 ACC:0.2500 ETA:562h:18m:44s 
+Train: Epo[030/5000] Iter[006/014] IterTime:[29.08s] LOSS: 50.0000 ACC:0.5000 ETA:562h:19m:4s 
+Train: Epo[030/5000] Iter[007/014] IterTime:[27.10s] LOSS: 37.5000 ACC:0.6250 ETA:523h:57m:12s 
+Train: Epo[030/5000] Iter[008/014] IterTime:[27.89s] LOSS: 75.0000 ACC:0.2500 ETA:539h:12m:43s 
+Train: Epo[030/5000] Iter[009/014] IterTime:[27.80s] LOSS: 75.0000 ACC:0.2500 ETA:537h:24m:33s 
+Train: Epo[030/5000] Iter[010/014] IterTime:[28.54s] LOSS: 50.0000 ACC:0.5000 ETA:551h:49m:45s 
+Train: Epo[030/5000] Iter[011/014] IterTime:[27.93s] LOSS: 25.0000 ACC:0.7500 ETA:539h:55m:37s 
+Train: Epo[030/5000] Iter[012/014] IterTime:[29.12s] LOSS: 62.5000 ACC:0.3750 ETA:562h:59m:40s 
+Train: Epo[030/5000] Iter[013/014] IterTime:[27.81s] LOSS: 87.5000 ACC:0.1250 ETA:537h:32m:56s 
+slurmstepd: error: *** JOB 14432966 ON cpu-e-939 CANCELLED AT 2023-02-15T22:11:47 ***

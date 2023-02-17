@@ -10,7 +10,7 @@ from dpcv.modeling.networks import (
     interpret_dan,
 )
 from .audio_interpretability_net import interpret_audio_model
-from .resnet_3d import resnet50_3d_model
+from .resnet_3d import resnet50_3d_model, resnet50_3d_model_udiva
 from .slow_fast import slow_fast_model
 from .TSN2D import tpn_model
 from .video_action_transformer import vat_model

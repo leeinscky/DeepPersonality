@@ -17,7 +17,7 @@ mac本地：
     alias rundeepfull='conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && python ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml'
     cd /home/zl525/code/DeepPersonality/ && python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 1 --bs 32
 
-# 模板
+# 命令模板
 conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup python3 ./script/run_exp.py \
 --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 50 --bs 16 --lr 0.001 >nohup_full_epo50_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 
@@ -54,43 +54,52 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
     batch size
         - 过小，会导致模型损失波动大，难以收敛，过大时，模型前期由于梯度的平均，导致收敛速度过慢。来源：loss下降很慢……，训练曲线如图，有人帮忙分析一下嘛？卡这很长时间了、非常感谢各位 ? - 搬砖人的回答 - 知乎 https://www.zhihu.com/question/472162326/answer/2308198711
 
+    sample_size=50 bs=8 lr=0.5  val loss 下降收敛了 val acc 上升趋势 auspicious-festival-241  且val acc准确率很高
+    sample_size=50 bs=8 lr=0.2  train loss 震荡 train acc 震荡 val loss 下降收敛了 val acc 上升趋势 bright-monkey-253
+    sample_size=50 bs=8 lr=0.1  val loss 上升 val acc 下降 但是train loss下降趋势不错 fortuitous-cake-240
 
-sample_size=50 bs=8 lr=0.5  val loss 下降收敛了 val acc 上升趋势 auspicious-festival-241  且val acc准确率很高
-sample_size=50 bs=8 lr=0.2  train loss 震荡 train acc 震荡 val loss 下降收敛了 val acc 上升趋势 bright-monkey-253
-sample_size=50 bs=8 lr=0.1  val loss 上升 val acc 下降 但是train loss下降趋势不错 fortuitous-cake-240
+    下一步: 重复 lr=0.1 - 0.5 之间的值，看看哪个效果最好
 
-下一步: 重复 lr=0.1 - 0.5 之间的值，看看哪个效果最好
+    发现：
+    根据 dpcv/engine/bi_modal_trainer.py里关于acc的计算逻辑，
+        - 如果batch_size=1，那么acc就是一个样本的平均准确率，从0.2-0.8都有可能，波动大
+        - 如果batch_size=8，那么acc就是8个样本的平均准确率，但是这8个样本中有的样本acc接近1，有的样本acc接近0，所以acc的平均值为0.5，
+    因此，可以发现，当batch_size越小，acc波动就越大，从0.2-0.8都有可能，当batch_size越大，acc越接近0.5，因为很多极值被平均掉了。
+    请问，这种准确率的计算方式是否准确？？ batchsize越大越好还是越小越好？？
+    关于准确率的计算方式，参考：https://colab.research.google.com/drive/1Ip20FMBtBDyvcRJJj_lXzozLyeimsN4d#scrollTo=ngDiEm6p1EqP
+    即对于回归问题，acc的计算方式是：acc = (y_pred - y_true).abs().mean()， 对于分类问题，acc的计算方式是：acc = (y_pred.argmax(dim=1) == y_true).float().mean()， 因为分类问题的y_pred是一个one-hot向量，所以argmax之后，就是一个数值，即预测的类别，然后和真实的类别进行比较，如果相等，那么acc=1，否则acc=0，然后求平均值，就是准确率。
 
-发现：
- 根据 dpcv/engine/bi_modal_trainer.py里关于acc的计算逻辑，
-    - 如果batch_size=1，那么acc就是一个样本的平均准确率，从0.2-0.8都有可能，波动大
-    - 如果batch_size=8，那么acc就是8个样本的平均准确率，但是这8个样本中有的样本acc接近1，有的样本acc接近0，所以acc的平均值为0.5，
- 因此，可以发现，当batch_size越小，acc波动就越大，从0.2-0.8都有可能，当batch_size越大，acc越接近0.5，因为很多极值被平均掉了。
- 请问，这种准确率的计算方式是否准确？？ batchsize越大越好还是越小越好？？
+    关于batch size的解释：
+        https://www.zhihu.com/question/32673260/answer/376970624
+        
+        Batch size会影响模型性能，过大或者过小都不合适。
+        1. 是什么？设置过大的批次（batch）大小，可能会对训练时网络的准确性产生负面影响，因为它降低了梯度下降的随机性。
+        2. 怎么做？要在可接受的训练时间内，确定最小的批次大小。一个能合理利用GPU并行性能的批次大小可能不会达到最佳的准确率，
+            因为在有些时候，较大的批次大小可能需要训练更多迭代周期才能达到相同的正确率。在开始时，要大胆地尝试很小的批次大小，如16、8，甚至是1。
+        3. 为什么？较小的批次大小能带来有更多起伏、更随机的权重更新。这有两个积极的作用，一是能帮助训练“跳出之前可能卡住它的局部最小值，
+            二是能让训练在平坦的最小值结束，这通常会带来更好的泛化性能。
 
-关于batch size的解释：
-    https://www.zhihu.com/question/32673260/answer/376970624
+        太大的batch size 容易陷入sharp minima，泛化性不好
+        
+        研究表明大的batchsize收敛到sharp minimum，而小的batchsize收敛到flat minimum，后者具有更好的泛化能力。两者的区别就在于变化的趋势，一个快一个慢，
+        如下图，造成这个现象的主要原因是小的batchsize带来的噪声有助于逃离sharp minimum。
+        对此实际上是有两个建议：
+            - 如果增加了学习率，那么batch size最好也跟着增加，这样收敛更稳定。
+            - 尽量使用大的学习率，因为很多研究都表明更大的学习率有利于提高泛化能力。如果真的要衰减，可以尝试其他办法，比如增加batch size，学习率对模型的收敛影响真的很大，慎重调整。
+        作者：初识CV 链接：https://www.zhihu.com/question/32673260/answer/1877223574
+
+        batch_size设的大一些，收敛得快，也就是需要训练的次数少，准确率上升得也很稳定，但是实际使用起来精度不高。
+        batch_size设的小一些，收敛得慢，而且可能准确率来回震荡，所以还要把基础学习速率降低一些；但是实际使用起来精度较高。
+        一般我只尝试batch_size=64或者batch_size=1两种情况。
+        作者：江何 链接：https://www.zhihu.com/question/32673260/answer/238851203
+
+
+    怎么判断网络是否收敛，以loss为准还是acc为准？
+        https://www.cnblogs.com/emanlee/p/14815390.html
     
-    Batch size会影响模型性能，过大或者过小都不合适。
-    1. 是什么？设置过大的批次（batch）大小，可能会对训练时网络的准确性产生负面影响，因为它降低了梯度下降的随机性。
-    2. 怎么做？要在可接受的训练时间内，确定最小的批次大小。一个能合理利用GPU并行性能的批次大小可能不会达到最佳的准确率，
-        因为在有些时候，较大的批次大小可能需要训练更多迭代周期才能达到相同的正确率。在开始时，要大胆地尝试很小的批次大小，如16、8，甚至是1。
-    3. 为什么？较小的批次大小能带来有更多起伏、更随机的权重更新。这有两个积极的作用，一是能帮助训练“跳出之前可能卡住它的局部最小值，
-        二是能让训练在平坦的最小值结束，这通常会带来更好的泛化性能。
-
-    太大的batch size 容易陷入sharp minima，泛化性不好
-    
-    研究表明大的batchsize收敛到sharp minimum，而小的batchsize收敛到flat minimum，后者具有更好的泛化能力。两者的区别就在于变化的趋势，一个快一个慢，
-    如下图，造成这个现象的主要原因是小的batchsize带来的噪声有助于逃离sharp minimum。
-    对此实际上是有两个建议：
-        - 如果增加了学习率，那么batch size最好也跟着增加，这样收敛更稳定。
-        - 尽量使用大的学习率，因为很多研究都表明更大的学习率有利于提高泛化能力。如果真的要衰减，可以尝试其他办法，比如增加batch size，学习率对模型的收敛影响真的很大，慎重调整。
-    作者：初识CV 链接：https://www.zhihu.com/question/32673260/answer/1877223574
-
-    batch_size设的大一些，收敛得快，也就是需要训练的次数少，准确率上升得也很稳定，但是实际使用起来精度不高。
-    batch_size设的小一些，收敛得慢，而且可能准确率来回震荡，所以还要把基础学习速率降低一些；但是实际使用起来精度较高。
-    一般我只尝试batch_size=64或者batch_size=1两种情况。
-    作者：江何 链接：https://www.zhihu.com/question/32673260/answer/238851203
+    当使用 ResNet 3D模型时：
+        学习率：根据实验smoldering-smooch-371，初始学习率为0.001时，loss上升，说明学习率过大，需要降低学习率。当学习率为0.0001时，loss下降，即初始学习率为0.0001时比较好
+        但是发现验证集的acc不高，因此过拟合了，考虑进行数据增强，引入噪声，加入dropout等方法
 
 
 # 一些结果相对比较好的保存模型
@@ -113,6 +122,8 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
     ln -s /home/zl525/rds/hpc-work/datasets/udiva_tiny /home/zl525/code/DeepPersonality/datasets/
     ln -s /home/zl525/rds/hpc-work/datasets/udiva_full /home/zl525/code/DeepPersonality/datasets/ 
 
+# 查看输入数据inputs labels 和 模型models在哪个device上 
+    参考：https://www.cnblogs.com/picassooo/p/13736843.html
 
 # transformer 融入框架
     1.Multimodal-Transformer代码库
@@ -150,3 +161,8 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
             # audio.shape= torch.Size([24, 500, 74]) 
             # vision.shape= torch.Size([24, 500, 35])
 
+######## wandb上的对比实验记录 #########
+将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示
+
+1. Project: DeepPersonality
+    experiment-1: 控制其他超参数不变，递增sample_size，观察acc的变化

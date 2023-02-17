@@ -83,7 +83,7 @@ class ExpRunner:
         return build_trainer(self.cfg, self.collector, self.logger)
 
     def before_train(self, cfg):
-        # cfg = self.cfg.TRAIN
+        cfg = self.cfg.TRAIN
         
         # 手动加载预训练模型用于测试 
         # # DeepPersonality代码库提供的预训练模型ResNet：checkpoint_297.pkl  Reference: https://github.com/liaorongfan/DeepPersonality
@@ -111,13 +111,21 @@ class ExpRunner:
             self.optimizer.param_groups[0]["lr"] = self.cfg.SOLVER.LR_INIT
 
     def train_epochs(self, cfg):
-        # cfg = self.cfg.TRAIN
+        cfg = self.cfg.TRAIN
         for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
             # 训练用到的文件路径 self.trainer: dpcv/engine/bi_modal_trainer.py;  self.model: dpcv/modeling/networks/audio_visual_residual.py;  self.data_loader["train"]:  备注：结合config/demo/bimodal_resnet18_udiva.yaml里的信息就可以看到class类名
+            
+            ### 1. train 
             self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+            
+            ### 2. valid
             if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
                 self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
             self.scheduler.step() # 每个epoch都进行学习率调整
+            
+            ### 3. test
+            if epoch % cfg.TEST_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都在数据集上进行测试
+                self.trainer.test(self.data_loader["test"], self.model, epoch)
             
             # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
             
@@ -130,11 +138,12 @@ class ExpRunner:
             #     print('current epoch:', epoch+1, ', save model with best valid acc')
             #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
             #     self.collector.update_best_epoch(epoch)
-            # if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch
-            #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            
+            if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch时，保存模型
+                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
 
     def after_train(self, cfg):
-        # cfg = self.cfg.TRAIN
+        cfg = self.cfg.TRAIN
         # self.collector.draw_epo_info(log_dir=self.log_dir)
         self.logger.info(
             "{} done, best acc: {} in epoch:{}".format(
@@ -145,7 +154,8 @@ class ExpRunner:
         )
 
     def train(self):
-        cfg = self.cfg.TRAIN
+        # cfg = self.cfg.TRAIN
+        cfg = self.cfg
         self.before_train(cfg) # 实际实验没有执行 只是检查下
         self.train_epochs(cfg)
         self.after_train(cfg)
@@ -168,15 +178,13 @@ class ExpRunner:
             self.model = load_model(self.model, weight_file)
 
         if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
-            ocean_acc_avg, ocean_acc, dataset_output, dataset_label, mse = self.trainer.test(
-                self.data_loader["test"], self.model
-            )
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label, mse, test_acc = self.trainer.test(self.data_loader["test"], self.model)
             self.logger.info("mse: {} mean: {}".format(mse[0], mse[1]))
         else:
-            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(
-                self.data_loader["full_test"], self.model
-            )
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(self.data_loader["full_test"], self.model)
         self.logger.info("acc: {} mean: {}".format(ocean_acc, ocean_acc_avg))
+        # 记录测试的准确率
+        self.logger.info("test_acc: {}".format(test_acc))
 
         if cfg.COMPUTE_PCC: # "COMPUTE_PCC":true 计算皮尔逊相关系数，即线性相关系数，值域[-1,1]，1表示完全正相关，-1表示完全负相关，0表示不相关，0.8表示强相关
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label, self.cfg.DATA_LOADER.DATASET_NAME)
@@ -193,19 +201,50 @@ class ExpRunner:
             torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
             torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
         wandb.log({
-            "test_mse": mse[1],         # 最终测试得到的mse均值，评价模型效果以这个为准
-            "test_acc":ocean_acc_avg,   # 最终测试得到的acc均值，评价模型效果以这个为准
-            # "test_pcc":pcc_mean,        # 最终测试得到的pcc均值，评价模型效果以这个为准
-            # "test_ccc":ccc_mean,        # 最终测试得到的ccc均值，评价模型效果以这个为准
+            "test_mse": mse[1],             # 最终测试得到的mse均值，评价模型效果以这个为准
+            "test_acc":test_acc,            # 最终测试得到的acc均值，评价模型效果以这个为准
+            # "test_pcc":pcc_mean,          # 最终测试得到的pcc均值，评价模型效果以这个为准
+            # "test_ccc":ccc_mean,          # 最终测试得到的ccc均值，评价模型效果以这个为准
             })
         
+        return
+
+    def test_classification(self, weight=None):
+        self.logger.info("Test only mode")
+        cfg = self.cfg.TEST
+        cfg.WEIGHT = weight if weight else cfg.WEIGHT
+
+        if cfg.WEIGHT:
+            self.model = load_model(self.model, cfg.WEIGHT)
+        else:
+            try: # 从log_dir中找到最新的模型, 具体逻辑: 从log_dir中找到所有以.pkl结尾的文件，然后找到最新的文件, 如果没有找到最新的模型, 则使用checkpoint_last.pkl
+                weights = [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)] # 找到所有以.pkl结尾的文件, 并且不包含last
+                weights = sorted(weights, key=lambda x: int(x[11:-4])) # 从文件名中找到最新的模型, 具体逻辑: 从文件名中找到数字, 然后按照数字排序, 最后取最后一个, 也就是最新的模型, 例如: checkpoint_100.pkl, checkpoint_200.pkl, checkpoint_300.pkl, 则取checkpoint_300.pkl
+                weight_file = os.path.join(self.log_dir, weights[-1]) # 最新的模型的路径
+            except IndexError:
+                weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl") # 如果没有找到最新的模型, 则使用checkpoint_last.pkl
+            self.logger.info(f"Test with model {weight_file}")
+            self.model = load_model(self.model, weight_file)
+
+        if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
+            test_acc = self.trainer.test(self.data_loader["test"], self.model)
+        else:
+            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(self.data_loader["full_test"], self.model)
+
+        if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":"" 即默认不保存
+            os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
+            torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
+            torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
         return
 
     def run(self):
         print('================================== start training... ==================================')
         self.train()
         print('================================== start test...     ==================================')
-        self.test()
+        if self.cfg.TRAIN.TRAINER == "BiModalTrainerUdiva":
+            self.test_classification() # test for classification task
+        else:
+            self.test() # test for regression task
         print('================================== done test ...     ==================================')
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
 

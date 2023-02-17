@@ -4,18 +4,19 @@
 
 cd /home/zl525/code/DeepPersonality/
 
-sample_size=3
-epoch=1
-batch_size=2
-learning_rate=0.001
+#### **************************** resnet3D: resnet_3d_udiva_full.yaml **************************** ####
+sample_size=2
+epoch=2
+batch_size=64
+learning_rate=0.0001
 
-python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_lstm_udiva_full.yaml \
+python3 -u ./script/run_exp.py --cfg_file ./config/demo/resnet_3d_udiva_full.yaml \
 --sample_size $sample_size \
 --max_epoch $epoch \
 --bs $batch_size \
---lr $learning_rate \
+--lr $learning_rate
 
-# ===============================================================================================
+#### **************************** model2: bimodal_lstm_udiva_full.yaml **************************** ####
 # sample_size=1
 # epoch=1
 # batch_size=2
@@ -29,3 +30,16 @@ python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_lstm_udiva_full.yam
 # --bs $batch_size \
 # --lr $learning_rate \
 # --resume $resume
+
+#### **************************** model1: bimodal_resnet18_udiva_full.yaml **************************** ####
+# sample_size=20
+# epoch=1
+# batch_size=32
+# learning_rate=0.0005
+
+# python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml \
+# --sample_size $sample_size \
+# --max_epoch $epoch \
+# --bs $batch_size \
+# --lr $learning_rate \
+

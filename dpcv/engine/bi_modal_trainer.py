@@ -191,7 +191,12 @@ class BiModalTrainer(object):
         for i, k in enumerate(keys):
             ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
             ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
-
+        # ocean_acc_avg_rand 遍历data_loader时每次迭代得到的预测准确率，然后计算得到平均值
+        # ocean_acc_dict 遍历data_loader时每次迭代得到的预测准确率所组成的字典
+        # dataset_output 模型具体的预测输出结果
+        # dataset_label 标签
+        # ocean_mse_dict 遍历data_loader时得到的各个均方误差值所组成的字典
+        # ocean_mse_mean_rand 遍历data_loader时得到的均方误差，然后计算得到平均值
         return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
 
     def full_test(self, data_set, model):
@@ -270,12 +275,13 @@ class BiModalTrainerUdiva(object):
     """trainer for Udiva bi-modal input"""
     def __init__(self, cfg, collector, logger):
         # print('[DeepPersonality/dpcv/engine/bi_modal_trainer.py] 开始执行BiModal模型的初始化 BiModalTrainer.__init__() ')
-        self.cfg = cfg
+        self.cfg = cfg.TRAIN
+        self.cfg_model = cfg.MODEL
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
         # 在 cfg.OUTPUT_DIR 路径后加上 /tensorboard_events
-        tb_writer_dir = os.path.join(cfg.OUTPUT_DIR, "tensorboard_events")
+        tb_writer_dir = os.path.join(self.cfg.OUTPUT_DIR, "tensorboard_events")
         self.tb_writer = SummaryWriter(tb_writer_dir)
         # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 结束执行BiModal模型的初始化 BiModalTrainer.__init__()')
 
@@ -310,54 +316,27 @@ class BiModalTrainerUdiva(object):
         然后:
         AudioVisualData 类里有个函数:def __getitem__(self, idx). 该函数返回的是: sample = {"image": img, "audio": wav, "label": label}, 其中: img, wav, label 都是 torch.Tensor 类型, img.shape() =  torch.Size([3, 224, 224]) wav.shape() =  torch.Size([1, 1, 50176]) label.shape() =  torch.Size([5])
         '''
-        
-        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 开始执行BiModal模型的train方法')
         lr = optimizer.param_groups[0]['lr']
         self.logger.info(f"Training: learning rate:{lr}")
         self.tb_writer.add_scalar("lr", lr, epoch_idx)
-        optimizer.zero_grad() # 梯度清零，即将梯度变为0  # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0005), SGD即随机梯度下降, lr是学习率，momentum是动量，weight_decay是权重衰减, 全称是Stochastic Gradient Descent，即随机梯度下降，即每次迭代时，随机选取一个batch的样本来进行梯度下降，而不是像梯度下降那样，每次迭代时，使用所有的样本来进行梯度下降，这样会使得每次迭代的计算量变大，而且每次迭代的结果也不稳定，而随机梯度下降则可以避免这个问题，但是随机梯度下降的结果也不稳定，因此，可以结合动量和权重衰减来使得随机梯度下降的结果更加稳定，即动量是为了使得每次迭代的结果更加稳定，而权重衰减是为了防止过拟合。
-        
+        optimizer.zero_grad() # 梯度清零，即将梯度变为0
         model.train()
         loss_list = []
         acc_avg_list = []
-        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... len(data_loader)=', len(data_loader), 'type(data_loader): ', type(data_loader)) # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'>
-        final_i = 0 
-        # 通过 看日志发现当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
-        for i, data in enumerate(data_loader): # len(data_loader)= 7 type(data_loader):  <class 'torch.utils.data.dataloader.DataLoader'> 一共有7个batch, 每个batch的大小是8, 所以一共有56个样本。 i代表第几个batch, data代表第i个batch的数据
-            final_i = i
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i)
-            # if i == 0:
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([batch_size, 3*2(由于torch.cat)=6, 224, 224])
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([batch_size, 1, 1*2(由于torch.cat)=2, 50176]) 8对应config里的batch_size，即8个wav音频，1对应1个channel，50176对应音频的长度，1x1x50176代表音频的大小，1代表channel，1x50176代表音频的长度
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([1(batch_size), 1]) 8对应config里的batch_size，1对应1个关系的标签
-            epo_iter_num = len(data_loader)
+        epoch_total_acc = 0
+        epoch_total_num = 0
+        epo_iter_num = len(data_loader)
+        for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
-
-            # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
-            inputs, labels = self.data_fmt(data) # inputs是一个元组，包含了image (data['image']: torch.Size([batchsize, 6, 224, 224])) 和audio(data['audio']: torch.Size([batchsize, 1, 2, 50176]))的输入，labels: torch.Size([1(batch_size), 1])
-            # 查看输入数据inputs labels 和 模型models在哪个device上 参考：https://www.cnblogs.com/picassooo/p/13736843.html
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据所在的设备, inputs[0].device=', inputs[0].device, ', inputs[1].device=', inputs[1].device, ', labels.device=', labels.device, ', 模型model所在的设备=', next(model.parameters()).device)
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... 第', i, '个batch数据，模型的输入数据 type(inputs): ', type(inputs), ', len(inputs): ', len(inputs))
-            
-            # 这里该怎么处理一对视频融合？我们在数据预处理时就将一对视频的数据进行了早期融合，所以这里不需要再对两个视频分支进行融合了，模型输出的结果是融合后的结果
-            # print('input data is ready, model start to train...')
+            inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
-            # fc1_output = model(*fc1_input)
-            # fc2_output = model(*fc2_input)
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  fc1_output=', fc1_output, '  fc2_output', fc2_output, '  labels.size()=', labels.size())
-            
-            # print('[dpcv/engine/bi_modal_trainer.py] print outputs, labels, outputs.size(), labels.size()')
-            # print(outputs)
-            # print('-----')
-            # print(labels)
-            # print('outputs.size()=', outputs.size(), ', labels.size()=', labels.size()) # outputs.size()= torch.Size([batch_size, 2]) , labels.size()= torch.Size([batch_size, 2])
-            
-            loss = loss_f(outputs.cpu(), labels.cpu()) # loss_f = nn.MSELoss()  即 mean_square_error，即均方误差，即预测值与真实值的差的平方的均值，即 (y_pred - y_true)^2，其中y_pred是预测值，y_true是真实值
-            
-            # print('loss=', loss)
-            
+            loss = loss_f(outputs.cpu(), labels.cpu().float())
+            if i in [0, 1, 2, 3, 4]:
+                print(outputs)
+                print(labels)
+                print(f'*********** i:{i}, train loss:{loss.item():.4f} ***********')
+            '''
             # batch_size = 3时
             # tensor([[0.4946, 0.5024],
             #         [0.4945, 0.5026],
@@ -367,7 +346,6 @@ class BiModalTrainerUdiva(object):
             #         [0., 1.],
             #         [1., 0.]])
             # loss= tensor(0.2487, grad_fn=<MseLossBackward0>)
-            
             
             # tensor([[0.2553, 0.7423],
             #         [0.2523, 0.7545],
@@ -406,24 +384,18 @@ class BiModalTrainerUdiva(object):
             # tensor([[0., 1.]])
             # outputs.size()= torch.Size([1, 2]) , labels.size()= torch.Size([1, 2])
             # loss= tensor(0.6941, grad_fn=<BinaryCrossEntropyBackward0>) # 计算过程: 0.4929*log(0.4929)+(1-0.4929)*log(1-0.4929)=0.6941
-            
-            
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  loss=', loss)
+            '''
             self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
-            # print('loss is ready, start to backward...')
             loss.backward() # loss.backward()是将loss反向传播，即计算loss对每个参数的梯度，即loss对每个参数的偏导数
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  经过backward函数后, loss=', loss, '  loss.item()=', loss.item())
             optimizer.step() # step()是将梯度更新到参数上，即将loss对每个参数的偏导数更新到参数上， 即 w = w - lr * gradient, 其中lr是学习率，gradient是loss对每个参数的偏导数，即loss对每个参数的梯度， w是模型的参数
 
             iter_end_time = time.time()
             iter_time = iter_end_time - iter_start_time
 
             loss_list.append(loss.item())
-            # acc_avg的公式里用1来减去是因为 we use 1 - |y_pred - y_true| as the accuracy metric, beacause we want to penalize the model more when the prediction is far from the ground truth.
-            acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0) # torch.abs 计算 tensor 的每个元素的绝对值, torch.abs(outputs.cpu() - labels.cpu())是预测值与真实值的差的绝对值, 即预测值与真实值的差的绝对值的平均值即为acc_avg, 即acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean(), clip(min=0)是将acc_avg的最小值限制在0以上
-            # print('outputs:', outputs.cpu().detach().numpy(), 'labels:', labels.cpu().detach().numpy(), 'acc_avg:', acc_avg.detach().numpy(), ', abs(outputs-labels):', torch.abs(outputs.cpu() - labels.cpu()).detach().numpy(), ' 1-abs:', (1 - torch.abs(outputs.cpu() - labels.cpu())).detach().numpy())
-            '''
-            acc_avg计算示例(batch_size=1):
+            # acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0) # acc_avg的公式里用1来减去是因为 we use 1 - |y_pred - y_true| as the accuracy metric, beacause we want to penalize the model more when the prediction is far from the ground truth. # torch.abs 计算 tensor 的每个元素的绝对值, torch.abs(outputs.cpu() - labels.cpu())是预测值与真实值的差的绝对值, 即预测值与真实值的差的绝对值的平均值即为acc_avg, 即acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean(), clip(min=0)是将acc_avg的最小值限制在0以上
+            ''' 
+            acc_avg计算示例(batch_size=1): acc_avg = (1 - torch.abs(outputs.cpu() - labels.cpu())).mean().clip(min=0)
                 1. outputs: [[0.4764987  0.52350134]] labels: [[1. 0.]] acc_avg: 0.4764987,
                     abs(outputs-labels): [[0.5235013  0.52350134]]  1-abs: [[0.47649872 0.47649866]], 平均值:0.47649872+0.47649866=0.9529974/2=0.4764987
                 2. outputs: [[0.73084384 0.26915607]] labels: [[0. 1.]] acc_avg: 0.26915613,
@@ -463,30 +435,26 @@ class BiModalTrainerUdiva(object):
                 1-abs: [[0.39302874 0.39302874]
                         [0.6539037  0.6539037 ]] # acc平均值: 0.39302874+0.39302874+0.6539037+0.6539037/4=2.09386488/4=0.52346622
             '''
-
             
-            # # 修改acc_avg的计算逻辑：outputs的第一维度是batch size，对于每个batch size，其shape为[2], 2是因为有2个输出. 如果第一个输出大于第二个输出，则预测的tensor为[1, 0], 如果第二个输出大于第一个输出，则预测的tensor为[0, 1]。如果预测的tensor与真实的tensor相等，则预测正确，否则预测错误
-            # acc_avg = 0
-            # for j in range(outputs.size()[0]):
-            #     if torch.argmax(outputs[j]) == torch.argmax(labels[j]): # torch.argmax()是返回tensor中最大值的索引
-            #         acc_avg += 1
-            # acc_avg = acc_avg / outputs.size()[0]
-                        
+            # 因为我们需要预测的是认识/不认识，属于分类问题而不是回归问题，所以计算acc的方式为：acc = (y_pred.argmax(dim=1) == y_true).float()
+            batch_total_acc = (outputs.cpu().argmax(dim=-1) == labels.cpu().argmax(dim=-1)).sum() # 当前batch里分类预测正确的样本数
+            batch_total_num = outputs.cpu().shape[0] # 当前batch的样本总数
+            batch_acc = batch_total_acc / batch_total_num # 当前batch的acc
+            epoch_total_acc += batch_total_acc
+            epoch_total_num += batch_total_num
+            epoch_current_acc = epoch_total_acc / epoch_total_num
             
-            acc_avg = acc_avg.detach().numpy() # detach()是将acc_avg从计算图中分离出来后，再转换成numpy类型的float类型，即tensor转换成float类型
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, ' 经过acc_avg.detach().numpy()后, acc_avg=', acc_avg)
+            acc_avg = batch_acc.detach().numpy() # detach()是将acc_avg从计算图中分离出来后，再转换成numpy类型的float类型，即tensor转换成float类型
             acc_avg_list.append(acc_avg)
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.train() 正在训练... i=', i, '  acc_avg_list=', acc_avg_list)
 
-            # log to wandb
             wandb.log({
                 "train_loss":  float(loss.item()),
-                "train_acc": float(acc_avg),
+                "train_acc": float(acc_avg), # 当前batch的acc
+                "train_epoch_current_acc": float(epoch_current_acc), # 当前epoch的持续记录的acc
                 "learning rate": lr,
                 "epoch": epoch_idx + 1,
             })
 
-            # print loss and training info for an interval
             if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1: #  self.cfg.LOG_INTERVAL = 10，即每10个batch打印一次loss和acc_avg
                 remain_iter = epo_iter_num - i # epo_iter_num(一个epoch里的batch数)-当前的batch数=剩余的batch数
                 remain_epo = self.cfg.MAX_EPOCH - epoch_idx 
@@ -494,15 +462,21 @@ class BiModalTrainerUdiva(object):
                 eta = int(eta) # 将eta转换成int类型
                 eta_string = f"{eta // 3600}h:{eta % 3600 // 60}m:{eta % 60}s"  # 将eta转换成时分秒的形式
                 self.logger.info(
-                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} ACC:{:.4f} ETA:{} ".format(
+                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) ETA:{} \n".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo 
                         i + 1, epo_iter_num,                 # Iter
                         iter_time,                           # IterTime
-                        float(loss.item()), float(acc_avg),  # LOSS ACC 
+                        float(loss.item()),                  # LOSS
+                        float(acc_avg), batch_total_acc, batch_total_num,    # Batch ACC
+                        epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo current ACC
                         eta_string,                          # ETA
                     )
                 )
-        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] 训练结束, data_loader里的元素个数为: final_i=', final_i)
+        
+        epoch_summary_acc = epoch_total_acc / epoch_total_num
+        self.logger.info(f"Train: Epo[{(epoch_idx + 1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Epoch Summary Acc: {epoch_summary_acc} ({epoch_total_acc}/{epoch_total_num})")
+        wandb.log({"train_epoch_summary_acc": float(epoch_summary_acc), "epoch": epoch_idx + 1}) # 记录当前epoch全部batch遍历完后的总体acc
+        
         self.clt.record_train_loss(loss_list) # 将loss_list里的loss值记录到self.clt里
         self.clt.record_train_acc(acc_avg_list) # 将acc_avg_list里的acc_avg值记录到self.clt里
 
@@ -512,121 +486,128 @@ class BiModalTrainerUdiva(object):
             loss_batch_list = []
             acc_batch_list = []
             ocean_acc_epoch = []
+            epoch_total_acc = 0
+            epoch_total_num = 0
+            epo_iter_num = len(data_loader)
             for i, data in enumerate(data_loader):
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i)
-                # if i == 0:
-                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data.keys()=', data.keys()) # data.keys()= dict_keys(['image', 'audio', 'label'])
-                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[image]的size: ', data['image'].size()) # torch.Size([4, 3, 224, 224]) 4对应config里的BATCH_SIZE
-                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[audio]的size: ', data['audio'].size()) # torch.Size([4, 1, 1, 50176]) 4对应config里的BATCH_SIZE
-                    # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainer.valid() 正在valid... i=', i,  'data[label]的size: ', data['label'].size(),'  data[label]=', data['label']) # torch.Size([4, 5]) 4对应config里的BATCH_SIZE
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
-                # print('[bi_modal_trainer.py]valid.. outputs.size()=', outputs.size(), '  outputs=', outputs, '  labels.size()=', labels.size(), '  labels=', labels)
-                loss = loss_f(outputs.cpu(), labels.cpu())
+                loss = loss_f(outputs.cpu(), labels.cpu().float())
+                
+                print(outputs)
+                print(labels)
+                print(f'*********** i:{i}, val loss:{loss.item():.4f} ***********')
+                
                 loss_batch_list.append(loss.item())
-                ocean_acc_batch = (1 - torch.abs(outputs.cpu().detach() - labels.cpu().detach())).mean(dim=0).clip(min=0) # ocean acc on a batch
-                ocean_acc_epoch.append(ocean_acc_batch)
-                acc_batch_avg = ocean_acc_batch.mean()
-                acc_batch_list.append(acc_batch_avg)
-            ocean_acc = torch.stack(ocean_acc_epoch, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images
-            ocean_acc_avg = ocean_acc.mean()
-            self.tb_writer.add_scalar("valid_acc", ocean_acc_avg, epoch_idx)
+                
+                batch_total_acc = (outputs.cpu().argmax(dim=-1) == labels.cpu().argmax(dim=-1)).sum() # 当前batch里分类预测正确的样本数
+                batch_total_num = outputs.cpu().shape[0] # 当前batch的样本总数
+                batch_acc = batch_total_acc / batch_total_num # 当前batch的acc
+                epoch_total_acc += batch_total_acc
+                epoch_total_num += batch_total_num
+                epoch_current_acc = epoch_total_acc / epoch_total_num
+                
+                if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
+                    self.logger.info(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{})".format(
+                            epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
+                            i + 1, epo_iter_num,                 # Iter
+                            float(loss.item()),                  # LOSS
+                            float(batch_acc), batch_total_acc, batch_total_num,  # Batch ACC
+                            epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo Current ACC
+                        )
+                    )
+                
+                wandb.log({
+                    "valid_loss": float(loss.item()),
+                    "valid_acc": float(batch_acc),
+                    "valid_epoch_current_acc": float(epoch_current_acc),
+                    "epoch": epoch_idx + 1,
+                })
+                acc_batch_list.append(batch_acc)
+            self.tb_writer.add_scalar("valid_acc", batch_acc, epoch_idx)
+        
+        epoch_summary_acc = epoch_total_acc / epoch_total_num # 当前epoch的总体acc
         self.clt.record_valid_loss(loss_batch_list) # loss over batches
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
-        self.clt.record_valid_ocean_acc(ocean_acc) # ocean acc over all valid data
-        if ocean_acc_avg > self.clt.best_valid_acc: # 如果当前的ocean_acc_avg大于之前的最好的ocean_acc_avg
-            self.clt.update_best_acc(ocean_acc_avg)
+        if epoch_summary_acc > self.clt.best_valid_acc: # 如果当前的epoch_summary_acc大于之前的最好的epoch_summary_acc
+            self.clt.update_best_acc(epoch_summary_acc)
             self.clt.update_model_save_flag(1)   # 1表示需要保存模型
+            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best epoch summary acc: {self.clt.best_valid_acc:.4f}, will save model')
         else:
+            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} <= best epoch summary acc: {self.clt.best_valid_acc:.4f}, not save model')
             self.clt.update_model_save_flag(0)  # 0表示不需要保存模型
-
+        
         self.logger.info(
-            "Valid: Epoch[{:0>3}/{:0>3}] Train Mean_Acc: {:.2%} Valid Mean_Acc:{:.2%} OCEAN_ACC:{}\n".
+            "Valid: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{})\n".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
-                float(self.clt.epoch_train_acc),   # Train Mean_Acc
-                float(self.clt.epoch_valid_acc),   # Valid Mean_Acc
-                self.clt.valid_ocean_acc)          # OCEAN_ACC
+                # float(self.clt.epoch_train_acc),   # Train Mean_Acc
+                # float(self.clt.epoch_valid_acc),   # Valid Mean_Acc，看日志发现和 epoch_summary_acc 值一样
+                # self.clt.valid_ocean_acc,          # OCEAN_ACC，看日志发现和 epoch_summary_acc 值一样
+                epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
+            )
         )
 
-        # log to wandb
         wandb.log({
-            "valid_loss": loss.item(),
-            "valid_acc_batch_avg": acc_batch_avg,
-            "valid_ocean_acc_avg": ocean_acc_avg,
-            "Train Mean_Acc": float(self.clt.epoch_train_acc),
-            "Valid Mean_Acc": float(self.clt.epoch_valid_acc),
+            # "valid_acc_batch_avg": acc_batch_avg,
+            # "valid_ocean_acc_avg": ocean_acc_avg,
+            # "Train Mean_Acc": float(self.clt.epoch_train_acc),
+            # "Valid Mean_Acc": float(self.clt.epoch_valid_acc),
+            "val_epoch_summary_acc": float(epoch_summary_acc),
             "epoch": epoch_idx + 1,
         })
 
-    def test(self, data_loader, model):
-        mse_func = torch.nn.MSELoss(reduction="none") # MSE损失函数, reduction="none"表示不对损失求均值
+    def test(self, data_loader, model, epoch_idx=None):
         model.eval()
-        with torch.no_grad(): # 不计算梯度 也不更新参数，因为是测试阶段，不需要更新参数，只需要计算loss，计算acc，计算ocean_acc，计算ocean_mse... 
-            mse_ls = []  # 用于存储mse
-            ocean_acc = [] # 用于存储ocean_acc
-            label_list = [] # 用于存储label
-            output_list = [] # 用于存储output
-            count = 0
+        with torch.no_grad(): # 不计算梯度 也不更新参数，因为是测试阶段，不需要更新参数，只需要计算loss，计算acc
+            # label_list = [] # 用于存储真实标签label
+            # output_list = [] # 用于存储模型的输出output
+            total_acc = 0
+            total_num = 0
+            test_acc = 0
             for data in tqdm(data_loader): # 遍历data_loader
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
-
                 outputs = outputs.cpu().detach()
                 labels = labels.cpu().detach()
-                output_list.append(outputs)
-                label_list.append(labels)
-                mse = mse_func(outputs, labels).mean(dim=0) #torch.nn.MSELoss(reduction="none") 表示不对损失求均值，所以这里需要再求一次均值  MSE全称是均方误差，是回归问题中常用的损失函数，其计算公式为：MSE=1/n∑(y-y')^2，其中y是真实值，y'是预测值，n是样本的个数， MSE越小，说明模型的预测效果越好，MSE越大，说明模型的预测效果越差，MSE的取值范围是[0,+∞)，MSE越接近0，说明模型的预测效果越好，MSE越接近+∞，说明模型的预测效果越差。
-                ocean_acc_batch = (1 - torch.abs(outputs - labels)).mean(dim=0).clip(min=0)
-                # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... mse=', mse, 'ocean_acc_batch=', ocean_acc_batch)
-                mse_ls.append(mse)
-                ocean_acc.append(ocean_acc_batch)
-                count += 1
-                # # log to wandb
-                # wandb.log({
-                #     "test_mse": mse,
-                #     "test_ocean_acc_batch": ocean_acc_batch,
-                #     "test_iteration": count,
-                # })
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_acc =', ocean_acc) # ocean_acc = [tensor([0.5024, 0.5014]), tensor([0.4976, 0.4985])]
-            ocean_mse = torch.stack(mse_ls, dim=0).mean(dim=0).numpy() # torch.stack() 将mse_ls中的每个元素都堆叠起来，dim=0表示按照第0维进行堆叠，即按照行堆叠，最后的结果是一个矩阵，矩阵的行数是mse_ls中元素的个数，列数是每个元素的列数
-            ocean_acc = torch.stack(ocean_acc, dim=0).mean(dim=0).numpy()  # ocean acc on all valid images 
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... after .mean(dim=0).numpy(), ocean_mse=', ocean_mse, ' ocean_acc=', ocean_acc) # after .mean(dim=0).numpy(), ocean_mse= [0.25000432 0.2500581 ]  ocean_acc= [0.5000013  0.49994403]
-            ocean_mse_mean = ocean_mse.mean() 
-            ocean_acc_avg = ocean_acc.mean()
-            dataset_output = torch.cat(output_list, dim=0).numpy()
-            dataset_label = torch.cat(label_list, dim=0).numpy()
-            # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse=', ocean_mse, '  ocean_mse_mean=',ocean_mse_mean, '  ocean_acc=', ocean_acc, ' ocean_acc_avg=', ocean_acc_avg, '\n dataset_output=', dataset_output, '\n dataset_label=', dataset_label)
-            # ocean_mse= [0.25000432 0.2500581] ocean_mse_mean= 0.25003123   ocean_acc= [0.5000013  0.49994403]  ocean_acc_avg= 0.49997267
+                
+                print(outputs)
+                print(labels)
+                print(f'*********** Test outputs and labels ***********')
+                
+                # 计算分类准确率
+                total_acc += (outputs.argmax(dim=-1) == labels.argmax(dim=-1)).sum()
+                total_num += outputs.shape[0]
+                test_acc = total_acc / total_num 
+                if epoch_idx is not None:
+                    self.logger.info(f"Test: Epo of Train[{(epoch_idx + 1):0>3}/{ self.cfg.MAX_EPOCH:0>3}] Tqdm Current test_acc:{test_acc} ({total_acc}/{total_num})")
+                else:
+                    self.logger.info(f"Test: Tqdm Current test_acc:{test_acc} ({total_acc}/{total_num})")
+                
+                # output_list.append(outputs)
+                # label_list.append(labels)
+            
+            # dataset_output = torch.cat(output_list, dim=0).numpy() # [val_batch_size, 2]
+            # dataset_label = torch.cat(label_list, dim=0).numpy() # [val_batch_size, 2]] 
             # dataset_output= [[0.5023817  0.49859118]
             #                 [0.502379   0.49847925]]
             # dataset_label= [[1. 0.]
             #                 [0. 1.]]
-        ocean_mse_mean_rand = np.round(ocean_mse_mean, 4) # round to 4 decimal places , 保留4位小数, 参考：https://www.geeksforgeeks.org/numpy-round_-python/
-        ocean_acc_avg_rand = np.round(ocean_acc_avg.astype("float64"), 4)
-        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_mean_rand=', ocean_mse_mean_rand, '  ocean_acc_avg_rand=', ocean_acc_avg_rand) # ocean_mse_mean_rand= 0.25   ocean_acc_avg_rand= 0.5
+        self.tb_writer.add_scalar("test_acc", test_acc)
+        if epoch_idx is not None:
+            self.logger.info("Test: Epo of Train[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{})\n".
+                             format(
+                                epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
+                                test_acc, total_acc, total_num,    # Epo ACC
+                            ))
+            wandb.log({"test_acc": float(test_acc), "epoch": epoch_idx + 1})
+        else:
+            self.logger.info("Test: Final Acc:{:.4f} ({}/{})\n".format(test_acc, total_acc, total_num))
+            wandb.log({"test_final_acc": float(test_acc)})
 
-        self.tb_writer.add_scalar("test_acc", ocean_acc_avg_rand)
-        # wandb.log({
-        #     "test_ocean_mse_mean_rand": ocean_mse_mean_rand, # 遍历data_loader时每次迭代得到的所有均方误差，然后求平均计算得到平均值
-        #     "test_ocean_acc_avg_rand": ocean_acc_avg_rand, # 遍历data_loader时每次迭代得到的所有预测准确率，然后求平均计算得到平均值
-        # })
-        keys = ["known_label", "unknown_label"]
-        ocean_mse_dict, ocean_acc_dict = {}, {}
-        for i, k in enumerate(keys):
-            # print('[dpcv/engine/bi_modal_trainer.py] 当前循环 i=', i, '  k=', k, '  ocean_mse[i]=', ocean_mse[i], '  ocean_acc[i]=', ocean_acc[i]) # 当前循环 i= 0   k= known_label   ocean_mse[i]= 0.25002003   ocean_acc[i]= 0.4999911  ; 当前循环 i= 1   k= unknown_label   ocean_mse[i]= 0.24997127   ocean_acc[i]= 0.5000472
-            ocean_mse_dict[k] = np.round(ocean_mse[i], 4)
-            ocean_acc_dict[k] = np.round(ocean_acc[i], 4)
-        # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... ocean_mse_dict=', ocean_mse_dict, '  ocean_acc_dict=', ocean_acc_dict)
-        
-        # ocean_acc_avg_rand 遍历data_loader时每次迭代得到的预测准确率，然后计算得到平均值
-        # ocean_acc_dict 遍历data_loader时每次迭代得到的预测准确率所组成的字典
-        # dataset_output 模型具体的预测输出结果
-        # dataset_label 标签
-        # ocean_mse_dict 遍历data_loader时得到的各个均方误差值所组成的字典
-        # ocean_mse_mean_rand 遍历data_loader时得到的均方误差，然后计算得到平均值
-        return ocean_acc_avg_rand, ocean_acc_dict, dataset_output, dataset_label, (ocean_mse_dict, ocean_mse_mean_rand)
+        return test_acc
 
     def full_test(self, data_set, model):
         model.eval()
@@ -709,7 +690,10 @@ class BiModalTrainerUdiva(object):
             img_in, aud_in, labels = data["image"], data["audio"], data["label"]
         else:
             raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
-    
+
+        if self.cfg_model.NAME == "resnet50_3d_model_udiva":
+            img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 N * T * C * H * W 转换为 N * C * T * H * W  e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
+            return (img_in, ), labels
         return (aud_in, img_in), labels
     
     def full_test_data_fmt(self, data):

@@ -121,6 +121,7 @@ __C.TRAIN.PRE_TRAINED_MODEL = None
 __C.TRAIN.RESUME = ""
 __C.TRAIN.LOG_INTERVAL = 10
 __C.TRAIN.VALID_INTERVAL = 1
+__C.TRAIN.TEST_INTERVAL = 1
 __C.TRAIN.OUTPUT_DIR = "results"
 __C.TRAIN.BIMODAL_OPTION = 1 # 1: image only, 2: audio only, 3: image + audio
 # ------------------------------------------- step 7:  test config node ------------------------------------------------

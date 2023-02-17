@@ -732,7 +732,8 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
             sample_size=cfg.DATA.SAMPLE_SIZE,
             config=cfg,
         )
-        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+        # batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+        batch_size = 11 # 待修改 # TODO
     # print('[audio_visual_data_udiva.py] batch_size: ', batch_size, ' mode: ', mode)
     data_loader = DataLoader(
         dataset=dataset,
