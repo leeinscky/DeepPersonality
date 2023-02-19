@@ -1,0 +1,663 @@
+Loading rhel8/default-amp
+  Loading requirement: dot rhel8/slurm singularity/current rhel8/global
+    cuda/11.4 libpciaccess/0.16/gcc-9.4.0-6fonbj6
+    libiconv/1.16/gcc-9.4.0-ahebbov libxml2/2.9.12/gcc-9.4.0-gnknt5e
+    ncurses/6.2/gcc-9.4.0-aiirok7 hwloc/2.5.0/gcc-9.4.0-7sqomga
+    libevent/2.1.12/gcc-9.4.0-hgny7cm numactl/2.0.14/gcc-9.4.0-52dwc6n
+    cuda/11.4.0/gcc-9.4.0-3hnxhjt gdrcopy/2.2/gcc-9.4.0-e4igtfp
+    knem/1.1.4/gcc-9.4.0-bpbxgva libnl/3.3.0/gcc-9.4.0-whwhrwb
+    rdma-core/34.0/gcc-9.4.0-5eo5n2u ucx/1.11.1/gcc-9.4.0-lktqyl4
+    openmpi/4.1.1/gcc-9.4.0-epagguv
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.13.10 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230218_122621-hshmcayl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: wandb version 0.13.10 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230218_122621-vbf1adrc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ethereal-universe-438
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/hshmcayl
+wandb: Syncing run visionary-dawn-439
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/vbf1adrc
+wandb: wandb version 0.13.10 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230218_122621-w30b9jd4
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run smart-plant-437
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/w30b9jd4
+wandb: wandb version 0.13.10 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230218_122621-4urib6bq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run expert-serenity-440
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/4urib6bq
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+{
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":160,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "SAMPLE_SIZE":208,
+        "SESSION":"TALK",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":2,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":9
+    },
+    "LOSS":{
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "NAME":"binary_cross_entropy"
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+    },
+    "MODEL":{
+        "NAME":"resnet50_3d_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.0005,
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "MILESTONE":[
+        "TEST_IMG_DATA":"image_data/test_data",
+            10,
+            20,
+            40,
+            60,
+            80,
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+            100
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        ],
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":176,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "RESET_LR":true,
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    },
+    "TEST":{
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+    "DATA_LOADER":{
+        "COMPUTE_CCC":false,
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":2,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":9
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"resnet50_3d_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "COMPUTE_PCC":false,
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "FACTOR":0.1,
+        "LR_INIT":0.0005,
+        "MILESTONE":[
+            10,
+            20,
+            40,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+            60,
+        "WEIGHT":""
+        "VALID_IMG_DATA":"image_data/valid_data",
+            80,
+    },
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+            100
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":200,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/resnet_3d_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+        "SCHEDULER":"multi_step_scale",
+        "RESUME":"",
+    },
+        "WEIGHT_DECAY":0.0005
+        "START_EPOCH":0,
+        "TEST_INTERVAL":1,
+    "DATA_LOADER":{
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    },
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":2,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":9
+    }
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+    },
+}
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":200,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/resnet_3d_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TEST_INTERVAL":1,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"resnet50_3d_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.0005,
+        "MILESTONE":[
+            10,
+            20,
+            40,
+            60,
+            80,
+            100
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":200,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/resnet_3d_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TEST_INTERVAL":1,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":192,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":2,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":9
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"resnet50_3d_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.0005,
+        "MILESTONE":[
+            10,
+            20,
+            40,
+            60,
+            80,
+            100
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":200,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/resnet_3d_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TEST_INTERVAL":1,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+change learning rate form [0.0005] to [0.0005]
+Training: learning rate:0.0005
+Using BCELoss
+================================== start training... ==================================
+change learning rate form [0.0005] to [0.0005]
+Training: learning rate:0.0005
+Using BCELoss
+================================== start training... ==================================
+change learning rate form [0.0005] to [0.0005]
+Training: learning rate:0.0005
+Using BCELoss
+================================== start training... ==================================
+change learning rate form [0.0005] to [0.0005]
+Training: learning rate:0.0005
+Using BCELoss
+================================== start training... ==================================
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: 🚀 View run ethereal-universe-438 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/hshmcayl
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230218_122621-hshmcayl/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 145, in <module>
+    main()
+  File "./script/run_exp.py", line 55, in main
+    runner.run()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 242, in run
+    self.train()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 160, in train
+    self.train_epochs(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 119, in train_epochs
+    self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/engine/bi_modal_trainer.py", line 332, in train
+    outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/resnet_3d.py", line 332, in forward
+    x = self.layer2(x)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/container.py", line 141, in forward
+    input = module(input)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/resnet_3d.py", line 98, in forward
+    out = self.conv3(out)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 590, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 585, in _conv_forward
+    return F.conv3d(
+RuntimeError: CUDA out of memory. Tried to allocate 980.00 MiB (GPU 0; 79.17 GiB total capacity; 76.26 GiB already allocated; 349.31 MiB free; 76.78 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+srun: error: gpu-q-53: task 0: Exited with exit code 1
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: / 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run visionary-dawn-439 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/vbf1adrc
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230218_122621-vbf1adrc/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 145, in <module>
+    main()
+  File "./script/run_exp.py", line 55, in main
+    runner.run()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 242, in run
+    self.train()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 160, in train
+    self.train_epochs(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 119, in train_epochs
+    self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/engine/bi_modal_trainer.py", line 332, in train
+    outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/resnet_3d.py", line 323, in forward
+    x = self.bn1(x)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 168, in forward
+    return F.batch_norm(
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/functional.py", line 2282, in batch_norm
+    return torch.batch_norm(
+RuntimeError: cuDNN error: CUDNN_STATUS_NOT_SUPPORTED. This error may appear if you passed in a non-contiguous input.
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+wandb: Waiting for W&B process to finish... (failed 1). Press Control-C to abort syncing.
+srun: error: gpu-q-53: task 0: Exited with exit code 1
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.031 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.031 MB uploaded (0.000 MB deduped)wandb: / 0.031 MB of 0.031 MB uploaded (0.000 MB deduped)wandb: 🚀 View run smart-plant-437 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/w30b9jd4
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230218_122621-w30b9jd4/logs
+wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: \ 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: | 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: / 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: - 0.014 MB of 0.014 MB uploaded (0.000 MB deduped)wandb: 🚀 View run expert-serenity-440 at: https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/4urib6bq
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20230218_122621-4urib6bq/logs
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 145, in <module>
+    main()
+  File "./script/run_exp.py", line 55, in main
+    runner.run()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 242, in run
+    self.train()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 160, in train
+    self.train_epochs(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 119, in train_epochs
+    self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/engine/bi_modal_trainer.py", line 332, in train
+    outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/resnet_3d.py", line 323, in forward
+    x = self.bn1(x)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 168, in forward
+    return F.batch_norm(
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/functional.py", line 2282, in batch_norm
+    return torch.batch_norm(
+RuntimeError: cuDNN error: CUDNN_STATUS_NOT_SUPPORTED. This error may appear if you passed in a non-contiguous input.
+Traceback (most recent call last):
+  File "./script/run_exp.py", line 145, in <module>
+    main()
+  File "./script/run_exp.py", line 55, in main
+    runner.run()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 242, in run
+    self.train()
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 160, in train
+    self.train_epochs(cfg)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/experiment/exp_runner.py", line 119, in train_epochs
+    self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/engine/bi_modal_trainer.py", line 332, in train
+    outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/code/DeepPersonality/script/../dpcv/modeling/networks/resnet_3d.py", line 323, in forward
+    x = self.bn1(x)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1102, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/modules/batchnorm.py", line 168, in forward
+    return F.batch_norm(
+  File "/home/zl525/.conda/envs/DeepPersonality/lib/python3.8/site-packages/torch/nn/functional.py", line 2282, in batch_norm
+    return torch.batch_norm(
+RuntimeError: cuDNN error: CUDNN_STATUS_NOT_SUPPORTED. This error may appear if you passed in a non-contiguous input.
+srun: error: gpu-q-53: task 0: Exited with exit code 1
+srun: error: gpu-q-53: task 0: Exited with exit code 1
+Changed directory to /home/zl525/code/DeepPersonality/leenote.
+
+JobID: 14539685
+======
+Time: Sat Feb 18 12:28:20 GMT 2023
+Running on master node: gpu-q-53
+Current directory: /home/zl525/code/DeepPersonality/leenote
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_CTYPE = "UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").
+
+Nodes allocated:
+================
+gpu-q-53
+
+numtasks=4, numnodes=1, mpi_tasks_per_node=4 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+ 
+

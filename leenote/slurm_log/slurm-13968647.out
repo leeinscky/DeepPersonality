@@ -1,0 +1,591 @@
+rhel8/default-icl(17):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-compilers/2022.1.0/gcc'
+rhel8/default-icl(18):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-mpi/2021.6.0/intel'
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230207_100734-hjy8hop4
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glad-universe-299
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/hjy8hop4
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":80,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":1,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":64,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":8
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"get_img_modal_lstm_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.01,
+        "MILESTONE":[
+            5,
+            7,
+            9,
+            11,
+            13,
+            16,
+            18,
+            20,
+            23,
+            25,
+            28,
+            30,
+            35,
+            38,
+            40,
+            42,
+            44,
+            46,
+            48,
+            50,
+            52,
+            54,
+            56,
+            70,
+            100
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":500,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+change learning rate form [0.01] to [0.01]
+Training: learning rate:0.01
+Using BCELoss
+================================== start training... ==================================
+Train: Epo[001/500] Iter[001/001] IterTime:[149.96s] LOSS: 0.6922 ACC:0.5005 ETA:20h:52m:11s 
+Valid: Epoch[001/500] Train Mean_Acc: 50.05% Valid Mean_Acc:39.43% OCEAN_ACC:[0.39425182 0.39425182]
+
+Training: learning rate:0.01
+Train: Epo[002/500] Iter[001/001] IterTime:[177.65s] LOSS: 1.0113 ACC:0.5902 ETA:24h:40m:23s 
+Valid: Epoch[002/500] Train Mean_Acc: 59.02% Valid Mean_Acc:51.22% OCEAN_ACC:[0.51221746 0.51221746]
+
+Training: learning rate:0.01
+Train: Epo[003/500] Iter[001/001] IterTime:[178.36s] LOSS: 0.7633 ACC:0.4781 ETA:24h:43m:22s 
+Valid: Epoch[003/500] Train Mean_Acc: 47.81% Valid Mean_Acc:50.58% OCEAN_ACC:[0.5057609 0.5057609]
+
+Training: learning rate:0.01
+Train: Epo[004/500] Iter[001/001] IterTime:[147.61s] LOSS: 0.7007 ACC:0.4989 ETA:20h:25m:10s 
+Valid: Epoch[004/500] Train Mean_Acc: 49.89% Valid Mean_Acc:49.85% OCEAN_ACC:[0.49851483 0.49851483]
+
+Training: learning rate:0.01
+Train: Epo[005/500] Iter[001/001] IterTime:[147.20s] LOSS: 0.6962 ACC:0.4985 ETA:20h:19m:16s 
+Valid: Epoch[005/500] Train Mean_Acc: 49.85% Valid Mean_Acc:48.00% OCEAN_ACC:[0.48000914 0.48000914]
+
+Training: learning rate:0.001
+Train: Epo[006/500] Iter[001/001] IterTime:[143.96s] LOSS: 0.6330 ACC:0.5560 ETA:19h:50m:2s 
+Valid: Epoch[006/500] Train Mean_Acc: 55.60% Valid Mean_Acc:43.77% OCEAN_ACC:[0.43765303 0.437653  ]
+
+Training: learning rate:0.001
+Train: Epo[007/500] Iter[001/001] IterTime:[146.66s] LOSS: 0.6322 ACC:0.5611 ETA:20h:9m:58s 
+Valid: Epoch[007/500] Train Mean_Acc: 56.11% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47779658 0.47779655]
+
+Training: learning rate:0.0001
+Train: Epo[008/500] Iter[001/001] IterTime:[146.67s] LOSS: 0.7566 ACC:0.5061 ETA:20h:7m:36s 
+Valid: Epoch[008/500] Train Mean_Acc: 50.61% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45556146 0.4555615 ]
+
+Training: learning rate:0.0001
+Train: Epo[009/500] Iter[001/001] IterTime:[143.77s] LOSS: 0.6950 ACC:0.5354 ETA:19h:41m:17s 
+Valid: Epoch[009/500] Train Mean_Acc: 53.54% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45561972 0.45561963]
+
+Training: learning rate:1e-05
+Train: Epo[010/500] Iter[001/001] IterTime:[146.72s] LOSS: 0.6951 ACC:0.5354 ETA:20h:3m:8s 
+Valid: Epoch[010/500] Train Mean_Acc: 53.54% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556148 0.4556148]
+
+Training: learning rate:1e-05
+Train: Epo[011/500] Iter[001/001] IterTime:[146.19s] LOSS: 0.6213 ACC:0.5704 ETA:19h:56m:16s 
+Valid: Epoch[011/500] Train Mean_Acc: 57.04% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47782218 0.47782218]
+
+Training: learning rate:1.0000000000000002e-06
+Train: Epo[012/500] Iter[001/001] IterTime:[146.31s] LOSS: 0.6581 ACC:0.5529 ETA:19h:54m:51s 
+Valid: Epoch[012/500] Train Mean_Acc: 55.29% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778229 0.4778229]
+
+Training: learning rate:1.0000000000000002e-06
+Train: Epo[013/500] Iter[001/001] IterTime:[145.16s] LOSS: 0.6336 ACC:0.5645 ETA:19h:43m:5s 
+Valid: Epoch[013/500] Train Mean_Acc: 56.45% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564723 0.45564723]
+
+Training: learning rate:1.0000000000000002e-07
+Train: Epo[014/500] Iter[001/001] IterTime:[148.12s] LOSS: 0.6455 ACC:0.5588 ETA:20h:4m:42s 
+Valid: Epoch[014/500] Train Mean_Acc: 55.88% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778237 0.4778237]
+
+Training: learning rate:1.0000000000000002e-07
+Train: Epo[015/500] Iter[001/001] IterTime:[145.39s] LOSS: 0.6588 ACC:0.5527 ETA:19h:40m:4s 
+Valid: Epoch[015/500] Train Mean_Acc: 55.27% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778238  0.47782376]
+
+Training: learning rate:1.0000000000000002e-07
+Train: Epo[016/500] Iter[001/001] IterTime:[145.78s] LOSS: 0.6823 ACC:0.5414 ETA:19h:40m:49s 
+Valid: Epoch[016/500] Train Mean_Acc: 54.14% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564783 0.45564777]
+
+Training: learning rate:1.0000000000000004e-08
+Train: Epo[017/500] Iter[001/001] IterTime:[143.53s] LOSS: 0.6337 ACC:0.5644 ETA:19h:20m:11s 
+Valid: Epoch[017/500] Train Mean_Acc: 56.44% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239 0.4778239]
+
+Training: learning rate:1.0000000000000004e-08
+Train: Epo[018/500] Iter[001/001] IterTime:[144.36s] LOSS: 0.7332 ACC:0.5172 ETA:19h:24m:29s 
+Valid: Epoch[018/500] Train Mean_Acc: 51.72% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000005e-09
+Train: Epo[019/500] Iter[001/001] IterTime:[144.29s] LOSS: 0.6948 ACC:0.5353 ETA:19h:21m:32s 
+Valid: Epoch[019/500] Train Mean_Acc: 53.53% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47782394 0.4778239 ]
+
+Training: learning rate:1.0000000000000005e-09
+Train: Epo[020/500] Iter[001/001] IterTime:[144.99s] LOSS: 0.6335 ACC:0.5647 ETA:19h:24m:47s 
+Valid: Epoch[020/500] Train Mean_Acc: 56.47% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.0000000000000006e-10
+Train: Epo[021/500] Iter[001/001] IterTime:[146.03s] LOSS: 0.6955 ACC:0.5351 ETA:19h:30m:39s 
+Valid: Epoch[021/500] Train Mean_Acc: 53.51% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000006e-10
+Train: Epo[022/500] Iter[001/001] IterTime:[143.52s] LOSS: 0.5964 ACC:0.5822 ETA:19h:8m:7s 
+Valid: Epoch[022/500] Train Mean_Acc: 58.22% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000006e-10
+Train: Epo[023/500] Iter[001/001] IterTime:[145.22s] LOSS: 0.6333 ACC:0.5647 ETA:19h:19m:21s 
+Valid: Epoch[023/500] Train Mean_Acc: 56.47% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000006e-11
+Train: Epo[024/500] Iter[001/001] IterTime:[145.85s] LOSS: 0.6951 ACC:0.5354 ETA:19h:21m:57s 
+Valid: Epoch[024/500] Train Mean_Acc: 53.54% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000006e-11
+Train: Epo[025/500] Iter[001/001] IterTime:[143.46s] LOSS: 0.6828 ACC:0.5409 ETA:19h:0m:28s 
+Valid: Epoch[025/500] Train Mean_Acc: 54.09% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000006e-12
+Train: Epo[026/500] Iter[001/001] IterTime:[147.12s] LOSS: 0.6957 ACC:0.5349 ETA:19h:27m:6s 
+Valid: Epoch[026/500] Train Mean_Acc: 53.49% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718 0.4334718]
+
+Training: learning rate:1.0000000000000006e-12
+Train: Epo[027/500] Iter[001/001] IterTime:[143.41s] LOSS: 0.6333 ACC:0.5647 ETA:18h:55m:21s 
+Valid: Epoch[027/500] Train Mean_Acc: 56.47% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000006e-12
+Train: Epo[028/500] Iter[001/001] IterTime:[146.49s] LOSS: 0.6708 ACC:0.5470 ETA:19h:17m:16s 
+Valid: Epoch[028/500] Train Mean_Acc: 54.70% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000007e-13
+Train: Epo[029/500] Iter[001/001] IterTime:[144.41s] LOSS: 0.6706 ACC:0.5468 ETA:18h:58m:28s 
+Valid: Epoch[029/500] Train Mean_Acc: 54.68% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718 0.4334718]
+
+Training: learning rate:1.0000000000000007e-13
+Train: Epo[030/500] Iter[001/001] IterTime:[143.45s] LOSS: 0.6947 ACC:0.5354 ETA:18h:48m:27s 
+Valid: Epoch[030/500] Train Mean_Acc: 53.54% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000008e-14
+Train: Epo[031/500] Iter[001/001] IterTime:[144.81s] LOSS: 0.6461 ACC:0.5584 ETA:18h:56m:43s 
+Valid: Epoch[031/500] Train Mean_Acc: 55.84% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000008e-14
+Train: Epo[032/500] Iter[001/001] IterTime:[148.34s] LOSS: 0.6458 ACC:0.5588 ETA:19h:21m:57s 
+Valid: Epoch[032/500] Train Mean_Acc: 55.88% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718  0.43347183]
+
+Training: learning rate:1.0000000000000008e-14
+Train: Epo[033/500] Iter[001/001] IterTime:[150.30s] LOSS: 0.6459 ACC:0.5588 ETA:19h:34m:49s 
+Valid: Epoch[033/500] Train Mean_Acc: 55.88% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000008e-14
+Train: Epo[034/500] Iter[001/001] IterTime:[145.38s] LOSS: 0.6580 ACC:0.5529 ETA:18h:53m:59s 
+Valid: Epoch[034/500] Train Mean_Acc: 55.29% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.0000000000000008e-14
+Train: Epo[035/500] Iter[001/001] IterTime:[145.33s] LOSS: 0.6336 ACC:0.5645 ETA:18h:51m:8s 
+Valid: Epoch[035/500] Train Mean_Acc: 56.45% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000009e-15
+Train: Epo[036/500] Iter[001/001] IterTime:[146.51s] LOSS: 0.6332 ACC:0.5647 ETA:18h:57m:52s 
+Valid: Epoch[036/500] Train Mean_Acc: 56.47% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718 0.4334718]
+
+Training: learning rate:1.0000000000000009e-15
+Train: Epo[037/500] Iter[001/001] IterTime:[147.25s] LOSS: 0.6701 ACC:0.5470 ETA:19h:1m:10s 
+Valid: Epoch[037/500] Train Mean_Acc: 54.70% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000009e-15
+Train: Epo[038/500] Iter[001/001] IterTime:[144.44s] LOSS: 0.6581 ACC:0.5528 ETA:18h:37m:0s 
+Valid: Epoch[038/500] Train Mean_Acc: 55.28% Valid Mean_Acc:45.57% OCEAN_ACC:[0.45566577 0.4556658 ]
+
+Training: learning rate:1.000000000000001e-16
+Train: Epo[039/500] Iter[001/001] IterTime:[145.89s] LOSS: 0.6953 ACC:0.5351 ETA:18h:45m:46s 
+Valid: Epoch[039/500] Train Mean_Acc: 53.51% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.000000000000001e-16
+Train: Epo[040/500] Iter[001/001] IterTime:[145.39s] LOSS: 0.6825 ACC:0.5413 ETA:18h:39m:32s 
+Valid: Epoch[040/500] Train Mean_Acc: 54.13% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.000000000000001e-17
+Train: Epo[041/500] Iter[001/001] IterTime:[145.46s] LOSS: 0.7073 ACC:0.5296 ETA:18h:37m:35s 
+Valid: Epoch[041/500] Train Mean_Acc: 52.96% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.000000000000001e-17
+Train: Epo[042/500] Iter[001/001] IterTime:[147.92s] LOSS: 0.6575 ACC:0.5531 ETA:18h:54m:0s 
+Valid: Epoch[042/500] Train Mean_Acc: 55.31% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.000000000000001e-18
+Train: Epo[043/500] Iter[001/001] IterTime:[144.14s] LOSS: 0.7086 ACC:0.5289 ETA:18h:22m:42s 
+Valid: Epoch[043/500] Train Mean_Acc: 52.89% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.000000000000001e-18
+Train: Epo[044/500] Iter[001/001] IterTime:[145.83s] LOSS: 0.6951 ACC:0.5353 ETA:18h:33m:10s 
+Valid: Epoch[044/500] Train Mean_Acc: 53.53% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.000000000000001e-19
+Train: Epo[045/500] Iter[001/001] IterTime:[147.45s] LOSS: 0.7454 ACC:0.5113 ETA:18h:43m:2s 
+Valid: Epoch[045/500] Train Mean_Acc: 51.13% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.000000000000001e-19
+Train: Epo[046/500] Iter[001/001] IterTime:[144.73s] LOSS: 0.7570 ACC:0.5058 ETA:18h:19m:56s 
+Valid: Epoch[046/500] Train Mean_Acc: 50.58% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000011e-20
+Train: Epo[047/500] Iter[001/001] IterTime:[145.73s] LOSS: 0.6209 ACC:0.5706 ETA:18h:25m:8s 
+Valid: Epoch[047/500] Train Mean_Acc: 57.06% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000011e-20
+Train: Epo[048/500] Iter[001/001] IterTime:[145.30s] LOSS: 0.7080 ACC:0.5293 ETA:18h:19m:24s 
+Valid: Epoch[048/500] Train Mean_Acc: 52.93% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000012e-21
+Train: Epo[049/500] Iter[001/001] IterTime:[146.77s] LOSS: 0.7325 ACC:0.5176 ETA:18h:28m:6s 
+Valid: Epoch[049/500] Train Mean_Acc: 51.76% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000012e-21
+Train: Epo[050/500] Iter[001/001] IterTime:[145.64s] LOSS: 0.6586 ACC:0.5525 ETA:18h:17m:11s 
+Valid: Epoch[050/500] Train Mean_Acc: 55.25% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000012e-22
+Train: Epo[051/500] Iter[001/001] IterTime:[146.04s] LOSS: 0.7072 ACC:0.5296 ETA:18h:17m:42s 
+Valid: Epoch[051/500] Train Mean_Acc: 52.96% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000012e-22
+Train: Epo[052/500] Iter[001/001] IterTime:[146.23s] LOSS: 0.6214 ACC:0.5703 ETA:18h:16m:42s 
+Valid: Epoch[052/500] Train Mean_Acc: 57.03% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718  0.43347183]
+
+Training: learning rate:1.0000000000000013e-23
+Train: Epo[053/500] Iter[001/001] IterTime:[144.64s] LOSS: 0.6577 ACC:0.5529 ETA:18h:2m:23s 
+Valid: Epoch[053/500] Train Mean_Acc: 55.29% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000013e-23
+Train: Epo[054/500] Iter[001/001] IterTime:[144.98s] LOSS: 0.6462 ACC:0.5586 ETA:18h:2m:32s 
+Valid: Epoch[054/500] Train Mean_Acc: 55.86% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000014e-24
+Train: Epo[055/500] Iter[001/001] IterTime:[143.16s] LOSS: 0.6836 ACC:0.5407 ETA:17h:46m:34s 
+Valid: Epoch[055/500] Train Mean_Acc: 54.07% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-24
+Train: Epo[056/500] Iter[001/001] IterTime:[144.73s] LOSS: 0.6828 ACC:0.5412 ETA:17h:55m:48s 
+Valid: Epoch[056/500] Train Mean_Acc: 54.12% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[057/500] Iter[001/001] IterTime:[148.77s] LOSS: 0.6957 ACC:0.5349 ETA:18h:23m:20s 
+Valid: Epoch[057/500] Train Mean_Acc: 53.49% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[058/500] Iter[001/001] IterTime:[146.75s] LOSS: 0.6958 ACC:0.5349 ETA:18h:5m:55s 
+Valid: Epoch[058/500] Train Mean_Acc: 53.49% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[059/500] Iter[001/001] IterTime:[148.10s] LOSS: 0.6579 ACC:0.5531 ETA:18h:13m:29s 
+Valid: Epoch[059/500] Train Mean_Acc: 55.31% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[060/500] Iter[001/001] IterTime:[145.23s] LOSS: 0.7328 ACC:0.5175 ETA:17h:49m:50s 
+Valid: Epoch[060/500] Train Mean_Acc: 51.75% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.45564786]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[061/500] Iter[001/001] IterTime:[144.92s] LOSS: 0.6341 ACC:0.5644 ETA:17h:45m:10s 
+Valid: Epoch[061/500] Train Mean_Acc: 56.44% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[062/500] Iter[001/001] IterTime:[146.63s] LOSS: 0.6211 ACC:0.5704 ETA:17h:55m:17s 
+Valid: Epoch[062/500] Train Mean_Acc: 57.04% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[063/500] Iter[001/001] IterTime:[143.31s] LOSS: 0.6705 ACC:0.5471 ETA:17h:28m:31s 
+Valid: Epoch[063/500] Train Mean_Acc: 54.71% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[064/500] Iter[001/001] IterTime:[146.25s] LOSS: 0.6333 ACC:0.5645 ETA:17h:47m:36s 
+Valid: Epoch[064/500] Train Mean_Acc: 56.45% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718 0.4334718]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[065/500] Iter[001/001] IterTime:[146.88s] LOSS: 0.6708 ACC:0.5470 ETA:17h:49m:47s 
+Valid: Epoch[065/500] Train Mean_Acc: 54.70% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[066/500] Iter[001/001] IterTime:[145.95s] LOSS: 0.7190 ACC:0.5239 ETA:17h:40m:33s 
+Valid: Epoch[066/500] Train Mean_Acc: 52.39% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[067/500] Iter[001/001] IterTime:[147.95s] LOSS: 0.6828 ACC:0.5410 ETA:17h:52m:38s 
+Valid: Epoch[067/500] Train Mean_Acc: 54.10% Valid Mean_Acc:45.57% OCEAN_ACC:[0.45566577 0.4556658 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[068/500] Iter[001/001] IterTime:[146.34s] LOSS: 0.7184 ACC:0.5241 ETA:17h:38m:33s 
+Valid: Epoch[068/500] Train Mean_Acc: 52.41% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[069/500] Iter[001/001] IterTime:[145.84s] LOSS: 0.6582 ACC:0.5527 ETA:17h:32m:29s 
+Valid: Epoch[069/500] Train Mean_Acc: 55.27% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000014e-25
+Train: Epo[070/500] Iter[001/001] IterTime:[145.34s] LOSS: 0.6462 ACC:0.5587 ETA:17h:26m:28s 
+Valid: Epoch[070/500] Train Mean_Acc: 55.87% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239 0.4778239]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[071/500] Iter[001/001] IterTime:[146.08s] LOSS: 0.6835 ACC:0.5409 ETA:17h:29m:18s 
+Valid: Epoch[071/500] Train Mean_Acc: 54.09% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[072/500] Iter[001/001] IterTime:[144.27s] LOSS: 0.7327 ACC:0.5174 ETA:17h:13m:55s 
+Valid: Epoch[072/500] Train Mean_Acc: 51.74% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[073/500] Iter[001/001] IterTime:[148.16s] LOSS: 0.6205 ACC:0.5708 ETA:17h:39m:19s 
+Valid: Epoch[073/500] Train Mean_Acc: 57.08% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47782394 0.4778239 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[074/500] Iter[001/001] IterTime:[143.58s] LOSS: 0.6714 ACC:0.5465 ETA:17h:4m:12s 
+Valid: Epoch[074/500] Train Mean_Acc: 54.65% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47782394 0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[075/500] Iter[001/001] IterTime:[143.91s] LOSS: 0.7201 ACC:0.5235 ETA:17h:4m:7s 
+Valid: Epoch[075/500] Train Mean_Acc: 52.35% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[076/500] Iter[001/001] IterTime:[144.67s] LOSS: 0.6940 ACC:0.5357 ETA:17h:7m:9s 
+Valid: Epoch[076/500] Train Mean_Acc: 53.57% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[077/500] Iter[001/001] IterTime:[146.15s] LOSS: 0.6201 ACC:0.5709 ETA:17h:15m:13s 
+Valid: Epoch[077/500] Train Mean_Acc: 57.09% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[078/500] Iter[001/001] IterTime:[145.23s] LOSS: 0.6960 ACC:0.5349 ETA:17h:6m:15s 
+Valid: Epoch[078/500] Train Mean_Acc: 53.49% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[079/500] Iter[001/001] IterTime:[146.88s] LOSS: 0.6703 ACC:0.5471 ETA:17h:15m:31s 
+Valid: Epoch[079/500] Train Mean_Acc: 54.71% Valid Mean_Acc:47.78% OCEAN_ACC:[0.47782394 0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[080/500] Iter[001/001] IterTime:[144.30s] LOSS: 0.6708 ACC:0.5469 ETA:16h:54m:53s 
+Valid: Epoch[080/500] Train Mean_Acc: 54.69% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[081/500] Iter[001/001] IterTime:[145.67s] LOSS: 0.7196 ACC:0.5237 ETA:17h:2m:6s 
+Valid: Epoch[081/500] Train Mean_Acc: 52.37% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[082/500] Iter[001/001] IterTime:[143.90s] LOSS: 0.6456 ACC:0.5588 ETA:16h:47m:16s 
+Valid: Epoch[082/500] Train Mean_Acc: 55.88% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[083/500] Iter[001/001] IterTime:[147.13s] LOSS: 0.6575 ACC:0.5531 ETA:17h:7m:26s 
+Valid: Epoch[083/500] Train Mean_Acc: 55.31% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[084/500] Iter[001/001] IterTime:[148.98s] LOSS: 0.6818 ACC:0.5412 ETA:17h:17m:53s 
+Valid: Epoch[084/500] Train Mean_Acc: 54.12% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[085/500] Iter[001/001] IterTime:[147.17s] LOSS: 0.7196 ACC:0.5236 ETA:17h:2m:48s 
+Valid: Epoch[085/500] Train Mean_Acc: 52.36% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[086/500] Iter[001/001] IterTime:[146.65s] LOSS: 0.6706 ACC:0.5470 ETA:16h:56m:47s 
+Valid: Epoch[086/500] Train Mean_Acc: 54.70% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[087/500] Iter[001/001] IterTime:[147.77s] LOSS: 0.6208 ACC:0.5705 ETA:17h:2m:5s 
+Valid: Epoch[087/500] Train Mean_Acc: 57.05% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718  0.43347183]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[088/500] Iter[001/001] IterTime:[149.75s] LOSS: 0.6834 ACC:0.5408 ETA:17h:13m:16s 
+Valid: Epoch[088/500] Train Mean_Acc: 54.08% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[089/500] Iter[001/001] IterTime:[148.69s] LOSS: 0.6835 ACC:0.5409 ETA:17h:3m:29s 
+Valid: Epoch[089/500] Train Mean_Acc: 54.09% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[090/500] Iter[001/001] IterTime:[146.14s] LOSS: 0.6835 ACC:0.5407 ETA:16h:43m:29s 
+Valid: Epoch[090/500] Train Mean_Acc: 54.07% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[091/500] Iter[001/001] IterTime:[146.30s] LOSS: 0.6832 ACC:0.5408 ETA:16h:42m:10s 
+Valid: Epoch[091/500] Train Mean_Acc: 54.08% Valid Mean_Acc:45.56% OCEAN_ACC:[0.4556479  0.45564786]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[092/500] Iter[001/001] IterTime:[147.67s] LOSS: 0.6847 ACC:0.5403 ETA:16h:49m:4s 
+Valid: Epoch[092/500] Train Mean_Acc: 54.03% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[093/500] Iter[001/001] IterTime:[146.68s] LOSS: 0.6825 ACC:0.5414 ETA:16h:39m:52s 
+Valid: Epoch[093/500] Train Mean_Acc: 54.14% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[094/500] Iter[001/001] IterTime:[147.19s] LOSS: 0.6836 ACC:0.5408 ETA:16h:40m:53s 
+Valid: Epoch[094/500] Train Mean_Acc: 54.08% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[095/500] Iter[001/001] IterTime:[145.54s] LOSS: 0.6711 ACC:0.5469 ETA:16h:27m:14s 
+Valid: Epoch[095/500] Train Mean_Acc: 54.69% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[096/500] Iter[001/001] IterTime:[144.37s] LOSS: 0.7195 ACC:0.5237 ETA:16h:16m:52s 
+Valid: Epoch[096/500] Train Mean_Acc: 52.37% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[097/500] Iter[001/001] IterTime:[146.45s] LOSS: 0.7205 ACC:0.5234 ETA:16h:28m:30s 
+Valid: Epoch[097/500] Train Mean_Acc: 52.34% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718  0.43347183]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[098/500] Iter[001/001] IterTime:[143.98s] LOSS: 0.6460 ACC:0.5584 ETA:16h:9m:26s 
+Valid: Epoch[098/500] Train Mean_Acc: 55.84% Valid Mean_Acc:43.35% OCEAN_ACC:[0.4334718 0.4334718]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[099/500] Iter[001/001] IterTime:[145.48s] LOSS: 0.7071 ACC:0.5295 ETA:16h:17m:9s 
+Valid: Epoch[099/500] Train Mean_Acc: 52.95% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-26
+Train: Epo[100/500] Iter[001/001] IterTime:[144.59s] LOSS: 0.7207 ACC:0.5232 ETA:16h:8m:46s 
+Valid: Epoch[100/500] Train Mean_Acc: 52.32% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[101/500] Iter[001/001] IterTime:[144.67s] LOSS: 0.7207 ACC:0.5232 ETA:16h:6m:54s 
+Valid: Epoch[101/500] Train Mean_Acc: 52.32% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[102/500] Iter[001/001] IterTime:[144.86s] LOSS: 0.5839 ACC:0.5881 ETA:16h:5m:43s 
+Valid: Epoch[102/500] Train Mean_Acc: 58.81% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[103/500] Iter[001/001] IterTime:[144.21s] LOSS: 0.6693 ACC:0.5475 ETA:15h:59m:1s 
+Valid: Epoch[103/500] Train Mean_Acc: 54.75% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[104/500] Iter[001/001] IterTime:[148.00s] LOSS: 0.6334 ACC:0.5646 ETA:16h:21m:43s 
+Valid: Epoch[104/500] Train Mean_Acc: 56.46% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[105/500] Iter[001/001] IterTime:[150.36s] LOSS: 0.6707 ACC:0.5466 ETA:16h:34m:51s 
+Valid: Epoch[105/500] Train Mean_Acc: 54.66% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[106/500] Iter[001/001] IterTime:[145.30s] LOSS: 0.6952 ACC:0.5351 ETA:15h:58m:59s 
+Valid: Epoch[106/500] Train Mean_Acc: 53.51% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[107/500] Iter[001/001] IterTime:[145.82s] LOSS: 0.6956 ACC:0.5349 ETA:16h:0m:0s 
+Valid: Epoch[107/500] Train Mean_Acc: 53.49% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[108/500] Iter[001/001] IterTime:[144.82s] LOSS: 0.6822 ACC:0.5414 ETA:15h:51m:0s 
+Valid: Epoch[108/500] Train Mean_Acc: 54.14% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[109/500] Iter[001/001] IterTime:[143.86s] LOSS: 0.6821 ACC:0.5415 ETA:15h:42m:17s 
+Valid: Epoch[109/500] Train Mean_Acc: 54.15% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[110/500] Iter[001/001] IterTime:[144.55s] LOSS: 0.7315 ACC:0.5179 ETA:15h:44m:23s 
+Valid: Epoch[110/500] Train Mean_Acc: 51.79% Valid Mean_Acc:47.78% OCEAN_ACC:[0.4778239  0.47782394]
+
+Training: learning rate:1.0000000000000015e-27
+Train: Epo[111/500] Iter[001/001] IterTime:[145.48s] LOSS: 0.7070 ACC:0.5296 ETA:15h:48m:4s 
+Valid: Epoch[111/500] Train Mean_Acc: 52.96% Valid Mean_Acc:45.56% OCEAN_ACC:[0.45564786 0.4556479 ]
+
+Training: learning rate:1.0000000000000015e-27
+slurmstepd: error: *** JOB 13968647 ON cpu-e-795 CANCELLED AT 2023-02-07T20:07:19 DUE TO TIME LIMIT ***

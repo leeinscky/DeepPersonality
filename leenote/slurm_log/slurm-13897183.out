@@ -1,0 +1,1898 @@
+rhel8/default-icl(17):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-compilers/2022.1.0/gcc'
+rhel8/default-icl(18):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-mpi/2021.6.0/intel'
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230205_163026-rdmlf5jr
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glittering-peony-268
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/rdmlf5jr
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":40,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":1,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":8,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":3
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"get_img_modal_lstm_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.4,
+        "MILESTONE":[
+            2,
+            8,
+            20,
+            30,
+            70,
+            100
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":500,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+change learning rate form [0.4] to [0.4]
+Training: learning rate:0.4
+Using BCELoss
+================================== start training... ==================================
+Train: Epo[001/500] Iter[001/014] IterTime:[9.74s] LOSS: 0.6933 ACC:0.5000 ETA:18h:59m:9s 
+Train: Epo[001/500] Iter[002/014] IterTime:[9.74s] LOSS: 0.6843 ACC:0.5863 ETA:18h:58m:52s 
+Train: Epo[001/500] Iter[003/014] IterTime:[9.31s] LOSS: 0.8249 ACC:0.4715 ETA:18h:7m:29s 
+Train: Epo[001/500] Iter[004/014] IterTime:[9.12s] LOSS: 0.7385 ACC:0.5485 ETA:17h:45m:8s 
+Train: Epo[001/500] Iter[005/014] IterTime:[9.07s] LOSS: 0.7505 ACC:0.4883 ETA:17h:39m:50s 
+Train: Epo[001/500] Iter[006/014] IterTime:[9.13s] LOSS: 0.7318 ACC:0.4955 ETA:17h:46m:34s 
+Train: Epo[001/500] Iter[007/014] IterTime:[9.30s] LOSS: 1.0226 ACC:0.4150 ETA:18h:6m:15s 
+Train: Epo[001/500] Iter[008/014] IterTime:[9.08s] LOSS: 0.9766 ACC:0.4073 ETA:17h:40m:18s 
+Train: Epo[001/500] Iter[009/014] IterTime:[9.25s] LOSS: 0.9853 ACC:0.3884 ETA:18h:0m:25s 
+Train: Epo[001/500] Iter[010/014] IterTime:[9.06s] LOSS: 0.8054 ACC:0.4887 ETA:17h:38m:7s 
+Train: Epo[001/500] Iter[011/014] IterTime:[9.17s] LOSS: 1.0270 ACC:0.3871 ETA:17h:50m:31s 
+Train: Epo[001/500] Iter[012/014] IterTime:[9.17s] LOSS: 0.9772 ACC:0.4204 ETA:17h:49m:52s 
+Train: Epo[001/500] Iter[013/014] IterTime:[8.97s] LOSS: 0.6571 ACC:0.5315 ETA:17h:26m:19s 
+Train: Epo[001/500] Iter[014/014] IterTime:[9.02s] LOSS: 0.7642 ACC:0.4816 ETA:17h:32m:27s 
+Valid: Epoch[001/500] Train Mean_Acc: 47.21% Valid Mean_Acc:51.04% OCEAN_ACC:[0.61111104 0.40959883]
+
+Training: learning rate:0.4
+Train: Epo[002/500] Iter[001/014] IterTime:[9.75s] LOSS: 0.7775 ACC:0.4870 ETA:18h:57m:57s 
+Train: Epo[002/500] Iter[002/014] IterTime:[9.37s] LOSS: 0.8066 ACC:0.4662 ETA:18h:13m:23s 
+Train: Epo[002/500] Iter[003/014] IterTime:[9.41s] LOSS: 0.6669 ACC:0.5225 ETA:18h:17m:27s 
+Train: Epo[002/500] Iter[004/014] IterTime:[9.45s] LOSS: 0.7724 ACC:0.4723 ETA:18h:22m:12s 
+Train: Epo[002/500] Iter[005/014] IterTime:[9.54s] LOSS: 0.7329 ACC:0.5005 ETA:18h:32m:18s 
+Train: Epo[002/500] Iter[006/014] IterTime:[9.60s] LOSS: 0.7328 ACC:0.4952 ETA:18h:38m:41s 
+Train: Epo[002/500] Iter[007/014] IterTime:[9.58s] LOSS: 0.8585 ACC:0.4413 ETA:18h:37m:14s 
+Train: Epo[002/500] Iter[008/014] IterTime:[9.49s] LOSS: 0.6784 ACC:0.5182 ETA:18h:25m:54s 
+Train: Epo[002/500] Iter[009/014] IterTime:[9.41s] LOSS: 0.8781 ACC:0.4365 ETA:18h:16m:44s 
+Train: Epo[002/500] Iter[010/014] IterTime:[9.45s] LOSS: 0.9255 ACC:0.4180 ETA:18h:21m:31s 
+Train: Epo[002/500] Iter[011/014] IterTime:[9.41s] LOSS: 0.7569 ACC:0.4878 ETA:18h:16m:8s 
+Train: Epo[002/500] Iter[012/014] IterTime:[9.41s] LOSS: 0.6195 ACC:0.5593 ETA:18h:16m:37s 
+Train: Epo[002/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.5684 ACC:0.5954 ETA:18h:27m:13s 
+Train: Epo[002/500] Iter[014/014] IterTime:[9.02s] LOSS: 0.6945 ACC:0.5246 ETA:17h:30m:23s 
+Valid: Epoch[002/500] Train Mean_Acc: 49.46% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[003/500] Iter[001/014] IterTime:[9.66s] LOSS: 0.5256 ACC:0.6036 ETA:18h:44m:36s 
+Train: Epo[003/500] Iter[002/014] IterTime:[9.50s] LOSS: 0.8282 ACC:0.4935 ETA:18h:26m:11s 
+Train: Epo[003/500] Iter[003/014] IterTime:[9.72s] LOSS: 0.8577 ACC:0.5080 ETA:18h:51m:36s 
+Train: Epo[003/500] Iter[004/014] IterTime:[9.55s] LOSS: 0.5197 ACC:0.6016 ETA:18h:31m:56s 
+Train: Epo[003/500] Iter[005/014] IterTime:[9.43s] LOSS: 0.7669 ACC:0.4979 ETA:18h:17m:52s 
+Train: Epo[003/500] Iter[006/014] IterTime:[9.29s] LOSS: 0.7521 ACC:0.4973 ETA:18h:1m:20s 
+Train: Epo[003/500] Iter[007/014] IterTime:[9.30s] LOSS: 0.6279 ACC:0.5488 ETA:18h:2m:14s 
+Train: Epo[003/500] Iter[008/014] IterTime:[9.46s] LOSS: 0.5960 ACC:0.5682 ETA:18h:20m:42s 
+Train: Epo[003/500] Iter[009/014] IterTime:[9.39s] LOSS: 0.7155 ACC:0.5235 ETA:18h:11m:44s 
+Train: Epo[003/500] Iter[010/014] IterTime:[9.47s] LOSS: 0.7861 ACC:0.4887 ETA:18h:21m:0s 
+Train: Epo[003/500] Iter[011/014] IterTime:[9.47s] LOSS: 0.5673 ACC:0.5927 ETA:18h:21m:28s 
+Train: Epo[003/500] Iter[012/014] IterTime:[9.44s] LOSS: 0.6771 ACC:0.5582 ETA:18h:17m:30s 
+Train: Epo[003/500] Iter[013/014] IterTime:[9.38s] LOSS: 0.8738 ACC:0.4419 ETA:18h:9m:50s 
+Train: Epo[003/500] Iter[014/014] IterTime:[9.09s] LOSS: 0.7382 ACC:0.5066 ETA:17h:36m:3s 
+Valid: Epoch[003/500] Train Mean_Acc: 53.08% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[004/500] Iter[001/014] IterTime:[9.57s] LOSS: 0.6841 ACC:0.5307 ETA:18h:32m:11s 
+Train: Epo[004/500] Iter[002/014] IterTime:[9.19s] LOSS: 0.9976 ACC:0.4196 ETA:17h:48m:3s 
+Train: Epo[004/500] Iter[003/014] IterTime:[9.45s] LOSS: 0.5022 ACC:0.6084 ETA:18h:17m:36s 
+Train: Epo[004/500] Iter[004/014] IterTime:[9.52s] LOSS: 0.7538 ACC:0.4908 ETA:18h:25m:20s 
+Train: Epo[004/500] Iter[005/014] IterTime:[9.55s] LOSS: 0.4816 ACC:0.6324 ETA:18h:28m:58s 
+Train: Epo[004/500] Iter[006/014] IterTime:[9.38s] LOSS: 0.6862 ACC:0.5208 ETA:18h:9m:42s 
+Train: Epo[004/500] Iter[007/014] IterTime:[9.33s] LOSS: 0.8058 ACC:0.4712 ETA:18h:2m:38s 
+Train: Epo[004/500] Iter[008/014] IterTime:[9.41s] LOSS: 0.6330 ACC:0.5463 ETA:18h:12m:41s 
+Train: Epo[004/500] Iter[009/014] IterTime:[9.64s] LOSS: 0.6005 ACC:0.5543 ETA:18h:39m:5s 
+Train: Epo[004/500] Iter[010/014] IterTime:[9.47s] LOSS: 0.8271 ACC:0.4526 ETA:18h:18m:42s 
+Train: Epo[004/500] Iter[011/014] IterTime:[9.58s] LOSS: 0.7680 ACC:0.4745 ETA:18h:31m:58s 
+Train: Epo[004/500] Iter[012/014] IterTime:[9.60s] LOSS: 0.6475 ACC:0.5375 ETA:18h:33m:37s 
+Train: Epo[004/500] Iter[013/014] IterTime:[9.42s] LOSS: 0.5996 ACC:0.5629 ETA:18h:12m:53s 
+Train: Epo[004/500] Iter[014/014] IterTime:[9.41s] LOSS: 0.6728 ACC:0.5354 ETA:18h:11m:1s 
+Valid: Epoch[004/500] Train Mean_Acc: 52.41% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[005/500] Iter[001/014] IterTime:[9.30s] LOSS: 0.6142 ACC:0.5480 ETA:17h:58m:39s 
+Train: Epo[005/500] Iter[002/014] IterTime:[9.41s] LOSS: 0.5276 ACC:0.6037 ETA:18h:11m:25s 
+Train: Epo[005/500] Iter[003/014] IterTime:[9.22s] LOSS: 0.9059 ACC:0.4312 ETA:17h:48m:38s 
+Train: Epo[005/500] Iter[004/014] IterTime:[9.22s] LOSS: 0.6241 ACC:0.5583 ETA:17h:48m:13s 
+Train: Epo[005/500] Iter[005/014] IterTime:[9.19s] LOSS: 0.7446 ACC:0.5068 ETA:17h:44m:39s 
+Train: Epo[005/500] Iter[006/014] IterTime:[9.22s] LOSS: 0.5835 ACC:0.5620 ETA:17h:48m:58s 
+Train: Epo[005/500] Iter[007/014] IterTime:[9.17s] LOSS: 0.9444 ACC:0.4110 ETA:17h:42m:29s 
+Train: Epo[005/500] Iter[008/014] IterTime:[9.17s] LOSS: 0.7562 ACC:0.4940 ETA:17h:42m:47s 
+Train: Epo[005/500] Iter[009/014] IterTime:[9.13s] LOSS: 0.6953 ACC:0.5265 ETA:17h:38m:3s 
+Train: Epo[005/500] Iter[010/014] IterTime:[9.26s] LOSS: 0.7624 ACC:0.4764 ETA:17h:52m:21s 
+Train: Epo[005/500] Iter[011/014] IterTime:[9.21s] LOSS: 0.6779 ACC:0.5202 ETA:17h:46m:57s 
+Train: Epo[005/500] Iter[012/014] IterTime:[9.12s] LOSS: 0.7117 ACC:0.5046 ETA:17h:36m:17s 
+Train: Epo[005/500] Iter[013/014] IterTime:[9.21s] LOSS: 0.7114 ACC:0.5026 ETA:17h:46m:3s 
+Train: Epo[005/500] Iter[014/014] IterTime:[8.87s] LOSS: 0.6382 ACC:0.5391 ETA:17h:7m:11s 
+Valid: Epoch[005/500] Train Mean_Acc: 51.32% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[006/500] Iter[001/014] IterTime:[9.36s] LOSS: 0.7222 ACC:0.5039 ETA:18h:3m:31s 
+Train: Epo[006/500] Iter[002/014] IterTime:[9.22s] LOSS: 0.6365 ACC:0.5356 ETA:17h:46m:25s 
+Train: Epo[006/500] Iter[003/014] IterTime:[9.21s] LOSS: 0.9271 ACC:0.4313 ETA:17h:45m:1s 
+Train: Epo[006/500] Iter[004/014] IterTime:[9.32s] LOSS: 0.7033 ACC:0.5181 ETA:17h:58m:42s 
+Train: Epo[006/500] Iter[005/014] IterTime:[9.19s] LOSS: 0.7372 ACC:0.4980 ETA:17h:42m:53s 
+Train: Epo[006/500] Iter[006/014] IterTime:[9.18s] LOSS: 0.6499 ACC:0.5390 ETA:17h:42m:13s 
+Train: Epo[006/500] Iter[007/014] IterTime:[9.17s] LOSS: 0.7447 ACC:0.4903 ETA:17h:40m:18s 
+Train: Epo[006/500] Iter[008/014] IterTime:[9.19s] LOSS: 0.6413 ACC:0.5433 ETA:17h:42m:32s 
+Train: Epo[006/500] Iter[009/014] IterTime:[9.28s] LOSS: 0.7849 ACC:0.4686 ETA:17h:52m:24s 
+Train: Epo[006/500] Iter[010/014] IterTime:[9.17s] LOSS: 0.5468 ACC:0.5823 ETA:17h:40m:3s 
+Train: Epo[006/500] Iter[011/014] IterTime:[9.19s] LOSS: 0.6590 ACC:0.5227 ETA:17h:42m:2s 
+Train: Epo[006/500] Iter[012/014] IterTime:[9.26s] LOSS: 0.6086 ACC:0.5522 ETA:17h:50m:4s 
+Train: Epo[006/500] Iter[013/014] IterTime:[8.96s] LOSS: 0.6934 ACC:0.5147 ETA:17h:14m:36s 
+Train: Epo[006/500] Iter[014/014] IterTime:[8.96s] LOSS: 0.6082 ACC:0.5538 ETA:17h:15m:29s 
+Valid: Epoch[006/500] Train Mean_Acc: 51.81% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[007/500] Iter[001/014] IterTime:[9.61s] LOSS: 0.8810 ACC:0.4304 ETA:18h:30m:25s 
+Train: Epo[007/500] Iter[002/014] IterTime:[9.40s] LOSS: 0.6472 ACC:0.5376 ETA:18h:5m:30s 
+Train: Epo[007/500] Iter[003/014] IterTime:[9.41s] LOSS: 0.6678 ACC:0.5298 ETA:18h:6m:16s 
+Train: Epo[007/500] Iter[004/014] IterTime:[9.46s] LOSS: 0.5284 ACC:0.6011 ETA:18h:12m:35s 
+Train: Epo[007/500] Iter[005/014] IterTime:[9.48s] LOSS: 0.7154 ACC:0.5060 ETA:18h:14m:8s 
+Train: Epo[007/500] Iter[006/014] IterTime:[9.61s] LOSS: 0.7345 ACC:0.4876 ETA:18h:29m:11s 
+Train: Epo[007/500] Iter[007/014] IterTime:[9.48s] LOSS: 0.6450 ACC:0.5317 ETA:18h:13m:46s 
+Train: Epo[007/500] Iter[008/014] IterTime:[9.44s] LOSS: 0.6195 ACC:0.5467 ETA:18h:9m:22s 
+Train: Epo[007/500] Iter[009/014] IterTime:[9.35s] LOSS: 0.7250 ACC:0.4967 ETA:17h:58m:18s 
+Train: Epo[007/500] Iter[010/014] IterTime:[9.39s] LOSS: 0.7666 ACC:0.4755 ETA:18h:3m:18s 
+Train: Epo[007/500] Iter[011/014] IterTime:[9.38s] LOSS: 0.6723 ACC:0.5291 ETA:18h:2m:1s 
+Train: Epo[007/500] Iter[012/014] IterTime:[9.54s] LOSS: 0.7211 ACC:0.5020 ETA:18h:20m:11s 
+Train: Epo[007/500] Iter[013/014] IterTime:[9.47s] LOSS: 0.6973 ACC:0.5167 ETA:18h:11m:34s 
+Train: Epo[007/500] Iter[014/014] IterTime:[9.32s] LOSS: 0.6385 ACC:0.5421 ETA:17h:54m:39s 
+Valid: Epoch[007/500] Train Mean_Acc: 51.66% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.04000000000000001
+Train: Epo[008/500] Iter[001/014] IterTime:[9.68s] LOSS: 0.6986 ACC:0.5163 ETA:18h:35m:28s 
+Train: Epo[008/500] Iter[002/014] IterTime:[9.31s] LOSS: 0.7352 ACC:0.4858 ETA:17h:52m:38s 
+Train: Epo[008/500] Iter[003/014] IterTime:[9.34s] LOSS: 0.6886 ACC:0.5103 ETA:17h:56m:7s 
+Train: Epo[008/500] Iter[004/014] IterTime:[9.41s] LOSS: 0.6475 ACC:0.5349 ETA:18h:3m:58s 
+Train: Epo[008/500] Iter[005/014] IterTime:[9.33s] LOSS: 0.5507 ACC:0.5802 ETA:17h:55m:6s 
+Train: Epo[008/500] Iter[006/014] IterTime:[9.28s] LOSS: 0.7260 ACC:0.5082 ETA:17h:48m:53s 
+Train: Epo[008/500] Iter[007/014] IterTime:[9.35s] LOSS: 0.7521 ACC:0.4822 ETA:17h:57m:1s 
+Train: Epo[008/500] Iter[008/014] IterTime:[9.26s] LOSS: 0.8332 ACC:0.4495 ETA:17h:46m:23s 
+Train: Epo[008/500] Iter[009/014] IterTime:[9.30s] LOSS: 0.7283 ACC:0.4950 ETA:17h:50m:56s 
+Train: Epo[008/500] Iter[010/014] IterTime:[9.29s] LOSS: 0.8571 ACC:0.4415 ETA:17h:49m:33s 
+Train: Epo[008/500] Iter[011/014] IterTime:[9.24s] LOSS: 0.6387 ACC:0.5398 ETA:17h:43m:51s 
+Train: Epo[008/500] Iter[012/014] IterTime:[9.37s] LOSS: 0.5539 ACC:0.5817 ETA:17h:58m:31s 
+Train: Epo[008/500] Iter[013/014] IterTime:[9.24s] LOSS: 0.7856 ACC:0.4670 ETA:17h:42m:43s 
+Train: Epo[008/500] Iter[014/014] IterTime:[9.03s] LOSS: 0.7809 ACC:0.4824 ETA:17h:18m:51s 
+Valid: Epoch[008/500] Train Mean_Acc: 50.53% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[009/500] Iter[001/014] IterTime:[9.23s] LOSS: 0.7689 ACC:0.4748 ETA:17h:41m:56s 
+Train: Epo[009/500] Iter[002/014] IterTime:[9.13s] LOSS: 0.6976 ACC:0.5087 ETA:17h:30m:38s 
+Train: Epo[009/500] Iter[003/014] IterTime:[9.20s] LOSS: 0.5142 ACC:0.6077 ETA:17h:37m:45s 
+Train: Epo[009/500] Iter[004/014] IterTime:[9.12s] LOSS: 0.6494 ACC:0.5352 ETA:17h:29m:3s 
+Train: Epo[009/500] Iter[005/014] IterTime:[9.17s] LOSS: 0.7119 ACC:0.5025 ETA:17h:34m:16s 
+Train: Epo[009/500] Iter[006/014] IterTime:[9.26s] LOSS: 0.5066 ACC:0.6098 ETA:17h:44m:31s 
+Train: Epo[009/500] Iter[007/014] IterTime:[9.17s] LOSS: 0.6309 ACC:0.5492 ETA:17h:34m:19s 
+Train: Epo[009/500] Iter[008/014] IterTime:[9.15s] LOSS: 0.4947 ACC:0.6218 ETA:17h:31m:58s 
+Train: Epo[009/500] Iter[009/014] IterTime:[9.20s] LOSS: 0.7386 ACC:0.4872 ETA:17h:37m:31s 
+Train: Epo[009/500] Iter[010/014] IterTime:[9.14s] LOSS: 0.5829 ACC:0.5637 ETA:17h:30m:26s 
+Train: Epo[009/500] Iter[011/014] IterTime:[9.19s] LOSS: 0.7134 ACC:0.5176 ETA:17h:35m:34s 
+Train: Epo[009/500] Iter[012/014] IterTime:[9.12s] LOSS: 0.8300 ACC:0.4595 ETA:17h:27m:44s 
+Train: Epo[009/500] Iter[013/014] IterTime:[9.06s] LOSS: 0.8337 ACC:0.4569 ETA:17h:20m:22s 
+Train: Epo[009/500] Iter[014/014] IterTime:[8.96s] LOSS: 0.6821 ACC:0.5321 ETA:17h:8m:18s 
+Valid: Epoch[009/500] Train Mean_Acc: 53.05% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[010/500] Iter[001/014] IterTime:[9.64s] LOSS: 0.8101 ACC:0.4785 ETA:18h:26m:26s 
+Train: Epo[010/500] Iter[002/014] IterTime:[9.38s] LOSS: 0.6345 ACC:0.5486 ETA:17h:57m:13s 
+Train: Epo[010/500] Iter[003/014] IterTime:[9.52s] LOSS: 0.4645 ACC:0.6365 ETA:18h:12m:17s 
+Train: Epo[010/500] Iter[004/014] IterTime:[9.22s] LOSS: 0.6269 ACC:0.5411 ETA:17h:37m:51s 
+Train: Epo[010/500] Iter[005/014] IterTime:[9.24s] LOSS: 0.5886 ACC:0.5591 ETA:17h:40m:5s 
+Train: Epo[010/500] Iter[006/014] IterTime:[9.35s] LOSS: 0.8118 ACC:0.4634 ETA:17h:52m:30s 
+Train: Epo[010/500] Iter[007/014] IterTime:[9.15s] LOSS: 0.6770 ACC:0.5246 ETA:17h:28m:59s 
+Train: Epo[010/500] Iter[008/014] IterTime:[9.20s] LOSS: 0.6486 ACC:0.5353 ETA:17h:34m:37s 
+Train: Epo[010/500] Iter[009/014] IterTime:[9.31s] LOSS: 0.6197 ACC:0.5446 ETA:17h:47m:31s 
+Train: Epo[010/500] Iter[010/014] IterTime:[9.15s] LOSS: 0.6601 ACC:0.5236 ETA:17h:29m:35s 
+Train: Epo[010/500] Iter[011/014] IterTime:[9.16s] LOSS: 0.7639 ACC:0.4744 ETA:17h:30m:33s 
+Train: Epo[010/500] Iter[012/014] IterTime:[9.24s] LOSS: 0.6842 ACC:0.5146 ETA:17h:39m:11s 
+Train: Epo[010/500] Iter[013/014] IterTime:[8.93s] LOSS: 0.5540 ACC:0.6025 ETA:17h:2m:57s 
+Train: Epo[010/500] Iter[014/014] IterTime:[9.02s] LOSS: 0.6979 ACC:0.5134 ETA:17h:13m:25s 
+Valid: Epoch[010/500] Train Mean_Acc: 53.29% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[011/500] Iter[001/014] IterTime:[9.59s] LOSS: 0.8391 ACC:0.4793 ETA:18h:18m:42s 
+Train: Epo[011/500] Iter[002/014] IterTime:[9.44s] LOSS: 0.5945 ACC:0.5680 ETA:18h:0m:54s 
+Train: Epo[011/500] Iter[003/014] IterTime:[9.41s] LOSS: 0.6885 ACC:0.5163 ETA:17h:57m:38s 
+Train: Epo[011/500] Iter[004/014] IterTime:[9.41s] LOSS: 0.5166 ACC:0.6078 ETA:17h:57m:18s 
+Train: Epo[011/500] Iter[005/014] IterTime:[9.50s] LOSS: 0.6190 ACC:0.5488 ETA:18h:7m:47s 
+Train: Epo[011/500] Iter[006/014] IterTime:[9.36s] LOSS: 0.7662 ACC:0.4784 ETA:17h:51m:52s 
+Train: Epo[011/500] Iter[007/014] IterTime:[9.48s] LOSS: 0.6246 ACC:0.5402 ETA:18h:5m:5s 
+Train: Epo[011/500] Iter[008/014] IterTime:[9.42s] LOSS: 0.7110 ACC:0.4999 ETA:17h:58m:21s 
+Train: Epo[011/500] Iter[009/014] IterTime:[9.37s] LOSS: 0.6127 ACC:0.5505 ETA:17h:52m:39s 
+Train: Epo[011/500] Iter[010/014] IterTime:[9.35s] LOSS: 0.6907 ACC:0.5193 ETA:17h:50m:16s 
+Train: Epo[011/500] Iter[011/014] IterTime:[9.39s] LOSS: 0.6841 ACC:0.5197 ETA:17h:54m:29s 
+Train: Epo[011/500] Iter[012/014] IterTime:[9.44s] LOSS: 0.7311 ACC:0.4972 ETA:18h:0m:14s 
+Train: Epo[011/500] Iter[013/014] IterTime:[9.29s] LOSS: 0.6778 ACC:0.5224 ETA:17h:42m:12s 
+Train: Epo[011/500] Iter[014/014] IterTime:[9.19s] LOSS: 0.5219 ACC:0.6071 ETA:17h:30m:28s 
+Valid: Epoch[011/500] Train Mean_Acc: 53.25% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[012/500] Iter[001/014] IterTime:[9.41s] LOSS: 0.8653 ACC:0.4383 ETA:17h:55m:57s 
+Train: Epo[012/500] Iter[002/014] IterTime:[9.54s] LOSS: 0.6027 ACC:0.5533 ETA:18h:10m:36s 
+Train: Epo[012/500] Iter[003/014] IterTime:[9.60s] LOSS: 0.8975 ACC:0.4426 ETA:18h:17m:28s 
+Train: Epo[012/500] Iter[004/014] IterTime:[9.16s] LOSS: 0.6269 ACC:0.5476 ETA:17h:26m:55s 
+Train: Epo[012/500] Iter[005/014] IterTime:[9.30s] LOSS: 0.5475 ACC:0.5843 ETA:17h:42m:13s 
+Train: Epo[012/500] Iter[006/014] IterTime:[9.55s] LOSS: 0.5656 ACC:0.5737 ETA:18h:10m:56s 
+Train: Epo[012/500] Iter[007/014] IterTime:[9.53s] LOSS: 0.7318 ACC:0.4985 ETA:18h:8m:54s 
+Train: Epo[012/500] Iter[008/014] IterTime:[9.26s] LOSS: 0.6369 ACC:0.5337 ETA:17h:38m:3s 
+Train: Epo[012/500] Iter[009/014] IterTime:[9.21s] LOSS: 0.6717 ACC:0.5352 ETA:17h:31m:13s 
+Train: Epo[012/500] Iter[010/014] IterTime:[9.20s] LOSS: 0.6348 ACC:0.5367 ETA:17h:30m:48s 
+Train: Epo[012/500] Iter[011/014] IterTime:[9.25s] LOSS: 0.8308 ACC:0.4497 ETA:17h:36m:35s 
+Train: Epo[012/500] Iter[012/014] IterTime:[9.17s] LOSS: 0.8294 ACC:0.4505 ETA:17h:26m:45s 
+Train: Epo[012/500] Iter[013/014] IterTime:[8.98s] LOSS: 0.5615 ACC:0.5835 ETA:17h:5m:18s 
+Train: Epo[012/500] Iter[014/014] IterTime:[8.97s] LOSS: 0.5700 ACC:0.5689 ETA:17h:3m:51s 
+Valid: Epoch[012/500] Train Mean_Acc: 52.12% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[013/500] Iter[001/014] IterTime:[9.58s] LOSS: 0.6961 ACC:0.5308 ETA:18h:12m:31s 
+Train: Epo[013/500] Iter[002/014] IterTime:[9.39s] LOSS: 0.7677 ACC:0.4903 ETA:17h:50m:56s 
+Train: Epo[013/500] Iter[003/014] IterTime:[9.38s] LOSS: 0.5666 ACC:0.5827 ETA:17h:49m:39s 
+Train: Epo[013/500] Iter[004/014] IterTime:[9.24s] LOSS: 0.6686 ACC:0.5308 ETA:17h:34m:2s 
+Train: Epo[013/500] Iter[005/014] IterTime:[9.40s] LOSS: 0.5165 ACC:0.6156 ETA:17h:52m:24s 
+Train: Epo[013/500] Iter[006/014] IterTime:[9.44s] LOSS: 0.7586 ACC:0.4980 ETA:17h:55m:55s 
+Train: Epo[013/500] Iter[007/014] IterTime:[9.66s] LOSS: 0.6272 ACC:0.5420 ETA:18h:21m:38s 
+Train: Epo[013/500] Iter[008/014] IterTime:[9.35s] LOSS: 0.6623 ACC:0.5309 ETA:17h:45m:12s 
+Train: Epo[013/500] Iter[009/014] IterTime:[9.61s] LOSS: 0.6581 ACC:0.5344 ETA:18h:14m:49s 
+Train: Epo[013/500] Iter[010/014] IterTime:[9.39s] LOSS: 0.8158 ACC:0.4574 ETA:17h:50m:16s 
+Train: Epo[013/500] Iter[011/014] IterTime:[9.16s] LOSS: 0.7178 ACC:0.4993 ETA:17h:23m:52s 
+Train: Epo[013/500] Iter[012/014] IterTime:[9.27s] LOSS: 0.7753 ACC:0.4759 ETA:17h:35m:46s 
+Train: Epo[013/500] Iter[013/014] IterTime:[9.12s] LOSS: 0.7607 ACC:0.5064 ETA:17h:18m:24s 
+Train: Epo[013/500] Iter[014/014] IterTime:[9.00s] LOSS: 0.7355 ACC:0.4937 ETA:17h:4m:24s 
+Valid: Epoch[013/500] Train Mean_Acc: 52.06% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[014/500] Iter[001/014] IterTime:[9.30s] LOSS: 0.8684 ACC:0.4398 ETA:17h:38m:47s 
+Train: Epo[014/500] Iter[002/014] IterTime:[9.51s] LOSS: 0.6882 ACC:0.5085 ETA:18h:2m:15s 
+Train: Epo[014/500] Iter[003/014] IterTime:[9.42s] LOSS: 0.6971 ACC:0.5228 ETA:17h:52m:2s 
+Train: Epo[014/500] Iter[004/014] IterTime:[9.49s] LOSS: 0.7136 ACC:0.4980 ETA:18h:0m:20s 
+Train: Epo[014/500] Iter[005/014] IterTime:[9.44s] LOSS: 0.6440 ACC:0.5300 ETA:17h:54m:7s 
+Train: Epo[014/500] Iter[006/014] IterTime:[9.46s] LOSS: 0.6872 ACC:0.5191 ETA:17h:56m:19s 
+Train: Epo[014/500] Iter[007/014] IterTime:[9.44s] LOSS: 0.6073 ACC:0.5548 ETA:17h:53m:30s 
+Train: Epo[014/500] Iter[008/014] IterTime:[9.37s] LOSS: 0.6998 ACC:0.5013 ETA:17h:45m:34s 
+Train: Epo[014/500] Iter[009/014] IterTime:[9.14s] LOSS: 0.7857 ACC:0.4708 ETA:17h:19m:10s 
+Train: Epo[014/500] Iter[010/014] IterTime:[9.31s] LOSS: 0.5200 ACC:0.6018 ETA:17h:38m:50s 
+Train: Epo[014/500] Iter[011/014] IterTime:[9.10s] LOSS: 0.5773 ACC:0.5696 ETA:17h:14m:56s 
+Train: Epo[014/500] Iter[012/014] IterTime:[9.10s] LOSS: 0.7386 ACC:0.4836 ETA:17h:14m:10s 
+Train: Epo[014/500] Iter[013/014] IterTime:[9.00s] LOSS: 0.6616 ACC:0.5208 ETA:17h:3m:13s 
+Train: Epo[014/500] Iter[014/014] IterTime:[9.00s] LOSS: 0.6687 ACC:0.5227 ETA:17h:3m:14s 
+Valid: Epoch[014/500] Train Mean_Acc: 51.74% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[015/500] Iter[001/014] IterTime:[9.37s] LOSS: 0.7430 ACC:0.4873 ETA:17h:45m:7s 
+Train: Epo[015/500] Iter[002/014] IterTime:[9.36s] LOSS: 0.4765 ACC:0.6235 ETA:17h:43m:43s 
+Train: Epo[015/500] Iter[003/014] IterTime:[9.50s] LOSS: 0.7096 ACC:0.5087 ETA:17h:58m:58s 
+Train: Epo[015/500] Iter[004/014] IterTime:[9.44s] LOSS: 0.8160 ACC:0.4622 ETA:17h:51m:54s 
+Train: Epo[015/500] Iter[005/014] IterTime:[9.46s] LOSS: 0.7154 ACC:0.4964 ETA:17h:54m:49s 
+Train: Epo[015/500] Iter[006/014] IterTime:[9.46s] LOSS: 0.5270 ACC:0.5940 ETA:17h:54m:17s 
+Train: Epo[015/500] Iter[007/014] IterTime:[9.32s] LOSS: 0.6502 ACC:0.5344 ETA:17h:38m:4s 
+Train: Epo[015/500] Iter[008/014] IterTime:[9.44s] LOSS: 0.6071 ACC:0.5561 ETA:17h:52m:2s 
+Train: Epo[015/500] Iter[009/014] IterTime:[9.52s] LOSS: 0.8369 ACC:0.4485 ETA:18h:0m:32s 
+Train: Epo[015/500] Iter[010/014] IterTime:[9.48s] LOSS: 0.5960 ACC:0.5727 ETA:17h:56m:13s 
+Train: Epo[015/500] Iter[011/014] IterTime:[9.36s] LOSS: 0.9866 ACC:0.3850 ETA:17h:41m:41s 
+Train: Epo[015/500] Iter[012/014] IterTime:[9.43s] LOSS: 0.7351 ACC:0.5149 ETA:17h:49m:19s 
+Train: Epo[015/500] Iter[013/014] IterTime:[9.21s] LOSS: 0.7727 ACC:0.4775 ETA:17h:24m:35s 
+Train: Epo[015/500] Iter[014/014] IterTime:[9.81s] LOSS: 0.6351 ACC:0.5368 ETA:18h:32m:40s 
+Valid: Epoch[015/500] Train Mean_Acc: 51.42% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[016/500] Iter[001/014] IterTime:[9.41s] LOSS: 0.4872 ACC:0.6217 ETA:17h:46m:39s 
+Train: Epo[016/500] Iter[002/014] IterTime:[9.20s] LOSS: 0.6568 ACC:0.5273 ETA:17h:23m:10s 
+Train: Epo[016/500] Iter[003/014] IterTime:[9.16s] LOSS: 0.6132 ACC:0.5534 ETA:17h:18m:0s 
+Train: Epo[016/500] Iter[004/014] IterTime:[9.11s] LOSS: 0.5910 ACC:0.5598 ETA:17h:12m:55s 
+Train: Epo[016/500] Iter[005/014] IterTime:[9.28s] LOSS: 0.8294 ACC:0.4438 ETA:17h:32m:9s 
+Train: Epo[016/500] Iter[006/014] IterTime:[9.20s] LOSS: 0.5495 ACC:0.5920 ETA:17h:22m:4s 
+Train: Epo[016/500] Iter[007/014] IterTime:[9.17s] LOSS: 0.6265 ACC:0.5468 ETA:17h:18m:48s 
+Train: Epo[016/500] Iter[008/014] IterTime:[9.18s] LOSS: 0.5597 ACC:0.5824 ETA:17h:19m:26s 
+Train: Epo[016/500] Iter[009/014] IterTime:[9.17s] LOSS: 0.8201 ACC:0.4522 ETA:17h:18m:26s 
+Train: Epo[016/500] Iter[010/014] IterTime:[9.17s] LOSS: 0.7387 ACC:0.4854 ETA:17h:18m:44s 
+Train: Epo[016/500] Iter[011/014] IterTime:[9.08s] LOSS: 0.7234 ACC:0.5021 ETA:17h:8m:34s 
+Train: Epo[016/500] Iter[012/014] IterTime:[9.21s] LOSS: 0.7465 ACC:0.4819 ETA:17h:22m:22s 
+Train: Epo[016/500] Iter[013/014] IterTime:[9.06s] LOSS: 0.6140 ACC:0.5473 ETA:17h:5m:40s 
+Train: Epo[016/500] Iter[014/014] IterTime:[8.97s] LOSS: 0.6238 ACC:0.5436 ETA:16h:55m:22s 
+Valid: Epoch[016/500] Train Mean_Acc: 53.14% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[017/500] Iter[001/014] IterTime:[9.59s] LOSS: 0.7870 ACC:0.4661 ETA:18h:4m:48s 
+Train: Epo[017/500] Iter[002/014] IterTime:[9.17s] LOSS: 0.6324 ACC:0.5601 ETA:17h:17m:51s 
+Train: Epo[017/500] Iter[003/014] IterTime:[9.14s] LOSS: 0.7196 ACC:0.5007 ETA:17h:14m:15s 
+Train: Epo[017/500] Iter[004/014] IterTime:[9.15s] LOSS: 0.6936 ACC:0.5236 ETA:17h:15m:17s 
+Train: Epo[017/500] Iter[005/014] IterTime:[9.14s] LOSS: 0.7149 ACC:0.5032 ETA:17h:14m:2s 
+Train: Epo[017/500] Iter[006/014] IterTime:[9.15s] LOSS: 0.5268 ACC:0.6011 ETA:17h:14m:32s 
+Train: Epo[017/500] Iter[007/014] IterTime:[9.17s] LOSS: 0.6455 ACC:0.5581 ETA:17h:16m:53s 
+Train: Epo[017/500] Iter[008/014] IterTime:[9.28s] LOSS: 0.7149 ACC:0.4993 ETA:17h:28m:52s 
+Train: Epo[017/500] Iter[009/014] IterTime:[9.17s] LOSS: 0.6925 ACC:0.5183 ETA:17h:16m:8s 
+Train: Epo[017/500] Iter[010/014] IterTime:[9.24s] LOSS: 0.6273 ACC:0.5525 ETA:17h:24m:23s 
+Train: Epo[017/500] Iter[011/014] IterTime:[9.22s] LOSS: 0.7393 ACC:0.4924 ETA:17h:21m:25s 
+Train: Epo[017/500] Iter[012/014] IterTime:[9.15s] LOSS: 0.6991 ACC:0.5077 ETA:17h:13m:47s 
+Train: Epo[017/500] Iter[013/014] IterTime:[9.14s] LOSS: 0.7982 ACC:0.4851 ETA:17h:12m:22s 
+Train: Epo[017/500] Iter[014/014] IterTime:[8.96s] LOSS: 0.6992 ACC:0.5116 ETA:16h:52m:14s 
+Valid: Epoch[017/500] Train Mean_Acc: 52.00% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[018/500] Iter[001/014] IterTime:[9.99s] LOSS: 0.6540 ACC:0.5326 ETA:18h:48m:17s 
+Train: Epo[018/500] Iter[002/014] IterTime:[9.29s] LOSS: 0.6648 ACC:0.5284 ETA:17h:28m:53s 
+Train: Epo[018/500] Iter[003/014] IterTime:[9.24s] LOSS: 0.7033 ACC:0.5277 ETA:17h:23m:42s 
+Train: Epo[018/500] Iter[004/014] IterTime:[9.25s] LOSS: 0.8720 ACC:0.4305 ETA:17h:24m:20s 
+Train: Epo[018/500] Iter[005/014] IterTime:[9.28s] LOSS: 0.6994 ACC:0.5077 ETA:17h:27m:4s 
+Train: Epo[018/500] Iter[006/014] IterTime:[9.15s] LOSS: 0.7218 ACC:0.5027 ETA:17h:12m:21s 
+Train: Epo[018/500] Iter[007/014] IterTime:[9.29s] LOSS: 0.5912 ACC:0.5750 ETA:17h:28m:27s 
+Train: Epo[018/500] Iter[008/014] IterTime:[9.26s] LOSS: 0.6370 ACC:0.5585 ETA:17h:24m:56s 
+Train: Epo[018/500] Iter[009/014] IterTime:[9.29s] LOSS: 0.9404 ACC:0.4075 ETA:17h:27m:58s 
+Train: Epo[018/500] Iter[010/014] IterTime:[9.43s] LOSS: 0.7391 ACC:0.5101 ETA:17h:43m:48s 
+Train: Epo[018/500] Iter[011/014] IterTime:[9.33s] LOSS: 0.5478 ACC:0.5845 ETA:17h:31m:58s 
+Train: Epo[018/500] Iter[012/014] IterTime:[9.47s] LOSS: 0.7522 ACC:0.4915 ETA:17h:48m:13s 
+Train: Epo[018/500] Iter[013/014] IterTime:[9.35s] LOSS: 0.7794 ACC:0.4811 ETA:17h:33m:47s 
+Train: Epo[018/500] Iter[014/014] IterTime:[9.04s] LOSS: 0.5176 ACC:0.6053 ETA:16h:59m:16s 
+Valid: Epoch[018/500] Train Mean_Acc: 51.74% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[019/500] Iter[001/014] IterTime:[9.66s] LOSS: 0.8537 ACC:0.4537 ETA:18h:8m:16s 
+Train: Epo[019/500] Iter[002/014] IterTime:[9.59s] LOSS: 0.5861 ACC:0.5669 ETA:18h:0m:19s 
+Train: Epo[019/500] Iter[003/014] IterTime:[9.55s] LOSS: 0.7633 ACC:0.5060 ETA:17h:56m:4s 
+Train: Epo[019/500] Iter[004/014] IterTime:[9.42s] LOSS: 0.7525 ACC:0.4866 ETA:17h:41m:10s 
+Train: Epo[019/500] Iter[005/014] IterTime:[9.62s] LOSS: 0.6244 ACC:0.5547 ETA:18h:3m:33s 
+Train: Epo[019/500] Iter[006/014] IterTime:[9.37s] LOSS: 0.8114 ACC:0.4609 ETA:17h:34m:56s 
+Train: Epo[019/500] Iter[007/014] IterTime:[9.33s] LOSS: 0.5890 ACC:0.5571 ETA:17h:30m:52s 
+Train: Epo[019/500] Iter[008/014] IterTime:[9.52s] LOSS: 0.6347 ACC:0.5485 ETA:17h:51m:20s 
+Train: Epo[019/500] Iter[009/014] IterTime:[9.51s] LOSS: 0.6377 ACC:0.5417 ETA:17h:50m:32s 
+Train: Epo[019/500] Iter[010/014] IterTime:[9.40s] LOSS: 0.7129 ACC:0.5126 ETA:17h:37m:53s 
+Train: Epo[019/500] Iter[011/014] IterTime:[9.49s] LOSS: 0.5221 ACC:0.6014 ETA:17h:47m:40s 
+Train: Epo[019/500] Iter[012/014] IterTime:[9.31s] LOSS: 0.7142 ACC:0.4986 ETA:17h:26m:59s 
+Train: Epo[019/500] Iter[013/014] IterTime:[9.28s] LOSS: 0.8922 ACC:0.4278 ETA:17h:24m:25s 
+Train: Epo[019/500] Iter[014/014] IterTime:[9.30s] LOSS: 0.5545 ACC:0.5994 ETA:17h:25m:37s 
+Valid: Epoch[019/500] Train Mean_Acc: 52.26% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.004000000000000001
+Train: Epo[020/500] Iter[001/014] IterTime:[9.63s] LOSS: 0.5695 ACC:0.5820 ETA:18h:3m:20s 
+Train: Epo[020/500] Iter[002/014] IterTime:[9.24s] LOSS: 0.6865 ACC:0.5165 ETA:17h:19m:35s 
+Train: Epo[020/500] Iter[003/014] IterTime:[9.29s] LOSS: 0.7858 ACC:0.4715 ETA:17h:24m:47s 
+Train: Epo[020/500] Iter[004/014] IterTime:[9.65s] LOSS: 0.6210 ACC:0.5677 ETA:18h:5m:15s 
+Train: Epo[020/500] Iter[005/014] IterTime:[9.54s] LOSS: 0.7044 ACC:0.5073 ETA:17h:52m:1s 
+Train: Epo[020/500] Iter[006/014] IterTime:[9.43s] LOSS: 0.6138 ACC:0.5549 ETA:17h:39m:16s 
+Train: Epo[020/500] Iter[007/014] IterTime:[9.61s] LOSS: 0.6584 ACC:0.5277 ETA:17h:59m:20s 
+Train: Epo[020/500] Iter[008/014] IterTime:[9.44s] LOSS: 0.7139 ACC:0.4944 ETA:17h:40m:19s 
+Train: Epo[020/500] Iter[009/014] IterTime:[9.55s] LOSS: 0.5856 ACC:0.5631 ETA:17h:52m:18s 
+Train: Epo[020/500] Iter[010/014] IterTime:[9.39s] LOSS: 0.6404 ACC:0.5432 ETA:17h:34m:43s 
+Train: Epo[020/500] Iter[011/014] IterTime:[9.21s] LOSS: 0.4846 ACC:0.6268 ETA:17h:13m:57s 
+Train: Epo[020/500] Iter[012/014] IterTime:[9.27s] LOSS: 0.8594 ACC:0.4330 ETA:17h:20m:57s 
+Train: Epo[020/500] Iter[013/014] IterTime:[8.95s] LOSS: 0.7439 ACC:0.4951 ETA:16h:44m:19s 
+Train: Epo[020/500] Iter[014/014] IterTime:[8.88s] LOSS: 0.9532 ACC:0.4030 ETA:16h:36m:49s 
+Valid: Epoch[020/500] Train Mean_Acc: 52.04% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[021/500] Iter[001/014] IterTime:[9.62s] LOSS: 0.7351 ACC:0.4887 ETA:18h:0m:12s 
+Train: Epo[021/500] Iter[002/014] IterTime:[9.38s] LOSS: 0.7431 ACC:0.4964 ETA:17h:32m:23s 
+Train: Epo[021/500] Iter[003/014] IterTime:[9.49s] LOSS: 0.7508 ACC:0.4979 ETA:17h:44m:18s 
+Train: Epo[021/500] Iter[004/014] IterTime:[9.51s] LOSS: 0.7025 ACC:0.5085 ETA:17h:47m:24s 
+Train: Epo[021/500] Iter[005/014] IterTime:[9.36s] LOSS: 0.6035 ACC:0.5570 ETA:17h:29m:53s 
+Train: Epo[021/500] Iter[006/014] IterTime:[9.43s] LOSS: 0.6809 ACC:0.5263 ETA:17h:37m:18s 
+Train: Epo[021/500] Iter[007/014] IterTime:[9.30s] LOSS: 0.7261 ACC:0.5038 ETA:17h:22m:26s 
+Train: Epo[021/500] Iter[008/014] IterTime:[9.22s] LOSS: 0.5806 ACC:0.5885 ETA:17h:13m:16s 
+Train: Epo[021/500] Iter[009/014] IterTime:[9.23s] LOSS: 0.7294 ACC:0.4875 ETA:17h:14m:41s 
+Train: Epo[021/500] Iter[010/014] IterTime:[9.22s] LOSS: 0.5348 ACC:0.6073 ETA:17h:13m:30s 
+Train: Epo[021/500] Iter[011/014] IterTime:[9.19s] LOSS: 0.8655 ACC:0.4650 ETA:17h:9m:38s 
+Train: Epo[021/500] Iter[012/014] IterTime:[9.42s] LOSS: 0.6153 ACC:0.5489 ETA:17h:35m:52s 
+Train: Epo[021/500] Iter[013/014] IterTime:[9.20s] LOSS: 0.6896 ACC:0.5223 ETA:17h:10m:42s 
+Train: Epo[021/500] Iter[014/014] IterTime:[9.69s] LOSS: 0.4634 ACC:0.6346 ETA:18h:5m:49s 
+Valid: Epoch[021/500] Train Mean_Acc: 53.09% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[022/500] Iter[001/014] IterTime:[9.58s] LOSS: 0.7206 ACC:0.4993 ETA:17h:53m:8s 
+Train: Epo[022/500] Iter[002/014] IterTime:[9.39s] LOSS: 0.5639 ACC:0.5777 ETA:17h:31m:57s 
+Train: Epo[022/500] Iter[003/014] IterTime:[9.29s] LOSS: 0.5650 ACC:0.5763 ETA:17h:20m:13s 
+Train: Epo[022/500] Iter[004/014] IterTime:[9.28s] LOSS: 0.6475 ACC:0.5387 ETA:17h:18m:26s 
+Train: Epo[022/500] Iter[005/014] IterTime:[9.50s] LOSS: 0.5519 ACC:0.5908 ETA:17h:43m:27s 
+Train: Epo[022/500] Iter[006/014] IterTime:[9.48s] LOSS: 0.8849 ACC:0.4439 ETA:17h:41m:30s 
+Train: Epo[022/500] Iter[007/014] IterTime:[9.36s] LOSS: 0.6307 ACC:0.5567 ETA:17h:27m:29s 
+Train: Epo[022/500] Iter[008/014] IterTime:[9.51s] LOSS: 0.7907 ACC:0.4732 ETA:17h:43m:30s 
+Train: Epo[022/500] Iter[009/014] IterTime:[9.27s] LOSS: 0.7635 ACC:0.4898 ETA:17h:17m:10s 
+Train: Epo[022/500] Iter[010/014] IterTime:[9.33s] LOSS: 0.8635 ACC:0.4375 ETA:17h:23m:10s 
+Train: Epo[022/500] Iter[011/014] IterTime:[9.28s] LOSS: 0.6317 ACC:0.5462 ETA:17h:18m:4s 
+Train: Epo[022/500] Iter[012/014] IterTime:[9.31s] LOSS: 0.6973 ACC:0.5293 ETA:17h:20m:48s 
+Train: Epo[022/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.5876 ACC:0.5755 ETA:17h:43m:17s 
+Train: Epo[022/500] Iter[014/014] IterTime:[9.02s] LOSS: 0.5362 ACC:0.5927 ETA:16h:48m:44s 
+Valid: Epoch[022/500] Train Mean_Acc: 53.05% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[023/500] Iter[001/014] IterTime:[9.46s] LOSS: 0.6506 ACC:0.5411 ETA:17h:37m:1s 
+Train: Epo[023/500] Iter[002/014] IterTime:[9.38s] LOSS: 0.6775 ACC:0.5319 ETA:17h:28m:13s 
+Train: Epo[023/500] Iter[003/014] IterTime:[9.32s] LOSS: 0.7642 ACC:0.4795 ETA:17h:21m:25s 
+Train: Epo[023/500] Iter[004/014] IterTime:[9.48s] LOSS: 0.6052 ACC:0.5673 ETA:17h:39m:28s 
+Train: Epo[023/500] Iter[005/014] IterTime:[9.35s] LOSS: 0.6424 ACC:0.5328 ETA:17h:24m:6s 
+Train: Epo[023/500] Iter[006/014] IterTime:[9.32s] LOSS: 0.6819 ACC:0.5209 ETA:17h:20m:37s 
+Train: Epo[023/500] Iter[007/014] IterTime:[9.41s] LOSS: 0.7676 ACC:0.4844 ETA:17h:30m:44s 
+Train: Epo[023/500] Iter[008/014] IterTime:[9.32s] LOSS: 0.8271 ACC:0.4604 ETA:17h:21m:4s 
+Train: Epo[023/500] Iter[009/014] IterTime:[9.41s] LOSS: 0.7556 ACC:0.4961 ETA:17h:30m:59s 
+Train: Epo[023/500] Iter[010/014] IterTime:[9.39s] LOSS: 0.6520 ACC:0.5451 ETA:17h:27m:31s 
+Train: Epo[023/500] Iter[011/014] IterTime:[9.20s] LOSS: 0.7226 ACC:0.5088 ETA:17h:6m:51s 
+Train: Epo[023/500] Iter[012/014] IterTime:[9.38s] LOSS: 0.5702 ACC:0.5738 ETA:17h:26m:31s 
+Train: Epo[023/500] Iter[013/014] IterTime:[8.98s] LOSS: 0.5596 ACC:0.5951 ETA:16h:42m:13s 
+Train: Epo[023/500] Iter[014/014] IterTime:[8.98s] LOSS: 0.7890 ACC:0.4798 ETA:16h:41m:19s 
+Valid: Epoch[023/500] Train Mean_Acc: 52.26% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[024/500] Iter[001/014] IterTime:[9.44s] LOSS: 0.8178 ACC:0.4727 ETA:17h:33m:18s 
+Train: Epo[024/500] Iter[002/014] IterTime:[9.21s] LOSS: 0.5640 ACC:0.5890 ETA:17h:6m:59s 
+Train: Epo[024/500] Iter[003/014] IterTime:[9.33s] LOSS: 0.5421 ACC:0.5922 ETA:17h:20m:12s 
+Train: Epo[024/500] Iter[004/014] IterTime:[9.31s] LOSS: 0.6334 ACC:0.5417 ETA:17h:18m:10s 
+Train: Epo[024/500] Iter[005/014] IterTime:[9.21s] LOSS: 0.7336 ACC:0.4922 ETA:17h:6m:24s 
+Train: Epo[024/500] Iter[006/014] IterTime:[9.31s] LOSS: 0.6744 ACC:0.5155 ETA:17h:17m:35s 
+Train: Epo[024/500] Iter[007/014] IterTime:[9.19s] LOSS: 0.6724 ACC:0.5386 ETA:17h:3m:36s 
+Train: Epo[024/500] Iter[008/014] IterTime:[9.15s] LOSS: 0.6749 ACC:0.5262 ETA:16h:58m:57s 
+Train: Epo[024/500] Iter[009/014] IterTime:[9.32s] LOSS: 0.5544 ACC:0.5865 ETA:17h:17m:46s 
+Train: Epo[024/500] Iter[010/014] IterTime:[9.14s] LOSS: 0.6883 ACC:0.5108 ETA:16h:57m:57s 
+Train: Epo[024/500] Iter[011/014] IterTime:[9.12s] LOSS: 0.6546 ACC:0.5483 ETA:16h:55m:29s 
+Train: Epo[024/500] Iter[012/014] IterTime:[9.14s] LOSS: 0.8340 ACC:0.4798 ETA:16h:57m:23s 
+Train: Epo[024/500] Iter[013/014] IterTime:[9.00s] LOSS: 0.7943 ACC:0.4765 ETA:16h:41m:48s 
+Train: Epo[024/500] Iter[014/014] IterTime:[9.05s] LOSS: 0.6198 ACC:0.5766 ETA:16h:47m:32s 
+Valid: Epoch[024/500] Train Mean_Acc: 53.19% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[025/500] Iter[001/014] IterTime:[9.28s] LOSS: 0.5286 ACC:0.6010 ETA:17h:12m:28s 
+Train: Epo[025/500] Iter[002/014] IterTime:[9.47s] LOSS: 0.6274 ACC:0.5508 ETA:17h:33m:58s 
+Train: Epo[025/500] Iter[003/014] IterTime:[9.58s] LOSS: 0.6612 ACC:0.5272 ETA:17h:45m:33s 
+Train: Epo[025/500] Iter[004/014] IterTime:[9.62s] LOSS: 0.8164 ACC:0.4536 ETA:17h:50m:30s 
+Train: Epo[025/500] Iter[005/014] IterTime:[9.51s] LOSS: 0.7426 ACC:0.4887 ETA:17h:37m:58s 
+Train: Epo[025/500] Iter[006/014] IterTime:[9.47s] LOSS: 0.7239 ACC:0.4957 ETA:17h:33m:19s 
+Train: Epo[025/500] Iter[007/014] IterTime:[9.68s] LOSS: 0.7724 ACC:0.4711 ETA:17h:56m:36s 
+Train: Epo[025/500] Iter[008/014] IterTime:[9.30s] LOSS: 0.5553 ACC:0.5965 ETA:17h:13m:48s 
+Train: Epo[025/500] Iter[009/014] IterTime:[9.50s] LOSS: 0.6693 ACC:0.5368 ETA:17h:35m:41s 
+Train: Epo[025/500] Iter[010/014] IterTime:[9.57s] LOSS: 0.6965 ACC:0.5212 ETA:17h:43m:42s 
+Train: Epo[025/500] Iter[011/014] IterTime:[9.44s] LOSS: 0.8027 ACC:0.4653 ETA:17h:29m:27s 
+Train: Epo[025/500] Iter[012/014] IterTime:[9.50s] LOSS: 0.9819 ACC:0.4029 ETA:17h:35m:3s 
+Train: Epo[025/500] Iter[013/014] IterTime:[9.31s] LOSS: 0.7171 ACC:0.5174 ETA:17h:14m:47s 
+Train: Epo[025/500] Iter[014/014] IterTime:[9.00s] LOSS: 0.6551 ACC:0.5384 ETA:16h:39m:17s 
+Valid: Epoch[025/500] Train Mean_Acc: 51.19% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[026/500] Iter[001/014] IterTime:[9.45s] LOSS: 0.6702 ACC:0.5178 ETA:17h:29m:26s 
+Train: Epo[026/500] Iter[002/014] IterTime:[9.39s] LOSS: 0.8579 ACC:0.4603 ETA:17h:22m:27s 
+Train: Epo[026/500] Iter[003/014] IterTime:[9.37s] LOSS: 0.5878 ACC:0.5732 ETA:17h:19m:56s 
+Train: Epo[026/500] Iter[004/014] IterTime:[9.47s] LOSS: 0.6193 ACC:0.5427 ETA:17h:31m:34s 
+Train: Epo[026/500] Iter[005/014] IterTime:[9.40s] LOSS: 0.5631 ACC:0.6057 ETA:17h:23m:44s 
+Train: Epo[026/500] Iter[006/014] IterTime:[9.53s] LOSS: 0.8541 ACC:0.4505 ETA:17h:37m:44s 
+Train: Epo[026/500] Iter[007/014] IterTime:[9.54s] LOSS: 0.7856 ACC:0.4639 ETA:17h:38m:52s 
+Train: Epo[026/500] Iter[008/014] IterTime:[9.45s] LOSS: 0.7741 ACC:0.4890 ETA:17h:28m:57s 
+Train: Epo[026/500] Iter[009/014] IterTime:[9.36s] LOSS: 0.7625 ACC:0.4826 ETA:17h:18m:22s 
+Train: Epo[026/500] Iter[010/014] IterTime:[9.34s] LOSS: 0.5784 ACC:0.5729 ETA:17h:15m:52s 
+Train: Epo[026/500] Iter[011/014] IterTime:[9.26s] LOSS: 0.5769 ACC:0.5754 ETA:17h:6m:45s 
+Train: Epo[026/500] Iter[012/014] IterTime:[9.34s] LOSS: 0.7896 ACC:0.4868 ETA:17h:15m:58s 
+Train: Epo[026/500] Iter[013/014] IterTime:[8.99s] LOSS: 0.6012 ACC:0.5659 ETA:16h:36m:33s 
+Train: Epo[026/500] Iter[014/014] IterTime:[8.93s] LOSS: 0.7002 ACC:0.5398 ETA:16h:29m:47s 
+Valid: Epoch[026/500] Train Mean_Acc: 52.33% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[027/500] Iter[001/014] IterTime:[9.32s] LOSS: 0.6974 ACC:0.5213 ETA:17h:12m:35s 
+Train: Epo[027/500] Iter[002/014] IterTime:[9.53s] LOSS: 0.6420 ACC:0.5481 ETA:17h:35m:53s 
+Train: Epo[027/500] Iter[003/014] IterTime:[9.61s] LOSS: 0.6125 ACC:0.5530 ETA:17h:45m:14s 
+Train: Epo[027/500] Iter[004/014] IterTime:[9.51s] LOSS: 0.6080 ACC:0.5571 ETA:17h:33m:3s 
+Train: Epo[027/500] Iter[005/014] IterTime:[9.32s] LOSS: 0.7556 ACC:0.4918 ETA:17h:12m:46s 
+Train: Epo[027/500] Iter[006/014] IterTime:[9.27s] LOSS: 0.6050 ACC:0.5686 ETA:17h:6m:53s 
+Train: Epo[027/500] Iter[007/014] IterTime:[9.25s] LOSS: 0.8625 ACC:0.4458 ETA:17h:4m:26s 
+Train: Epo[027/500] Iter[008/014] IterTime:[9.23s] LOSS: 0.6082 ACC:0.5633 ETA:17h:2m:18s 
+Train: Epo[027/500] Iter[009/014] IterTime:[9.36s] LOSS: 0.6830 ACC:0.5283 ETA:17h:16m:26s 
+Train: Epo[027/500] Iter[010/014] IterTime:[9.22s] LOSS: 0.6497 ACC:0.5493 ETA:17h:0m:37s 
+Train: Epo[027/500] Iter[011/014] IterTime:[9.23s] LOSS: 0.6499 ACC:0.5330 ETA:17h:0m:58s 
+Train: Epo[027/500] Iter[012/014] IterTime:[9.26s] LOSS: 0.7846 ACC:0.4697 ETA:17h:4m:29s 
+Train: Epo[027/500] Iter[013/014] IterTime:[9.07s] LOSS: 0.5401 ACC:0.5936 ETA:16h:43m:11s 
+Train: Epo[027/500] Iter[014/014] IterTime:[9.34s] LOSS: 0.7720 ACC:0.4826 ETA:17h:13m:2s 
+Valid: Epoch[027/500] Train Mean_Acc: 52.90% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[028/500] Iter[001/014] IterTime:[9.34s] LOSS: 0.7597 ACC:0.4966 ETA:17h:13m:33s 
+Train: Epo[028/500] Iter[002/014] IterTime:[9.18s] LOSS: 0.5885 ACC:0.5716 ETA:16h:54m:45s 
+Train: Epo[028/500] Iter[003/014] IterTime:[9.45s] LOSS: 0.7257 ACC:0.5053 ETA:17h:25m:10s 
+Train: Epo[028/500] Iter[004/014] IterTime:[9.51s] LOSS: 0.6847 ACC:0.5243 ETA:17h:30m:52s 
+Train: Epo[028/500] Iter[005/014] IterTime:[9.47s] LOSS: 0.7270 ACC:0.5169 ETA:17h:26m:23s 
+Train: Epo[028/500] Iter[006/014] IterTime:[9.48s] LOSS: 0.6931 ACC:0.5187 ETA:17h:27m:57s 
+Train: Epo[028/500] Iter[007/014] IterTime:[9.55s] LOSS: 0.6485 ACC:0.5392 ETA:17h:35m:15s 
+Train: Epo[028/500] Iter[008/014] IterTime:[9.15s] LOSS: 0.6457 ACC:0.5339 ETA:16h:51m:0s 
+Train: Epo[028/500] Iter[009/014] IterTime:[9.21s] LOSS: 0.5699 ACC:0.5866 ETA:16h:57m:32s 
+Train: Epo[028/500] Iter[010/014] IterTime:[9.17s] LOSS: 0.6243 ACC:0.5546 ETA:16h:52m:17s 
+Train: Epo[028/500] Iter[011/014] IterTime:[9.38s] LOSS: 0.6173 ACC:0.5696 ETA:17h:16m:13s 
+Train: Epo[028/500] Iter[012/014] IterTime:[9.20s] LOSS: 0.7672 ACC:0.4871 ETA:16h:56m:18s 
+Train: Epo[028/500] Iter[013/014] IterTime:[9.36s] LOSS: 0.8293 ACC:0.4595 ETA:17h:13m:9s 
+Train: Epo[028/500] Iter[014/014] IterTime:[8.88s] LOSS: 0.7152 ACC:0.5081 ETA:16h:20m:22s 
+Valid: Epoch[028/500] Train Mean_Acc: 52.66% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[029/500] Iter[001/014] IterTime:[9.49s] LOSS: 0.8530 ACC:0.4435 ETA:17h:27m:13s 
+Train: Epo[029/500] Iter[002/014] IterTime:[9.48s] LOSS: 0.6334 ACC:0.5432 ETA:17h:26m:13s 
+Train: Epo[029/500] Iter[003/014] IterTime:[9.44s] LOSS: 0.6716 ACC:0.5371 ETA:17h:22m:3s 
+Train: Epo[029/500] Iter[004/014] IterTime:[9.49s] LOSS: 0.5284 ACC:0.6051 ETA:17h:26m:42s 
+Train: Epo[029/500] Iter[005/014] IterTime:[9.39s] LOSS: 0.8501 ACC:0.4474 ETA:17h:15m:23s 
+Train: Epo[029/500] Iter[006/014] IterTime:[9.39s] LOSS: 0.5441 ACC:0.6024 ETA:17h:15m:55s 
+Train: Epo[029/500] Iter[007/014] IterTime:[9.43s] LOSS: 0.6972 ACC:0.5116 ETA:17h:20m:15s 
+Train: Epo[029/500] Iter[008/014] IterTime:[9.30s] LOSS: 0.4947 ACC:0.6181 ETA:17h:5m:21s 
+Train: Epo[029/500] Iter[009/014] IterTime:[9.32s] LOSS: 0.5705 ACC:0.5819 ETA:17h:7m:32s 
+Train: Epo[029/500] Iter[010/014] IterTime:[9.33s] LOSS: 0.6483 ACC:0.5290 ETA:17h:8m:1s 
+Train: Epo[029/500] Iter[011/014] IterTime:[9.44s] LOSS: 0.6424 ACC:0.5303 ETA:17h:19m:53s 
+Train: Epo[029/500] Iter[012/014] IterTime:[9.49s] LOSS: 0.5495 ACC:0.5864 ETA:17h:26m:0s 
+Train: Epo[029/500] Iter[013/014] IterTime:[9.13s] LOSS: 0.7195 ACC:0.5072 ETA:16h:45m:43s 
+Train: Epo[029/500] Iter[014/014] IterTime:[9.12s] LOSS: 0.6679 ACC:0.5237 ETA:16h:44m:8s 
+Valid: Epoch[029/500] Train Mean_Acc: 54.05% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:0.00040000000000000013
+Train: Epo[030/500] Iter[001/014] IterTime:[9.33s] LOSS: 0.5662 ACC:0.5786 ETA:17h:7m:34s 
+Train: Epo[030/500] Iter[002/014] IterTime:[9.21s] LOSS: 0.7132 ACC:0.5275 ETA:16h:53m:48s 
+Train: Epo[030/500] Iter[003/014] IterTime:[9.42s] LOSS: 0.6563 ACC:0.5275 ETA:17h:16m:53s 
+Train: Epo[030/500] Iter[004/014] IterTime:[9.23s] LOSS: 0.7004 ACC:0.5160 ETA:16h:56m:33s 
+Train: Epo[030/500] Iter[005/014] IterTime:[9.48s] LOSS: 0.7367 ACC:0.4976 ETA:17h:23m:47s 
+Train: Epo[030/500] Iter[006/014] IterTime:[9.45s] LOSS: 0.7656 ACC:0.4736 ETA:17h:20m:12s 
+Train: Epo[030/500] Iter[007/014] IterTime:[9.37s] LOSS: 0.7287 ACC:0.4929 ETA:17h:10m:36s 
+Train: Epo[030/500] Iter[008/014] IterTime:[9.42s] LOSS: 0.6094 ACC:0.5632 ETA:17h:16m:49s 
+Train: Epo[030/500] Iter[009/014] IterTime:[9.55s] LOSS: 0.5459 ACC:0.5857 ETA:17h:30m:19s 
+Train: Epo[030/500] Iter[010/014] IterTime:[9.71s] LOSS: 0.5606 ACC:0.5819 ETA:17h:47m:44s 
+Train: Epo[030/500] Iter[011/014] IterTime:[9.59s] LOSS: 0.5872 ACC:0.5763 ETA:17h:34m:24s 
+Train: Epo[030/500] Iter[012/014] IterTime:[9.40s] LOSS: 0.6985 ACC:0.5136 ETA:17h:13m:43s 
+Train: Epo[030/500] Iter[013/014] IterTime:[9.37s] LOSS: 0.6864 ACC:0.5218 ETA:17h:9m:48s 
+Train: Epo[030/500] Iter[014/014] IterTime:[9.33s] LOSS: 0.7774 ACC:0.4720 ETA:17h:5m:25s 
+Valid: Epoch[030/500] Train Mean_Acc: 53.06% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[031/500] Iter[001/014] IterTime:[9.40s] LOSS: 0.8072 ACC:0.4547 ETA:17h:13m:4s 
+Train: Epo[031/500] Iter[002/014] IterTime:[9.39s] LOSS: 0.8517 ACC:0.4498 ETA:17h:11m:59s 
+Train: Epo[031/500] Iter[003/014] IterTime:[9.59s] LOSS: 0.6910 ACC:0.5331 ETA:17h:33m:12s 
+Train: Epo[031/500] Iter[004/014] IterTime:[9.56s] LOSS: 0.7734 ACC:0.4747 ETA:17h:30m:18s 
+Train: Epo[031/500] Iter[005/014] IterTime:[9.54s] LOSS: 0.6467 ACC:0.5370 ETA:17h:27m:19s 
+Train: Epo[031/500] Iter[006/014] IterTime:[9.45s] LOSS: 0.5805 ACC:0.5827 ETA:17h:18m:13s 
+Train: Epo[031/500] Iter[007/014] IterTime:[9.35s] LOSS: 0.6902 ACC:0.5699 ETA:17h:6m:26s 
+Train: Epo[031/500] Iter[008/014] IterTime:[9.21s] LOSS: 0.6992 ACC:0.5137 ETA:16h:51m:13s 
+Train: Epo[031/500] Iter[009/014] IterTime:[9.45s] LOSS: 0.7506 ACC:0.4896 ETA:17h:17m:46s 
+Train: Epo[031/500] Iter[010/014] IterTime:[9.30s] LOSS: 0.5356 ACC:0.5926 ETA:17h:1m:0s 
+Train: Epo[031/500] Iter[011/014] IterTime:[9.30s] LOSS: 0.7514 ACC:0.4882 ETA:17h:0m:43s 
+Train: Epo[031/500] Iter[012/014] IterTime:[9.09s] LOSS: 0.8045 ACC:0.4898 ETA:16h:37m:6s 
+Train: Epo[031/500] Iter[013/014] IterTime:[9.04s] LOSS: 0.6904 ACC:0.5161 ETA:16h:32m:6s 
+Train: Epo[031/500] Iter[014/014] IterTime:[8.88s] LOSS: 0.5907 ACC:0.5620 ETA:16h:13m:36s 
+Valid: Epoch[031/500] Train Mean_Acc: 51.81% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[032/500] Iter[001/014] IterTime:[9.33s] LOSS: 0.7682 ACC:0.4819 ETA:17h:3m:1s 
+Train: Epo[032/500] Iter[002/014] IterTime:[9.13s] LOSS: 0.6782 ACC:0.5184 ETA:16h:41m:33s 
+Train: Epo[032/500] Iter[003/014] IterTime:[9.21s] LOSS: 0.7442 ACC:0.4818 ETA:16h:49m:59s 
+Train: Epo[032/500] Iter[004/014] IterTime:[9.17s] LOSS: 0.5672 ACC:0.5787 ETA:16h:45m:42s 
+Train: Epo[032/500] Iter[005/014] IterTime:[9.13s] LOSS: 0.6573 ACC:0.5354 ETA:16h:40m:25s 
+Train: Epo[032/500] Iter[006/014] IterTime:[9.20s] LOSS: 0.6365 ACC:0.5402 ETA:16h:48m:14s 
+Train: Epo[032/500] Iter[007/014] IterTime:[9.14s] LOSS: 0.7058 ACC:0.5149 ETA:16h:41m:54s 
+Train: Epo[032/500] Iter[008/014] IterTime:[9.24s] LOSS: 0.7380 ACC:0.5013 ETA:16h:51m:53s 
+Train: Epo[032/500] Iter[009/014] IterTime:[9.16s] LOSS: 0.5662 ACC:0.5769 ETA:16h:43m:9s 
+Train: Epo[032/500] Iter[010/014] IterTime:[9.19s] LOSS: 0.6017 ACC:0.5611 ETA:16h:45m:55s 
+Train: Epo[032/500] Iter[011/014] IterTime:[9.25s] LOSS: 0.8571 ACC:0.4439 ETA:16h:53m:2s 
+Train: Epo[032/500] Iter[012/014] IterTime:[9.21s] LOSS: 0.6598 ACC:0.5408 ETA:16h:48m:1s 
+Train: Epo[032/500] Iter[013/014] IterTime:[8.98s] LOSS: 0.7395 ACC:0.4966 ETA:16h:23m:12s 
+Train: Epo[032/500] Iter[014/014] IterTime:[9.12s] LOSS: 0.7195 ACC:0.4979 ETA:16h:38m:26s 
+Valid: Epoch[032/500] Train Mean_Acc: 51.93% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[033/500] Iter[001/014] IterTime:[9.44s] LOSS: 0.6452 ACC:0.5519 ETA:17h:13m:20s 
+Train: Epo[033/500] Iter[002/014] IterTime:[9.76s] LOSS: 0.7628 ACC:0.4854 ETA:17h:47m:51s 
+Train: Epo[033/500] Iter[003/014] IterTime:[9.64s] LOSS: 0.6936 ACC:0.5072 ETA:17h:34m:12s 
+Train: Epo[033/500] Iter[004/014] IterTime:[9.47s] LOSS: 0.8526 ACC:0.4393 ETA:17h:16m:22s 
+Train: Epo[033/500] Iter[005/014] IterTime:[9.58s] LOSS: 0.7949 ACC:0.4792 ETA:17h:28m:5s 
+Train: Epo[033/500] Iter[006/014] IterTime:[9.41s] LOSS: 0.8160 ACC:0.4586 ETA:17h:9m:29s 
+Train: Epo[033/500] Iter[007/014] IterTime:[9.59s] LOSS: 0.7314 ACC:0.4903 ETA:17h:27m:58s 
+Train: Epo[033/500] Iter[008/014] IterTime:[9.37s] LOSS: 0.5563 ACC:0.5862 ETA:17h:4m:45s 
+Train: Epo[033/500] Iter[009/014] IterTime:[9.45s] LOSS: 0.6876 ACC:0.5228 ETA:17h:12m:49s 
+Train: Epo[033/500] Iter[010/014] IterTime:[9.55s] LOSS: 0.6961 ACC:0.5083 ETA:17h:23m:17s 
+Train: Epo[033/500] Iter[011/014] IterTime:[9.51s] LOSS: 0.8018 ACC:0.4567 ETA:17h:18m:50s 
+Train: Epo[033/500] Iter[012/014] IterTime:[9.55s] LOSS: 0.7528 ACC:0.4826 ETA:17h:23m:11s 
+Train: Epo[033/500] Iter[013/014] IterTime:[9.22s] LOSS: 0.6041 ACC:0.5568 ETA:16h:47m:33s 
+Train: Epo[033/500] Iter[014/014] IterTime:[9.26s] LOSS: 0.5150 ACC:0.6035 ETA:16h:51m:22s 
+Valid: Epoch[033/500] Train Mean_Acc: 50.92% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[034/500] Iter[001/014] IterTime:[9.49s] LOSS: 0.7398 ACC:0.5028 ETA:17h:16m:22s 
+Train: Epo[034/500] Iter[002/014] IterTime:[9.27s] LOSS: 0.6162 ACC:0.5527 ETA:16h:51m:38s 
+Train: Epo[034/500] Iter[003/014] IterTime:[9.35s] LOSS: 0.4499 ACC:0.6455 ETA:17h:1m:10s 
+Train: Epo[034/500] Iter[004/014] IterTime:[9.49s] LOSS: 0.6966 ACC:0.5068 ETA:17h:16m:0s 
+Train: Epo[034/500] Iter[005/014] IterTime:[9.27s] LOSS: 0.6517 ACC:0.5412 ETA:16h:51m:41s 
+Train: Epo[034/500] Iter[006/014] IterTime:[9.50s] LOSS: 0.8628 ACC:0.4483 ETA:17h:16m:47s 
+Train: Epo[034/500] Iter[007/014] IterTime:[9.31s] LOSS: 0.6182 ACC:0.5501 ETA:16h:55m:58s 
+Train: Epo[034/500] Iter[008/014] IterTime:[9.26s] LOSS: 0.6540 ACC:0.5315 ETA:16h:50m:16s 
+Train: Epo[034/500] Iter[009/014] IterTime:[9.35s] LOSS: 0.6540 ACC:0.5402 ETA:16h:59m:43s 
+Train: Epo[034/500] Iter[010/014] IterTime:[9.20s] LOSS: 0.8688 ACC:0.4365 ETA:16h:43m:32s 
+Train: Epo[034/500] Iter[011/014] IterTime:[9.21s] LOSS: 0.6751 ACC:0.5275 ETA:16h:44m:38s 
+Train: Epo[034/500] Iter[012/014] IterTime:[9.33s] LOSS: 0.8264 ACC:0.4662 ETA:16h:57m:30s 
+Train: Epo[034/500] Iter[013/014] IterTime:[9.07s] LOSS: 0.6913 ACC:0.5174 ETA:16h:28m:21s 
+Train: Epo[034/500] Iter[014/014] IterTime:[9.03s] LOSS: 0.7418 ACC:0.5047 ETA:16h:24m:36s 
+Valid: Epoch[034/500] Train Mean_Acc: 51.94% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[035/500] Iter[001/014] IterTime:[9.41s] LOSS: 0.6594 ACC:0.5314 ETA:17h:5m:35s 
+Train: Epo[035/500] Iter[002/014] IterTime:[9.34s] LOSS: 0.5797 ACC:0.5711 ETA:16h:57m:25s 
+Train: Epo[035/500] Iter[003/014] IterTime:[9.21s] LOSS: 0.5149 ACC:0.6040 ETA:16h:43m:48s 
+Train: Epo[035/500] Iter[004/014] IterTime:[9.30s] LOSS: 0.7423 ACC:0.4947 ETA:16h:52m:38s 
+Train: Epo[035/500] Iter[005/014] IterTime:[9.31s] LOSS: 0.6948 ACC:0.5394 ETA:16h:54m:11s 
+Train: Epo[035/500] Iter[006/014] IterTime:[9.17s] LOSS: 0.5673 ACC:0.5775 ETA:16h:38m:16s 
+Train: Epo[035/500] Iter[007/014] IterTime:[9.22s] LOSS: 0.8552 ACC:0.4432 ETA:16h:43m:33s 
+Train: Epo[035/500] Iter[008/014] IterTime:[9.19s] LOSS: 0.7340 ACC:0.4964 ETA:16h:40m:50s 
+Train: Epo[035/500] Iter[009/014] IterTime:[9.24s] LOSS: 0.6881 ACC:0.5342 ETA:16h:45m:52s 
+Train: Epo[035/500] Iter[010/014] IterTime:[9.25s] LOSS: 0.6412 ACC:0.5378 ETA:16h:46m:42s 
+Train: Epo[035/500] Iter[011/014] IterTime:[9.28s] LOSS: 0.6552 ACC:0.5373 ETA:16h:50m:6s 
+Train: Epo[035/500] Iter[012/014] IterTime:[9.24s] LOSS: 0.7621 ACC:0.4841 ETA:16h:45m:14s 
+Train: Epo[035/500] Iter[013/014] IterTime:[9.29s] LOSS: 0.5945 ACC:0.5635 ETA:16h:50m:27s 
+Train: Epo[035/500] Iter[014/014] IterTime:[8.91s] LOSS: 0.7686 ACC:0.4916 ETA:16h:8m:41s 
+Valid: Epoch[035/500] Train Mean_Acc: 52.90% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[036/500] Iter[001/014] IterTime:[9.42s] LOSS: 0.7855 ACC:0.4703 ETA:17h:4m:7s 
+Train: Epo[036/500] Iter[002/014] IterTime:[9.69s] LOSS: 0.5906 ACC:0.5635 ETA:17h:33m:19s 
+Train: Epo[036/500] Iter[003/014] IterTime:[9.39s] LOSS: 0.6391 ACC:0.5421 ETA:17h:0m:31s 
+Train: Epo[036/500] Iter[004/014] IterTime:[9.25s] LOSS: 0.8112 ACC:0.4607 ETA:16h:45m:28s 
+Train: Epo[036/500] Iter[005/014] IterTime:[9.34s] LOSS: 0.6102 ACC:0.5670 ETA:16h:55m:18s 
+Train: Epo[036/500] Iter[006/014] IterTime:[9.22s] LOSS: 0.6562 ACC:0.5528 ETA:16h:42m:12s 
+Train: Epo[036/500] Iter[007/014] IterTime:[9.30s] LOSS: 0.4699 ACC:0.6296 ETA:16h:50m:31s 
+Train: Epo[036/500] Iter[008/014] IterTime:[9.24s] LOSS: 0.8310 ACC:0.4543 ETA:16h:44m:9s 
+Train: Epo[036/500] Iter[009/014] IterTime:[9.30s] LOSS: 0.6405 ACC:0.5371 ETA:16h:49m:53s 
+Train: Epo[036/500] Iter[010/014] IterTime:[9.26s] LOSS: 0.6074 ACC:0.5605 ETA:16h:45m:49s 
+Train: Epo[036/500] Iter[011/014] IterTime:[9.46s] LOSS: 0.6613 ACC:0.5352 ETA:17h:7m:4s 
+Train: Epo[036/500] Iter[012/014] IterTime:[9.33s] LOSS: 0.6372 ACC:0.5487 ETA:16h:52m:20s 
+Train: Epo[036/500] Iter[013/014] IterTime:[9.23s] LOSS: 0.5373 ACC:0.6002 ETA:16h:42m:16s 
+Train: Epo[036/500] Iter[014/014] IterTime:[8.94s] LOSS: 0.7436 ACC:0.4842 ETA:16h:10m:12s 
+Valid: Epoch[036/500] Train Mean_Acc: 53.62% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[037/500] Iter[001/014] IterTime:[9.50s] LOSS: 0.6829 ACC:0.5183 ETA:17h:10m:23s 
+Train: Epo[037/500] Iter[002/014] IterTime:[9.58s] LOSS: 0.7044 ACC:0.5069 ETA:17h:19m:28s 
+Train: Epo[037/500] Iter[003/014] IterTime:[9.53s] LOSS: 0.5281 ACC:0.5970 ETA:17h:13m:27s 
+Train: Epo[037/500] Iter[004/014] IterTime:[9.41s] LOSS: 0.6408 ACC:0.5377 ETA:17h:0m:58s 
+Train: Epo[037/500] Iter[005/014] IterTime:[9.31s] LOSS: 0.7743 ACC:0.4712 ETA:16h:49m:55s 
+Train: Epo[037/500] Iter[006/014] IterTime:[9.28s] LOSS: 0.6462 ACC:0.5335 ETA:16h:45m:53s 
+Train: Epo[037/500] Iter[007/014] IterTime:[9.29s] LOSS: 0.8902 ACC:0.4197 ETA:16h:46m:30s 
+Train: Epo[037/500] Iter[008/014] IterTime:[9.26s] LOSS: 0.6942 ACC:0.5141 ETA:16h:43m:45s 
+Train: Epo[037/500] Iter[009/014] IterTime:[9.31s] LOSS: 0.6285 ACC:0.5426 ETA:16h:48m:40s 
+Train: Epo[037/500] Iter[010/014] IterTime:[9.28s] LOSS: 0.6515 ACC:0.5285 ETA:16h:45m:51s 
+Train: Epo[037/500] Iter[011/014] IterTime:[9.25s] LOSS: 0.5020 ACC:0.6135 ETA:16h:42m:33s 
+Train: Epo[037/500] Iter[012/014] IterTime:[9.27s] LOSS: 0.7994 ACC:0.4659 ETA:16h:44m:25s 
+Train: Epo[037/500] Iter[013/014] IterTime:[8.94s] LOSS: 0.7647 ACC:0.4875 ETA:16h:8m:3s 
+Train: Epo[037/500] Iter[014/014] IterTime:[9.26s] LOSS: 0.9465 ACC:0.4231 ETA:16h:42m:21s 
+Valid: Epoch[037/500] Train Mean_Acc: 51.14% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[038/500] Iter[001/014] IterTime:[9.32s] LOSS: 0.6585 ACC:0.5323 ETA:16h:48m:41s 
+Train: Epo[038/500] Iter[002/014] IterTime:[9.22s] LOSS: 0.6386 ACC:0.5378 ETA:16h:38m:33s 
+Train: Epo[038/500] Iter[003/014] IterTime:[9.19s] LOSS: 0.7214 ACC:0.5079 ETA:16h:35m:3s 
+Train: Epo[038/500] Iter[004/014] IterTime:[9.42s] LOSS: 0.8138 ACC:0.4541 ETA:16h:59m:45s 
+Train: Epo[038/500] Iter[005/014] IterTime:[9.33s] LOSS: 0.5723 ACC:0.5829 ETA:16h:49m:1s 
+Train: Epo[038/500] Iter[006/014] IterTime:[9.28s] LOSS: 0.6564 ACC:0.5320 ETA:16h:43m:37s 
+Train: Epo[038/500] Iter[007/014] IterTime:[9.27s] LOSS: 0.8578 ACC:0.4597 ETA:16h:42m:44s 
+Train: Epo[038/500] Iter[008/014] IterTime:[9.27s] LOSS: 0.7554 ACC:0.4961 ETA:16h:42m:40s 
+Train: Epo[038/500] Iter[009/014] IterTime:[9.34s] LOSS: 0.7995 ACC:0.4653 ETA:16h:50m:2s 
+Train: Epo[038/500] Iter[010/014] IterTime:[9.32s] LOSS: 0.6399 ACC:0.5331 ETA:16h:48m:3s 
+Train: Epo[038/500] Iter[011/014] IterTime:[9.32s] LOSS: 0.7407 ACC:0.4876 ETA:16h:47m:11s 
+Train: Epo[038/500] Iter[012/014] IterTime:[9.30s] LOSS: 0.6898 ACC:0.5116 ETA:16h:45m:1s 
+Train: Epo[038/500] Iter[013/014] IterTime:[8.98s] LOSS: 0.7050 ACC:0.5047 ETA:16h:10m:34s 
+Train: Epo[038/500] Iter[014/014] IterTime:[8.96s] LOSS: 0.6390 ACC:0.5441 ETA:16h:8m:33s 
+Valid: Epoch[038/500] Train Mean_Acc: 51.06% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[039/500] Iter[001/014] IterTime:[9.39s] LOSS: 0.6724 ACC:0.5272 ETA:16h:54m:37s 
+Train: Epo[039/500] Iter[002/014] IterTime:[9.25s] LOSS: 0.6629 ACC:0.5344 ETA:16h:39m:13s 
+Train: Epo[039/500] Iter[003/014] IterTime:[9.23s] LOSS: 0.5564 ACC:0.5866 ETA:16h:36m:49s 
+Train: Epo[039/500] Iter[004/014] IterTime:[9.25s] LOSS: 0.5373 ACC:0.5925 ETA:16h:38m:52s 
+Train: Epo[039/500] Iter[005/014] IterTime:[9.32s] LOSS: 0.8328 ACC:0.4483 ETA:16h:46m:12s 
+Train: Epo[039/500] Iter[006/014] IterTime:[9.25s] LOSS: 0.7352 ACC:0.5133 ETA:16h:38m:0s 
+Train: Epo[039/500] Iter[007/014] IterTime:[9.38s] LOSS: 0.7422 ACC:0.4987 ETA:16h:51m:53s 
+Train: Epo[039/500] Iter[008/014] IterTime:[9.23s] LOSS: 0.9723 ACC:0.4001 ETA:16h:36m:20s 
+Train: Epo[039/500] Iter[009/014] IterTime:[9.33s] LOSS: 0.5499 ACC:0.5897 ETA:16h:46m:15s 
+Train: Epo[039/500] Iter[010/014] IterTime:[9.23s] LOSS: 0.6714 ACC:0.5277 ETA:16h:35m:31s 
+Train: Epo[039/500] Iter[011/014] IterTime:[9.23s] LOSS: 0.7640 ACC:0.5062 ETA:16h:35m:20s 
+Train: Epo[039/500] Iter[012/014] IterTime:[9.27s] LOSS: 0.5869 ACC:0.5724 ETA:16h:39m:23s 
+Train: Epo[039/500] Iter[013/014] IterTime:[9.23s] LOSS: 0.5695 ACC:0.5705 ETA:16h:35m:13s 
+Train: Epo[039/500] Iter[014/014] IterTime:[8.87s] LOSS: 0.9951 ACC:0.3871 ETA:15h:56m:30s 
+Valid: Epoch[039/500] Train Mean_Acc: 51.82% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[040/500] Iter[001/014] IterTime:[9.39s] LOSS: 0.7040 ACC:0.5125 ETA:16h:52m:15s 
+Train: Epo[040/500] Iter[002/014] IterTime:[9.39s] LOSS: 0.6921 ACC:0.5099 ETA:16h:51m:42s 
+Train: Epo[040/500] Iter[003/014] IterTime:[9.25s] LOSS: 0.6533 ACC:0.5358 ETA:16h:36m:39s 
+Train: Epo[040/500] Iter[004/014] IterTime:[9.28s] LOSS: 0.6351 ACC:0.5383 ETA:16h:39m:24s 
+Train: Epo[040/500] Iter[005/014] IterTime:[9.14s] LOSS: 0.7860 ACC:0.4825 ETA:16h:24m:45s 
+Train: Epo[040/500] Iter[006/014] IterTime:[9.19s] LOSS: 0.5475 ACC:0.5900 ETA:16h:29m:40s 
+Train: Epo[040/500] Iter[007/014] IterTime:[9.25s] LOSS: 0.5679 ACC:0.5763 ETA:16h:35m:57s 
+Train: Epo[040/500] Iter[008/014] IterTime:[9.16s] LOSS: 0.6335 ACC:0.5519 ETA:16h:26m:25s 
+Train: Epo[040/500] Iter[009/014] IterTime:[9.27s] LOSS: 0.7578 ACC:0.4857 ETA:16h:38m:0s 
+Train: Epo[040/500] Iter[010/014] IterTime:[9.39s] LOSS: 0.5856 ACC:0.5837 ETA:16h:50m:44s 
+Train: Epo[040/500] Iter[011/014] IterTime:[9.36s] LOSS: 0.7446 ACC:0.4827 ETA:16h:47m:45s 
+Train: Epo[040/500] Iter[012/014] IterTime:[9.34s] LOSS: 0.6061 ACC:0.5618 ETA:16h:45m:4s 
+Train: Epo[040/500] Iter[013/014] IterTime:[9.36s] LOSS: 0.7942 ACC:0.4823 ETA:16h:46m:42s 
+Train: Epo[040/500] Iter[014/014] IterTime:[9.02s] LOSS: 0.8308 ACC:0.4643 ETA:16h:10m:51s 
+Valid: Epoch[040/500] Train Mean_Acc: 52.56% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[041/500] Iter[001/014] IterTime:[9.56s] LOSS: 0.5712 ACC:0.5834 ETA:17h:7m:48s 
+Train: Epo[041/500] Iter[002/014] IterTime:[9.46s] LOSS: 0.7677 ACC:0.4898 ETA:16h:57m:32s 
+Train: Epo[041/500] Iter[003/014] IterTime:[9.32s] LOSS: 0.6632 ACC:0.5311 ETA:16h:42m:44s 
+Train: Epo[041/500] Iter[004/014] IterTime:[9.42s] LOSS: 0.9780 ACC:0.3876 ETA:16h:52m:45s 
+Train: Epo[041/500] Iter[005/014] IterTime:[9.43s] LOSS: 0.5968 ACC:0.5725 ETA:16h:53m:55s 
+Train: Epo[041/500] Iter[006/014] IterTime:[9.28s] LOSS: 0.6326 ACC:0.5541 ETA:16h:37m:18s 
+Train: Epo[041/500] Iter[007/014] IterTime:[9.39s] LOSS: 0.8690 ACC:0.4362 ETA:16h:49m:29s 
+Train: Epo[041/500] Iter[008/014] IterTime:[9.34s] LOSS: 0.7160 ACC:0.5101 ETA:16h:43m:10s 
+Train: Epo[041/500] Iter[009/014] IterTime:[9.31s] LOSS: 0.5880 ACC:0.5684 ETA:16h:39m:54s 
+Train: Epo[041/500] Iter[010/014] IterTime:[9.32s] LOSS: 0.7066 ACC:0.5077 ETA:16h:41m:33s 
+Train: Epo[041/500] Iter[011/014] IterTime:[9.56s] LOSS: 0.6266 ACC:0.5688 ETA:17h:6m:22s 
+Train: Epo[041/500] Iter[012/014] IterTime:[9.35s] LOSS: 0.6311 ACC:0.5539 ETA:16h:44m:7s 
+Train: Epo[041/500] Iter[013/014] IterTime:[9.32s] LOSS: 0.6600 ACC:0.5322 ETA:16h:40m:44s 
+Train: Epo[041/500] Iter[014/014] IterTime:[9.39s] LOSS: 0.6778 ACC:0.5296 ETA:16h:47m:55s 
+Valid: Epoch[041/500] Train Mean_Acc: 52.32% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[042/500] Iter[001/014] IterTime:[9.67s] LOSS: 0.7503 ACC:0.4875 ETA:17h:18m:0s 
+Train: Epo[042/500] Iter[002/014] IterTime:[9.45s] LOSS: 0.7110 ACC:0.5163 ETA:16h:53m:46s 
+Train: Epo[042/500] Iter[003/014] IterTime:[9.33s] LOSS: 0.7640 ACC:0.4846 ETA:16h:41m:7s 
+Train: Epo[042/500] Iter[004/014] IterTime:[9.48s] LOSS: 0.7595 ACC:0.4815 ETA:16h:56m:51s 
+Train: Epo[042/500] Iter[005/014] IterTime:[9.42s] LOSS: 0.5818 ACC:0.5696 ETA:16h:50m:23s 
+Train: Epo[042/500] Iter[006/014] IterTime:[9.52s] LOSS: 0.7549 ACC:0.4896 ETA:17h:0m:33s 
+Train: Epo[042/500] Iter[007/014] IterTime:[9.69s] LOSS: 0.6260 ACC:0.5414 ETA:17h:18m:50s 
+Train: Epo[042/500] Iter[008/014] IterTime:[9.50s] LOSS: 0.8068 ACC:0.4649 ETA:16h:58m:58s 
+Train: Epo[042/500] Iter[009/014] IterTime:[9.43s] LOSS: 0.5196 ACC:0.6037 ETA:16h:51m:8s 
+Train: Epo[042/500] Iter[010/014] IterTime:[9.41s] LOSS: 0.7784 ACC:0.4710 ETA:16h:48m:22s 
+Train: Epo[042/500] Iter[011/014] IterTime:[9.34s] LOSS: 0.6258 ACC:0.5472 ETA:16h:40m:29s 
+Train: Epo[042/500] Iter[012/014] IterTime:[9.38s] LOSS: 0.7514 ACC:0.4878 ETA:16h:45m:18s 
+Train: Epo[042/500] Iter[013/014] IterTime:[9.29s] LOSS: 0.7466 ACC:0.4910 ETA:16h:35m:1s 
+Train: Epo[042/500] Iter[014/014] IterTime:[9.23s] LOSS: 0.5019 ACC:0.6148 ETA:16h:28m:23s 
+Valid: Epoch[042/500] Train Mean_Acc: 51.79% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[043/500] Iter[001/014] IterTime:[9.64s] LOSS: 0.8387 ACC:0.4644 ETA:17h:12m:15s 
+Train: Epo[043/500] Iter[002/014] IterTime:[9.77s] LOSS: 0.7089 ACC:0.5142 ETA:17h:26m:31s 
+Train: Epo[043/500] Iter[003/014] IterTime:[9.75s] LOSS: 0.6928 ACC:0.5241 ETA:17h:24m:23s 
+Train: Epo[043/500] Iter[004/014] IterTime:[9.81s] LOSS: 0.7236 ACC:0.5019 ETA:17h:29m:56s 
+Train: Epo[043/500] Iter[005/014] IterTime:[9.83s] LOSS: 0.7575 ACC:0.4879 ETA:17h:31m:43s 
+Train: Epo[043/500] Iter[006/014] IterTime:[10.03s] LOSS: 0.5673 ACC:0.5738 ETA:17h:53m:19s 
+Train: Epo[043/500] Iter[007/014] IterTime:[9.83s] LOSS: 0.6469 ACC:0.5437 ETA:17h:31m:39s 
+Train: Epo[043/500] Iter[008/014] IterTime:[9.96s] LOSS: 0.6623 ACC:0.5284 ETA:17h:45m:31s 
+Train: Epo[043/500] Iter[009/014] IterTime:[9.89s] LOSS: 0.8120 ACC:0.4649 ETA:17h:38m:14s 
+Train: Epo[043/500] Iter[010/014] IterTime:[9.70s] LOSS: 0.6453 ACC:0.5364 ETA:17h:16m:59s 
+Train: Epo[043/500] Iter[011/014] IterTime:[9.64s] LOSS: 0.7706 ACC:0.4837 ETA:17h:10m:22s 
+Train: Epo[043/500] Iter[012/014] IterTime:[9.60s] LOSS: 0.6431 ACC:0.5626 ETA:17h:5m:58s 
+Train: Epo[043/500] Iter[013/014] IterTime:[10.01s] LOSS: 0.7213 ACC:0.5232 ETA:17h:50m:15s 
+Train: Epo[043/500] Iter[014/014] IterTime:[9.62s] LOSS: 0.7820 ACC:0.4829 ETA:17h:8m:19s 
+Valid: Epoch[043/500] Train Mean_Acc: 51.37% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[044/500] Iter[001/014] IterTime:[10.08s] LOSS: 0.6951 ACC:0.5238 ETA:17h:56m:53s 
+Train: Epo[044/500] Iter[002/014] IterTime:[9.87s] LOSS: 0.6540 ACC:0.5333 ETA:17h:34m:31s 
+Train: Epo[044/500] Iter[003/014] IterTime:[9.90s] LOSS: 0.5742 ACC:0.5703 ETA:17h:37m:39s 
+Train: Epo[044/500] Iter[004/014] IterTime:[9.76s] LOSS: 0.7784 ACC:0.4907 ETA:17h:22m:17s 
+Train: Epo[044/500] Iter[005/014] IterTime:[9.66s] LOSS: 0.7067 ACC:0.5067 ETA:17h:11m:39s 
+Train: Epo[044/500] Iter[006/014] IterTime:[9.75s] LOSS: 0.7517 ACC:0.4975 ETA:17h:21m:21s 
+Train: Epo[044/500] Iter[007/014] IterTime:[9.72s] LOSS: 0.6809 ACC:0.5309 ETA:17h:17m:16s 
+Train: Epo[044/500] Iter[008/014] IterTime:[9.73s] LOSS: 0.6098 ACC:0.5609 ETA:17h:18m:9s 
+Train: Epo[044/500] Iter[009/014] IterTime:[9.75s] LOSS: 0.7352 ACC:0.4819 ETA:17h:20m:32s 
+Train: Epo[044/500] Iter[010/014] IterTime:[9.73s] LOSS: 0.6317 ACC:0.5564 ETA:17h:18m:52s 
+Train: Epo[044/500] Iter[011/014] IterTime:[9.70s] LOSS: 0.8317 ACC:0.4658 ETA:17h:15m:31s 
+Train: Epo[044/500] Iter[012/014] IterTime:[9.77s] LOSS: 0.8280 ACC:0.4546 ETA:17h:22m:4s 
+Train: Epo[044/500] Iter[013/014] IterTime:[9.57s] LOSS: 0.5502 ACC:0.5900 ETA:17h:0m:31s 
+Train: Epo[044/500] Iter[014/014] IterTime:[9.57s] LOSS: 0.6390 ACC:0.5392 ETA:17h:0m:59s 
+Valid: Epoch[044/500] Train Mean_Acc: 52.16% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[045/500] Iter[001/014] IterTime:[9.93s] LOSS: 0.7840 ACC:0.4846 ETA:17h:39m:18s 
+Train: Epo[045/500] Iter[002/014] IterTime:[9.69s] LOSS: 0.7107 ACC:0.5083 ETA:17h:13m:34s 
+Train: Epo[045/500] Iter[003/014] IterTime:[9.79s] LOSS: 0.6310 ACC:0.5515 ETA:17h:23m:15s 
+Train: Epo[045/500] Iter[004/014] IterTime:[9.86s] LOSS: 0.8576 ACC:0.4378 ETA:17h:31m:18s 
+Train: Epo[045/500] Iter[005/014] IterTime:[9.70s] LOSS: 0.7816 ACC:0.4840 ETA:17h:13m:17s 
+Train: Epo[045/500] Iter[006/014] IterTime:[9.84s] LOSS: 0.5253 ACC:0.6006 ETA:17h:27m:56s 
+Train: Epo[045/500] Iter[007/014] IterTime:[9.74s] LOSS: 0.6217 ACC:0.5507 ETA:17h:17m:50s 
+Train: Epo[045/500] Iter[008/014] IterTime:[9.70s] LOSS: 0.8625 ACC:0.4489 ETA:17h:12m:55s 
+Train: Epo[045/500] Iter[009/014] IterTime:[9.78s] LOSS: 0.5605 ACC:0.5788 ETA:17h:21m:5s 
+Train: Epo[045/500] Iter[010/014] IterTime:[9.71s] LOSS: 0.7429 ACC:0.5050 ETA:17h:14m:19s 
+Train: Epo[045/500] Iter[011/014] IterTime:[9.77s] LOSS: 0.6215 ACC:0.5512 ETA:17h:20m:1s 
+Train: Epo[045/500] Iter[012/014] IterTime:[9.73s] LOSS: 0.7137 ACC:0.5095 ETA:17h:15m:23s 
+Train: Epo[045/500] Iter[013/014] IterTime:[9.62s] LOSS: 0.6219 ACC:0.5517 ETA:17h:4m:25s 
+Train: Epo[045/500] Iter[014/014] IterTime:[9.55s] LOSS: 0.6996 ACC:0.5145 ETA:16h:56m:26s 
+Valid: Epoch[045/500] Train Mean_Acc: 51.98% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[046/500] Iter[001/014] IterTime:[9.93s] LOSS: 0.5757 ACC:0.5701 ETA:17h:37m:3s 
+Train: Epo[046/500] Iter[002/014] IterTime:[9.83s] LOSS: 0.5559 ACC:0.5839 ETA:17h:25m:18s 
+Train: Epo[046/500] Iter[003/014] IterTime:[10.00s] LOSS: 0.7041 ACC:0.5059 ETA:17h:43m:14s 
+Train: Epo[046/500] Iter[004/014] IterTime:[9.81s] LOSS: 0.6939 ACC:0.5176 ETA:17h:23m:39s 
+Train: Epo[046/500] Iter[005/014] IterTime:[10.15s] LOSS: 0.5526 ACC:0.5868 ETA:17h:59m:47s 
+Train: Epo[046/500] Iter[006/014] IterTime:[9.76s] LOSS: 0.6626 ACC:0.5309 ETA:17h:17m:37s 
+Train: Epo[046/500] Iter[007/014] IterTime:[10.04s] LOSS: 0.5900 ACC:0.5648 ETA:17h:46m:51s 
+Train: Epo[046/500] Iter[008/014] IterTime:[10.13s] LOSS: 0.6666 ACC:0.5331 ETA:17h:56m:35s 
+Train: Epo[046/500] Iter[009/014] IterTime:[9.75s] LOSS: 0.7382 ACC:0.4898 ETA:17h:15m:50s 
+Train: Epo[046/500] Iter[010/014] IterTime:[9.79s] LOSS: 0.6709 ACC:0.5314 ETA:17h:20m:22s 
+Train: Epo[046/500] Iter[011/014] IterTime:[9.70s] LOSS: 0.6099 ACC:0.5529 ETA:17h:10m:55s 
+Train: Epo[046/500] Iter[012/014] IterTime:[9.81s] LOSS: 0.7590 ACC:0.4916 ETA:17h:21m:28s 
+Train: Epo[046/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.7243 ACC:0.5015 ETA:16h:50m:9s 
+Train: Epo[046/500] Iter[014/014] IterTime:[9.48s] LOSS: 0.6463 ACC:0.5457 ETA:16h:46m:47s 
+Valid: Epoch[046/500] Train Mean_Acc: 53.61% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[047/500] Iter[001/014] IterTime:[10.27s] LOSS: 0.5883 ACC:0.5655 ETA:18h:10m:39s 
+Train: Epo[047/500] Iter[002/014] IterTime:[9.98s] LOSS: 0.7886 ACC:0.4806 ETA:17h:39m:30s 
+Train: Epo[047/500] Iter[003/014] IterTime:[10.03s] LOSS: 0.7162 ACC:0.5099 ETA:17h:44m:47s 
+Train: Epo[047/500] Iter[004/014] IterTime:[9.90s] LOSS: 0.7806 ACC:0.4695 ETA:17h:30m:36s 
+Train: Epo[047/500] Iter[005/014] IterTime:[10.02s] LOSS: 0.6069 ACC:0.5514 ETA:17h:43m:22s 
+Train: Epo[047/500] Iter[006/014] IterTime:[9.86s] LOSS: 0.5037 ACC:0.6168 ETA:17h:26m:29s 
+Train: Epo[047/500] Iter[007/014] IterTime:[9.87s] LOSS: 0.6922 ACC:0.5182 ETA:17h:27m:23s 
+Train: Epo[047/500] Iter[008/014] IterTime:[9.91s] LOSS: 0.9220 ACC:0.4243 ETA:17h:30m:48s 
+Train: Epo[047/500] Iter[009/014] IterTime:[9.81s] LOSS: 0.5396 ACC:0.5905 ETA:17h:20m:31s 
+Train: Epo[047/500] Iter[010/014] IterTime:[9.91s] LOSS: 0.7048 ACC:0.5139 ETA:17h:30m:19s 
+Train: Epo[047/500] Iter[011/014] IterTime:[9.88s] LOSS: 0.6466 ACC:0.5363 ETA:17h:27m:27s 
+Train: Epo[047/500] Iter[012/014] IterTime:[9.86s] LOSS: 0.8161 ACC:0.4612 ETA:17h:24m:29s 
+Train: Epo[047/500] Iter[013/014] IterTime:[9.81s] LOSS: 0.7336 ACC:0.4954 ETA:17h:19m:41s 
+Train: Epo[047/500] Iter[014/014] IterTime:[9.64s] LOSS: 0.8743 ACC:0.4622 ETA:17h:1m:28s 
+Valid: Epoch[047/500] Train Mean_Acc: 51.40% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[048/500] Iter[001/014] IterTime:[9.98s] LOSS: 0.8052 ACC:0.4819 ETA:17h:37m:20s 
+Train: Epo[048/500] Iter[002/014] IterTime:[9.97s] LOSS: 0.7348 ACC:0.5008 ETA:17h:36m:15s 
+Train: Epo[048/500] Iter[003/014] IterTime:[10.15s] LOSS: 0.6299 ACC:0.5460 ETA:17h:55m:1s 
+Train: Epo[048/500] Iter[004/014] IterTime:[9.86s] LOSS: 0.7974 ACC:0.4660 ETA:17h:23m:38s 
+Train: Epo[048/500] Iter[005/014] IterTime:[9.88s] LOSS: 0.7043 ACC:0.5150 ETA:17h:25m:30s 
+Train: Epo[048/500] Iter[006/014] IterTime:[9.93s] LOSS: 0.7379 ACC:0.4942 ETA:17h:31m:32s 
+Train: Epo[048/500] Iter[007/014] IterTime:[9.95s] LOSS: 0.5649 ACC:0.5726 ETA:17h:33m:18s 
+Train: Epo[048/500] Iter[008/014] IterTime:[9.94s] LOSS: 0.8133 ACC:0.4794 ETA:17h:31m:28s 
+Train: Epo[048/500] Iter[009/014] IterTime:[9.82s] LOSS: 0.6627 ACC:0.5246 ETA:17h:19m:3s 
+Train: Epo[048/500] Iter[010/014] IterTime:[9.87s] LOSS: 0.7226 ACC:0.5036 ETA:17h:24m:14s 
+Train: Epo[048/500] Iter[011/014] IterTime:[9.89s] LOSS: 0.6982 ACC:0.5258 ETA:17h:26m:18s 
+Train: Epo[048/500] Iter[012/014] IterTime:[9.92s] LOSS: 0.7400 ACC:0.4894 ETA:17h:29m:1s 
+Train: Epo[048/500] Iter[013/014] IterTime:[9.77s] LOSS: 0.7279 ACC:0.4958 ETA:17h:12m:42s 
+Train: Epo[048/500] Iter[014/014] IterTime:[10.40s] LOSS: 0.6677 ACC:0.5439 ETA:18h:19m:26s 
+Valid: Epoch[048/500] Train Mean_Acc: 50.99% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[049/500] Iter[001/014] IterTime:[10.28s] LOSS: 0.6480 ACC:0.5564 ETA:18h:6m:35s 
+Train: Epo[049/500] Iter[002/014] IterTime:[9.88s] LOSS: 0.6846 ACC:0.5107 ETA:17h:23m:56s 
+Train: Epo[049/500] Iter[003/014] IterTime:[9.82s] LOSS: 0.6864 ACC:0.5124 ETA:17h:18m:7s 
+Train: Epo[049/500] Iter[004/014] IterTime:[9.92s] LOSS: 0.5482 ACC:0.5946 ETA:17h:28m:24s 
+Train: Epo[049/500] Iter[005/014] IterTime:[9.89s] LOSS: 0.6438 ACC:0.5363 ETA:17h:24m:26s 
+Train: Epo[049/500] Iter[006/014] IterTime:[9.89s] LOSS: 0.5160 ACC:0.6017 ETA:17h:24m:50s 
+Train: Epo[049/500] Iter[007/014] IterTime:[9.85s] LOSS: 0.6739 ACC:0.5267 ETA:17h:20m:34s 
+Train: Epo[049/500] Iter[008/014] IterTime:[9.87s] LOSS: 0.6438 ACC:0.5388 ETA:17h:22m:35s 
+Train: Epo[049/500] Iter[009/014] IterTime:[9.98s] LOSS: 0.7577 ACC:0.4910 ETA:17h:33m:40s 
+Train: Epo[049/500] Iter[010/014] IterTime:[10.00s] LOSS: 0.7344 ACC:0.5089 ETA:17h:35m:22s 
+Train: Epo[049/500] Iter[011/014] IterTime:[10.02s] LOSS: 0.7950 ACC:0.4666 ETA:17h:37m:29s 
+Train: Epo[049/500] Iter[012/014] IterTime:[9.98s] LOSS: 0.7536 ACC:0.4879 ETA:17h:32m:54s 
+Train: Epo[049/500] Iter[013/014] IterTime:[9.89s] LOSS: 0.9062 ACC:0.4367 ETA:17h:23m:4s 
+Train: Epo[049/500] Iter[014/014] IterTime:[9.89s] LOSS: 0.6479 ACC:0.5284 ETA:17h:22m:59s 
+Valid: Epoch[049/500] Train Mean_Acc: 52.12% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[050/500] Iter[001/014] IterTime:[10.01s] LOSS: 0.5321 ACC:0.6069 ETA:17h:35m:28s 
+Train: Epo[050/500] Iter[002/014] IterTime:[10.00s] LOSS: 0.7151 ACC:0.5015 ETA:17h:34m:23s 
+Train: Epo[050/500] Iter[003/014] IterTime:[10.04s] LOSS: 0.6951 ACC:0.5326 ETA:17h:38m:49s 
+Train: Epo[050/500] Iter[004/014] IterTime:[9.99s] LOSS: 0.7622 ACC:0.4756 ETA:17h:32m:39s 
+Train: Epo[050/500] Iter[005/014] IterTime:[10.07s] LOSS: 0.6313 ACC:0.5530 ETA:17h:41m:41s 
+Train: Epo[050/500] Iter[006/014] IterTime:[9.90s] LOSS: 0.5528 ACC:0.5826 ETA:17h:23m:17s 
+Train: Epo[050/500] Iter[007/014] IterTime:[10.06s] LOSS: 0.6371 ACC:0.5372 ETA:17h:39m:39s 
+Train: Epo[050/500] Iter[008/014] IterTime:[10.22s] LOSS: 0.6641 ACC:0.5398 ETA:17h:56m:30s 
+Train: Epo[050/500] Iter[009/014] IterTime:[10.19s] LOSS: 0.7605 ACC:0.4845 ETA:17h:53m:3s 
+Train: Epo[050/500] Iter[010/014] IterTime:[10.07s] LOSS: 0.6064 ACC:0.5614 ETA:17h:40m:2s 
+Train: Epo[050/500] Iter[011/014] IterTime:[9.97s] LOSS: 0.7279 ACC:0.4979 ETA:17h:29m:58s 
+Train: Epo[050/500] Iter[012/014] IterTime:[10.03s] LOSS: 0.6999 ACC:0.5086 ETA:17h:36m:27s 
+Train: Epo[050/500] Iter[013/014] IterTime:[9.73s] LOSS: 0.8091 ACC:0.4520 ETA:17h:4m:37s 
+Train: Epo[050/500] Iter[014/014] IterTime:[9.74s] LOSS: 0.8174 ACC:0.4643 ETA:17h:5m:17s 
+Valid: Epoch[050/500] Train Mean_Acc: 52.13% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[051/500] Iter[001/014] IterTime:[10.15s] LOSS: 0.5570 ACC:0.5854 ETA:17h:48m:32s 
+Train: Epo[051/500] Iter[002/014] IterTime:[10.42s] LOSS: 0.6042 ACC:0.5566 ETA:18h:16m:7s 
+Train: Epo[051/500] Iter[003/014] IterTime:[10.47s] LOSS: 0.5336 ACC:0.5905 ETA:18h:21m:38s 
+Train: Epo[051/500] Iter[004/014] IterTime:[10.58s] LOSS: 0.7609 ACC:0.4932 ETA:18h:33m:9s 
+Train: Epo[051/500] Iter[005/014] IterTime:[10.21s] LOSS: 0.8269 ACC:0.4754 ETA:17h:53m:23s 
+Train: Epo[051/500] Iter[006/014] IterTime:[10.36s] LOSS: 0.7171 ACC:0.5121 ETA:18h:8m:49s 
+Train: Epo[051/500] Iter[007/014] IterTime:[10.39s] LOSS: 0.7455 ACC:0.4954 ETA:18h:12m:16s 
+Train: Epo[051/500] Iter[008/014] IterTime:[10.21s] LOSS: 0.7958 ACC:0.4703 ETA:17h:53m:13s 
+Train: Epo[051/500] Iter[009/014] IterTime:[10.18s] LOSS: 0.6353 ACC:0.5557 ETA:17h:50m:21s 
+Train: Epo[051/500] Iter[010/014] IterTime:[10.11s] LOSS: 0.6303 ACC:0.5564 ETA:17h:42m:17s 
+Train: Epo[051/500] Iter[011/014] IterTime:[10.08s] LOSS: 0.6684 ACC:0.5317 ETA:17h:39m:25s 
+Train: Epo[051/500] Iter[012/014] IterTime:[10.12s] LOSS: 0.6504 ACC:0.5407 ETA:17h:42m:39s 
+Train: Epo[051/500] Iter[013/014] IterTime:[9.89s] LOSS: 0.5807 ACC:0.5773 ETA:17h:19m:17s 
+Train: Epo[051/500] Iter[014/014] IterTime:[9.93s] LOSS: 0.8496 ACC:0.4441 ETA:17h:22m:48s 
+Valid: Epoch[051/500] Train Mean_Acc: 52.75% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[052/500] Iter[001/014] IterTime:[10.23s] LOSS: 0.6956 ACC:0.5154 ETA:17h:54m:31s 
+Train: Epo[052/500] Iter[002/014] IterTime:[10.20s] LOSS: 0.6225 ACC:0.5544 ETA:17h:50m:32s 
+Train: Epo[052/500] Iter[003/014] IterTime:[10.40s] LOSS: 0.6112 ACC:0.5670 ETA:18h:11m:29s 
+Train: Epo[052/500] Iter[004/014] IterTime:[10.51s] LOSS: 0.6293 ACC:0.5447 ETA:18h:22m:55s 
+Train: Epo[052/500] Iter[005/014] IterTime:[10.37s] LOSS: 0.5557 ACC:0.5892 ETA:18h:7m:56s 
+Train: Epo[052/500] Iter[006/014] IterTime:[10.31s] LOSS: 0.7867 ACC:0.4705 ETA:18h:1m:18s 
+Train: Epo[052/500] Iter[007/014] IterTime:[10.36s] LOSS: 0.5845 ACC:0.5637 ETA:18h:6m:48s 
+Train: Epo[052/500] Iter[008/014] IterTime:[10.33s] LOSS: 0.7032 ACC:0.5184 ETA:18h:3m:16s 
+Train: Epo[052/500] Iter[009/014] IterTime:[10.36s] LOSS: 0.7932 ACC:0.4810 ETA:18h:6m:50s 
+Train: Epo[052/500] Iter[010/014] IterTime:[10.34s] LOSS: 0.7792 ACC:0.4908 ETA:18h:3m:54s 
+Train: Epo[052/500] Iter[011/014] IterTime:[10.32s] LOSS: 0.7219 ACC:0.5399 ETA:18h:1m:34s 
+Train: Epo[052/500] Iter[012/014] IterTime:[10.10s] LOSS: 0.4644 ACC:0.6368 ETA:17h:38m:45s 
+Train: Epo[052/500] Iter[013/014] IterTime:[9.94s] LOSS: 0.7742 ACC:0.4929 ETA:17h:21m:58s 
+Train: Epo[052/500] Iter[014/014] IterTime:[10.00s] LOSS: 0.6794 ACC:0.5137 ETA:17h:28m:8s 
+Valid: Epoch[052/500] Train Mean_Acc: 53.42% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[053/500] Iter[001/014] IterTime:[10.29s] LOSS: 0.6906 ACC:0.5139 ETA:17h:58m:2s 
+Train: Epo[053/500] Iter[002/014] IterTime:[10.08s] LOSS: 0.7937 ACC:0.4652 ETA:17h:35m:57s 
+Train: Epo[053/500] Iter[003/014] IterTime:[10.15s] LOSS: 0.6450 ACC:0.5456 ETA:17h:43m:33s 
+Train: Epo[053/500] Iter[004/014] IterTime:[10.08s] LOSS: 0.6937 ACC:0.5133 ETA:17h:35m:51s 
+Train: Epo[053/500] Iter[005/014] IterTime:[10.18s] LOSS: 0.7142 ACC:0.5069 ETA:17h:45m:52s 
+Train: Epo[053/500] Iter[006/014] IterTime:[10.07s] LOSS: 0.7320 ACC:0.5089 ETA:17h:34m:2s 
+Train: Epo[053/500] Iter[007/014] IterTime:[10.11s] LOSS: 0.6925 ACC:0.5196 ETA:17h:37m:59s 
+Train: Epo[053/500] Iter[008/014] IterTime:[10.13s] LOSS: 0.6746 ACC:0.5309 ETA:17h:40m:34s 
+Train: Epo[053/500] Iter[009/014] IterTime:[10.08s] LOSS: 0.5978 ACC:0.5706 ETA:17h:34m:41s 
+Train: Epo[053/500] Iter[010/014] IterTime:[10.22s] LOSS: 0.5334 ACC:0.5952 ETA:17h:48m:51s 
+Train: Epo[053/500] Iter[011/014] IterTime:[10.09s] LOSS: 0.8397 ACC:0.4637 ETA:17h:35m:51s 
+Train: Epo[053/500] Iter[012/014] IterTime:[10.45s] LOSS: 0.5193 ACC:0.5996 ETA:18h:13m:20s 
+Train: Epo[053/500] Iter[013/014] IterTime:[10.07s] LOSS: 0.7674 ACC:0.4780 ETA:17h:32m:34s 
+Train: Epo[053/500] Iter[014/014] IterTime:[9.83s] LOSS: 0.6913 ACC:0.5182 ETA:17h:8m:7s 
+Valid: Epoch[053/500] Train Mean_Acc: 52.35% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[054/500] Iter[001/014] IterTime:[10.58s] LOSS: 0.9150 ACC:0.4441 ETA:18h:25m:30s 
+Train: Epo[054/500] Iter[002/014] IterTime:[10.35s] LOSS: 0.7115 ACC:0.5097 ETA:18h:1m:59s 
+Train: Epo[054/500] Iter[003/014] IterTime:[10.60s] LOSS: 0.7113 ACC:0.5035 ETA:18h:28m:12s 
+Train: Epo[054/500] Iter[004/014] IterTime:[10.69s] LOSS: 0.4986 ACC:0.6139 ETA:18h:36m:44s 
+Train: Epo[054/500] Iter[005/014] IterTime:[10.22s] LOSS: 0.6751 ACC:0.5286 ETA:17h:47m:56s 
+Train: Epo[054/500] Iter[006/014] IterTime:[10.22s] LOSS: 0.6496 ACC:0.5533 ETA:17h:47m:12s 
+Train: Epo[054/500] Iter[007/014] IterTime:[10.09s] LOSS: 0.6216 ACC:0.5611 ETA:17h:33m:49s 
+Train: Epo[054/500] Iter[008/014] IterTime:[10.07s] LOSS: 0.7965 ACC:0.4893 ETA:17h:31m:45s 
+Train: Epo[054/500] Iter[009/014] IterTime:[9.99s] LOSS: 0.6186 ACC:0.5567 ETA:17h:22m:59s 
+Train: Epo[054/500] Iter[010/014] IterTime:[10.00s] LOSS: 0.7587 ACC:0.4873 ETA:17h:24m:17s 
+Train: Epo[054/500] Iter[011/014] IterTime:[10.01s] LOSS: 0.6014 ACC:0.5634 ETA:17h:24m:18s 
+Train: Epo[054/500] Iter[012/014] IterTime:[9.98s] LOSS: 0.7657 ACC:0.4751 ETA:17h:21m:39s 
+Train: Epo[054/500] Iter[013/014] IterTime:[9.90s] LOSS: 0.6246 ACC:0.5510 ETA:17h:13m:4s 
+Train: Epo[054/500] Iter[014/014] IterTime:[9.75s] LOSS: 1.0434 ACC:0.3783 ETA:16h:57m:24s 
+Valid: Epoch[054/500] Train Mean_Acc: 51.54% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[055/500] Iter[001/014] IterTime:[10.29s] LOSS: 0.5552 ACC:0.5893 ETA:17h:53m:16s 
+Train: Epo[055/500] Iter[002/014] IterTime:[10.31s] LOSS: 0.6911 ACC:0.5134 ETA:17h:55m:32s 
+Train: Epo[055/500] Iter[003/014] IterTime:[10.33s] LOSS: 0.9283 ACC:0.4343 ETA:17h:57m:31s 
+Train: Epo[055/500] Iter[004/014] IterTime:[10.07s] LOSS: 0.6176 ACC:0.5616 ETA:17h:29m:50s 
+Train: Epo[055/500] Iter[005/014] IterTime:[10.44s] LOSS: 0.7977 ACC:0.4766 ETA:18h:8m:22s 
+Train: Epo[055/500] Iter[006/014] IterTime:[10.18s] LOSS: 0.8822 ACC:0.4499 ETA:17h:40m:42s 
+Train: Epo[055/500] Iter[007/014] IterTime:[10.02s] LOSS: 0.6751 ACC:0.5254 ETA:17h:24m:15s 
+Train: Epo[055/500] Iter[008/014] IterTime:[10.08s] LOSS: 0.5565 ACC:0.5878 ETA:17h:30m:14s 
+Train: Epo[055/500] Iter[009/014] IterTime:[10.47s] LOSS: 0.6048 ACC:0.5655 ETA:18h:10m:13s 
+Train: Epo[055/500] Iter[010/014] IterTime:[10.35s] LOSS: 0.6823 ACC:0.5181 ETA:17h:58m:1s 
+Train: Epo[055/500] Iter[011/014] IterTime:[10.13s] LOSS: 0.7882 ACC:0.4815 ETA:17h:34m:55s 
+Train: Epo[055/500] Iter[012/014] IterTime:[10.05s] LOSS: 0.6586 ACC:0.5323 ETA:17h:26m:15s 
+Train: Epo[055/500] Iter[013/014] IterTime:[9.83s] LOSS: 0.8640 ACC:0.4687 ETA:17h:2m:50s 
+Train: Epo[055/500] Iter[014/014] IterTime:[9.79s] LOSS: 0.5416 ACC:0.6044 ETA:16h:58m:43s 
+Valid: Epoch[055/500] Train Mean_Acc: 52.20% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[056/500] Iter[001/014] IterTime:[10.06s] LOSS: 0.7756 ACC:0.4884 ETA:17h:26m:57s 
+Train: Epo[056/500] Iter[002/014] IterTime:[9.89s] LOSS: 0.6282 ACC:0.5490 ETA:17h:8m:49s 
+Train: Epo[056/500] Iter[003/014] IterTime:[9.95s] LOSS: 0.5515 ACC:0.5807 ETA:17h:14m:56s 
+Train: Epo[056/500] Iter[004/014] IterTime:[10.14s] LOSS: 0.8768 ACC:0.4394 ETA:17h:34m:39s 
+Train: Epo[056/500] Iter[005/014] IterTime:[10.20s] LOSS: 0.6308 ACC:0.5454 ETA:17h:40m:54s 
+Train: Epo[056/500] Iter[006/014] IterTime:[10.15s] LOSS: 0.8524 ACC:0.4513 ETA:17h:35m:4s 
+Train: Epo[056/500] Iter[007/014] IterTime:[10.13s] LOSS: 0.7661 ACC:0.4927 ETA:17h:33m:0s 
+Train: Epo[056/500] Iter[008/014] IterTime:[10.16s] LOSS: 0.6110 ACC:0.5642 ETA:17h:36m:22s 
+Train: Epo[056/500] Iter[009/014] IterTime:[10.08s] LOSS: 0.8116 ACC:0.4603 ETA:17h:27m:52s 
+Train: Epo[056/500] Iter[010/014] IterTime:[9.95s] LOSS: 0.5826 ACC:0.5702 ETA:17h:14m:17s 
+Train: Epo[056/500] Iter[011/014] IterTime:[9.93s] LOSS: 0.7529 ACC:0.4862 ETA:17h:11m:23s 
+Train: Epo[056/500] Iter[012/014] IterTime:[9.84s] LOSS: 0.7879 ACC:0.4652 ETA:17h:2m:11s 
+Train: Epo[056/500] Iter[013/014] IterTime:[9.93s] LOSS: 0.5717 ACC:0.5726 ETA:17h:11m:6s 
+Train: Epo[056/500] Iter[014/014] IterTime:[9.66s] LOSS: 0.6110 ACC:0.5592 ETA:16h:43m:21s 
+Valid: Epoch[056/500] Train Mean_Acc: 51.60% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[057/500] Iter[001/014] IterTime:[10.16s] LOSS: 0.5716 ACC:0.5692 ETA:17h:34m:47s 
+Train: Epo[057/500] Iter[002/014] IterTime:[9.96s] LOSS: 0.7496 ACC:0.5033 ETA:17h:13m:38s 
+Train: Epo[057/500] Iter[003/014] IterTime:[9.78s] LOSS: 0.5229 ACC:0.6053 ETA:16h:55m:31s 
+Train: Epo[057/500] Iter[004/014] IterTime:[9.82s] LOSS: 0.4773 ACC:0.6293 ETA:16h:59m:33s 
+Train: Epo[057/500] Iter[005/014] IterTime:[9.88s] LOSS: 0.8698 ACC:0.4280 ETA:17h:5m:24s 
+Train: Epo[057/500] Iter[006/014] IterTime:[9.82s] LOSS: 0.6560 ACC:0.5330 ETA:16h:59m:19s 
+Train: Epo[057/500] Iter[007/014] IterTime:[9.80s] LOSS: 0.5760 ACC:0.5686 ETA:16h:57m:3s 
+Train: Epo[057/500] Iter[008/014] IterTime:[9.78s] LOSS: 0.8803 ACC:0.4420 ETA:16h:54m:39s 
+Train: Epo[057/500] Iter[009/014] IterTime:[9.85s] LOSS: 0.6715 ACC:0.5264 ETA:17h:1m:13s 
+Train: Epo[057/500] Iter[010/014] IterTime:[9.77s] LOSS: 0.8841 ACC:0.4293 ETA:16h:52m:43s 
+Train: Epo[057/500] Iter[011/014] IterTime:[9.73s] LOSS: 0.8070 ACC:0.4787 ETA:16h:48m:32s 
+Train: Epo[057/500] Iter[012/014] IterTime:[9.66s] LOSS: 0.7744 ACC:0.4799 ETA:16h:41m:33s 
+Train: Epo[057/500] Iter[013/014] IterTime:[9.72s] LOSS: 0.6354 ACC:0.5587 ETA:16h:47m:14s 
+Train: Epo[057/500] Iter[014/014] IterTime:[9.53s] LOSS: 0.6936 ACC:0.5216 ETA:16h:27m:10s 
+Valid: Epoch[057/500] Train Mean_Acc: 51.95% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[058/500] Iter[001/014] IterTime:[9.93s] LOSS: 0.6526 ACC:0.5357 ETA:17h:8m:23s 
+Train: Epo[058/500] Iter[002/014] IterTime:[9.73s] LOSS: 0.7168 ACC:0.5068 ETA:16h:48m:1s 
+Train: Epo[058/500] Iter[003/014] IterTime:[9.76s] LOSS: 0.6941 ACC:0.5122 ETA:16h:50m:46s 
+Train: Epo[058/500] Iter[004/014] IterTime:[9.68s] LOSS: 0.7114 ACC:0.5096 ETA:16h:42m:18s 
+Train: Epo[058/500] Iter[005/014] IterTime:[9.72s] LOSS: 1.0530 ACC:0.3699 ETA:16h:46m:35s 
+Train: Epo[058/500] Iter[006/014] IterTime:[9.79s] LOSS: 0.5468 ACC:0.5994 ETA:16h:53m:19s 
+Train: Epo[058/500] Iter[007/014] IterTime:[9.87s] LOSS: 0.6650 ACC:0.5300 ETA:17h:1m:41s 
+Train: Epo[058/500] Iter[008/014] IterTime:[9.79s] LOSS: 0.6682 ACC:0.5268 ETA:16h:52m:50s 
+Train: Epo[058/500] Iter[009/014] IterTime:[9.69s] LOSS: 0.7202 ACC:0.5073 ETA:16h:42m:9s 
+Train: Epo[058/500] Iter[010/014] IterTime:[9.73s] LOSS: 0.5782 ACC:0.5731 ETA:16h:46m:12s 
+Train: Epo[058/500] Iter[011/014] IterTime:[9.70s] LOSS: 0.5767 ACC:0.5831 ETA:16h:43m:48s 
+Train: Epo[058/500] Iter[012/014] IterTime:[9.71s] LOSS: 0.8286 ACC:0.4624 ETA:16h:44m:33s 
+Train: Epo[058/500] Iter[013/014] IterTime:[9.58s] LOSS: 0.7700 ACC:0.4680 ETA:16h:30m:5s 
+Train: Epo[058/500] Iter[014/014] IterTime:[9.49s] LOSS: 0.6644 ACC:0.5409 ETA:16h:21m:36s 
+Valid: Epoch[058/500] Train Mean_Acc: 51.61% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[059/500] Iter[001/014] IterTime:[9.88s] LOSS: 0.5352 ACC:0.5923 ETA:17h:0m:53s 
+Train: Epo[059/500] Iter[002/014] IterTime:[9.84s] LOSS: 0.8357 ACC:0.4468 ETA:16h:56m:29s 
+Train: Epo[059/500] Iter[003/014] IterTime:[9.78s] LOSS: 0.7160 ACC:0.5141 ETA:16h:50m:52s 
+Train: Epo[059/500] Iter[004/014] IterTime:[9.74s] LOSS: 1.0023 ACC:0.3888 ETA:16h:46m:4s 
+Train: Epo[059/500] Iter[005/014] IterTime:[9.69s] LOSS: 0.7074 ACC:0.5116 ETA:16h:40m:53s 
+Train: Epo[059/500] Iter[006/014] IterTime:[9.73s] LOSS: 0.6387 ACC:0.5401 ETA:16h:44m:40s 
+Train: Epo[059/500] Iter[007/014] IterTime:[9.83s] LOSS: 0.8178 ACC:0.4542 ETA:16h:54m:59s 
+Train: Epo[059/500] Iter[008/014] IterTime:[9.72s] LOSS: 0.5397 ACC:0.5889 ETA:16h:43m:51s 
+Train: Epo[059/500] Iter[009/014] IterTime:[9.75s] LOSS: 0.7808 ACC:0.4794 ETA:16h:46m:32s 
+Train: Epo[059/500] Iter[010/014] IterTime:[9.73s] LOSS: 0.5229 ACC:0.6032 ETA:16h:43m:55s 
+Train: Epo[059/500] Iter[011/014] IterTime:[9.73s] LOSS: 0.6765 ACC:0.5210 ETA:16h:44m:35s 
+Train: Epo[059/500] Iter[012/014] IterTime:[9.78s] LOSS: 0.7286 ACC:0.4932 ETA:16h:48m:56s 
+Train: Epo[059/500] Iter[013/014] IterTime:[9.74s] LOSS: 0.5437 ACC:0.5905 ETA:16h:45m:13s 
+Train: Epo[059/500] Iter[014/014] IterTime:[9.50s] LOSS: 0.8626 ACC:0.4481 ETA:16h:20m:17s 
+Valid: Epoch[059/500] Train Mean_Acc: 51.23% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[060/500] Iter[001/014] IterTime:[9.83s] LOSS: 0.6633 ACC:0.5290 ETA:16h:53m:31s 
+Train: Epo[060/500] Iter[002/014] IterTime:[9.73s] LOSS: 0.5300 ACC:0.6060 ETA:16h:43m:1s 
+Train: Epo[060/500] Iter[003/014] IterTime:[9.76s] LOSS: 0.5613 ACC:0.6024 ETA:16h:46m:25s 
+Train: Epo[060/500] Iter[004/014] IterTime:[9.80s] LOSS: 0.6667 ACC:0.5316 ETA:16h:49m:54s 
+Train: Epo[060/500] Iter[005/014] IterTime:[9.87s] LOSS: 0.6048 ACC:0.5619 ETA:16h:57m:9s 
+Train: Epo[060/500] Iter[006/014] IterTime:[9.72s] LOSS: 0.7010 ACC:0.5128 ETA:16h:41m:17s 
+Train: Epo[060/500] Iter[007/014] IterTime:[9.71s] LOSS: 0.5657 ACC:0.5926 ETA:16h:40m:54s 
+Train: Epo[060/500] Iter[008/014] IterTime:[9.88s] LOSS: 0.8279 ACC:0.4524 ETA:16h:57m:39s 
+Train: Epo[060/500] Iter[009/014] IterTime:[9.72s] LOSS: 0.7408 ACC:0.4875 ETA:16h:40m:43s 
+Train: Epo[060/500] Iter[010/014] IterTime:[9.65s] LOSS: 0.6741 ACC:0.5363 ETA:16h:33m:47s 
+Train: Epo[060/500] Iter[011/014] IterTime:[9.75s] LOSS: 0.6574 ACC:0.5342 ETA:16h:43m:36s 
+Train: Epo[060/500] Iter[012/014] IterTime:[9.75s] LOSS: 0.7533 ACC:0.4978 ETA:16h:43m:29s 
+Train: Epo[060/500] Iter[013/014] IterTime:[9.59s] LOSS: 0.6999 ACC:0.5079 ETA:16h:26m:48s 
+Train: Epo[060/500] Iter[014/014] IterTime:[9.50s] LOSS: 0.8690 ACC:0.4429 ETA:16h:17m:42s 
+Valid: Epoch[060/500] Train Mean_Acc: 52.82% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[061/500] Iter[001/014] IterTime:[9.80s] LOSS: 0.7201 ACC:0.5096 ETA:16h:48m:39s 
+Train: Epo[061/500] Iter[002/014] IterTime:[10.09s] LOSS: 0.6563 ACC:0.5264 ETA:17h:18m:35s 
+Train: Epo[061/500] Iter[003/014] IterTime:[9.66s] LOSS: 0.6675 ACC:0.5335 ETA:16h:33m:53s 
+Train: Epo[061/500] Iter[004/014] IterTime:[10.09s] LOSS: 0.7835 ACC:0.4716 ETA:17h:18m:5s 
+Train: Epo[061/500] Iter[005/014] IterTime:[10.01s] LOSS: 0.5819 ACC:0.5690 ETA:17h:9m:41s 
+Train: Epo[061/500] Iter[006/014] IterTime:[9.82s] LOSS: 0.7374 ACC:0.4983 ETA:16h:50m:5s 
+Train: Epo[061/500] Iter[007/014] IterTime:[10.10s] LOSS: 0.5667 ACC:0.5764 ETA:17h:18m:14s 
+Train: Epo[061/500] Iter[008/014] IterTime:[9.83s] LOSS: 0.7559 ACC:0.4878 ETA:16h:50m:10s 
+Train: Epo[061/500] Iter[009/014] IterTime:[10.02s] LOSS: 0.9985 ACC:0.3929 ETA:17h:9m:24s 
+Train: Epo[061/500] Iter[010/014] IterTime:[9.95s] LOSS: 0.6078 ACC:0.5523 ETA:17h:1m:58s 
+Train: Epo[061/500] Iter[011/014] IterTime:[9.95s] LOSS: 0.6334 ACC:0.5465 ETA:17h:1m:43s 
+Train: Epo[061/500] Iter[012/014] IterTime:[9.91s] LOSS: 0.5809 ACC:0.5724 ETA:16h:57m:32s 
+Train: Epo[061/500] Iter[013/014] IterTime:[9.73s] LOSS: 0.5934 ACC:0.5619 ETA:16h:39m:35s 
+Train: Epo[061/500] Iter[014/014] IterTime:[9.84s] LOSS: 0.6750 ACC:0.5381 ETA:16h:49m:57s 
+Valid: Epoch[061/500] Train Mean_Acc: 52.41% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[062/500] Iter[001/014] IterTime:[10.13s] LOSS: 0.5969 ACC:0.5684 ETA:17h:20m:4s 
+Train: Epo[062/500] Iter[002/014] IterTime:[9.81s] LOSS: 0.5746 ACC:0.5765 ETA:16h:46m:44s 
+Train: Epo[062/500] Iter[003/014] IterTime:[10.18s] LOSS: 0.4513 ACC:0.6496 ETA:17h:24m:33s 
+Train: Epo[062/500] Iter[004/014] IterTime:[10.34s] LOSS: 0.7122 ACC:0.5231 ETA:17h:41m:26s 
+Train: Epo[062/500] Iter[005/014] IterTime:[9.89s] LOSS: 0.8810 ACC:0.4395 ETA:16h:54m:33s 
+Train: Epo[062/500] Iter[006/014] IterTime:[10.26s] LOSS: 0.6293 ACC:0.5466 ETA:17h:32m:18s 
+Train: Epo[062/500] Iter[007/014] IterTime:[10.04s] LOSS: 0.7623 ACC:0.4923 ETA:17h:9m:26s 
+Train: Epo[062/500] Iter[008/014] IterTime:[9.88s] LOSS: 0.7594 ACC:0.4889 ETA:16h:53m:26s 
+Train: Epo[062/500] Iter[009/014] IterTime:[10.05s] LOSS: 0.6298 ACC:0.5511 ETA:17h:9m:57s 
+Train: Epo[062/500] Iter[010/014] IterTime:[9.92s] LOSS: 0.7670 ACC:0.4878 ETA:16h:56m:53s 
+Train: Epo[062/500] Iter[011/014] IterTime:[10.06s] LOSS: 0.7640 ACC:0.4730 ETA:17h:11m:39s 
+Train: Epo[062/500] Iter[012/014] IterTime:[9.92s] LOSS: 0.6942 ACC:0.5118 ETA:16h:56m:25s 
+Train: Epo[062/500] Iter[013/014] IterTime:[9.64s] LOSS: 0.9268 ACC:0.4292 ETA:16h:27m:59s 
+Train: Epo[062/500] Iter[014/014] IterTime:[9.96s] LOSS: 0.6203 ACC:0.5576 ETA:17h:0m:40s 
+Valid: Epoch[062/500] Train Mean_Acc: 52.11% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[063/500] Iter[001/014] IterTime:[10.22s] LOSS: 0.7593 ACC:0.4896 ETA:17h:27m:5s 
+Train: Epo[063/500] Iter[002/014] IterTime:[10.02s] LOSS: 0.6186 ACC:0.5434 ETA:17h:6m:13s 
+Train: Epo[063/500] Iter[003/014] IterTime:[9.90s] LOSS: 0.7007 ACC:0.5222 ETA:16h:54m:9s 
+Train: Epo[063/500] Iter[004/014] IterTime:[9.91s] LOSS: 0.8309 ACC:0.4575 ETA:16h:54m:35s 
+Train: Epo[063/500] Iter[005/014] IterTime:[9.92s] LOSS: 0.7765 ACC:0.4788 ETA:16h:55m:46s 
+Train: Epo[063/500] Iter[006/014] IterTime:[9.88s] LOSS: 0.6112 ACC:0.5597 ETA:16h:51m:25s 
+Train: Epo[063/500] Iter[007/014] IterTime:[9.80s] LOSS: 0.6958 ACC:0.5101 ETA:16h:42m:59s 
+Train: Epo[063/500] Iter[008/014] IterTime:[9.78s] LOSS: 0.7793 ACC:0.4798 ETA:16h:40m:11s 
+Train: Epo[063/500] Iter[009/014] IterTime:[9.87s] LOSS: 0.7541 ACC:0.4901 ETA:16h:49m:55s 
+Train: Epo[063/500] Iter[010/014] IterTime:[9.77s] LOSS: 0.5504 ACC:0.5908 ETA:16h:39m:25s 
+Train: Epo[063/500] Iter[011/014] IterTime:[9.87s] LOSS: 0.8750 ACC:0.4318 ETA:16h:48m:55s 
+Train: Epo[063/500] Iter[012/014] IterTime:[9.78s] LOSS: 0.7074 ACC:0.5163 ETA:16h:40m:17s 
+Train: Epo[063/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.6569 ACC:0.5340 ETA:16h:12m:31s 
+Train: Epo[063/500] Iter[014/014] IterTime:[9.68s] LOSS: 0.6751 ACC:0.5263 ETA:16h:29m:41s 
+Valid: Epoch[063/500] Train Mean_Acc: 50.93% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[064/500] Iter[001/014] IterTime:[10.16s] LOSS: 0.7221 ACC:0.5145 ETA:17h:18m:48s 
+Train: Epo[064/500] Iter[002/014] IterTime:[9.79s] LOSS: 0.6870 ACC:0.5291 ETA:16h:40m:2s 
+Train: Epo[064/500] Iter[003/014] IterTime:[10.00s] LOSS: 0.7223 ACC:0.4990 ETA:17h:1m:29s 
+Train: Epo[064/500] Iter[004/014] IterTime:[9.90s] LOSS: 0.6287 ACC:0.5445 ETA:16h:51m:19s 
+Train: Epo[064/500] Iter[005/014] IterTime:[9.86s] LOSS: 0.7092 ACC:0.5025 ETA:16h:47m:29s 
+Train: Epo[064/500] Iter[006/014] IterTime:[9.88s] LOSS: 0.6900 ACC:0.5232 ETA:16h:49m:12s 
+Train: Epo[064/500] Iter[007/014] IterTime:[9.99s] LOSS: 0.5799 ACC:0.5848 ETA:17h:0m:5s 
+Train: Epo[064/500] Iter[008/014] IterTime:[9.83s] LOSS: 0.6646 ACC:0.5277 ETA:16h:43m:47s 
+Train: Epo[064/500] Iter[009/014] IterTime:[9.89s] LOSS: 0.6927 ACC:0.5147 ETA:16h:49m:6s 
+Train: Epo[064/500] Iter[010/014] IterTime:[9.94s] LOSS: 0.6040 ACC:0.5531 ETA:16h:54m:0s 
+Train: Epo[064/500] Iter[011/014] IterTime:[10.23s] LOSS: 0.5958 ACC:0.5588 ETA:17h:23m:37s 
+Train: Epo[064/500] Iter[012/014] IterTime:[9.96s] LOSS: 0.6030 ACC:0.5639 ETA:16h:56m:33s 
+Train: Epo[064/500] Iter[013/014] IterTime:[9.79s] LOSS: 0.6969 ACC:0.5072 ETA:16h:38m:8s 
+Train: Epo[064/500] Iter[014/014] IterTime:[9.63s] LOSS: 0.6336 ACC:0.5522 ETA:16h:22m:27s 
+Valid: Epoch[064/500] Train Mean_Acc: 53.39% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[065/500] Iter[001/014] IterTime:[9.88s] LOSS: 0.9863 ACC:0.4266 ETA:16h:47m:43s 
+Train: Epo[065/500] Iter[002/014] IterTime:[10.07s] LOSS: 0.6477 ACC:0.5340 ETA:17h:6m:32s 
+Train: Epo[065/500] Iter[003/014] IterTime:[9.87s] LOSS: 0.7426 ACC:0.4964 ETA:16h:45m:49s 
+Train: Epo[065/500] Iter[004/014] IterTime:[10.05s] LOSS: 0.8683 ACC:0.4317 ETA:17h:4m:36s 
+Train: Epo[065/500] Iter[005/014] IterTime:[9.94s] LOSS: 0.6183 ACC:0.5472 ETA:16h:53m:6s 
+Train: Epo[065/500] Iter[006/014] IterTime:[10.02s] LOSS: 0.8081 ACC:0.4799 ETA:17h:0m:27s 
+Train: Epo[065/500] Iter[007/014] IterTime:[9.85s] LOSS: 0.8636 ACC:0.4510 ETA:16h:43m:8s 
+Train: Epo[065/500] Iter[008/014] IterTime:[10.16s] LOSS: 0.6558 ACC:0.5349 ETA:17h:14m:49s 
+Train: Epo[065/500] Iter[009/014] IterTime:[9.72s] LOSS: 0.6337 ACC:0.5494 ETA:16h:30m:16s 
+Train: Epo[065/500] Iter[010/014] IterTime:[10.03s] LOSS: 0.5732 ACC:0.5919 ETA:17h:1m:42s 
+Train: Epo[065/500] Iter[011/014] IterTime:[9.68s] LOSS: 0.6735 ACC:0.5331 ETA:16h:25m:29s 
+Train: Epo[065/500] Iter[012/014] IterTime:[9.94s] LOSS: 0.7621 ACC:0.4834 ETA:16h:51m:17s 
+Train: Epo[065/500] Iter[013/014] IterTime:[10.18s] LOSS: 0.6474 ACC:0.5378 ETA:17h:16m:9s 
+Train: Epo[065/500] Iter[014/014] IterTime:[9.50s] LOSS: 0.8661 ACC:0.4253 ETA:16h:6m:11s 
+Valid: Epoch[065/500] Train Mean_Acc: 50.16% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[066/500] Iter[001/014] IterTime:[10.11s] LOSS: 0.9001 ACC:0.4346 ETA:17h:8m:51s 
+Train: Epo[066/500] Iter[002/014] IterTime:[9.99s] LOSS: 0.6347 ACC:0.5417 ETA:16h:56m:11s 
+Train: Epo[066/500] Iter[003/014] IterTime:[10.07s] LOSS: 0.7357 ACC:0.5062 ETA:17h:3m:53s 
+Train: Epo[066/500] Iter[004/014] IterTime:[9.98s] LOSS: 0.8153 ACC:0.4655 ETA:16h:54m:54s 
+Train: Epo[066/500] Iter[005/014] IterTime:[9.84s] LOSS: 0.5723 ACC:0.5755 ETA:16h:40m:26s 
+Train: Epo[066/500] Iter[006/014] IterTime:[9.94s] LOSS: 0.5965 ACC:0.5629 ETA:16h:50m:54s 
+Train: Epo[066/500] Iter[007/014] IterTime:[9.85s] LOSS: 0.7009 ACC:0.5228 ETA:16h:41m:34s 
+Train: Epo[066/500] Iter[008/014] IterTime:[9.96s] LOSS: 0.7653 ACC:0.4837 ETA:16h:51m:41s 
+Train: Epo[066/500] Iter[009/014] IterTime:[9.95s] LOSS: 0.6271 ACC:0.5426 ETA:16h:50m:28s 
+Train: Epo[066/500] Iter[010/014] IterTime:[10.15s] LOSS: 0.5158 ACC:0.6074 ETA:17h:11m:1s 
+Train: Epo[066/500] Iter[011/014] IterTime:[10.17s] LOSS: 0.6595 ACC:0.5277 ETA:17h:12m:54s 
+Train: Epo[066/500] Iter[012/014] IterTime:[10.06s] LOSS: 0.6042 ACC:0.5554 ETA:17h:1m:35s 
+Train: Epo[066/500] Iter[013/014] IterTime:[9.99s] LOSS: 0.8055 ACC:0.4756 ETA:16h:53m:54s 
+Train: Epo[066/500] Iter[014/014] IterTime:[9.53s] LOSS: 0.6901 ACC:0.5309 ETA:16h:7m:25s 
+Valid: Epoch[066/500] Train Mean_Acc: 52.38% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[067/500] Iter[001/014] IterTime:[10.14s] LOSS: 0.7197 ACC:0.4998 ETA:17h:9m:10s 
+Train: Epo[067/500] Iter[002/014] IterTime:[9.74s] LOSS: 0.7653 ACC:0.4835 ETA:16h:28m:54s 
+Train: Epo[067/500] Iter[003/014] IterTime:[10.04s] LOSS: 0.7204 ACC:0.5167 ETA:16h:58m:50s 
+Train: Epo[067/500] Iter[004/014] IterTime:[9.96s] LOSS: 0.6181 ACC:0.5630 ETA:16h:50m:0s 
+Train: Epo[067/500] Iter[005/014] IterTime:[9.93s] LOSS: 0.9030 ACC:0.4592 ETA:16h:47m:13s 
+Train: Epo[067/500] Iter[006/014] IterTime:[9.96s] LOSS: 0.6431 ACC:0.5505 ETA:16h:50m:19s 
+Train: Epo[067/500] Iter[007/014] IterTime:[9.65s] LOSS: 0.5597 ACC:0.5799 ETA:16h:18m:56s 
+Train: Epo[067/500] Iter[008/014] IterTime:[9.81s] LOSS: 0.6487 ACC:0.5363 ETA:16h:34m:23s 
+Train: Epo[067/500] Iter[009/014] IterTime:[9.69s] LOSS: 0.6473 ACC:0.5398 ETA:16h:22m:35s 
+Train: Epo[067/500] Iter[010/014] IterTime:[9.72s] LOSS: 0.8386 ACC:0.4595 ETA:16h:25m:16s 
+Train: Epo[067/500] Iter[011/014] IterTime:[9.78s] LOSS: 0.6598 ACC:0.5315 ETA:16h:31m:4s 
+Train: Epo[067/500] Iter[012/014] IterTime:[9.69s] LOSS: 0.7241 ACC:0.5285 ETA:16h:21m:19s 
+Train: Epo[067/500] Iter[013/014] IterTime:[9.47s] LOSS: 0.7286 ACC:0.4969 ETA:15h:59m:6s 
+Train: Epo[067/500] Iter[014/014] IterTime:[9.60s] LOSS: 0.6543 ACC:0.5403 ETA:16h:12m:45s 
+Valid: Epoch[067/500] Train Mean_Acc: 52.04% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[068/500] Iter[001/014] IterTime:[9.94s] LOSS: 0.6604 ACC:0.5348 ETA:16h:46m:55s 
+Train: Epo[068/500] Iter[002/014] IterTime:[10.12s] LOSS: 0.7622 ACC:0.4907 ETA:17h:4m:12s 
+Train: Epo[068/500] Iter[003/014] IterTime:[10.03s] LOSS: 0.6232 ACC:0.5610 ETA:16h:55m:11s 
+Train: Epo[068/500] Iter[004/014] IterTime:[9.99s] LOSS: 0.7972 ACC:0.4695 ETA:16h:51m:24s 
+Train: Epo[068/500] Iter[005/014] IterTime:[10.05s] LOSS: 0.7414 ACC:0.4970 ETA:16h:56m:34s 
+Train: Epo[068/500] Iter[006/014] IterTime:[9.79s] LOSS: 0.7843 ACC:0.4831 ETA:16h:30m:17s 
+Train: Epo[068/500] Iter[007/014] IterTime:[9.83s] LOSS: 0.5225 ACC:0.6075 ETA:16h:34m:4s 
+Train: Epo[068/500] Iter[008/014] IterTime:[9.97s] LOSS: 0.4886 ACC:0.6199 ETA:16h:48m:27s 
+Train: Epo[068/500] Iter[009/014] IterTime:[9.85s] LOSS: 0.6549 ACC:0.5343 ETA:16h:35m:51s 
+Train: Epo[068/500] Iter[010/014] IterTime:[9.75s] LOSS: 0.5574 ACC:0.5841 ETA:16h:25m:44s 
+Train: Epo[068/500] Iter[011/014] IterTime:[9.78s] LOSS: 0.6688 ACC:0.5208 ETA:16h:28m:59s 
+Train: Epo[068/500] Iter[012/014] IterTime:[9.98s] LOSS: 0.6285 ACC:0.5610 ETA:16h:48m:41s 
+Train: Epo[068/500] Iter[013/014] IterTime:[9.56s] LOSS: 0.8225 ACC:0.4874 ETA:16h:5m:45s 
+Train: Epo[068/500] Iter[014/014] IterTime:[9.57s] LOSS: 0.6419 ACC:0.5411 ETA:16h:6m:45s 
+Valid: Epoch[068/500] Train Mean_Acc: 53.52% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[069/500] Iter[001/014] IterTime:[10.01s] LOSS: 0.7193 ACC:0.5142 ETA:16h:51m:34s 
+Train: Epo[069/500] Iter[002/014] IterTime:[10.32s] LOSS: 0.5527 ACC:0.5865 ETA:17h:22m:9s 
+Train: Epo[069/500] Iter[003/014] IterTime:[10.13s] LOSS: 0.8258 ACC:0.4644 ETA:17h:3m:5s 
+Train: Epo[069/500] Iter[004/014] IterTime:[10.21s] LOSS: 0.5324 ACC:0.5972 ETA:17h:11m:16s 
+Train: Epo[069/500] Iter[005/014] IterTime:[9.79s] LOSS: 0.7413 ACC:0.4947 ETA:16h:28m:43s 
+Train: Epo[069/500] Iter[006/014] IterTime:[10.17s] LOSS: 0.6221 ACC:0.5470 ETA:17h:6m:29s 
+Train: Epo[069/500] Iter[007/014] IterTime:[9.87s] LOSS: 0.8280 ACC:0.4527 ETA:16h:36m:24s 
+Train: Epo[069/500] Iter[008/014] IterTime:[9.82s] LOSS: 0.6309 ACC:0.5474 ETA:16h:31m:24s 
+Train: Epo[069/500] Iter[009/014] IterTime:[9.88s] LOSS: 0.5750 ACC:0.5690 ETA:16h:36m:42s 
+Train: Epo[069/500] Iter[010/014] IterTime:[9.74s] LOSS: 0.7434 ACC:0.4993 ETA:16h:23m:0s 
+Train: Epo[069/500] Iter[011/014] IterTime:[9.79s] LOSS: 0.7940 ACC:0.4574 ETA:16h:27m:53s 
+Train: Epo[069/500] Iter[012/014] IterTime:[9.79s] LOSS: 0.6946 ACC:0.5201 ETA:16h:27m:34s 
+Train: Epo[069/500] Iter[013/014] IterTime:[9.52s] LOSS: 0.8345 ACC:0.4522 ETA:15h:59m:55s 
+Train: Epo[069/500] Iter[014/014] IterTime:[9.57s] LOSS: 0.7504 ACC:0.4899 ETA:16h:4m:20s 
+Valid: Epoch[069/500] Train Mean_Acc: 51.37% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-05
+Train: Epo[070/500] Iter[001/014] IterTime:[10.26s] LOSS: 0.5912 ACC:0.5714 ETA:17h:14m:12s 
+Train: Epo[070/500] Iter[002/014] IterTime:[9.94s] LOSS: 0.7169 ACC:0.5396 ETA:16h:42m:7s 
+Train: Epo[070/500] Iter[003/014] IterTime:[10.09s] LOSS: 0.6118 ACC:0.5541 ETA:16h:56m:17s 
+Train: Epo[070/500] Iter[004/014] IterTime:[9.96s] LOSS: 0.5599 ACC:0.5822 ETA:16h:43m:54s 
+Train: Epo[070/500] Iter[005/014] IterTime:[10.09s] LOSS: 0.6551 ACC:0.5308 ETA:16h:56m:1s 
+Train: Epo[070/500] Iter[006/014] IterTime:[10.14s] LOSS: 0.6008 ACC:0.5619 ETA:17h:1m:16s 
+Train: Epo[070/500] Iter[007/014] IterTime:[9.88s] LOSS: 0.7410 ACC:0.5000 ETA:16h:35m:22s 
+Train: Epo[070/500] Iter[008/014] IterTime:[9.86s] LOSS: 0.7433 ACC:0.4849 ETA:16h:32m:25s 
+Train: Epo[070/500] Iter[009/014] IterTime:[9.90s] LOSS: 0.8668 ACC:0.4510 ETA:16h:36m:27s 
+Train: Epo[070/500] Iter[010/014] IterTime:[9.89s] LOSS: 0.8365 ACC:0.4505 ETA:16h:35m:50s 
+Train: Epo[070/500] Iter[011/014] IterTime:[9.79s] LOSS: 0.8290 ACC:0.4610 ETA:16h:24m:50s 
+Train: Epo[070/500] Iter[012/014] IterTime:[9.85s] LOSS: 0.5345 ACC:0.5904 ETA:16h:31m:2s 
+Train: Epo[070/500] Iter[013/014] IterTime:[9.98s] LOSS: 0.6734 ACC:0.5320 ETA:16h:43m:53s 
+Train: Epo[070/500] Iter[014/014] IterTime:[9.48s] LOSS: 0.7282 ACC:0.5044 ETA:15h:53m:7s 
+Valid: Epoch[070/500] Train Mean_Acc: 52.24% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[071/500] Iter[001/014] IterTime:[10.05s] LOSS: 0.7190 ACC:0.5087 ETA:16h:50m:28s 
+Train: Epo[071/500] Iter[002/014] IterTime:[9.85s] LOSS: 0.7116 ACC:0.5269 ETA:16h:30m:51s 
+Train: Epo[071/500] Iter[003/014] IterTime:[9.84s] LOSS: 0.7672 ACC:0.4858 ETA:16h:29m:21s 
+Train: Epo[071/500] Iter[004/014] IterTime:[9.94s] LOSS: 0.6743 ACC:0.5192 ETA:16h:39m:32s 
+Train: Epo[071/500] Iter[005/014] IterTime:[9.79s] LOSS: 0.7250 ACC:0.5029 ETA:16h:23m:35s 
+Train: Epo[071/500] Iter[006/014] IterTime:[10.07s] LOSS: 0.6394 ACC:0.5345 ETA:16h:52m:10s 
+Train: Epo[071/500] Iter[007/014] IterTime:[9.86s] LOSS: 0.6686 ACC:0.5281 ETA:16h:30m:38s 
+Train: Epo[071/500] Iter[008/014] IterTime:[9.90s] LOSS: 0.8914 ACC:0.4242 ETA:16h:34m:9s 
+Train: Epo[071/500] Iter[009/014] IterTime:[9.77s] LOSS: 0.7216 ACC:0.5113 ETA:16h:20m:55s 
+Train: Epo[071/500] Iter[010/014] IterTime:[9.82s] LOSS: 0.5883 ACC:0.5639 ETA:16h:26m:3s 
+Train: Epo[071/500] Iter[011/014] IterTime:[9.87s] LOSS: 0.5993 ACC:0.5642 ETA:16h:31m:4s 
+Train: Epo[071/500] Iter[012/014] IterTime:[9.76s] LOSS: 0.8184 ACC:0.4684 ETA:16h:19m:22s 
+Train: Epo[071/500] Iter[013/014] IterTime:[9.58s] LOSS: 0.8362 ACC:0.4480 ETA:16h:1m:50s 
+Train: Epo[071/500] Iter[014/014] IterTime:[9.59s] LOSS: 0.6015 ACC:0.5584 ETA:16h:2m:48s 
+Valid: Epoch[071/500] Train Mean_Acc: 51.03% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[072/500] Iter[001/014] IterTime:[10.17s] LOSS: 0.5462 ACC:0.5898 ETA:17h:0m:33s 
+Train: Epo[072/500] Iter[002/014] IterTime:[9.97s] LOSS: 0.6510 ACC:0.5327 ETA:16h:40m:11s 
+Train: Epo[072/500] Iter[003/014] IterTime:[10.00s] LOSS: 0.8311 ACC:0.4650 ETA:16h:43m:3s 
+Train: Epo[072/500] Iter[004/014] IterTime:[10.00s] LOSS: 0.6478 ACC:0.5408 ETA:16h:42m:29s 
+Train: Epo[072/500] Iter[005/014] IterTime:[9.84s] LOSS: 0.6886 ACC:0.5108 ETA:16h:26m:34s 
+Train: Epo[072/500] Iter[006/014] IterTime:[9.82s] LOSS: 0.6326 ACC:0.5434 ETA:16h:24m:36s 
+Train: Epo[072/500] Iter[007/014] IterTime:[9.87s] LOSS: 0.7269 ACC:0.5018 ETA:16h:29m:21s 
+Train: Epo[072/500] Iter[008/014] IterTime:[9.85s] LOSS: 0.5741 ACC:0.5730 ETA:16h:26m:50s 
+Train: Epo[072/500] Iter[009/014] IterTime:[9.85s] LOSS: 0.6211 ACC:0.5544 ETA:16h:27m:4s 
+Train: Epo[072/500] Iter[010/014] IterTime:[9.80s] LOSS: 0.6833 ACC:0.5229 ETA:16h:21m:37s 
+Train: Epo[072/500] Iter[011/014] IterTime:[9.78s] LOSS: 0.7869 ACC:0.4718 ETA:16h:19m:19s 
+Train: Epo[072/500] Iter[012/014] IterTime:[9.82s] LOSS: 0.6942 ACC:0.5199 ETA:16h:23m:28s 
+Train: Epo[072/500] Iter[013/014] IterTime:[9.64s] LOSS: 0.6280 ACC:0.5522 ETA:16h:5m:38s 
+Train: Epo[072/500] Iter[014/014] IterTime:[9.60s] LOSS: 0.6879 ACC:0.5248 ETA:16h:1m:6s 
+Valid: Epoch[072/500] Train Mean_Acc: 52.88% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[073/500] Iter[001/014] IterTime:[10.44s] LOSS: 0.7378 ACC:0.4927 ETA:17h:24m:35s 
+Train: Epo[073/500] Iter[002/014] IterTime:[9.78s] LOSS: 0.6129 ACC:0.5525 ETA:16h:19m:8s 
+Train: Epo[073/500] Iter[003/014] IterTime:[9.99s] LOSS: 0.8036 ACC:0.4587 ETA:16h:39m:50s 
+Train: Epo[073/500] Iter[004/014] IterTime:[10.07s] LOSS: 0.7270 ACC:0.5092 ETA:16h:47m:10s 
+Train: Epo[073/500] Iter[005/014] IterTime:[10.13s] LOSS: 0.7096 ACC:0.5072 ETA:16h:53m:25s 
+Train: Epo[073/500] Iter[006/014] IterTime:[9.92s] LOSS: 0.5913 ACC:0.5622 ETA:16h:31m:44s 
+Train: Epo[073/500] Iter[007/014] IterTime:[10.21s] LOSS: 0.7704 ACC:0.4999 ETA:17h:1m:29s 
+Train: Epo[073/500] Iter[008/014] IterTime:[9.93s] LOSS: 0.6539 ACC:0.5403 ETA:16h:32m:42s 
+Train: Epo[073/500] Iter[009/014] IterTime:[9.84s] LOSS: 0.6122 ACC:0.5598 ETA:16h:23m:47s 
+Train: Epo[073/500] Iter[010/014] IterTime:[9.79s] LOSS: 0.6346 ACC:0.5501 ETA:16h:18m:19s 
+Train: Epo[073/500] Iter[011/014] IterTime:[9.83s] LOSS: 0.5933 ACC:0.5693 ETA:16h:22m:27s 
+Train: Epo[073/500] Iter[012/014] IterTime:[9.71s] LOSS: 0.6677 ACC:0.5327 ETA:16h:10m:37s 
+Train: Epo[073/500] Iter[013/014] IterTime:[9.54s] LOSS: 0.5914 ACC:0.5611 ETA:15h:53m:16s 
+Train: Epo[073/500] Iter[014/014] IterTime:[9.51s] LOSS: 0.6438 ACC:0.5412 ETA:15h:50m:8s 
+Valid: Epoch[073/500] Train Mean_Acc: 53.12% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[074/500] Iter[001/014] IterTime:[9.84s] LOSS: 0.6909 ACC:0.5119 ETA:16h:23m:9s 
+Train: Epo[074/500] Iter[002/014] IterTime:[10.13s] LOSS: 0.6862 ACC:0.5298 ETA:16h:51m:50s 
+Train: Epo[074/500] Iter[003/014] IterTime:[10.22s] LOSS: 0.5363 ACC:0.6038 ETA:17h:0m:15s 
+Train: Epo[074/500] Iter[004/014] IterTime:[10.04s] LOSS: 0.6449 ACC:0.5448 ETA:16h:42m:13s 
+Train: Epo[074/500] Iter[005/014] IterTime:[9.86s] LOSS: 0.5871 ACC:0.5662 ETA:16h:23m:33s 
+Train: Epo[074/500] Iter[006/014] IterTime:[10.04s] LOSS: 0.6454 ACC:0.5346 ETA:16h:41m:35s 
+Train: Epo[074/500] Iter[007/014] IterTime:[10.03s] LOSS: 0.7201 ACC:0.4980 ETA:16h:40m:27s 
+Train: Epo[074/500] Iter[008/014] IterTime:[9.75s] LOSS: 0.6010 ACC:0.5606 ETA:16h:12m:16s 
+Train: Epo[074/500] Iter[009/014] IterTime:[9.77s] LOSS: 0.6793 ACC:0.5222 ETA:16h:14m:19s 
+Train: Epo[074/500] Iter[010/014] IterTime:[9.71s] LOSS: 0.5799 ACC:0.5659 ETA:16h:8m:17s 
+Train: Epo[074/500] Iter[011/014] IterTime:[9.75s] LOSS: 0.6259 ACC:0.5427 ETA:16h:12m:4s 
+Train: Epo[074/500] Iter[012/014] IterTime:[9.74s] LOSS: 0.6547 ACC:0.5305 ETA:16h:11m:12s 
+Train: Epo[074/500] Iter[013/014] IterTime:[9.53s] LOSS: 0.6867 ACC:0.5362 ETA:15h:50m:16s 
+Train: Epo[074/500] Iter[014/014] IterTime:[9.56s] LOSS: 0.6280 ACC:0.5454 ETA:15h:52m:23s 
+Valid: Epoch[074/500] Train Mean_Acc: 54.23% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[075/500] Iter[001/014] IterTime:[10.20s] LOSS: 0.6654 ACC:0.5356 ETA:16h:56m:23s 
+Train: Epo[075/500] Iter[002/014] IterTime:[9.84s] LOSS: 0.6717 ACC:0.5236 ETA:16h:20m:19s 
+Train: Epo[075/500] Iter[003/014] IterTime:[9.80s] LOSS: 0.5909 ACC:0.5792 ETA:16h:16m:15s 
+Train: Epo[075/500] Iter[004/014] IterTime:[10.11s] LOSS: 0.6810 ACC:0.5295 ETA:16h:47m:3s 
+Train: Epo[075/500] Iter[005/014] IterTime:[9.87s] LOSS: 0.8686 ACC:0.4495 ETA:16h:22m:50s 
+Train: Epo[075/500] Iter[006/014] IterTime:[10.13s] LOSS: 0.6919 ACC:0.5205 ETA:16h:48m:41s 
+Train: Epo[075/500] Iter[007/014] IterTime:[10.13s] LOSS: 0.8313 ACC:0.4965 ETA:16h:48m:0s 
+Train: Epo[075/500] Iter[008/014] IterTime:[10.16s] LOSS: 0.7119 ACC:0.5072 ETA:16h:50m:37s 
+Train: Epo[075/500] Iter[009/014] IterTime:[10.14s] LOSS: 0.6505 ACC:0.5314 ETA:16h:49m:14s 
+Train: Epo[075/500] Iter[010/014] IterTime:[10.04s] LOSS: 0.6727 ACC:0.5209 ETA:16h:39m:0s 
+Train: Epo[075/500] Iter[011/014] IterTime:[9.98s] LOSS: 0.6745 ACC:0.5269 ETA:16h:33m:3s 
+Train: Epo[075/500] Iter[012/014] IterTime:[9.96s] LOSS: 0.6562 ACC:0.5259 ETA:16h:30m:51s 
+Train: Epo[075/500] Iter[013/014] IterTime:[10.19s] LOSS: 0.7561 ACC:0.4794 ETA:16h:53m:18s 
+Train: Epo[075/500] Iter[014/014] IterTime:[9.55s] LOSS: 0.6594 ACC:0.5328 ETA:15h:49m:1s 
+Valid: Epoch[075/500] Train Mean_Acc: 51.85% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[076/500] Iter[001/014] IterTime:[10.08s] LOSS: 0.7089 ACC:0.5159 ETA:16h:41m:53s 
+Train: Epo[076/500] Iter[002/014] IterTime:[9.98s] LOSS: 0.5680 ACC:0.5802 ETA:16h:31m:53s 
+Train: Epo[076/500] Iter[003/014] IterTime:[9.95s] LOSS: 0.6713 ACC:0.5214 ETA:16h:28m:39s 
+Train: Epo[076/500] Iter[004/014] IterTime:[9.93s] LOSS: 0.7210 ACC:0.5022 ETA:16h:26m:53s 
+Train: Epo[076/500] Iter[005/014] IterTime:[9.83s] LOSS: 0.6613 ACC:0.5280 ETA:16h:16m:34s 
+Train: Epo[076/500] Iter[006/014] IterTime:[9.88s] LOSS: 0.7850 ACC:0.4807 ETA:16h:21m:9s 
+Train: Epo[076/500] Iter[007/014] IterTime:[9.77s] LOSS: 0.5964 ACC:0.5672 ETA:16h:10m:36s 
+Train: Epo[076/500] Iter[008/014] IterTime:[9.76s] LOSS: 0.8047 ACC:0.4754 ETA:16h:8m:48s 
+Train: Epo[076/500] Iter[009/014] IterTime:[9.86s] LOSS: 0.7041 ACC:0.5398 ETA:16h:18m:26s 
+Train: Epo[076/500] Iter[010/014] IterTime:[9.95s] LOSS: 0.7132 ACC:0.5093 ETA:16h:27m:59s 
+Train: Epo[076/500] Iter[011/014] IterTime:[9.89s] LOSS: 0.7263 ACC:0.5198 ETA:16h:21m:40s 
+Train: Epo[076/500] Iter[012/014] IterTime:[9.78s] LOSS: 0.5173 ACC:0.6063 ETA:16h:10m:28s 
+Train: Epo[076/500] Iter[013/014] IterTime:[9.54s] LOSS: 0.5894 ACC:0.5600 ETA:15h:45m:56s 
+Train: Epo[076/500] Iter[014/014] IterTime:[9.72s] LOSS: 0.7084 ACC:0.5206 ETA:16h:4m:14s 
+Valid: Epoch[076/500] Train Mean_Acc: 53.05% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[077/500] Iter[001/014] IterTime:[9.87s] LOSS: 0.6490 ACC:0.5319 ETA:16h:18m:49s 
+Train: Epo[077/500] Iter[002/014] IterTime:[10.15s] LOSS: 0.7920 ACC:0.4633 ETA:16h:46m:44s 
+Train: Epo[077/500] Iter[003/014] IterTime:[10.10s] LOSS: 0.6126 ACC:0.5616 ETA:16h:41m:13s 
+Train: Epo[077/500] Iter[004/014] IterTime:[9.85s] LOSS: 0.6057 ACC:0.5575 ETA:16h:16m:26s 
+Train: Epo[077/500] Iter[005/014] IterTime:[9.99s] LOSS: 0.6473 ACC:0.5416 ETA:16h:30m:24s 
+Train: Epo[077/500] Iter[006/014] IterTime:[10.14s] LOSS: 0.8515 ACC:0.4532 ETA:16h:44m:45s 
+Train: Epo[077/500] Iter[007/014] IterTime:[9.73s] LOSS: 0.8852 ACC:0.4318 ETA:16h:4m:11s 
+Train: Epo[077/500] Iter[008/014] IterTime:[9.72s] LOSS: 0.8056 ACC:0.4721 ETA:16h:3m:2s 
+Train: Epo[077/500] Iter[009/014] IterTime:[9.74s] LOSS: 0.4910 ACC:0.6250 ETA:16h:4m:7s 
+Train: Epo[077/500] Iter[010/014] IterTime:[9.92s] LOSS: 0.6482 ACC:0.5288 ETA:16h:22m:12s 
+Train: Epo[077/500] Iter[011/014] IterTime:[9.75s] LOSS: 0.5549 ACC:0.6000 ETA:16h:5m:19s 
+Train: Epo[077/500] Iter[012/014] IterTime:[9.77s] LOSS: 0.4863 ACC:0.6228 ETA:16h:7m:2s 
+Train: Epo[077/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.6039 ACC:0.5600 ETA:15h:41m:29s 
+Train: Epo[077/500] Iter[014/014] IterTime:[9.52s] LOSS: 0.6155 ACC:0.5681 ETA:15h:42m:29s 
+Valid: Epoch[077/500] Train Mean_Acc: 53.70% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[078/500] Iter[001/014] IterTime:[9.97s] LOSS: 0.7789 ACC:0.4746 ETA:16h:26m:13s 
+Train: Epo[078/500] Iter[002/014] IterTime:[10.19s] LOSS: 0.6763 ACC:0.5264 ETA:16h:48m:15s 
+Train: Epo[078/500] Iter[003/014] IterTime:[9.77s] LOSS: 0.7124 ACC:0.5045 ETA:16h:6m:41s 
+Train: Epo[078/500] Iter[004/014] IterTime:[10.04s] LOSS: 0.5240 ACC:0.6009 ETA:16h:32m:37s 
+Train: Epo[078/500] Iter[005/014] IterTime:[10.14s] LOSS: 0.7144 ACC:0.5109 ETA:16h:42m:16s 
+Train: Epo[078/500] Iter[006/014] IterTime:[10.09s] LOSS: 0.7089 ACC:0.5104 ETA:16h:37m:10s 
+Train: Epo[078/500] Iter[007/014] IterTime:[10.17s] LOSS: 0.7130 ACC:0.5244 ETA:16h:45m:37s 
+Train: Epo[078/500] Iter[008/014] IterTime:[9.83s] LOSS: 0.8660 ACC:0.4702 ETA:16h:11m:34s 
+Train: Epo[078/500] Iter[009/014] IterTime:[9.75s] LOSS: 0.8008 ACC:0.4607 ETA:16h:3m:15s 
+Train: Epo[078/500] Iter[010/014] IterTime:[9.76s] LOSS: 0.7873 ACC:0.4838 ETA:16h:3m:45s 
+Train: Epo[078/500] Iter[011/014] IterTime:[9.75s] LOSS: 0.6424 ACC:0.5348 ETA:16h:2m:48s 
+Train: Epo[078/500] Iter[012/014] IterTime:[9.75s] LOSS: 0.6609 ACC:0.5293 ETA:16h:2m:43s 
+Train: Epo[078/500] Iter[013/014] IterTime:[9.59s] LOSS: 0.7241 ACC:0.5058 ETA:15h:46m:43s 
+Train: Epo[078/500] Iter[014/014] IterTime:[9.67s] LOSS: 0.8379 ACC:0.4641 ETA:15h:54m:35s 
+Valid: Epoch[078/500] Train Mean_Acc: 50.72% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[079/500] Iter[001/014] IterTime:[9.92s] LOSS: 0.5760 ACC:0.5877 ETA:16h:19m:2s 
+Train: Epo[079/500] Iter[002/014] IterTime:[10.07s] LOSS: 0.6325 ACC:0.5556 ETA:16h:34m:10s 
+Train: Epo[079/500] Iter[003/014] IterTime:[10.14s] LOSS: 0.6164 ACC:0.5587 ETA:16h:40m:46s 
+Train: Epo[079/500] Iter[004/014] IterTime:[9.72s] LOSS: 0.7781 ACC:0.4754 ETA:15h:58m:53s 
+Train: Epo[079/500] Iter[005/014] IterTime:[9.65s] LOSS: 0.7075 ACC:0.5085 ETA:15h:52m:9s 
+Train: Epo[079/500] Iter[006/014] IterTime:[9.70s] LOSS: 0.5850 ACC:0.5761 ETA:15h:56m:35s 
+Train: Epo[079/500] Iter[007/014] IterTime:[9.66s] LOSS: 0.5197 ACC:0.6064 ETA:15h:52m:4s 
+Train: Epo[079/500] Iter[008/014] IterTime:[9.64s] LOSS: 0.6860 ACC:0.5260 ETA:15h:50m:35s 
+Train: Epo[079/500] Iter[009/014] IterTime:[9.76s] LOSS: 0.7820 ACC:0.4856 ETA:16h:2m:23s 
+Train: Epo[079/500] Iter[010/014] IterTime:[9.65s] LOSS: 0.6075 ACC:0.5513 ETA:15h:50m:46s 
+Train: Epo[079/500] Iter[011/014] IterTime:[9.79s] LOSS: 0.8002 ACC:0.4674 ETA:16h:4m:48s 
+Train: Epo[079/500] Iter[012/014] IterTime:[9.69s] LOSS: 0.6755 ACC:0.5259 ETA:15h:54m:16s 
+Train: Epo[079/500] Iter[013/014] IterTime:[9.42s] LOSS: 0.7581 ACC:0.4868 ETA:15h:27m:29s 
+Train: Epo[079/500] Iter[014/014] IterTime:[10.03s] LOSS: 0.7355 ACC:0.5169 ETA:16h:27m:33s 
+Valid: Epoch[079/500] Train Mean_Acc: 53.06% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[080/500] Iter[001/014] IterTime:[9.86s] LOSS: 0.5096 ACC:0.6186 ETA:16h:10m:48s 
+Train: Epo[080/500] Iter[002/014] IterTime:[9.72s] LOSS: 0.6767 ACC:0.5349 ETA:15h:56m:33s 
+Train: Epo[080/500] Iter[003/014] IterTime:[9.76s] LOSS: 0.7805 ACC:0.4878 ETA:16h:0m:47s 
+Train: Epo[080/500] Iter[004/014] IterTime:[9.68s] LOSS: 0.5583 ACC:0.5907 ETA:15h:52m:57s 
+Train: Epo[080/500] Iter[005/014] IterTime:[9.80s] LOSS: 0.6885 ACC:0.5216 ETA:16h:4m:28s 
+Train: Epo[080/500] Iter[006/014] IterTime:[9.77s] LOSS: 0.7233 ACC:0.4986 ETA:16h:1m:29s 
+Train: Epo[080/500] Iter[007/014] IterTime:[9.71s] LOSS: 0.7472 ACC:0.5011 ETA:15h:55m:4s 
+Train: Epo[080/500] Iter[008/014] IterTime:[9.77s] LOSS: 0.8111 ACC:0.4604 ETA:16h:1m:11s 
+Train: Epo[080/500] Iter[009/014] IterTime:[9.71s] LOSS: 0.6365 ACC:0.5429 ETA:15h:55m:7s 
+Train: Epo[080/500] Iter[010/014] IterTime:[9.73s] LOSS: 0.5956 ACC:0.5675 ETA:15h:56m:58s 
+Train: Epo[080/500] Iter[011/014] IterTime:[9.73s] LOSS: 0.6194 ACC:0.5492 ETA:15h:55m:58s 
+Train: Epo[080/500] Iter[012/014] IterTime:[9.70s] LOSS: 0.6446 ACC:0.5453 ETA:15h:52m:52s 
+Train: Epo[080/500] Iter[013/014] IterTime:[9.52s] LOSS: 0.6921 ACC:0.5147 ETA:15h:35m:26s 
+Train: Epo[080/500] Iter[014/014] IterTime:[9.48s] LOSS: 0.5699 ACC:0.5745 ETA:15h:31m:15s 
+Valid: Epoch[080/500] Train Mean_Acc: 53.63% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[081/500] Iter[001/014] IterTime:[10.27s] LOSS: 0.5900 ACC:0.5709 ETA:16h:49m:2s 
+Train: Epo[081/500] Iter[002/014] IterTime:[10.00s] LOSS: 0.7621 ACC:0.4899 ETA:16h:22m:8s 
+Train: Epo[081/500] Iter[003/014] IterTime:[10.07s] LOSS: 0.5491 ACC:0.5843 ETA:16h:28m:47s 
+Train: Epo[081/500] Iter[004/014] IterTime:[9.99s] LOSS: 0.5670 ACC:0.5831 ETA:16h:20m:41s 
+Train: Epo[081/500] Iter[005/014] IterTime:[9.86s] LOSS: 0.8071 ACC:0.4574 ETA:16h:8m:15s 
+Train: Epo[081/500] Iter[006/014] IterTime:[10.11s] LOSS: 0.6607 ACC:0.5296 ETA:16h:32m:29s 
+Train: Epo[081/500] Iter[007/014] IterTime:[9.93s] LOSS: 0.7153 ACC:0.5107 ETA:16h:14m:27s 
+Train: Epo[081/500] Iter[008/014] IterTime:[9.91s] LOSS: 0.7070 ACC:0.5085 ETA:16h:12m:35s 
+Train: Epo[081/500] Iter[009/014] IterTime:[9.90s] LOSS: 0.7287 ACC:0.4986 ETA:16h:10m:49s 
+Train: Epo[081/500] Iter[010/014] IterTime:[9.93s] LOSS: 0.8495 ACC:0.4504 ETA:16h:14m:10s 
+Train: Epo[081/500] Iter[011/014] IterTime:[9.84s] LOSS: 0.8641 ACC:0.4468 ETA:16h:4m:42s 
+Train: Epo[081/500] Iter[012/014] IterTime:[9.92s] LOSS: 0.7016 ACC:0.5068 ETA:16h:12m:36s 
+Train: Epo[081/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.6438 ACC:0.5550 ETA:15h:32m:29s 
+Train: Epo[081/500] Iter[014/014] IterTime:[9.90s] LOSS: 0.6183 ACC:0.5538 ETA:16h:10m:41s 
+Valid: Epoch[081/500] Train Mean_Acc: 51.76% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[082/500] Iter[001/014] IterTime:[10.20s] LOSS: 0.8050 ACC:0.4706 ETA:16h:39m:40s 
+Train: Epo[082/500] Iter[002/014] IterTime:[9.98s] LOSS: 0.8764 ACC:0.4322 ETA:16h:17m:51s 
+Train: Epo[082/500] Iter[003/014] IterTime:[9.99s] LOSS: 0.6323 ACC:0.5555 ETA:16h:18m:37s 
+Train: Epo[082/500] Iter[004/014] IterTime:[9.87s] LOSS: 0.6276 ACC:0.5535 ETA:16h:7m:7s 
+Train: Epo[082/500] Iter[005/014] IterTime:[9.80s] LOSS: 0.6118 ACC:0.5567 ETA:15h:59m:50s 
+Train: Epo[082/500] Iter[006/014] IterTime:[9.78s] LOSS: 0.6863 ACC:0.5217 ETA:15h:57m:44s 
+Train: Epo[082/500] Iter[007/014] IterTime:[9.91s] LOSS: 0.7242 ACC:0.5084 ETA:16h:9m:56s 
+Train: Epo[082/500] Iter[008/014] IterTime:[9.82s] LOSS: 0.7365 ACC:0.4979 ETA:16h:1m:18s 
+Train: Epo[082/500] Iter[009/014] IterTime:[9.77s] LOSS: 0.6147 ACC:0.5548 ETA:15h:56m:18s 
+Train: Epo[082/500] Iter[010/014] IterTime:[9.84s] LOSS: 0.6412 ACC:0.5426 ETA:16h:3m:16s 
+Train: Epo[082/500] Iter[011/014] IterTime:[9.87s] LOSS: 0.6767 ACC:0.5315 ETA:16h:5m:28s 
+Train: Epo[082/500] Iter[012/014] IterTime:[10.06s] LOSS: 0.5721 ACC:0.5759 ETA:16h:24m:16s 
+Train: Epo[082/500] Iter[013/014] IterTime:[9.63s] LOSS: 0.6121 ACC:0.5554 ETA:15h:41m:45s 
+Train: Epo[082/500] Iter[014/014] IterTime:[9.54s] LOSS: 0.6486 ACC:0.5426 ETA:15h:32m:24s 
+Valid: Epoch[082/500] Train Mean_Acc: 52.85% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[083/500] Iter[001/014] IterTime:[10.22s] LOSS: 0.6330 ACC:0.5466 ETA:16h:39m:9s 
+Train: Epo[083/500] Iter[002/014] IterTime:[9.81s] LOSS: 0.6942 ACC:0.5106 ETA:15h:58m:46s 
+Train: Epo[083/500] Iter[003/014] IterTime:[9.77s] LOSS: 0.6319 ACC:0.5563 ETA:15h:55m:12s 
+Train: Epo[083/500] Iter[004/014] IterTime:[9.81s] LOSS: 0.6904 ACC:0.5148 ETA:15h:58m:10s 
+Train: Epo[083/500] Iter[005/014] IterTime:[9.73s] LOSS: 0.5882 ACC:0.5697 ETA:15h:51m:4s 
+Train: Epo[083/500] Iter[006/014] IterTime:[10.14s] LOSS: 0.7042 ACC:0.5104 ETA:16h:30m:25s 
+Train: Epo[083/500] Iter[007/014] IterTime:[9.70s] LOSS: 0.6694 ACC:0.5398 ETA:15h:47m:39s 
+Train: Epo[083/500] Iter[008/014] IterTime:[9.65s] LOSS: 0.5957 ACC:0.5566 ETA:15h:42m:20s 
+Train: Epo[083/500] Iter[009/014] IterTime:[9.64s] LOSS: 0.8315 ACC:0.4511 ETA:15h:41m:26s 
+Train: Epo[083/500] Iter[010/014] IterTime:[9.73s] LOSS: 0.7187 ACC:0.5030 ETA:15h:49m:54s 
+Train: Epo[083/500] Iter[011/014] IterTime:[10.06s] LOSS: 0.5194 ACC:0.6176 ETA:16h:21m:58s 
+Train: Epo[083/500] Iter[012/014] IterTime:[9.76s] LOSS: 0.6475 ACC:0.5418 ETA:15h:52m:32s 
+Train: Epo[083/500] Iter[013/014] IterTime:[9.41s] LOSS: 0.6377 ACC:0.5409 ETA:15h:17m:42s 
+Train: Epo[083/500] Iter[014/014] IterTime:[9.53s] LOSS: 0.8235 ACC:0.4568 ETA:15h:29m:36s 
+Valid: Epoch[083/500] Train Mean_Acc: 52.97% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[084/500] Iter[001/014] IterTime:[9.85s] LOSS: 0.6370 ACC:0.5383 ETA:16h:0m:54s 
+Train: Epo[084/500] Iter[002/014] IterTime:[10.34s] LOSS: 0.7027 ACC:0.5142 ETA:16h:47m:51s 
+Train: Epo[084/500] Iter[003/014] IterTime:[10.06s] LOSS: 0.8190 ACC:0.4815 ETA:16h:20m:53s 
+Train: Epo[084/500] Iter[004/014] IterTime:[10.17s] LOSS: 0.7964 ACC:0.4835 ETA:16h:31m:9s 
+Train: Epo[084/500] Iter[005/014] IterTime:[10.07s] LOSS: 0.6775 ACC:0.5322 ETA:16h:21m:52s 
+Train: Epo[084/500] Iter[006/014] IterTime:[10.22s] LOSS: 0.8167 ACC:0.4715 ETA:16h:36m:20s 
+Train: Epo[084/500] Iter[007/014] IterTime:[9.97s] LOSS: 0.6700 ACC:0.5361 ETA:16h:11m:19s 
+Train: Epo[084/500] Iter[008/014] IterTime:[10.00s] LOSS: 0.5857 ACC:0.5681 ETA:16h:13m:53s 
+Train: Epo[084/500] Iter[009/014] IterTime:[9.91s] LOSS: 0.7802 ACC:0.4718 ETA:16h:5m:31s 
+Train: Epo[084/500] Iter[010/014] IterTime:[9.93s] LOSS: 0.8290 ACC:0.4599 ETA:16h:6m:48s 
+Train: Epo[084/500] Iter[011/014] IterTime:[9.96s] LOSS: 0.5711 ACC:0.5753 ETA:16h:9m:37s 
+Train: Epo[084/500] Iter[012/014] IterTime:[9.97s] LOSS: 0.6665 ACC:0.5393 ETA:16h:10m:45s 
+Train: Epo[084/500] Iter[013/014] IterTime:[9.61s] LOSS: 0.6187 ACC:0.5586 ETA:15h:35m:35s 
+Train: Epo[084/500] Iter[014/014] IterTime:[9.57s] LOSS: 0.5563 ACC:0.5793 ETA:15h:31m:39s 
+Valid: Epoch[084/500] Train Mean_Acc: 52.21% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[085/500] Iter[001/014] IterTime:[10.56s] LOSS: 0.7473 ACC:0.4980 ETA:17h:7m:12s 
+Train: Epo[085/500] Iter[002/014] IterTime:[10.17s] LOSS: 0.6234 ACC:0.5592 ETA:16h:29m:29s 
+Train: Epo[085/500] Iter[003/014] IterTime:[9.99s] LOSS: 0.6811 ACC:0.5279 ETA:16h:11m:28s 
+Train: Epo[085/500] Iter[004/014] IterTime:[9.75s] LOSS: 0.6301 ACC:0.5450 ETA:15h:48m:4s 
+Train: Epo[085/500] Iter[005/014] IterTime:[9.90s] LOSS: 0.5724 ACC:0.5731 ETA:16h:2m:24s 
+Train: Epo[085/500] Iter[006/014] IterTime:[9.90s] LOSS: 0.6435 ACC:0.5387 ETA:16h:2m:52s 
+Train: Epo[085/500] Iter[007/014] IterTime:[9.85s] LOSS: 0.7263 ACC:0.5028 ETA:15h:57m:2s 
+Train: Epo[085/500] Iter[008/014] IterTime:[9.95s] LOSS: 0.7374 ACC:0.5031 ETA:16h:7m:2s 
+Train: Epo[085/500] Iter[009/014] IterTime:[9.74s] LOSS: 0.6354 ACC:0.5570 ETA:15h:46m:33s 
+Train: Epo[085/500] Iter[010/014] IterTime:[9.81s] LOSS: 0.7144 ACC:0.5047 ETA:15h:52m:39s 
+Train: Epo[085/500] Iter[011/014] IterTime:[9.79s] LOSS: 0.7272 ACC:0.5043 ETA:15h:51m:2s 
+Train: Epo[085/500] Iter[012/014] IterTime:[9.56s] LOSS: 0.7761 ACC:0.4774 ETA:15h:28m:53s 
+Train: Epo[085/500] Iter[013/014] IterTime:[9.88s] LOSS: 0.6270 ACC:0.5544 ETA:15h:59m:41s 
+Train: Epo[085/500] Iter[014/014] IterTime:[9.60s] LOSS: 1.0225 ACC:0.3959 ETA:15h:31m:58s 
+Valid: Epoch[085/500] Train Mean_Acc: 51.72% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[086/500] Iter[001/014] IterTime:[9.97s] LOSS: 0.7468 ACC:0.5067 ETA:16h:7m:56s 
+Train: Epo[086/500] Iter[002/014] IterTime:[9.79s] LOSS: 0.5098 ACC:0.6112 ETA:15h:50m:10s 
+Train: Epo[086/500] Iter[003/014] IterTime:[9.71s] LOSS: 0.5407 ACC:0.6006 ETA:15h:42m:34s 
+Train: Epo[086/500] Iter[004/014] IterTime:[9.75s] LOSS: 0.8278 ACC:0.4480 ETA:15h:45m:36s 
+Train: Epo[086/500] Iter[005/014] IterTime:[9.72s] LOSS: 0.6514 ACC:0.5428 ETA:15h:42m:50s 
+Train: Epo[086/500] Iter[006/014] IterTime:[9.85s] LOSS: 0.5770 ACC:0.5714 ETA:15h:55m:25s 
+Train: Epo[086/500] Iter[007/014] IterTime:[9.75s] LOSS: 0.6201 ACC:0.5519 ETA:15h:45m:9s 
+Train: Epo[086/500] Iter[008/014] IterTime:[9.71s] LOSS: 0.6110 ACC:0.5668 ETA:15h:41m:18s 
+Train: Epo[086/500] Iter[009/014] IterTime:[9.75s] LOSS: 0.9135 ACC:0.4174 ETA:15h:45m:8s 
+Train: Epo[086/500] Iter[010/014] IterTime:[9.75s] LOSS: 0.6251 ACC:0.5502 ETA:15h:44m:53s 
+Train: Epo[086/500] Iter[011/014] IterTime:[9.81s] LOSS: 0.6711 ACC:0.5349 ETA:15h:50m:43s 
+Train: Epo[086/500] Iter[012/014] IterTime:[9.74s] LOSS: 0.6170 ACC:0.5629 ETA:15h:43m:29s 
+Train: Epo[086/500] Iter[013/014] IterTime:[9.51s] LOSS: 0.5979 ACC:0.5623 ETA:15h:21m:16s 
+Train: Epo[086/500] Iter[014/014] IterTime:[9.51s] LOSS: 0.6281 ACC:0.5572 ETA:15h:20m:36s 
+Valid: Epoch[086/500] Train Mean_Acc: 54.17% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[087/500] Iter[001/014] IterTime:[10.56s] LOSS: 0.6084 ACC:0.5547 ETA:17h:3m:1s 
+Train: Epo[087/500] Iter[002/014] IterTime:[9.76s] LOSS: 0.6717 ACC:0.5377 ETA:15h:44m:32s 
+Train: Epo[087/500] Iter[003/014] IterTime:[9.76s] LOSS: 0.7142 ACC:0.5042 ETA:15h:45m:14s 
+Train: Epo[087/500] Iter[004/014] IterTime:[10.03s] LOSS: 0.6825 ACC:0.5177 ETA:16h:10m:31s 
+Train: Epo[087/500] Iter[005/014] IterTime:[10.13s] LOSS: 0.8096 ACC:0.4768 ETA:16h:20m:10s 
+Train: Epo[087/500] Iter[006/014] IterTime:[9.88s] LOSS: 1.0177 ACC:0.3918 ETA:15h:56m:14s 
+Train: Epo[087/500] Iter[007/014] IterTime:[9.89s] LOSS: 0.6242 ACC:0.5497 ETA:15h:57m:1s 
+Train: Epo[087/500] Iter[008/014] IterTime:[9.97s] LOSS: 0.6124 ACC:0.5667 ETA:16h:4m:2s 
+Train: Epo[087/500] Iter[009/014] IterTime:[10.02s] LOSS: 0.5996 ACC:0.5675 ETA:16h:9m:20s 
+Train: Epo[087/500] Iter[010/014] IterTime:[9.86s] LOSS: 0.5889 ACC:0.5722 ETA:15h:53m:2s 
+Train: Epo[087/500] Iter[011/014] IterTime:[9.86s] LOSS: 0.6498 ACC:0.5390 ETA:15h:53m:31s 
+Train: Epo[087/500] Iter[012/014] IterTime:[9.85s] LOSS: 0.4464 ACC:0.6430 ETA:15h:52m:15s 
+Train: Epo[087/500] Iter[013/014] IterTime:[9.64s] LOSS: 0.7899 ACC:0.4715 ETA:15h:31m:10s 
+Train: Epo[087/500] Iter[014/014] IterTime:[9.56s] LOSS: 0.6733 ACC:0.5236 ETA:15h:23m:51s 
+Valid: Epoch[087/500] Train Mean_Acc: 52.97% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[088/500] Iter[001/014] IterTime:[10.25s] LOSS: 0.7061 ACC:0.5094 ETA:16h:30m:24s 
+Train: Epo[088/500] Iter[002/014] IterTime:[10.16s] LOSS: 0.8149 ACC:0.4599 ETA:16h:20m:57s 
+Train: Epo[088/500] Iter[003/014] IterTime:[10.17s] LOSS: 0.6413 ACC:0.5408 ETA:16h:22m:19s 
+Train: Epo[088/500] Iter[004/014] IterTime:[9.86s] LOSS: 0.6773 ACC:0.5217 ETA:15h:51m:39s 
+Train: Epo[088/500] Iter[005/014] IterTime:[9.64s] LOSS: 0.5885 ACC:0.5649 ETA:15h:30m:57s 
+Train: Epo[088/500] Iter[006/014] IterTime:[9.65s] LOSS: 0.6390 ACC:0.5422 ETA:15h:30m:57s 
+Train: Epo[088/500] Iter[007/014] IterTime:[9.70s] LOSS: 0.6059 ACC:0.5697 ETA:15h:35m:56s 
+Train: Epo[088/500] Iter[008/014] IterTime:[9.58s] LOSS: 0.7697 ACC:0.4790 ETA:15h:24m:14s 
+Train: Epo[088/500] Iter[009/014] IterTime:[9.64s] LOSS: 0.6959 ACC:0.5205 ETA:15h:30m:23s 
+Train: Epo[088/500] Iter[010/014] IterTime:[9.57s] LOSS: 0.8376 ACC:0.4578 ETA:15h:22m:57s 
+Train: Epo[088/500] Iter[011/014] IterTime:[9.64s] LOSS: 0.6537 ACC:0.5307 ETA:15h:29m:23s 
+Train: Epo[088/500] Iter[012/014] IterTime:[9.65s] LOSS: 0.7102 ACC:0.4962 ETA:15h:30m:22s 
+Train: Epo[088/500] Iter[013/014] IterTime:[9.44s] LOSS: 0.5647 ACC:0.5835 ETA:15h:9m:58s 
+Train: Epo[088/500] Iter[014/014] IterTime:[9.58s] LOSS: 0.6307 ACC:0.5439 ETA:15h:23m:4s 
+Valid: Epoch[088/500] Train Mean_Acc: 52.29% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[089/500] Iter[001/014] IterTime:[9.89s] LOSS: 0.5595 ACC:0.5807 ETA:15h:53m:32s 
+Train: Epo[089/500] Iter[002/014] IterTime:[10.08s] LOSS: 0.6229 ACC:0.5436 ETA:16h:10m:53s 
+Train: Epo[089/500] Iter[003/014] IterTime:[9.78s] LOSS: 0.5385 ACC:0.5953 ETA:15h:42m:23s 
+Train: Epo[089/500] Iter[004/014] IterTime:[9.75s] LOSS: 0.6777 ACC:0.5177 ETA:15h:38m:44s 
+Train: Epo[089/500] Iter[005/014] IterTime:[9.80s] LOSS: 0.6258 ACC:0.5503 ETA:15h:43m:42s 
+Train: Epo[089/500] Iter[006/014] IterTime:[9.72s] LOSS: 0.7281 ACC:0.5094 ETA:15h:36m:7s 
+Train: Epo[089/500] Iter[007/014] IterTime:[9.76s] LOSS: 0.5300 ACC:0.5956 ETA:15h:39m:59s 
+Train: Epo[089/500] Iter[008/014] IterTime:[9.74s] LOSS: 0.7249 ACC:0.5022 ETA:15h:37m:19s 
+Train: Epo[089/500] Iter[009/014] IterTime:[9.85s] LOSS: 0.7441 ACC:0.4984 ETA:15h:48m:8s 
+Train: Epo[089/500] Iter[010/014] IterTime:[9.77s] LOSS: 0.7509 ACC:0.4979 ETA:15h:40m:30s 
+Train: Epo[089/500] Iter[011/014] IterTime:[9.76s] LOSS: 0.9154 ACC:0.4195 ETA:15h:38m:40s 
+Train: Epo[089/500] Iter[012/014] IterTime:[9.69s] LOSS: 0.5777 ACC:0.5748 ETA:15h:31m:41s 
+Train: Epo[089/500] Iter[013/014] IterTime:[9.75s] LOSS: 0.8181 ACC:0.4632 ETA:15h:38m:1s 
+Train: Epo[089/500] Iter[014/014] IterTime:[9.48s] LOSS: 0.7333 ACC:0.5036 ETA:15h:11m:43s 
+Valid: Epoch[089/500] Train Mean_Acc: 52.52% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[090/500] Iter[001/014] IterTime:[9.95s] LOSS: 0.8217 ACC:0.4979 ETA:15h:56m:20s 
+Train: Epo[090/500] Iter[002/014] IterTime:[10.11s] LOSS: 0.7279 ACC:0.4961 ETA:16h:11m:21s 
+Train: Epo[090/500] Iter[003/014] IterTime:[10.14s] LOSS: 0.6820 ACC:0.5190 ETA:16h:14m:13s 
+Train: Epo[090/500] Iter[004/014] IterTime:[10.17s] LOSS: 0.8063 ACC:0.4845 ETA:16h:17m:32s 
+Train: Epo[090/500] Iter[005/014] IterTime:[10.06s] LOSS: 0.6931 ACC:0.5240 ETA:16h:6m:53s 
+Train: Epo[090/500] Iter[006/014] IterTime:[9.99s] LOSS: 0.6557 ACC:0.5414 ETA:15h:59m:37s 
+Train: Epo[090/500] Iter[007/014] IterTime:[9.74s] LOSS: 0.6110 ACC:0.5522 ETA:15h:35m:45s 
+Train: Epo[090/500] Iter[008/014] IterTime:[10.14s] LOSS: 0.7898 ACC:0.4900 ETA:16h:13m:58s 
+Train: Epo[090/500] Iter[009/014] IterTime:[10.09s] LOSS: 0.6622 ACC:0.5629 ETA:16h:8m:37s 
+Train: Epo[090/500] Iter[010/014] IterTime:[10.56s] LOSS: 0.5998 ACC:0.5555 ETA:16h:53m:27s 
+Train: Epo[090/500] Iter[011/014] IterTime:[10.19s] LOSS: 0.8441 ACC:0.4657 ETA:16h:17m:53s 
+Train: Epo[090/500] Iter[012/014] IterTime:[10.00s] LOSS: 0.5719 ACC:0.5834 ETA:15h:59m:36s 
+Train: Epo[090/500] Iter[013/014] IterTime:[9.71s] LOSS: 0.7460 ACC:0.4960 ETA:15h:31m:18s 
+Train: Epo[090/500] Iter[014/014] IterTime:[9.54s] LOSS: 0.5985 ACC:0.5678 ETA:15h:15m:25s 
+Valid: Epoch[090/500] Train Mean_Acc: 52.40% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[091/500] Iter[001/014] IterTime:[10.10s] LOSS: 0.8130 ACC:0.4602 ETA:16h:8m:31s 
+Train: Epo[091/500] Iter[002/014] IterTime:[10.24s] LOSS: 0.6822 ACC:0.5344 ETA:16h:22m:17s 
+Train: Epo[091/500] Iter[003/014] IterTime:[9.97s] LOSS: 0.7331 ACC:0.4977 ETA:15h:55m:39s 
+Train: Epo[091/500] Iter[004/014] IterTime:[10.14s] LOSS: 0.5091 ACC:0.6096 ETA:16h:11m:42s 
+Train: Epo[091/500] Iter[005/014] IterTime:[10.01s] LOSS: 0.5391 ACC:0.5921 ETA:15h:59m:20s 
+Train: Epo[091/500] Iter[006/014] IterTime:[9.81s] LOSS: 0.7132 ACC:0.5136 ETA:15h:40m:6s 
+Train: Epo[091/500] Iter[007/014] IterTime:[9.85s] LOSS: 0.5895 ACC:0.5687 ETA:15h:43m:18s 
+Train: Epo[091/500] Iter[008/014] IterTime:[9.69s] LOSS: 0.7461 ACC:0.5018 ETA:15h:27m:50s 
+Train: Epo[091/500] Iter[009/014] IterTime:[10.34s] LOSS: 0.8771 ACC:0.4342 ETA:16h:30m:9s 
+Train: Epo[091/500] Iter[010/014] IterTime:[9.95s] LOSS: 0.9691 ACC:0.3994 ETA:15h:53m:1s 
+Train: Epo[091/500] Iter[011/014] IterTime:[9.97s] LOSS: 0.5837 ACC:0.5715 ETA:15h:54m:14s 
+Train: Epo[091/500] Iter[012/014] IterTime:[9.71s] LOSS: 0.5601 ACC:0.5814 ETA:15h:29m:8s 
+Train: Epo[091/500] Iter[013/014] IterTime:[9.46s] LOSS: 0.6489 ACC:0.5483 ETA:15h:4m:55s 
+Train: Epo[091/500] Iter[014/014] IterTime:[9.50s] LOSS: 0.7188 ACC:0.5075 ETA:15h:9m:24s 
+Valid: Epoch[091/500] Train Mean_Acc: 52.29% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[092/500] Iter[001/014] IterTime:[9.96s] LOSS: 0.7223 ACC:0.5060 ETA:15h:52m:35s 
+Train: Epo[092/500] Iter[002/014] IterTime:[10.03s] LOSS: 0.4870 ACC:0.6208 ETA:15h:59m:13s 
+Train: Epo[092/500] Iter[003/014] IterTime:[9.93s] LOSS: 0.7081 ACC:0.5086 ETA:15h:49m:27s 
+Train: Epo[092/500] Iter[004/014] IterTime:[10.13s] LOSS: 0.6985 ACC:0.5098 ETA:16h:8m:19s 
+Train: Epo[092/500] Iter[005/014] IterTime:[10.35s] LOSS: 0.6846 ACC:0.5102 ETA:16h:29m:41s 
+Train: Epo[092/500] Iter[006/014] IterTime:[10.08s] LOSS: 0.8399 ACC:0.4657 ETA:16h:3m:33s 
+Train: Epo[092/500] Iter[007/014] IterTime:[10.07s] LOSS: 0.8100 ACC:0.4770 ETA:16h:2m:10s 
+Train: Epo[092/500] Iter[008/014] IterTime:[9.80s] LOSS: 0.6689 ACC:0.5237 ETA:15h:36m:39s 
+Train: Epo[092/500] Iter[009/014] IterTime:[9.80s] LOSS: 0.7158 ACC:0.5079 ETA:15h:36m:26s 
+Train: Epo[092/500] Iter[010/014] IterTime:[9.77s] LOSS: 0.7533 ACC:0.4997 ETA:15h:33m:26s 
+Train: Epo[092/500] Iter[011/014] IterTime:[9.72s] LOSS: 0.8126 ACC:0.4592 ETA:15h:28m:26s 
+Train: Epo[092/500] Iter[012/014] IterTime:[9.70s] LOSS: 0.6465 ACC:0.5378 ETA:15h:26m:18s 
+Train: Epo[092/500] Iter[013/014] IterTime:[9.54s] LOSS: 0.6120 ACC:0.5506 ETA:15h:10m:35s 
+Train: Epo[092/500] Iter[014/014] IterTime:[9.57s] LOSS: 0.6482 ACC:0.5433 ETA:15h:13m:19s 
+Valid: Epoch[092/500] Train Mean_Acc: 51.57% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[093/500] Iter[001/014] IterTime:[9.98s] LOSS: 0.9511 ACC:0.4179 ETA:15h:52m:0s 
+Train: Epo[093/500] Iter[002/014] IterTime:[10.14s] LOSS: 0.7337 ACC:0.5021 ETA:16h:7m:12s 
+Train: Epo[093/500] Iter[003/014] IterTime:[9.84s] LOSS: 0.6399 ACC:0.5387 ETA:15h:38m:41s 
+Train: Epo[093/500] Iter[004/014] IterTime:[9.83s] LOSS: 0.7134 ACC:0.5097 ETA:15h:37m:19s 
+Train: Epo[093/500] Iter[005/014] IterTime:[9.83s] LOSS: 0.7420 ACC:0.4993 ETA:15h:37m:46s 
+Train: Epo[093/500] Iter[006/014] IterTime:[9.78s] LOSS: 0.9218 ACC:0.4145 ETA:15h:32m:15s 
+Train: Epo[093/500] Iter[007/014] IterTime:[9.79s] LOSS: 0.5299 ACC:0.5930 ETA:15h:33m:3s 
+Train: Epo[093/500] Iter[008/014] IterTime:[9.75s] LOSS: 0.6428 ACC:0.5417 ETA:15h:29m:35s 
+Train: Epo[093/500] Iter[009/014] IterTime:[9.80s] LOSS: 0.8223 ACC:0.4595 ETA:15h:33m:52s 
+Train: Epo[093/500] Iter[010/014] IterTime:[9.90s] LOSS: 0.6631 ACC:0.5295 ETA:15h:43m:4s 
+Train: Epo[093/500] Iter[011/014] IterTime:[9.80s] LOSS: 0.6017 ACC:0.5648 ETA:15h:33m:17s 
+Train: Epo[093/500] Iter[012/014] IterTime:[9.92s] LOSS: 0.5398 ACC:0.5939 ETA:15h:44m:35s 
+Train: Epo[093/500] Iter[013/014] IterTime:[9.56s] LOSS: 0.7303 ACC:0.4995 ETA:15h:10m:25s 
+Train: Epo[093/500] Iter[014/014] IterTime:[9.60s] LOSS: 0.5815 ACC:0.5687 ETA:15h:13m:54s 
+Valid: Epoch[093/500] Train Mean_Acc: 51.66% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[094/500] Iter[001/014] IterTime:[10.15s] LOSS: 0.8027 ACC:0.4808 ETA:16h:6m:13s 
+Train: Epo[094/500] Iter[002/014] IterTime:[10.12s] LOSS: 0.7102 ACC:0.5019 ETA:16h:3m:0s 
+Train: Epo[094/500] Iter[003/014] IterTime:[10.08s] LOSS: 0.6841 ACC:0.5324 ETA:15h:59m:17s 
+Train: Epo[094/500] Iter[004/014] IterTime:[10.29s] LOSS: 0.6010 ACC:0.5598 ETA:16h:19m:29s 
+Train: Epo[094/500] Iter[005/014] IterTime:[10.10s] LOSS: 0.5945 ACC:0.5631 ETA:16h:1m:9s 
+Train: Epo[094/500] Iter[006/014] IterTime:[9.85s] LOSS: 0.5367 ACC:0.5920 ETA:15h:37m:20s 
+Train: Epo[094/500] Iter[007/014] IterTime:[10.29s] LOSS: 0.6810 ACC:0.5408 ETA:16h:18m:35s 
+Train: Epo[094/500] Iter[008/014] IterTime:[10.09s] LOSS: 0.8216 ACC:0.4824 ETA:15h:59m:50s 
+Train: Epo[094/500] Iter[009/014] IterTime:[9.81s] LOSS: 0.6155 ACC:0.5589 ETA:15h:32m:46s 
+Train: Epo[094/500] Iter[010/014] IterTime:[9.83s] LOSS: 0.6947 ACC:0.5293 ETA:15h:34m:41s 
+Train: Epo[094/500] Iter[011/014] IterTime:[9.83s] LOSS: 0.7295 ACC:0.5077 ETA:15h:34m:18s 
+Train: Epo[094/500] Iter[012/014] IterTime:[9.81s] LOSS: 0.8088 ACC:0.4888 ETA:15h:32m:14s 
+Train: Epo[094/500] Iter[013/014] IterTime:[9.66s] LOSS: 0.6864 ACC:0.5176 ETA:15h:17m:18s 
+Train: Epo[094/500] Iter[014/014] IterTime:[9.55s] LOSS: 0.7366 ACC:0.4985 ETA:15h:7m:29s 
+Valid: Epoch[094/500] Train Mean_Acc: 52.53% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[095/500] Iter[001/014] IterTime:[10.01s] LOSS: 0.7430 ACC:0.5067 ETA:15h:50m:10s 
+Train: Epo[095/500] Iter[002/014] IterTime:[10.14s] LOSS: 0.5067 ACC:0.6095 ETA:16h:2m:36s 
+Train: Epo[095/500] Iter[003/014] IterTime:[9.99s] LOSS: 0.6101 ACC:0.5646 ETA:15h:47m:56s 
+Train: Epo[095/500] Iter[004/014] IterTime:[10.09s] LOSS: 0.5972 ACC:0.5533 ETA:15h:57m:45s 
+Train: Epo[095/500] Iter[005/014] IterTime:[10.13s] LOSS: 0.6511 ACC:0.5453 ETA:16h:1m:9s 
+Train: Epo[095/500] Iter[006/014] IterTime:[9.98s] LOSS: 0.6604 ACC:0.5409 ETA:15h:47m:10s 
+Train: Epo[095/500] Iter[007/014] IterTime:[10.05s] LOSS: 0.7403 ACC:0.5051 ETA:15h:53m:3s 
+Train: Epo[095/500] Iter[008/014] IterTime:[9.91s] LOSS: 0.9282 ACC:0.4287 ETA:15h:40m:6s 
+Train: Epo[095/500] Iter[009/014] IterTime:[9.92s] LOSS: 0.6208 ACC:0.5567 ETA:15h:40m:21s 
+Train: Epo[095/500] Iter[010/014] IterTime:[10.08s] LOSS: 0.7061 ACC:0.5225 ETA:15h:55m:23s 
+Train: Epo[095/500] Iter[011/014] IterTime:[9.79s] LOSS: 0.6605 ACC:0.5286 ETA:15h:28m:23s 
+Train: Epo[095/500] Iter[012/014] IterTime:[9.84s] LOSS: 0.6673 ACC:0.5451 ETA:15h:33m:6s 
+Train: Epo[095/500] Iter[013/014] IterTime:[9.82s] LOSS: 0.5756 ACC:0.5699 ETA:15h:30m:17s 
+Train: Epo[095/500] Iter[014/014] IterTime:[9.53s] LOSS: 0.6430 ACC:0.5345 ETA:15h:2m:55s 
+Valid: Epoch[095/500] Train Mean_Acc: 53.65% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[096/500] Iter[001/014] IterTime:[10.00s] LOSS: 0.7053 ACC:0.5133 ETA:15h:47m:38s 
+Train: Epo[096/500] Iter[002/014] IterTime:[9.78s] LOSS: 0.6088 ACC:0.5566 ETA:15h:26m:35s 
+Train: Epo[096/500] Iter[003/014] IterTime:[9.65s] LOSS: 0.7951 ACC:0.4711 ETA:15h:14m:1s 
+Train: Epo[096/500] Iter[004/014] IterTime:[9.69s] LOSS: 0.6864 ACC:0.5225 ETA:15h:17m:54s 
+Train: Epo[096/500] Iter[005/014] IterTime:[9.71s] LOSS: 0.5686 ACC:0.5738 ETA:15h:18m:56s 
+Train: Epo[096/500] Iter[006/014] IterTime:[9.73s] LOSS: 0.5682 ACC:0.5901 ETA:15h:20m:47s 
+Train: Epo[096/500] Iter[007/014] IterTime:[9.87s] LOSS: 0.6790 ACC:0.5182 ETA:15h:34m:9s 
+Train: Epo[096/500] Iter[008/014] IterTime:[9.65s] LOSS: 0.8211 ACC:0.4570 ETA:15h:12m:40s 
+Train: Epo[096/500] Iter[009/014] IterTime:[9.74s] LOSS: 0.6870 ACC:0.5246 ETA:15h:21m:22s 
+Train: Epo[096/500] Iter[010/014] IterTime:[9.82s] LOSS: 0.6602 ACC:0.5311 ETA:15h:28m:29s 
+Train: Epo[096/500] Iter[011/014] IterTime:[9.65s] LOSS: 0.8604 ACC:0.4532 ETA:15h:12m:15s 
+Train: Epo[096/500] Iter[012/014] IterTime:[9.61s] LOSS: 0.6075 ACC:0.5520 ETA:15h:9m:5s 
+Train: Epo[096/500] Iter[013/014] IterTime:[9.45s] LOSS: 0.7155 ACC:0.5216 ETA:14h:53m:17s 
+Train: Epo[096/500] Iter[014/014] IterTime:[9.41s] LOSS: 0.6947 ACC:0.5214 ETA:14h:49m:32s 
+Valid: Epoch[096/500] Train Mean_Acc: 52.19% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[097/500] Iter[001/014] IterTime:[9.86s] LOSS: 0.6748 ACC:0.5310 ETA:15h:31m:47s 
+Train: Epo[097/500] Iter[002/014] IterTime:[9.76s] LOSS: 0.6469 ACC:0.5371 ETA:15h:22m:28s 
+Train: Epo[097/500] Iter[003/014] IterTime:[9.70s] LOSS: 0.5890 ACC:0.5744 ETA:15h:16m:18s 
+Train: Epo[097/500] Iter[004/014] IterTime:[9.82s] LOSS: 0.5937 ACC:0.5657 ETA:15h:27m:2s 
+Train: Epo[097/500] Iter[005/014] IterTime:[9.76s] LOSS: 0.6272 ACC:0.5469 ETA:15h:21m:41s 
+Train: Epo[097/500] Iter[006/014] IterTime:[9.76s] LOSS: 0.7177 ACC:0.5185 ETA:15h:21m:7s 
+Train: Epo[097/500] Iter[007/014] IterTime:[9.75s] LOSS: 0.8348 ACC:0.4661 ETA:15h:19m:56s 
+Train: Epo[097/500] Iter[008/014] IterTime:[9.71s] LOSS: 0.5805 ACC:0.5741 ETA:15h:16m:4s 
+Train: Epo[097/500] Iter[009/014] IterTime:[9.70s] LOSS: 0.5773 ACC:0.5941 ETA:15h:15m:37s 
+Train: Epo[097/500] Iter[010/014] IterTime:[9.69s] LOSS: 0.9391 ACC:0.4466 ETA:15h:14m:38s 
+Train: Epo[097/500] Iter[011/014] IterTime:[9.72s] LOSS: 0.7579 ACC:0.4918 ETA:15h:16m:43s 
+Train: Epo[097/500] Iter[012/014] IterTime:[9.73s] LOSS: 0.5740 ACC:0.5701 ETA:15h:18m:2s 
+Train: Epo[097/500] Iter[013/014] IterTime:[9.53s] LOSS: 0.6627 ACC:0.5408 ETA:14h:58m:29s 
+Train: Epo[097/500] Iter[014/014] IterTime:[10.11s] LOSS: 0.6779 ACC:0.5243 ETA:15h:53m:29s 
+Valid: Epoch[097/500] Train Mean_Acc: 53.44% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[098/500] Iter[001/014] IterTime:[9.96s] LOSS: 0.6609 ACC:0.5298 ETA:15h:39m:17s 
+Train: Epo[098/500] Iter[002/014] IterTime:[9.76s] LOSS: 0.6301 ACC:0.5465 ETA:15h:20m:12s 
+Train: Epo[098/500] Iter[003/014] IterTime:[9.68s] LOSS: 0.7063 ACC:0.5032 ETA:15h:12m:23s 
+Train: Epo[098/500] Iter[004/014] IterTime:[9.79s] LOSS: 0.6778 ACC:0.5230 ETA:15h:22m:29s 
+Train: Epo[098/500] Iter[005/014] IterTime:[9.72s] LOSS: 0.7800 ACC:0.4749 ETA:15h:16m:0s 
+Train: Epo[098/500] Iter[006/014] IterTime:[9.76s] LOSS: 0.5762 ACC:0.5782 ETA:15h:19m:27s 
+Train: Epo[098/500] Iter[007/014] IterTime:[9.69s] LOSS: 0.6360 ACC:0.5441 ETA:15h:12m:4s 
+Train: Epo[098/500] Iter[008/014] IterTime:[9.79s] LOSS: 0.7977 ACC:0.4837 ETA:15h:21m:59s 
+Train: Epo[098/500] Iter[009/014] IterTime:[9.72s] LOSS: 0.5402 ACC:0.5872 ETA:15h:14m:32s 
+Train: Epo[098/500] Iter[010/014] IterTime:[9.71s] LOSS: 0.6335 ACC:0.5508 ETA:15h:14m:7s 
+Train: Epo[098/500] Iter[011/014] IterTime:[9.76s] LOSS: 0.7193 ACC:0.5064 ETA:15h:18m:38s 
+Train: Epo[098/500] Iter[012/014] IterTime:[9.74s] LOSS: 0.5582 ACC:0.5905 ETA:15h:16m:39s 
+Train: Epo[098/500] Iter[013/014] IterTime:[9.67s] LOSS: 0.7488 ACC:0.5126 ETA:15h:9m:44s 
+Train: Epo[098/500] Iter[014/014] IterTime:[9.54s] LOSS: 0.6036 ACC:0.5540 ETA:14h:57m:4s 
+Valid: Epoch[098/500] Train Mean_Acc: 53.46% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[099/500] Iter[001/014] IterTime:[9.79s] LOSS: 0.7934 ACC:0.4705 ETA:15h:20m:58s 
+Train: Epo[099/500] Iter[002/014] IterTime:[9.72s] LOSS: 0.5875 ACC:0.5695 ETA:15h:13m:40s 
+Train: Epo[099/500] Iter[003/014] IterTime:[9.77s] LOSS: 0.5833 ACC:0.5691 ETA:15h:18m:3s 
+Train: Epo[099/500] Iter[004/014] IterTime:[9.97s] LOSS: 0.8340 ACC:0.4531 ETA:15h:36m:35s 
+Train: Epo[099/500] Iter[005/014] IterTime:[9.71s] LOSS: 0.7391 ACC:0.4845 ETA:15h:12m:42s 
+Train: Epo[099/500] Iter[006/014] IterTime:[9.78s] LOSS: 0.6332 ACC:0.5466 ETA:15h:18m:43s 
+Train: Epo[099/500] Iter[007/014] IterTime:[9.77s] LOSS: 0.5874 ACC:0.5647 ETA:15h:18m:10s 
+Train: Epo[099/500] Iter[008/014] IterTime:[9.78s] LOSS: 0.8042 ACC:0.4663 ETA:15h:18m:21s 
+Train: Epo[099/500] Iter[009/014] IterTime:[9.77s] LOSS: 0.6298 ACC:0.5604 ETA:15h:17m:43s 
+Train: Epo[099/500] Iter[010/014] IterTime:[9.78s] LOSS: 0.7678 ACC:0.4800 ETA:15h:18m:37s 
+Train: Epo[099/500] Iter[011/014] IterTime:[9.71s] LOSS: 0.6306 ACC:0.5387 ETA:15h:11m:23s 
+Train: Epo[099/500] Iter[012/014] IterTime:[9.74s] LOSS: 0.5597 ACC:0.5813 ETA:15h:14m:32s 
+Train: Epo[099/500] Iter[013/014] IterTime:[9.60s] LOSS: 0.6496 ACC:0.5288 ETA:15h:0m:49s 
+Train: Epo[099/500] Iter[014/014] IterTime:[9.62s] LOSS: 0.6307 ACC:0.5514 ETA:15h:2m:51s 
+Valid: Epoch[099/500] Train Mean_Acc: 52.61% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.0000000000000015e-06
+Train: Epo[100/500] Iter[001/014] IterTime:[9.86s] LOSS: 0.7400 ACC:0.4873 ETA:15h:25m:11s 
+Train: Epo[100/500] Iter[002/014] IterTime:[9.92s] LOSS: 0.8379 ACC:0.4526 ETA:15h:30m:24s 
+Train: Epo[100/500] Iter[003/014] IterTime:[10.20s] LOSS: 0.5557 ACC:0.5814 ETA:15h:56m:47s 
+Train: Epo[100/500] Iter[004/014] IterTime:[9.77s] LOSS: 0.6334 ACC:0.5455 ETA:15h:16m:2s 
+Train: Epo[100/500] Iter[005/014] IterTime:[9.63s] LOSS: 0.8062 ACC:0.4717 ETA:15h:2m:32s 
+Train: Epo[100/500] Iter[006/014] IterTime:[9.62s] LOSS: 0.8251 ACC:0.4676 ETA:15h:1m:54s 
+Train: Epo[100/500] Iter[007/014] IterTime:[9.67s] LOSS: 0.6551 ACC:0.5290 ETA:15h:5m:37s 
+Train: Epo[100/500] Iter[008/014] IterTime:[9.69s] LOSS: 0.6216 ACC:0.5584 ETA:15h:7m:40s 
+Train: Epo[100/500] Iter[009/014] IterTime:[9.73s] LOSS: 0.5511 ACC:0.6026 ETA:15h:11m:33s 
+Train: Epo[100/500] Iter[010/014] IterTime:[9.77s] LOSS: 0.6456 ACC:0.5392 ETA:15h:14m:51s 
+Train: Epo[100/500] Iter[011/014] IterTime:[9.78s] LOSS: 0.6805 ACC:0.5245 ETA:15h:15m:46s 
+Train: Epo[100/500] Iter[012/014] IterTime:[9.77s] LOSS: 0.7788 ACC:0.4843 ETA:15h:14m:35s 
+Train: Epo[100/500] Iter[013/014] IterTime:[9.52s] LOSS: 0.6961 ACC:0.5095 ETA:14h:50m:46s 
+Train: Epo[100/500] Iter[014/014] IterTime:[9.47s] LOSS: 0.7929 ACC:0.4758 ETA:14h:45m:53s 
+Valid: Epoch[100/500] Train Mean_Acc: 51.64% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-07
+Train: Epo[101/500] Iter[001/014] IterTime:[9.90s] LOSS: 0.6785 ACC:0.5371 ETA:15h:26m:14s 
+Train: Epo[101/500] Iter[002/014] IterTime:[9.94s] LOSS: 0.8964 ACC:0.4279 ETA:15h:30m:11s 
+Train: Epo[101/500] Iter[003/014] IterTime:[10.00s] LOSS: 0.5496 ACC:0.5852 ETA:15h:35m:17s 
+Train: Epo[101/500] Iter[004/014] IterTime:[10.08s] LOSS: 0.7813 ACC:0.4733 ETA:15h:42m:38s 
+Train: Epo[101/500] Iter[005/014] IterTime:[9.83s] LOSS: 0.7259 ACC:0.4969 ETA:15h:19m:18s 
+Train: Epo[101/500] Iter[006/014] IterTime:[9.95s] LOSS: 0.5787 ACC:0.5838 ETA:15h:30m:25s 
+Train: Epo[101/500] Iter[007/014] IterTime:[9.71s] LOSS: 0.6665 ACC:0.5258 ETA:15h:7m:53s 
+Train: Epo[101/500] Iter[008/014] IterTime:[9.89s] LOSS: 0.7330 ACC:0.4901 ETA:15h:24m:28s 
+Train: Epo[101/500] Iter[009/014] IterTime:[9.84s] LOSS: 0.6769 ACC:0.5272 ETA:15h:19m:12s 
+Train: Epo[101/500] Iter[010/014] IterTime:[9.72s] LOSS: 0.6545 ACC:0.5270 ETA:15h:7m:54s 
+Train: Epo[101/500] Iter[011/014] IterTime:[9.76s] LOSS: 0.6266 ACC:0.5509 ETA:15h:11m:43s 
+Train: Epo[101/500] Iter[012/014] IterTime:[9.79s] LOSS: 0.6919 ACC:0.5360 ETA:15h:14m:23s 
+Train: Epo[101/500] Iter[013/014] IterTime:[9.62s] LOSS: 0.4440 ACC:0.6466 ETA:14h:58m:26s 
+Train: Epo[101/500] Iter[014/014] IterTime:[9.73s] LOSS: 0.6280 ACC:0.5521 ETA:15h:8m:0s 
+Valid: Epoch[101/500] Train Mean_Acc: 53.29% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-07
+Train: Epo[102/500] Iter[001/014] IterTime:[10.08s] LOSS: 0.6703 ACC:0.5336 ETA:15h:40m:32s 
+Train: Epo[102/500] Iter[002/014] IterTime:[9.87s] LOSS: 0.6055 ACC:0.5515 ETA:15h:21m:25s 
+Train: Epo[102/500] Iter[003/014] IterTime:[9.90s] LOSS: 0.6560 ACC:0.5362 ETA:15h:23m:43s 
+Train: Epo[102/500] Iter[004/014] IterTime:[10.06s] LOSS: 0.5870 ACC:0.5685 ETA:15h:38m:18s 
+Train: Epo[102/500] Iter[005/014] IterTime:[9.95s] LOSS: 0.7433 ACC:0.4989 ETA:15h:28m:4s 
+Train: Epo[102/500] Iter[006/014] IterTime:[9.86s] LOSS: 0.8743 ACC:0.4234 ETA:15h:19m:28s 
+Train: Epo[102/500] Iter[007/014] IterTime:[9.79s] LOSS: 0.5677 ACC:0.5741 ETA:15h:12m:23s 
+Train: Epo[102/500] Iter[008/014] IterTime:[9.91s] LOSS: 0.5509 ACC:0.5849 ETA:15h:23m:21s 
+Train: Epo[102/500] Iter[009/014] IterTime:[9.81s] LOSS: 0.6917 ACC:0.5233 ETA:15h:14m:2s 
+Train: Epo[102/500] Iter[010/014] IterTime:[9.76s] LOSS: 0.4604 ACC:0.6421 ETA:15h:9m:17s 
+Train: Epo[102/500] Iter[011/014] IterTime:[9.80s] LOSS: 0.6877 ACC:0.5386 ETA:15h:13m:3s 
+Train: Epo[102/500] Iter[012/014] IterTime:[9.74s] LOSS: 0.8076 ACC:0.4558 ETA:15h:7m:13s 
+Train: Epo[102/500] Iter[013/014] IterTime:[9.86s] LOSS: 0.7239 ACC:0.5039 ETA:15h:18m:43s 
+Train: Epo[102/500] Iter[014/014] IterTime:[9.72s] LOSS: 0.8270 ACC:0.4546 ETA:15h:5m:22s 
+Valid: Epoch[102/500] Train Mean_Acc: 52.78% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-07
+Train: Epo[103/500] Iter[001/014] IterTime:[9.79s] LOSS: 0.8577 ACC:0.4384 ETA:15h:11m:39s 
+Train: Epo[103/500] Iter[002/014] IterTime:[9.73s] LOSS: 0.7490 ACC:0.4863 ETA:15h:5m:45s 
+Train: Epo[103/500] Iter[003/014] IterTime:[9.72s] LOSS: 0.6415 ACC:0.5450 ETA:15h:4m:24s 
+Train: Epo[103/500] Iter[004/014] IterTime:[9.57s] LOSS: 0.5792 ACC:0.5762 ETA:14h:50m:41s 
+Train: Epo[103/500] Iter[005/014] IterTime:[9.65s] LOSS: 0.9194 ACC:0.4153 ETA:14h:57m:45s 
+Train: Epo[103/500] Iter[006/014] IterTime:[9.77s] LOSS: 0.6464 ACC:0.5446 ETA:15h:8m:52s 
+Train: Epo[103/500] Iter[007/014] IterTime:[9.64s] LOSS: 0.5506 ACC:0.6014 ETA:14h:56m:40s 
+Train: Epo[103/500] Iter[008/014] IterTime:[9.60s] LOSS: 0.4940 ACC:0.6186 ETA:14h:52m:52s 
+Train: Epo[103/500] Iter[009/014] IterTime:[9.67s] LOSS: 0.4879 ACC:0.6216 ETA:14h:59m:22s 
+Train: Epo[103/500] Iter[010/014] IterTime:[9.61s] LOSS: 0.6602 ACC:0.5414 ETA:14h:52m:59s 
+Train: Epo[103/500] Iter[011/014] IterTime:[9.61s] LOSS: 0.7783 ACC:0.4823 ETA:14h:53m:20s 
+Train: Epo[103/500] Iter[012/014] IterTime:[9.62s] LOSS: 0.7219 ACC:0.4967 ETA:14h:54m:5s 
+Train: Epo[103/500] Iter[013/014] IterTime:[9.48s] LOSS: 0.6791 ACC:0.5297 ETA:14h:40m:30s 
+Train: Epo[103/500] Iter[014/014] IterTime:[9.55s] LOSS: 0.6145 ACC:0.5630 ETA:14h:47m:6s 
+Valid: Epoch[103/500] Train Mean_Acc: 53.29% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888893 0.38888893]
+
+Training: learning rate:4.000000000000002e-07
+Train: Epo[104/500] Iter[001/014] IterTime:[10.13s] LOSS: 0.6602 ACC:0.5431 ETA:15h:40m:35s 
+Train: Epo[104/500] Iter[002/014] IterTime:[10.20s] LOSS: 0.6307 ACC:0.5459 ETA:15h:47m:12s 
+Train: Epo[104/500] Iter[003/014] IterTime:[9.82s] LOSS: 0.7725 ACC:0.4778 ETA:15h:11m:39s 
+Train: Epo[104/500] Iter[004/014] IterTime:[9.96s] LOSS: 0.7349 ACC:0.4924 ETA:15h:24m:27s 
+Train: Epo[104/500] Iter[005/014] IterTime:[9.69s] LOSS: 0.7109 ACC:0.5108 ETA:14h:59m:17s 
+Train: Epo[104/500] Iter[006/014] IterTime:[9.72s] LOSS: 0.6403 ACC:0.5532 ETA:15h:1m:37s 
+Train: Epo[104/500] Iter[007/014] IterTime:[9.75s] LOSS: 0.6101 ACC:0.5520 ETA:15h:4m:2s 
+Train: Epo[104/500] Iter[008/014] IterTime:[9.68s] LOSS: 0.6603 ACC:0.5341 ETA:14h:58m:12s 
+Train: Epo[104/500] Iter[009/014] IterTime:[9.92s] LOSS: 0.7253 ACC:0.4971 ETA:15h:19m:42s 
+Train: Epo[104/500] Iter[010/014] IterTime:[9.67s] LOSS: 0.8429 ACC:0.4459 ETA:14h:56m:37s 
+Train: Epo[104/500] Iter[011/014] IterTime:[9.64s] LOSS: 0.6146 ACC:0.5467 ETA:14h:53m:19s 
+Train: Epo[104/500] Iter[012/014] IterTime:[9.63s] LOSS: 0.6829 ACC:0.5124 ETA:14h:52m:55s 
+Train: Epo[104/500] Iter[013/014] IterTime:[9.37s] LOSS: 0.5667 ACC:0.5820 ETA:14h:28m:37s 
+Train: Epo[104/500] Iter[014/014] IterTime:[9.54s] LOSS: 0.8434 ACC:0.4516 ETA:14h:43m:50s 
+Valid: Epoch[104/500] Train Mean_Acc: 51.75% Valid Mean_Acc:38.89% OCEAN_ACC:[0.38888887 0.38888887]
+
+Training: learning rate:4.000000000000002e-07
+Train: Epo[105/500] Iter[001/014] IterTime:[10.35s] LOSS: 0.6445 ACC:0.5351 ETA:15h:58m:46s 
+Train: Epo[105/500] Iter[002/014] IterTime:[9.96s] LOSS: 0.6967 ACC:0.5050 ETA:15h:22m:9s 
+slurmstepd: error: *** JOB 13897183 ON cpu-e-1136 CANCELLED AT 2023-02-05T21:23:18 ***

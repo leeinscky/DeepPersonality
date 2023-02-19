@@ -17,17 +17,21 @@
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total?
 #! Note probably this should not exceed the total number of GPUs in use.
-#SBATCH --ntasks=1
+#SBATCH --ntasks=4
 #! Specify the number of GPUs per node (between 1 and 4; must be 4 if nodes>1).
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #! How much wallclock time will be required?
-#SBATCH --time=4:00:00
+#SBATCH --time=6:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
 #! interrupted by node failure or system downtime):
 ##SBATCH --no-requeue
+
+#SBATCH --mem=79G
+#SBATCH --output=slurm_log/slurm-%j.%x.out
+#SBATCH --error=slurm_log/slurm-%j.%x.err
 
 #! Do not change:
 #SBATCH -p ampere
@@ -87,8 +91,47 @@ conda activate DeepPersonality
 echo "> Python version : $(which python)"
 
 echo "==================== Run program ===================="
-cd /home/zl525/code/DeepPersonality/leenote/
-sh main_slurm_gpu.sh
+#### 仅执行一个脚本
+# cd /home/zl525/code/DeepPersonality/leenote/
+# sh main_slurm_gpu.sh
+
+
+#### 并行执行多个脚本
+cd /home/zl525/code/DeepPersonality/
+
+nvidia-smi
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+JOBID=$SLURM_JOB_ID
+
+#### ==================== resnet3D: resnet_3d_udiva_full.yaml ==================== ####
+cfg_file=./config/demo/resnet_3d_udiva_full.yaml
+epoch=200
+# epoch和SBATCH --time的设置值参考：
+    # sample_size=128, batch_size=16时，GPU运行4小时，跑了185个epoch
+    # sample_size=48, batch_size=16时，GPU运行1小时44分钟，跑完了200个epoch
+
+sample_size=160
+sample_size2=176
+sample_size3=192
+sample_size4=208
+
+batch_size=16
+batch_size2=16
+batch_size3=16
+batch_size4=16
+
+learning_rate=0.0005
+learning_rate2=0.0005
+learning_rate3=0.0005
+learning_rate4=0.0005
+
+srun --mem-per-gpu=19G --ntasks=1 --cpus-per-task=32 --gres=gpu:1 --exclusive /home/zl525/.conda/envs/DeepPersonality/bin/python ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/slurm-${JOBID}_$sample_size.log 2>&1 &
+srun --mem-per-gpu=19G --ntasks=1 --cpus-per-task=32 --gres=gpu:1 --exclusive /home/zl525/.conda/envs/DeepPersonality/bin/python ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/slurm-${JOBID}_$sample_size2.log 2>&1 &
+srun --mem-per-gpu=19G --ntasks=1 --cpus-per-task=32 --gres=gpu:1 --exclusive /home/zl525/.conda/envs/DeepPersonality/bin/python ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/slurm-${JOBID}_$sample_size3.log 2>&1 &
+srun --mem-per-gpu=19G --ntasks=1 --cpus-per-task=32 --gres=gpu:1 --exclusive /home/zl525/.conda/envs/DeepPersonality/bin/python ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/slurm-${JOBID}_$sample_size4.log 2>&1 &
+wait
+
+
 
 ###############################################################
 ### You should not have to change anything below this line ####
@@ -121,3 +164,4 @@ eval $CMD
 
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep
+# 14554800

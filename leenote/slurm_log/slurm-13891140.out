@@ -1,0 +1,212 @@
+rhel8/default-icl(17):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-compilers/2022.1.0/gcc'
+rhel8/default-icl(18):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-mpi/2021.6.0/intel'
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+wandb: Currently logged in as: 1009694687 (hyllbd-1009694687). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.13.9
+wandb: Run data is saved locally in /home/zl525/code/DeepPersonality/wandb/run-20230205_082903-81qmuvre
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run bright-kumquat-236
+wandb: ⭐️ View project at https://wandb.ai/hyllbd-1009694687/DeepPersonality
+wandb: 🚀 View run at https://wandb.ai/hyllbd-1009694687/DeepPersonality/runs/81qmuvre
+{
+    "DATA":{
+        "ANIMALS_TEST_AUD_DATA":"udiva_full/test/recordings/animals_recordings_test_wav",
+        "ANIMALS_TEST_IMG_DATA":"udiva_full/test/recordings/animals_recordings_test_img",
+        "ANIMALS_TRAIN_AUD_DATA":"udiva_full/train/recordings/animals_recordings_train_wav",
+        "ANIMALS_TRAIN_IMG_DATA":"udiva_full/train/recordings/animals_recordings_train_img",
+        "ANIMALS_VAL_AUD_DATA":"udiva_full/val/recordings/animals_recordings_val_wav",
+        "ANIMALS_VAL_IMG_DATA":"udiva_full/val/recordings/animals_recordings_val_img",
+        "GHOST_TEST_AUD_DATA":"udiva_full/test/recordings/ghost_recordings_test_wav",
+        "GHOST_TEST_IMG_DATA":"udiva_full/test/recordings/ghost_recordings_test_img",
+        "GHOST_TRAIN_AUD_DATA":"udiva_full/train/recordings/ghost_recordings_train_wav",
+        "GHOST_TRAIN_IMG_DATA":"udiva_full/train/recordings/ghost_recordings_train_img",
+        "GHOST_VAL_AUD_DATA":"udiva_full/val/recordings/ghost_recordings_val_wav",
+        "GHOST_VAL_IMG_DATA":"udiva_full/val/recordings/ghost_recordings_val_img",
+        "LEGO_TEST_AUD_DATA":"udiva_full/test/recordings/lego_recordings_test_wav",
+        "LEGO_TEST_IMG_DATA":"udiva_full/test/recordings/lego_recordings_test_img",
+        "LEGO_TRAIN_AUD_DATA":"udiva_full/train/recordings/lego_recordings_train_wav",
+        "LEGO_TRAIN_IMG_DATA":"udiva_full/train/recordings/lego_recordings_train_img",
+        "LEGO_VAL_AUD_DATA":"udiva_full/val/recordings/lego_recordings_val_wav",
+        "LEGO_VAL_IMG_DATA":"udiva_full/val/recordings/lego_recordings_val_img",
+        "ROOT":"datasets",
+        "SAMPLE_SIZE":250,
+        "SESSION":"TALK",
+        "TALK_TEST_AUD_DATA":"udiva_full/test/recordings/talk_recordings_test_wav",
+        "TALK_TEST_IMG_DATA":"udiva_full/test/recordings/talk_recordings_test_img",
+        "TALK_TRAIN_AUD_DATA":"udiva_full/train/recordings/talk_recordings_train_wav",
+        "TALK_TRAIN_IMG_DATA":"udiva_full/train/recordings/talk_recordings_train_img",
+        "TALK_VAL_AUD_DATA":"udiva_full/val/recordings/talk_recordings_val_wav",
+        "TALK_VAL_IMG_DATA":"udiva_full/val/recordings/talk_recordings_val_img",
+        "TEST_AUD_DATA":"raw_voice/testData",
+        "TEST_IMG_DATA":"image_data/test_data",
+        "TEST_IMG_FACE_DATA":"image_data/test_data_face",
+        "TEST_LABEL_DATA":"udiva_full/test/label/sessions_test.pkl",
+        "TRAIN_AUD_DATA":"raw_voice/trainingData",
+        "TRAIN_IMG_DATA":"image_data/train_data",
+        "TRAIN_IMG_FACE_DATA":"image_data/train_data_face",
+        "TRAIN_LABEL_DATA":"udiva_full/train/label/sessions_train.pkl",
+        "TYPE":"frame",
+        "VALID_AUD_DATA":"raw_voice/validationData",
+        "VALID_IMG_DATA":"image_data/valid_data",
+        "VALID_IMG_FACE_DATA":"image_data/valid_data_face",
+        "VALID_LABEL_DATA":"udiva_full/val/label/sessions_val.pkl",
+        "VA_DATA":"va_data/cropped_aligned",
+        "VA_ROOT":"datasets",
+        "VA_TRAIN_LABEL":"va_data/va_label/VA_Set/Train_Set",
+        "VA_VALID_LABEL":"va_data/va_label/VA_Set/Validation_Set"
+    },
+    "DATA_LOADER":{
+        "DATASET":"",
+        "DATASET_NAME":"UDIVA",
+        "DROP_LAST":true,
+        "NAME":"bimodal_resnet_lstm_data_loader_udiva",
+        "NUM_WORKERS":1,
+        "SECOND_STAGE":{
+            "METHOD":"",
+            "TYPE":""
+        },
+        "SHUFFLE":true,
+        "TRAIN_BATCH_SIZE":16,
+        "TRANSFORM":"standard_frame_transform",
+        "VALID_BATCH_SIZE":3
+    },
+    "LOSS":{
+        "NAME":"binary_cross_entropy"
+    },
+    "MODEL":{
+        "NAME":"get_img_modal_lstm_model_udiva",
+        "NUM_CLASS":5,
+        "PRETRAIN":false,
+        "RETURN_FEATURE":false,
+        "SPECTRUM_CHANNEL":50
+    },
+    "SOLVER":{
+        "BETA_1":0.5,
+        "BETA_2":0.999,
+        "FACTOR":0.1,
+        "LR_INIT":0.0001,
+        "MILESTONE":[
+            4,
+            10,
+            15
+        ],
+        "MOMENTUM":0.9,
+        "NAME":"adam",
+        "RESET_LR":true,
+        "SCHEDULER":"multi_step_scale",
+        "WEIGHT_DECAY":0.0005
+    },
+    "TEST":{
+        "COMPUTE_CCC":false,
+        "COMPUTE_PCC":false,
+        "FULL_TEST":false,
+        "SAVE_DATASET_OUTPUT":"",
+        "TEST_ONLY":false,
+        "WEIGHT":""
+    },
+    "TRAIN":{
+        "BIMODAL_OPTION":1,
+        "LOG_INTERVAL":1,
+        "MAX_EPOCH":50,
+        "OUTPUT_DIR":"results/demo/unified_frame_images/bimodal_resnet_udiva",
+        "PRE_TRAINED_MODEL":null,
+        "RESUME":"",
+        "START_EPOCH":0,
+        "TRAINER":"BiModalTrainerUdiva",
+        "VALID_INTERVAL":1
+    }
+}
+change learning rate form [0.0001] to [0.0001]
+Training: learning rate:0.0001
+Using BCELoss
+================================== start training... ==================================
+Train: Epo[001/050] Iter[001/007] IterTime:[121.23s] LOSS: 0.6936 ACC:0.5000 ETA:12h:1m:19s 
+Train: Epo[001/050] Iter[002/007] IterTime:[119.42s] LOSS: 0.6416 ACC:0.5282 ETA:11h:48m:33s 
+Train: Epo[001/050] Iter[003/007] IterTime:[123.30s] LOSS: 0.6915 ACC:0.5141 ETA:12h:9m:32s 
+Train: Epo[001/050] Iter[004/007] IterTime:[122.37s] LOSS: 0.6213 ACC:0.5644 ETA:12h:2m:0s 
+Train: Epo[001/050] Iter[005/007] IterTime:[120.74s] LOSS: 0.7296 ACC:0.5252 ETA:11h:50m:22s 
+Train: Epo[001/050] Iter[006/007] IterTime:[117.04s] LOSS: 0.8735 ACC:0.4531 ETA:11h:26m:37s 
+Train: Epo[001/050] Iter[007/007] IterTime:[116.34s] LOSS: 0.5936 ACC:0.5715 ETA:11h:20m:35s 
+Valid: Epoch[001/050] Train Mean_Acc: 52.23% Valid Mean_Acc:47.97% OCEAN_ACC:[0.48985055 0.46963596]
+
+Training: learning rate:0.0001
+current epoch: 1 , save model with best valid acc
+Train: Epo[002/050] Iter[001/007] IterTime:[123.36s] LOSS: 0.6436 ACC:0.5355 ETA:11h:59m:35s 
+Train: Epo[002/050] Iter[002/007] IterTime:[119.26s] LOSS: 0.6698 ACC:0.5192 ETA:11h:33m:40s 
+Train: Epo[002/050] Iter[003/007] IterTime:[118.16s] LOSS: 0.6886 ACC:0.5094 ETA:11h:25m:18s 
+Train: Epo[002/050] Iter[004/007] IterTime:[119.19s] LOSS: 0.6404 ACC:0.5344 ETA:11h:29m:18s 
+Train: Epo[002/050] Iter[005/007] IterTime:[119.47s] LOSS: 0.6898 ACC:0.5130 ETA:11h:28m:56s 
+Train: Epo[002/050] Iter[006/007] IterTime:[115.69s] LOSS: 0.6939 ACC:0.5151 ETA:11h:5m:12s 
+Train: Epo[002/050] Iter[007/007] IterTime:[116.63s] LOSS: 0.6303 ACC:0.5507 ETA:11h:8m:40s 
+Valid: Epoch[002/050] Train Mean_Acc: 52.53% Valid Mean_Acc:46.55% OCEAN_ACC:[0.45262137 0.47839105]
+
+Training: learning rate:0.0001
+Train: Epo[003/050] Iter[001/007] IterTime:[121.28s] LOSS: 0.7827 ACC:0.4810 ETA:11h:33m:18s 
+Train: Epo[003/050] Iter[002/007] IterTime:[116.95s] LOSS: 0.6244 ACC:0.5562 ETA:11h:6m:36s 
+Train: Epo[003/050] Iter[003/007] IterTime:[119.67s] LOSS: 0.6269 ACC:0.5530 ETA:11h:20m:7s 
+Train: Epo[003/050] Iter[004/007] IterTime:[120.09s] LOSS: 0.7302 ACC:0.5000 ETA:11h:20m:29s 
+Train: Epo[003/050] Iter[005/007] IterTime:[120.92s] LOSS: 0.6030 ACC:0.5588 ETA:11h:23m:11s 
+Train: Epo[003/050] Iter[006/007] IterTime:[117.55s] LOSS: 0.5838 ACC:0.5656 ETA:11h:2m:12s 
+Train: Epo[003/050] Iter[007/007] IterTime:[119.82s] LOSS: 0.7400 ACC:0.4876 ETA:11h:13m:0s 
+Valid: Epoch[003/050] Train Mean_Acc: 52.89% Valid Mean_Acc:47.95% OCEAN_ACC:[0.4861115  0.47281024]
+
+Training: learning rate:0.0001
+Train: Epo[004/050] Iter[001/007] IterTime:[123.13s] LOSS: 0.7081 ACC:0.5016 ETA:11h:29m:32s 
+Train: Epo[004/050] Iter[002/007] IterTime:[118.21s] LOSS: 0.7035 ACC:0.5007 ETA:10h:59m:58s 
+Train: Epo[004/050] Iter[003/007] IterTime:[118.58s] LOSS: 0.6394 ACC:0.5310 ETA:11h:0m:4s 
+Train: Epo[004/050] Iter[004/007] IterTime:[118.28s] LOSS: 0.6445 ACC:0.5277 ETA:10h:56m:26s 
+Train: Epo[004/050] Iter[005/007] IterTime:[118.58s] LOSS: 0.6853 ACC:0.5072 ETA:10h:56m:7s 
+Train: Epo[004/050] Iter[006/007] IterTime:[114.62s] LOSS: 0.6709 ACC:0.5149 ETA:10h:32m:19s 
+Train: Epo[004/050] Iter[007/007] IterTime:[115.57s] LOSS: 0.6497 ACC:0.5265 ETA:10h:35m:39s 
+Valid: Epoch[004/050] Train Mean_Acc: 51.57% Valid Mean_Acc:48.33% OCEAN_ACC:[0.4792857  0.48738572]
+
+Training: learning rate:1e-05
+current epoch: 4 , save model with best valid acc
+Train: Epo[005/050] Iter[001/007] IterTime:[121.38s] LOSS: 0.7066 ACC:0.5002 ETA:11h:5m:34s 
+Train: Epo[005/050] Iter[002/007] IterTime:[118.87s] LOSS: 0.5829 ACC:0.5616 ETA:10h:49m:50s 
+Train: Epo[005/050] Iter[003/007] IterTime:[120.02s] LOSS: 0.6665 ACC:0.5205 ETA:10h:54m:8s 
+Train: Epo[005/050] Iter[004/007] IterTime:[121.19s] LOSS: 0.6441 ACC:0.5316 ETA:10h:58m:27s 
+Train: Epo[005/050] Iter[005/007] IterTime:[119.09s] LOSS: 0.6221 ACC:0.5428 ETA:10h:45m:4s 
+Train: Epo[005/050] Iter[006/007] IterTime:[116.40s] LOSS: 0.7103 ACC:0.4996 ETA:10h:28m:32s 
+Train: Epo[005/050] Iter[007/007] IterTime:[119.10s] LOSS: 0.7553 ACC:0.4779 ETA:10h:41m:10s 
+Valid: Epoch[005/050] Train Mean_Acc: 51.92% Valid Mean_Acc:48.05% OCEAN_ACC:[0.47537276 0.4855504 ]
+
+Training: learning rate:1e-05
+Train: Epo[006/050] Iter[001/007] IterTime:[122.78s] LOSS: 0.7114 ACC:0.4999 ETA:10h:58m:53s 
+Train: Epo[006/050] Iter[002/007] IterTime:[119.02s] LOSS: 0.6886 ACC:0.5114 ETA:10h:36m:45s 
+Train: Epo[006/050] Iter[003/007] IterTime:[118.98s] LOSS: 0.6881 ACC:0.5119 ETA:10h:34m:32s 
+Train: Epo[006/050] Iter[004/007] IterTime:[118.05s] LOSS: 0.6394 ACC:0.5361 ETA:10h:27m:37s 
+Train: Epo[006/050] Iter[005/007] IterTime:[118.05s] LOSS: 0.6889 ACC:0.5118 ETA:10h:25m:38s 
+Train: Epo[006/050] Iter[006/007] IterTime:[117.15s] LOSS: 0.6145 ACC:0.5486 ETA:10h:18m:57s 
+Train: Epo[006/050] Iter[007/007] IterTime:[115.43s] LOSS: 0.6387 ACC:0.5368 ETA:10h:7m:57s 
+Valid: Epoch[006/050] Train Mean_Acc: 52.24% Valid Mean_Acc:47.83% OCEAN_ACC:[0.47461447 0.4820782 ]
+
+Training: learning rate:1e-05
+Train: Epo[007/050] Iter[001/007] IterTime:[121.95s] LOSS: 0.6142 ACC:0.5489 ETA:10h:40m:15s 
+Train: Epo[007/050] Iter[002/007] IterTime:[118.05s] LOSS: 0.7133 ACC:0.5002 ETA:10h:17m:47s 
+Train: Epo[007/050] Iter[003/007] IterTime:[117.36s] LOSS: 0.7150 ACC:0.4994 ETA:10h:12m:13s 
+Train: Epo[007/050] Iter[004/007] IterTime:[118.04s] LOSS: 0.6127 ACC:0.5500 ETA:10h:13m:49s 
+Train: Epo[007/050] Iter[005/007] IterTime:[118.11s] LOSS: 0.7158 ACC:0.4995 ETA:10h:12m:11s 
+Train: Epo[007/050] Iter[006/007] IterTime:[114.79s] LOSS: 0.6114 ACC:0.5507 ETA:9h:53m:6s 
+Train: Epo[007/050] Iter[007/007] IterTime:[114.12s] LOSS: 0.6880 ACC:0.5133 ETA:9h:47m:43s 
+Valid: Epoch[007/050] Train Mean_Acc: 52.31% Valid Mean_Acc:47.70% OCEAN_ACC:[0.47525224 0.47872958]
+
+Training: learning rate:1e-05
+Train: Epo[008/050] Iter[001/007] IterTime:[122.17s] LOSS: 0.6885 ACC:0.5131 ETA:10h:27m:7s 
+Train: Epo[008/050] Iter[002/007] IterTime:[118.25s] LOSS: 0.6103 ACC:0.5516 ETA:10h:5m:2s 
+Train: Epo[008/050] Iter[003/007] IterTime:[118.07s] LOSS: 0.6634 ACC:0.5257 ETA:10h:2m:7s 
+Train: Epo[008/050] Iter[004/007] IterTime:[118.70s] LOSS: 0.6885 ACC:0.5134 ETA:10h:3m:24s 
+Train: Epo[008/050] Iter[005/007] IterTime:[117.99s] LOSS: 0.6899 ACC:0.5130 ETA:9h:57m:49s 
+Train: Epo[008/050] Iter[006/007] IterTime:[117.60s] LOSS: 0.7164 ACC:0.5000 ETA:9h:53m:52s 
+Train: Epo[008/050] Iter[007/007] IterTime:[115.14s] LOSS: 0.5803 ACC:0.5672 ETA:9h:39m:32s 
+Valid: Epoch[008/050] Train Mean_Acc: 52.63% Valid Mean_Acc:47.53% OCEAN_ACC:[0.47545257 0.47513834]
+
+Training: learning rate:1e-05
+Train: Epo[009/050] Iter[001/007] IterTime:[120.85s] LOSS: 0.7448 ACC:0.4863 ETA:10h:6m:15s 
+Train: Epo[009/050] Iter[002/007] IterTime:[117.50s] LOSS: 0.6072 ACC:0.5542 ETA:9h:47m:28s 
+Train: Epo[009/050] Iter[003/007] IterTime:[117.84s] LOSS: 0.6340 ACC:0.5410 ETA:9h:47m:12s 
+Train: Epo[009/050] Iter[004/007] IterTime:[117.42s] LOSS: 0.6899 ACC:0.5136 ETA:9h:43m:9s 
+Train: Epo[009/050] Iter[005/007] IterTime:[117.83s] LOSS: 0.6900 ACC:0.5134 ETA:9h:43m:15s 
+Train: Epo[009/050] Iter[006/007] IterTime:[116.20s] LOSS: 0.6898 ACC:0.5138 ETA:9h:33m:14s 

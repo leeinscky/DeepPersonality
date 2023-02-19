@@ -16,7 +16,7 @@ nohup python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --max_epoch $epoch \
 --bs $batch_size \
 --lr $learning_rate \
->nohup_full_resnet3D_samp${sample_size}_epo${epoch}_bs${batch_size}_lr${learning_rate}_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
+>nohup_log/nohup_full_resnet3D_samp${sample_size}_epo${epoch}_bs${batch_size}_lr${learning_rate}_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 
 
 #### **************************** model2: bimodal_lstm_udiva_full.yaml **************************** ####

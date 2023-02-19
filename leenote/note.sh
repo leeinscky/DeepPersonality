@@ -32,8 +32,53 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
     cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep
 
     # 运行记录：
-    Submitted batch job 13703460  failed torch版本和A100 GPU不兼容
-    Submitted batch job 13855836
+
+    # slurm_submit_deep_4nodes 提交记录：
+        14589749:
+            sample_size=144
+            sample_size2=160
+            sample_size3=176
+            sample_size4=192
+            sample_size5=16
+            sample_size6=32
+
+            batch_size=8
+            batch_size2=8
+            batch_size3=8
+            batch_size4=8
+            batch_size5=32
+            batch_size6=32
+
+        14590606:
+            sample_size=48
+            sample_size2=64
+            sample_size3=80
+            sample_size4=96
+            sample_size5=112
+            sample_size6=128
+
+            batch_size=32
+            batch_size2=32
+            batch_size3=32
+            batch_size4=32
+            batch_size5=32
+            batch_size6=32
+
+
+        14595310: 
+            sample_size=8
+            sample_size2=16
+            sample_size3=32
+            sample_size4=48
+            sample_size5=64
+            sample_size6=80
+
+            batch_size=64
+            batch_size2=64
+            batch_size3=64
+            batch_size4=64
+            batch_size5=64
+            batch_size6=64
 
 ####### 调参总结 #######
 参考:
@@ -105,6 +150,9 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
 # 一些结果相对比较好的保存模型
 resume="results/demo/unified_frame_images/bimodal_resnet_udiva/02-03_21-46/checkpoint_0.pkl"
 resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimodal_resnet_udiva/02-04_02-10/checkpoint_0.pkl"
+
+    # 根据wandb的链接id来查找日志所在文件夹
+    find . -name "d7lcr806"
 
 
 # 替换print，将下面的两行的第一行替换成第二行即可注释所有print信息

@@ -4,7 +4,7 @@ cd /home/zl525/code/DeepPersonality/
 
 
 #### ===================== resnet3D: resnet_3d_udiva_full.yaml ===================== ####
-sample_size=48
+sample_size=96
 epoch=200
 batch_size=16
 learning_rate=0.0005
