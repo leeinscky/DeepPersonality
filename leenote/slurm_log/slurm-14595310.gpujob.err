@@ -8,4 +8,11 @@ Loading rhel8/default-amp
     knem/1.1.4/gcc-9.4.0-bpbxgva libnl/3.3.0/gcc-9.4.0-whwhrwb
     rdma-core/34.0/gcc-9.4.0-5eo5n2u ucx/1.11.1/gcc-9.4.0-lktqyl4
     openmpi/4.1.1/gcc-9.4.0-epagguv
-slurmstepd: error: *** JOB 14589749 ON gpu-q-48 CANCELLED AT 2023-02-20T02:34:57 DUE TO TIME LIMIT ***
+perl: warning: Setting locale failed.
+perl: warning: Please check that your locale settings:
+	LANGUAGE = (unset),
+	LC_ALL = (unset),
+	LC_CTYPE = "UTF-8",
+	LANG = "en_US.UTF-8"
+    are supported and installed on your system.
+perl: warning: Falling back to a fallback locale ("en_US.UTF-8").

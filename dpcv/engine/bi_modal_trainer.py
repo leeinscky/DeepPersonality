@@ -1,3 +1,4 @@
+from cmath import e
 import torch
 from tqdm import tqdm
 import numpy as np
@@ -692,9 +693,12 @@ class BiModalTrainerUdiva(object):
             raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
 
         if self.cfg_model.NAME == "resnet50_3d_model_udiva":
-            img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 N * T * C * H * W 转换为 N * C * T * H * W  e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
+            img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             return (img_in, ), labels
-        return (aud_in, img_in), labels
+        elif self.cfg_model.NAME == "vivit_model_udiva":
+            return (img_in, ), labels # img_in: [batch, time, channel, height, width]
+        else:
+            return (aud_in, img_in), labels
     
     def full_test_data_fmt(self, data):
         images, wav, label = data["image"], data["audio"], data["label"]

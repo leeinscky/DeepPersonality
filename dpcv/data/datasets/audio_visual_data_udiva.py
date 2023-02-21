@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt # plt 用于显示图片
 import matplotlib.image as mpimg # mpimg 用于读取图片
 import wandb
 
-# '''
 class AudioVisualDataUdiva(VideoDataUdiva):
 
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
@@ -216,8 +215,7 @@ class AudioVisualDataUdiva(VideoDataUdiva):
             fc2_wav_fill = np.zeros((1, 1, 50176))
             fc2_wav_fill[..., :fc2_wav_tmp.shape[-1]] = fc2_wav_tmp
             fc2_wav_tmp = fc2_wav_fill
-
-        return fc1_wav_tmp, fc2_wav_tmp
+    
         # return fc1_wav_tmp
 
         # wav_ft = np.load(wav_path) # np.load()读取.npy文件, 返回的是一个numpy.ndarray对象, 例如：wav_ft.shape=(1, 128, 128), wav_ft.dtype=float32, wav_ft.max()=0.99999994, wav_ft.min()=-0.99999994, wav_ft.mean()=0.000101, wav_ft.std()=0.000101, 
@@ -231,7 +229,7 @@ class AudioVisualDataUdiva(VideoDataUdiva):
         #     wav_fill[..., :wav_tmp.shape[-1]] = wav_tmp
         #     wav_tmp = wav_fill
         # return wav_tmp
-# '''
+        return fc1_wav_tmp, fc2_wav_tmp
 
 # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
 class AudioVisualLstmDataUdiva(VideoDataUdiva): 

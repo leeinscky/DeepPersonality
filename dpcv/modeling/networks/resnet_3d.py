@@ -316,34 +316,34 @@ class ResNetUdiva(nn.Module):
     def forward(self, x):
         # 手动构造一个假输入
         # x = torch.randn(4, 3, 16, 224, 224) # batch_size, channel, time/sample_size, height, width
-        # print('[ResNetUdiva] 0-input x.shape: ', x.shape) # batch_size * 6(channel) * sample_size * 224 * 224
+        # print('[ResNetUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
         
         x = self.conv1(x)
-        # print('[ResNetUdiva] after conv1, x.shape: ', x.shape) # batch_size * 64 * sample_size * 112 * 112
+        # print('[ResNetUdiva] after conv1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         x = self.bn1(x)
-        # print('[ResNetUdiva] after bn1, x.shape: ', x.shape) # batch_size * 64 * sample_size * 112 * 112
+        # print('[ResNetUdiva] after bn1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         x = self.relu(x)
-        # print('[ResNetUdiva] after relu, x.shape: ', x.shape) # batch_size * 64 * sample_size * 112 * 112
+        # print('[ResNetUdiva] after relu, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         if not self.no_max_pool:
             x = self.maxpool(x)
 
         x = self.layer1(x)
-        # print('[ResNetUdiva] after layer1, x.shape: ', x.shape) # batch_size * 256 * 5 * 56 * 56
+        # print('[ResNetUdiva] after layer1, x.shape: ', x.shape) # batch_size, 256, 5, 56, 56
         x = self.layer2(x)
-        # print('[ResNetUdiva] after layer2, x.shape: ', x.shape) # batch_size * 512 * 3 * 28 * 28
+        # print('[ResNetUdiva] after layer2, x.shape: ', x.shape) # batch_size, 512, 3, 28, 28
         x = self.layer3(x)
-        # print('[ResNetUdiva] after layer3, x.shape: ', x.shape) # batch_size * 1024 * 2 * 14 * 14
+        # print('[ResNetUdiva] after layer3, x.shape: ', x.shape) # batch_size, 1024, 2, 14, 14
         x = self.layer4(x)
-        # print('[ResNetUdiva] after layer4, x.shape: ', x.shape) # batch_size * 2048 * 1 * 7 * 7
+        # print('[ResNetUdiva] after layer4, x.shape: ', x.shape) # batch_size, 2048, 1, 7, 7
 
         x = self.avgpool(x)
-        # print('[ResNetUdiva] after avgpool, x.shape: ', x.shape) # batch_size * 2048 * 1 * 1 * 1
+        # print('[ResNetUdiva] after avgpool, x.shape: ', x.shape) # batch_size, 2048, 1, 1, 1
 
         x = x.view(x.size(0), -1)
-        # print('[ResNetUdiva] after view, x.shape: ', x.shape) # batch_size * 2048
+        # print('[ResNetUdiva] after view, x.shape: ', x.shape) # batch_size, 2048
         
         x = self.fc(x)
-        # print('[ResNetUdiva] after fc x.shape: ', x.shape) # batch_size * n_classes(2)
+        # print('[ResNetUdiva] after fc x.shape: ', x.shape) # batch_size, n_classes(2)
         # print('[ResNetUdiva] after fc x: ', x)
         # 添加激活函数 softmax，将输出值限制在0-1之间
         x = F.softmax(x, dim=1)
@@ -382,6 +382,6 @@ def resnet50_3d_model_udiva(cfg):
 
 if __name__ == "__main__":
     model = get_3d_resnet_model(50)
-    xin = torch.randn(4, 3, 16, 224, 224)
+    xin = torch.randn(4, 3, 16, 224, 224) # batch_size, channel, time/sample_size, height, width
     y = model(xin)
     print(y.shape)

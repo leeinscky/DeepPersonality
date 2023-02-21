@@ -4,17 +4,29 @@
 
 cd /home/zl525/code/DeepPersonality/
 
-#### **************************** resnet3D: resnet_3d_udiva_full.yaml **************************** ####
-sample_size=2
+#### **************************** transformer: transformer_udiva.yaml **************************** ####
+sample_size=16
 epoch=2
-batch_size=64
+batch_size=8
 learning_rate=0.0001
 
-python3 -u ./script/run_exp.py --cfg_file ./config/demo/resnet_3d_udiva_full.yaml \
+python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \
 --sample_size $sample_size \
 --max_epoch $epoch \
 --bs $batch_size \
 --lr $learning_rate
+
+#### **************************** resnet3D: resnet_3d_udiva_full.yaml **************************** ####
+# sample_size=2
+# epoch=2
+# batch_size=64
+# learning_rate=0.0001
+
+# python3 -u ./script/run_exp.py --cfg_file ./config/demo/resnet_3d_udiva_full.yaml \
+# --sample_size $sample_size \
+# --max_epoch $epoch \
+# --bs $batch_size \
+# --lr $learning_rate
 
 #### **************************** model2: bimodal_lstm_udiva_full.yaml **************************** ####
 # sample_size=1
