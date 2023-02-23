@@ -18,5 +18,6 @@ from .statistic_model import statistic_mlp
 from .spectrum_model import spectrum_conv_model
 from .spectrum_model import spectrum_conv_model2
 from .multi_modal_pred_net import multi_modal_visual_model, multi_modal_audio_model
-from .vivit import vivit_model_udiva
+from .vivit_model2 import vivit_model_udiva
+from .vivit_model3 import vivit_model3_udiva
 

@@ -102,12 +102,12 @@ JOBID=$SLURM_JOB_ID
 cfg_file=./config/demo/transformer_udiva.yaml
 epoch=300
 
-sample_size=8
-sample_size2=16
-sample_size3=32
-sample_size4=48
-sample_size5=64
-sample_size6=80
+sample_size=96
+sample_size2=112
+sample_size3=128
+sample_size4=144
+sample_size5=160
+sample_size6=176
 
 batch_size=16
 batch_size2=16
@@ -206,4 +206,4 @@ eval $CMD
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_6nodes
 # ResNet-3D: 14583321 14583364 14589749 14590606 14595310
-# ViViT: 14684530
+# ViViT: 14715935 (sample 8-80)  14716137 (sample 96-176)

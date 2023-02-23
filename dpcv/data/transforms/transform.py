@@ -31,6 +31,19 @@ def standard_frame_transform():
     ])
     return transforms
 
+@TRANSFORM_REGISTRY.register()
+def udiva_frame_transforms():
+    import torchvision.transforms as transforms
+    transforms = transforms.Compose([
+        transforms.Resize(256), 
+        transforms.RandomHorizontalFlip(0.5),
+        transforms.CenterCrop((224, 224)),
+        transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+        transforms.ToTensor(), 
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    print('udiva_frame_transforms...')
+    return transforms
 
 @TRANSFORM_REGISTRY.register()
 def face_image_transform():

@@ -17,7 +17,7 @@
 #SBATCH --nodes=10
 #! How many (MPI) tasks will there be in total? (<= nodes*32)
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
-#SBATCH --ntasks=50
+#SBATCH --ntasks=320
 #! How much wallclock time will be required?
 #SBATCH --time=12:00:00
 #! What types of email messages do you wish to receive?
@@ -114,16 +114,16 @@ JOBID=$SLURM_JOB_ID
 cfg_file=./config/demo/transformer_udiva.yaml
 epoch=300
 
-sample_size=8
-sample_size2=16
-sample_size3=32
-sample_size4=48
-sample_size5=64
-sample_size6=80
-sample_size7=96
-sample_size8=112
-sample_size9=128
-sample_size10=144
+sample_size=96
+sample_size2=112
+sample_size3=128
+sample_size4=144
+sample_size5=160
+sample_size6=176
+sample_size7=192
+sample_size8=208
+sample_size9=224
+sample_size10=240
 
 batch_size=16
 batch_size2=16
@@ -191,4 +191,4 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 eval $CMD 
 
 # cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_10nodes.peta4-skylake
-# ViViT: 14688968
+# ViViT: 14688968 14693953

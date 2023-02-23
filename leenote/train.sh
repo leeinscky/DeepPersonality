@@ -6,8 +6,8 @@ cd /home/zl525/code/DeepPersonality/
 
 #### **************************** transformer: transformer_udiva.yaml **************************** ####
 sample_size=16
-epoch=2
-batch_size=8
+epoch=1
+batch_size=32
 learning_rate=0.0001
 
 python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \

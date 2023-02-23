@@ -37,13 +37,13 @@ DATA:
   TEST_LABEL_DATA: "udiva_full/test/label/sessions_test.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
-  TRANSFORM: "standard_frame_transform"
+  TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 16
   VALID_BATCH_SIZE: 9
   NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
 MODEL:
-  NAME: "vivit_model_udiva"
+  NAME: "vivit_model3_udiva"
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:

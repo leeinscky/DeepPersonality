@@ -14,12 +14,12 @@
 #! Which project should be charged:
 #SBATCH -A COMPUTERLAB-SL3-CPU
 #! How many whole nodes should be allocated?
-#SBATCH --nodes=4
+#SBATCH --nodes=2
 #! How many (MPI) tasks will there be in total? (<= nodes*32)
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
-#SBATCH --ntasks=128
+#SBATCH --ntasks=64
 #! How much wallclock time will be required?
-#SBATCH --time=10:00:00
+#SBATCH --time=4:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -106,8 +106,39 @@ conda activate DeepPersonality
 echo "> Python version : $(which python)"
 
 echo "==================== Run program ===================="
-cd /home/zl525/code/DeepPersonality/leenote/
-sh main_slurm_cpu.sh
+
+#### ==================== resnet3D: resnet_3d_udiva_full.yaml ==================== ####
+cfg_file=./config/demo/resnet_3d_udiva_full.yaml
+epoch=300
+
+sample_size=48
+sample_size2=64
+sample_size3=32
+sample_size4=48
+sample_size5=64
+sample_size6=80
+
+batch_size=16
+batch_size2=16
+batch_size3=16
+batch_size4=16
+batch_size5=16
+batch_size6=16
+
+learning_rate=0.0005
+learning_rate2=0.0005
+learning_rate3=0.0005
+learning_rate4=0.0005
+learning_rate5=0.0005
+learning_rate6=0.0005
+
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size}_${batch_size}.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size2}_${batch_size2}.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size3}_${batch_size3}.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size4}_${batch_size4}.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size5 --max_epoch $epoch --bs $batch_size5 --lr $learning_rate5 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size5}_${batch_size5}.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size6}_${batch_size6}.log 2>&1 &
+wait
 
 ###############################################################
 ### You should not have to change anything below this line ####
@@ -139,3 +170,4 @@ eval $CMD
 
 
 # cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
+# ResNet3D: 14800438 14800443

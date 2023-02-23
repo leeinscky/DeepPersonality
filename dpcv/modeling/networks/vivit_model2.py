@@ -199,7 +199,7 @@ class ViViT(nn.Module):
         super().__init__()
         # model = ViViT(224, 16, 100, 16).to(device) so, image_size = 224, patch_size = 16, num_classes = 100, num_frames = 16
         
-        assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
+        assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)' # cls token 全称是 class token, 用于分类任务. mean pooling 用于回归任务
 
 
         assert image_size % patch_size == 0, 'Image dimensions must be divisible by the patch size.'
@@ -262,7 +262,7 @@ class ViViT(nn.Module):
         x = self.temporal_transformer(x)
         # print('[vivit] after temporal_transformer x.shape:', x.shape) # [b, t, d] e.g. [8, 17, 192]
 
-        x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0]
+        x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0] # x[:, 0] means use the first frame, e.g. [8, 17, 192] -> total of 17 frames, but we only use the first frame, so the result is [8, 192]
         # print('[vivit] after mean x.shape:', x.shape) # [b, d] e.g. [8, 192]
         
         x = self.mlp_head(x)

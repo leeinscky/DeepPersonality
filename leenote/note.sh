@@ -154,6 +154,15 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
     # 根据wandb的链接id来查找日志所在文件夹
     find . -name "d7lcr806"
 
+# 验证 以下两种方法计算的auroc是否相同
+    from torchmetrics.functional import auroc
+    from sklearn.metrics import roc_auc_score
+    结论： 在train val test三个数据集上都是一样的！ 所以只要用其中一种就行了
+
+    那么train_batch_sklearn_auc和train_batch_sklearn_auc2的趋势对比呢？即使用 (labels.argmax(dim=-1), outputs.argmax(dim=-1)) 和 (labels[:, 0], outputs[:, 0]) 的区别
+    结论：取值不一样，但是趋势大概是80%的相似，后续保留2的版本
+    参考：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#ce59a5d3e9174c028d1d87f69183abc7
+
 
 # 替换print，将下面的两行的第一行替换成第二行即可注释所有print信息
   print('[
