@@ -10,7 +10,6 @@ import time
 import wandb
 from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
-from sklearn.metrics import roc_auc_score
 
 @TRAINER_REGISTRY.register()
 class BiModalTrainer(object):
@@ -331,15 +330,18 @@ class BiModalTrainerUdiva(object):
         pred_list, label_list, pred_list2, label_list2 = [], [], [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
+            print('[bi_modal_trainer.py] train... type(data)=', type(data), ', len(data)=', len(data)) # type(data)= <class 'list'> , len(data)= 2
+            print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
+            """ 1、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
+                2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
             inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             # print('[bi_modal_trainer.py] train... model.device=', model.device, 'inputs[0].device=', inputs[0].device)
             outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             loss = loss_f(outputs.cpu(), labels.cpu().float())
             if i in [0, 1, 2, 3, 4]:
-                print(outputs)
-                print(labels)
-                print(f'*********** i:{i}, train loss:{loss.item():.4f} ***********')
+                print(torch.cat([outputs, labels], dim=1))
+                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
             '''
             # batch_size = 3时
             # tensor([[0.4946, 0.5024],
@@ -465,16 +467,8 @@ class BiModalTrainerUdiva(object):
             label_list2.extend(labels.argmax(dim=-1).tolist())
             
             #### 计算指标：AUC
-            try:
-                batch_sklearn_auc = roc_auc_score(labels[:, 0], outputs[:, 0]) # 这个计算方式准确， 详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#54f5f767d63640b9bfafe78232aa8245
-                batch_sklearn_auc2 = roc_auc_score(labels.argmax(dim=-1), outputs.argmax(dim=-1)) # 不准确
-            except ValueError:
-                batch_sklearn_auc = -1
-                batch_sklearn_auc2 = -1
-                pass
-            batch_torchmetrics_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
-            # 将 outputs.argmax(dim=-1) 的dtype转换成float32
-            batch_torchmetrics_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
+            batch_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
+            batch_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
             
             #### 计算指标：F1
             f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
@@ -484,10 +478,8 @@ class BiModalTrainerUdiva(object):
                 "train_loss":  float(loss.item()),
                 "train_acc": float(acc_avg), # 当前batch的acc
                 "train_epoch_current_acc": float(epoch_current_acc), # 当前epoch的持续记录的acc
-                "train_batch_sklearn_auc": batch_sklearn_auc, # 当前batch的sklearn计算的auc
-                "train_batch_sklearn_auc2": batch_sklearn_auc2, # 当前batch的sklearn计算的auc
-                "train_batch_torchmetrics_auc": float(batch_torchmetrics_auc), # 当前batch的torchmetrics计算的auc
-                "train_batch_torchmetrics_auc2": float(batch_torchmetrics_auc2), # 当前batch的torchmetrics计算的auc
+                "train_batch_auc": float(batch_auc), # 当前batch的auc
+                "train_batch_auc2": float(batch_auc2),
                 "train_batch_f1": float(f1), # 当前batch的f1
                 "train_batch_f1_2": float(f1_2), # 当前batch的f1
                 "learning rate": lr,
@@ -501,46 +493,42 @@ class BiModalTrainerUdiva(object):
                 eta = int(eta) # 将eta转换成int类型
                 eta_string = f"{eta // 3600}h:{eta % 3600 // 60}m:{eta % 60}s"  # 将eta转换成时分秒的形式
                 self.logger.info(
-                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f},{:.4f},{:.4f}) F1:{:.4f} ({:.4f}) ETA:{} \n".format(
+                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) ETA:{} \n".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo 
                         i + 1, epo_iter_num,                 # Iter
                         iter_time,                           # IterTime
                         float(loss.item()),                  # LOSS
                         float(acc_avg), batch_total_acc, batch_total_num,    # Batch ACC
                         epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo current ACC
-                        batch_sklearn_auc, batch_torchmetrics_auc, batch_sklearn_auc2, batch_torchmetrics_auc2, # AUC
+                        batch_auc, batch_auc2, # AUC
                         f1, f1_2,                            # F1
                         eta_string,                          # ETA
-                    )
-                )
+                    ))
         #### 计算指标：acc
         epoch_summary_acc = epoch_total_acc / epoch_total_num
         
         #### 计算指标：AUC
         # print('pred_list:', pred_list, 'label_list:', label_list, 'pred_list2:', pred_list2, ', len(pred_list):', len(pred_list), ', len(label_list):', len(label_list), ', len(pred_list2):', len(pred_list2))
-        sklearn_auc = roc_auc_score(label_list, pred_list)
-        sklearn_auc2 = roc_auc_score(label_list2, pred_list2)
-        torchmetrics_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
-        torchmetrics_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
+        epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
+        epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
         
         #### 计算指标：F1 score
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
 
         self.logger.info(
-            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f},{:.4f},{:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
+            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
-                sklearn_auc, torchmetrics_auc, sklearn_auc2, torchmetrics_auc2, # Epo AUC
+                epoch_auc, epoch_auc2, # Epo AUC
                 f1, f1_2, # Epo F1_Score
-            )
-        )
+            ))
         
         wandb.log({
             "train_epoch_summary_acc": float(epoch_summary_acc),  # 记录当前epoch全部batch遍历完后的总体acc
-            "train_epoch_summary_auc": float(sklearn_auc), # 比sklearn_auc2更准确的auc
-            "train_epoch_summary_auc2": float(sklearn_auc2),
+            "train_epoch_summary_auc": float(epoch_auc), # 比epoch_auc2更准确的auc
+            "train_epoch_summary_auc2": float(epoch_auc2),
             "train_epoch_summary_f1_score": float(f1), # 比f1_2更准确的f1
             "train_epoch_summary_f1_score2": float(f1_2),
             "epoch": epoch_idx + 1})
@@ -563,9 +551,8 @@ class BiModalTrainerUdiva(object):
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu().float())
                 
-                print(outputs)
-                print(labels)
-                print(f'*********** i:{i}, val loss:{loss.item():.4f} ***********')
+                print(torch.cat([outputs, labels], dim=1))
+                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} ***********')
                 
                 loss_batch_list.append(loss.item())
                 
@@ -587,15 +574,8 @@ class BiModalTrainerUdiva(object):
                 label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确
                 pred_list2.extend(outputs.argmax(dim=-1).tolist())
                 label_list2.extend(labels.argmax(dim=-1).tolist())
-                try:
-                    batch_sklearn_auc = roc_auc_score(labels[:, 0], outputs[:, 0]) # 这个计算方式准确， 详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#54f5f767d63640b9bfafe78232aa8245
-                    batch_sklearn_auc2 = roc_auc_score(labels.argmax(dim=-1), outputs.argmax(dim=-1)) # 不准确
-                except ValueError:
-                    batch_sklearn_auc = -1
-                    batch_sklearn_auc2 = -1
-                    pass
-                batch_torchmetrics_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
-                batch_torchmetrics_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
+                batch_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
+                batch_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
                 
                 #### 计算指标：F1
                 f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
@@ -603,25 +583,22 @@ class BiModalTrainerUdiva(object):
 
                 if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
                     self.logger.info(
-                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f},{:.4f},{:.4f}) F1:{:.4f} ({:.4f})".format(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f})".format(
                             epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
                             i + 1, epo_iter_num,                 # Iter
                             float(loss.item()),                  # LOSS
                             float(batch_acc), batch_total_acc, batch_total_num,  # Batch ACC
                             epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo Current ACC
-                            batch_sklearn_auc, batch_torchmetrics_auc, batch_sklearn_auc2, batch_torchmetrics_auc2, # AUC
+                            batch_auc, batch_auc2, # AUC
                             f1, f1_2, # F1
-                        )
-                    )
+                        ))
                 
                 wandb.log({
                     "valid_loss": float(loss.item()),
                     "valid_acc": float(batch_acc),
                     "valid_epoch_current_acc": float(epoch_current_acc),
-                    "valid_batch_sklearn_auc": float(batch_sklearn_auc),
-                    "valid_batch_torchmetrics_auc": float(batch_torchmetrics_auc),
-                    "valid_batch_sklearn_auc2": float(batch_sklearn_auc2),
-                    "valid_batch_torchmetrics_auc2": float(batch_torchmetrics_auc2),
+                    "valid_batch_auc": float(batch_auc),
+                    "valid_batch_auc2": float(batch_auc2),
                     "valid_batch_f1": float(f1),
                     "valid_batch_f1_2": float(f1_2),
                     "epoch": epoch_idx + 1,
@@ -641,28 +618,21 @@ class BiModalTrainerUdiva(object):
             self.clt.update_model_save_flag(0)  # 0表示不需要保存模型
         
         #### 计算指标：AUC
-        sklearn_auc = roc_auc_score(label_list, pred_list)
-        sklearn_auc2 = roc_auc_score(label_list2, pred_list2)
-        print('[valid] torch.tensor(pred_list2).dtype:', torch.tensor(pred_list2).dtype)
-        torchmetrics_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
-        torchmetrics_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
+        epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
+        epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
         
         #### 计算指标：F1 score
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         self.logger.info(
-            "Valid: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f},{:.4f},{:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
+            "Valid: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
-                # float(self.clt.epoch_train_acc),   # Train Mean_Acc
-                # float(self.clt.epoch_valid_acc),   # Valid Mean_Acc，看日志发现和 epoch_summary_acc 值一样
-                # self.clt.valid_ocean_acc,          # OCEAN_ACC，看日志发现和 epoch_summary_acc 值一样
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
-                sklearn_auc, torchmetrics_auc, sklearn_auc2, torchmetrics_auc2, # Epo AUC
+                epoch_auc, epoch_auc2, # Epo AUC
                 f1, f1_2, # Epo F1_Score
-            )
-        )
+            ))
 
         wandb.log({
             # "valid_acc_batch_avg": acc_batch_avg,
@@ -670,10 +640,8 @@ class BiModalTrainerUdiva(object):
             # "Train Mean_Acc": float(self.clt.epoch_train_acc),
             # "Valid Mean_Acc": float(self.clt.epoch_valid_acc),
             "val_epoch_summary_acc": float(epoch_summary_acc),
-            "val_epoch_summary_auc": float(sklearn_auc),
-            "val_epoch_summary_auc2": float(sklearn_auc2),
-            "val_epoch_summary_torchmetrics_auc": float(torchmetrics_auc),
-            "val_epoch_summary_torchmetrics_auc2": float(torchmetrics_auc2),
+            "val_epoch_summary_auc": float(epoch_auc),
+            "val_epoch_summary_auc2": float(epoch_auc2),
             "val_epoch_summary_f1": float(f1),
             "val_epoch_summary_f1_2": float(f1_2),
             "epoch": epoch_idx + 1,
@@ -695,8 +663,7 @@ class BiModalTrainerUdiva(object):
                 outputs = outputs.cpu().detach()
                 labels = labels.cpu().detach()
                 
-                print(outputs)
-                print(labels)
+                print(torch.cat([outputs, labels], dim=1))
                 print(f'*********** Test outputs and labels ***********')
                 
                 #### 计算ACC
@@ -715,7 +682,7 @@ class BiModalTrainerUdiva(object):
                 if epoch_idx is not None:
                     self.logger.info(f"Test: Epo of Train[{(epoch_idx + 1):0>3}/{ self.cfg.MAX_EPOCH:0>3}] Tqdm Current test_acc:{test_acc} ({total_acc}/{total_num})")
                 else:
-                    self.logger.info(f"Test: Tqdm Current test_acc:{test_acc} ({total_acc}/{total_num})")
+                    self.logger.info(f"Test: Tqdm Current test_acc:{test_acc:.4f} ({total_acc}/{total_num})")
                 
                 # output_list.append(outputs)
                 # label_list.append(labels)
@@ -729,34 +696,33 @@ class BiModalTrainerUdiva(object):
         self.tb_writer.add_scalar("test_acc", test_acc)
         
         #### 计算指标：AUC
-        sklearn_auc = roc_auc_score(label_list, pred_list)
-        sklearn_auc2 = roc_auc_score(label_list2, pred_list2)
-        torchmetrics_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
-        torchmetrics_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
+        epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
+        epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
         
         #### 计算指标：F1 score
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         if epoch_idx is not None:
-            self.logger.info("Test: Epo of Train[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f},{:.4f},{:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".format(
+            self.logger.info("Test: Epo of Train[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".format(
                                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                                 test_acc, total_acc, total_num,    # Epo ACC
-                                sklearn_auc, torchmetrics_auc, sklearn_auc2, torchmetrics_auc2, # Epo AUC
+                                epoch_auc, epoch_auc2, # Epo AUC
                                 f1, f1_2, # Epo F1_Score
                             ))
             wandb.log({
-                "test_acc": float(test_acc), 
-                "test_sklearn_auc": float(sklearn_auc),
-                "test_sklearn_auc2": float(sklearn_auc2),
-                "test_torchmetrics_auc": float(torchmetrics_auc),
-                "test_torchmetrics_auc2": float(torchmetrics_auc2),
+                "test_acc": float(test_acc),
+                "test_auc": float(epoch_auc),
+                "test_auc2": float(epoch_auc2),
                 "test_f1": float(f1),
                 "test_f1_2": float(f1_2),
                 "epoch": epoch_idx + 1})
         else:
-            self.logger.info("Test: Final Acc:{:.4f} ({}/{})\n".format(test_acc, total_acc, total_num))
-            wandb.log({"test_final_acc": float(test_acc)})
+            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f})\n".format(test_acc, total_acc, total_num, epoch_auc, epoch_auc2))
+            wandb.log({
+                "test_final_acc": float(test_acc),
+                "test_final_auc": float(epoch_auc),
+                })
 
         return test_acc
 
@@ -818,20 +784,40 @@ class BiModalTrainerUdiva(object):
                 torch.save(video_extract, save_to_file)
 
     def data_fmt(self, data):
-        for k, v in data.items():
-            data[k] = v.to(self.device)
-        
-        if self.cfg.BIMODAL_OPTION == 1:
-            aud_in = None
-            img_in, labels = data["image"], data["label"]
-        elif self.cfg.BIMODAL_OPTION == 2:
-            aud_in, labels = data["audio"], data["label"]
-            img_in = None
-        elif self.cfg.BIMODAL_OPTION == 3:
-            img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+        print('[bi_modal_trainer] type of data: ', type(data))
+        if isinstance(data, dict): 
+            # 1、如果data_loader中没有使用RandomOverSampler data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据
+            for k, v in data.items(): # Python 字典(Dictionary) items() 函数以列表返回可遍历的(键, 值) 元组数组。
+                data[k] = v.to(self.device)
+            if self.cfg.BIMODAL_OPTION == 1:
+                aud_in = None
+                img_in, labels = data["image"], data["label"]
+            elif self.cfg.BIMODAL_OPTION == 2:
+                aud_in, labels = data["audio"], data["label"]
+                img_in = None
+            elif self.cfg.BIMODAL_OPTION == 3:
+                img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+            else:
+                raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
+        elif isinstance(data, list):
+            # 2、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
+            for i, v in enumerate(data): # Python enumerate() 函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标
+                data[i] = v.to(self.device)
+            if self.cfg.BIMODAL_OPTION == 1:
+                aud_in = None
+                img_in, labels = data[0], data[1] # img_in.shape: [batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
+                # print('[bi_modal_trainer] img_in.shape: ', img_in.shape, ' labels.shape: ', labels.shape)
+            elif self.cfg.BIMODAL_OPTION == 2:
+                aud_in, labels = data[0], data[1]
+                img_in = None
+            elif self.cfg.BIMODAL_OPTION == 3:
+                img_in, aud_in, labels = data[0], data[1], data[2]
+            else:
+                raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
         else:
-            raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
+            raise ValueError("data type should be dict or list, not {}".format(type(data)))
 
+        # 不同的模型需要不同的维度格式，这里根据不同的模型进行数据格式的转换
         if self.cfg_model.NAME == "resnet50_3d_model_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             return (img_in, ), labels

@@ -1,0 +1,59 @@
+Loading rhel8/default-amp
+  Loading requirement: dot rhel8/slurm singularity/current rhel8/global
+    cuda/11.4 libpciaccess/0.16/gcc-9.4.0-6fonbj6
+    libiconv/1.16/gcc-9.4.0-ahebbov libxml2/2.9.12/gcc-9.4.0-gnknt5e
+    ncurses/6.2/gcc-9.4.0-aiirok7 hwloc/2.5.0/gcc-9.4.0-7sqomga
+    libevent/2.1.12/gcc-9.4.0-hgny7cm numactl/2.0.14/gcc-9.4.0-52dwc6n
+    cuda/11.4.0/gcc-9.4.0-3hnxhjt gdrcopy/2.2/gcc-9.4.0-e4igtfp
+    knem/1.1.4/gcc-9.4.0-bpbxgva libnl/3.3.0/gcc-9.4.0-whwhrwb
+    rdma-core/34.0/gcc-9.4.0-5eo5n2u ucx/1.11.1/gcc-9.4.0-lktqyl4
+    openmpi/4.1.1/gcc-9.4.0-epagguv
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+Fri Feb 24 09:49:49 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 510.85.02    Driver Version: 510.85.02    CUDA Version: 11.6     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A100-SXM...  On   | 00000000:01:00.0 Off |                    0 |
+| N/A   36C    P0    75W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A100-SXM...  On   | 00000000:41:00.0 Off |                    0 |
+| N/A   35C    P0    74W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   2  NVIDIA A100-SXM...  On   | 00000000:81:00.0 Off |                    0 |
+| N/A   36C    P0    79W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   3  NVIDIA A100-SXM...  On   | 00000000:C1:00.0 Off |                    0 |
+| N/A   35C    P0    79W / 500W |      0MiB / 81920MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+srun: Job 14881756 step creation temporarily disabled, retrying (Requested nodes are busy)
+srun: Job 14881756 step creation temporarily disabled, retrying (Requested nodes are busy)
+srun: Job 14881756 step creation temporarily disabled, retrying (Requested nodes are busy)
+srun: Job 14881756 step creation still disabled, retrying (Requested nodes are busy)
+srun: Job 14881756 step creation still disabled, retrying (Requested nodes are busy)
+srun: Job 14881756 step creation still disabled, retrying (Requested nodes are busy)
+srun: Step created for job 14881756
+srun: Job 14881756 step creation still disabled, retrying (Requested nodes are busy)
+srun: error: Unable to create step for job 14881756: Job/step already completing or completed
+srun: Job 14881756 step creation still disabled, retrying (Requested nodes are busy)
+srun: error: Unable to create step for job 14881756: Job/step already completing or completed
+srun: Job step aborted: Waiting up to 122 seconds for job step to finish.
+slurmstepd: error: *** JOB 14881756 ON gpu-q-50 CANCELLED AT 2023-02-24T09:50:46 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 14881756.1 ON gpu-q-50 CANCELLED AT 2023-02-24T09:50:46 DUE TO TIME LIMIT ***

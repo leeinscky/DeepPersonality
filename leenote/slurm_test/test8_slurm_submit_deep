@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:4
 #! How much wallclock time will be required?
-#SBATCH --time=0:00:59
+#SBATCH --time=0:01:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -106,14 +106,13 @@ echo "==================== Run program ===================="
 # 每个task可以看到所有四个GPU
 nvidia-smi
 cd /home/zl525/code/DeepPersonality/leenote/slurm_test/
-#### ==================== resnet3D: resnet_3d_udiva_full.yaml ==================== ####
 JOBID=$SLURM_JOB_ID
 
-export CUDA_VISIBLE_DEVICES=0,1,2,3
-srun --ntasks=1 --cpus-per-task=32 --exclusive --export=CUDA_VISIBLE_DEVICES=0,1,2,3 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 29 3 > log/slurm-${JOBID}_3.log 2>&1 &                                                                      
-srun --ntasks=1 --cpus-per-task=32 --exclusive --export=CUDA_VISIBLE_DEVICES=0,1,2,3 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 30 2 > log/slurm-${JOBID}_2.log 2>&1 &                                                                      
-srun --ntasks=1 --cpus-per-task=32 --exclusive --export=CUDA_VISIBLE_DEVICES=0,1,2,3 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 31 1 > log/slurm-${JOBID}_1.log 2>&1 &                                                                      
-srun --ntasks=1 --cpus-per-task=32 --exclusive --export=CUDA_VISIBLE_DEVICES=0,1,2,3 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 32 0 > log/slurm-${JOBID}_0.log 2>&1 &                                                                      
+# export CUDA_VISIBLE_DEVICES=0,1,2,3
+srun --ntasks=1 --cpus-per-task=32 --export=CUDA_VISIBLE_DEVICES=0 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 29 0 > log/slurm-${JOBID}_3.log &                                                                     
+srun --ntasks=1 --cpus-per-task=32 --export=CUDA_VISIBLE_DEVICES=1 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 30 0 > log/slurm-${JOBID}_2.log &                                                                     
+srun --ntasks=1 --cpus-per-task=32 --export=CUDA_VISIBLE_DEVICES=2 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 31 0 > log/slurm-${JOBID}_1.log &                                                                     
+srun --ntasks=1 --cpus-per-task=32 --export=CUDA_VISIBLE_DEVICES=3 /home/zl525/.conda/envs/DeepPersonality/bin/python slurm_test.py 32 0 > log/slurm-${JOBID}_0.log &                                                                     
 wait
 
 ###############################################################
@@ -147,4 +146,4 @@ eval $CMD
 
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote/slurm_test && sbatch test8_slurm_submit_deep
-# 14547788
+# 14881496 14881756

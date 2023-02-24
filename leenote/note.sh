@@ -223,3 +223,4 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
 
 1. Project: DeepPersonality
     experiment-1: 控制其他超参数不变，递增sample_size，观察acc的变化
+    experiment-2: 相比于experiment-1增加了auc、f1score指标，控制其他超参数不变，递增sample_size，观察auc的变化

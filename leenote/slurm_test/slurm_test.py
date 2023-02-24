@@ -48,5 +48,5 @@ print('hello:', num, ', current time:', time.strftime("%Y-%m-%d %H:%M:%S", time.
 
 # sleep 1 minutes
 import time
-time.sleep(5)
+time.sleep(30)
 
