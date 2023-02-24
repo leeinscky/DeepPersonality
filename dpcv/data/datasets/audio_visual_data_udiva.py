@@ -17,7 +17,7 @@ from random import shuffle
 import matplotlib.pyplot as plt # plt 用于显示图片
 import matplotlib.image as mpimg # mpimg 用于读取图片
 import wandb
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, BorderlineSMOTE, SMOTE
 from collections import Counter
 import torch.nn.functional as F
 
@@ -655,73 +655,13 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         )
         batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
         
-        #****************** 以下是为了让数据集更均衡，使用 oversampling 过采样方法来让数据集更均衡 ******************
-        # 由于udiva 训练集所有的116个session中，认识的label有44个，不认识的label有72个(有一个坏数据，所以减去1为71个)，所以使用 oversampling 过采样方法来让数据集更均衡, 借助imblearn.over_sampling.RandomOverSampler
-        ros = RandomOverSampler(random_state=0)
-        # 查看均衡前的数据分布
-        print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
-        # len(dataset)= 115 , type(dataset)= <class 'dpcv.data.datasets.audio_visual_data_udiva.AudioVisualLstmDataUdiva'> , dataset[0].keys()= dict_keys(['image', 'label']) , type(dataset[0])= <class 'dict'>
-        
-        print('image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
-        # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率
-        
-        #****************** 构造X_train, y_train 作为fit_resample的输入参数********************
-        X_train, y_train = [], []
-        # 临时测试，只保留dataset的前10个元素 # TODO 待删除
-        for i in range(len(dataset)):
-            print('i=', i)
-            X_train.append(dataset[i]['image'])
-            y_train.append(dataset[i]['label'])
-            if i == 20: # TODO 待删除
-                break # TODO 待删除
-        print('[oversampling]- len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
-        # len(X_train)= 115 , len(y_train)= 115 , X_train[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
-        X_train = torch.stack(X_train, dim=0)
-        y_train = torch.stack(y_train, dim=0)
-        print('[oversampling]- after stack: len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), 'X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
-        sample_size = X_train.shape[1]
-        # after stack: len(X_train)= 115 , len(y_train)= 115, X_train.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
-        
-        # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
-        X_train = X_train.reshape(X_train.shape[0], -1) # 将X_train转换为shape为[115, sample_size*6*224*224]的二维数组，方便后续的过采样
-        y_train = y_train.argmax(dim=1) # 将y_train转换为shape为[115, ]的一维数组，方便后续的过采样
-        print('[oversampling]- after reshape: X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', type(X_train)=', type(X_train), ', type(y_train)=', type(y_train))
-        # after reshape: X_train.shape= torch.Size([115, 1204224]) , y_train.shape= torch.Size([115]) , type(X_train)= <class 'torch.Tensor'> , type(y_train)= <class 'torch.Tensor'>
-        # print('[oversampling]- ******** Counter(y_train)=', sorted(Counter(y_train.numpy()).items())) # 使用Counter查看均衡前的label类别数据分布 # 统计y_train中各类label的数量
-        # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
-        
-        #****************** 执行过采样 ******************
-        X_resampled, y_resampled = ros.fit_resample(X_train, y_train) 
-        print('[oversampling]- after oversampling: X_resampled.shape=', X_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_resampled)=', type(X_resampled), ', type(y_resampled)=', type(y_resampled))
-        # after oversampling: X_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
-        print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
-        # Counter(y_resampled)= [(0, 71), (1, 71)] 即认识的label有71个，不认识的label也有71个
-        print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
-        
-        # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
-        a = X_train[:, :4]
-        # b = X_resampled[:, :4]
-        b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
-        print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
-        # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
-        
-        X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
-        y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
-        
-        print('[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
-        # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
-        
-        #****************** 构造dataset 用于传给dataloader ******************
-        dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch
-        # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是一个shape为[2]的label
-        
-        # 查看dataset里的数据shape和类型
-        # print('[oversampling]- final dataset: len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0]=', dataset[0])
-        # len(dataset)= 142 , type(dataset)= <class 'torch.utils.data.dataset.TensorDataset'> , dataset[0]= (tensor([[[[-2.0323, -2.0494, ... ,  0.9668]]]]), tensor([1., 0.])) 即第一个元素是一个shape为[sample_size, 6, 224, 224]的tensor，第二个元素是一个shape为[2]的tensor
+        # 过采样
+        if cfg.DATA.SAMPLING_NAME is not None:
+            dataset = over_sampling(dataset, cfg.DATA.SAMPLING_NAME)
         image, label = dataset[0]
-        print('[oversampling]- final return dataset: image.shape=', image.shape, ', label=', label, ', len(dataset)=', len(dataset))
+        print('[oversampling]- final return dataset: len(dataset)=', len(dataset), 'dataset[0]的image.shape=', image.shape, ', dataset[0]的label.shape=', label)
         # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
-    
+        
     elif mode == "valid":
         # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行验证集的dataloader初始化...')
         val_img_data = [
@@ -810,6 +750,83 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
     )
     return data_loader
 
+def over_sampling(dataset, sampler_name): 
+    #****************** 以下是为了让数据集更均衡，使用 oversampling 过采样方法来让数据集更均衡 ******************
+    # choose sampler
+    if sampler_name == 'RandomOverSampler':
+        print('[oversampling]- Using RandomOverSampler to oversampling')
+        sampler = RandomOverSampler(random_state=0)
+    elif sampler_name == 'SMOTE':
+        print('[oversampling]- Using SMOTE to oversampling')
+        sampler = SMOTE(random_state=42)
+    elif sampler_name == 'BorderlineSMOTE':
+        print('[oversampling]- Using BorderlineSMOTE to oversampling')
+        sampler = BorderlineSMOTE(random_state=42)
+    else:
+        print('[oversampling]- Using RandomOverSampler to oversampling')
+        sampler = RandomOverSampler(random_state=0)
+    
+    # 由于udiva 训练集所有的116个session中，认识的label有44个，不认识的label有72个(有一个坏数据，所以减去1为71个)，所以使用 oversampling 过采样方法来让数据集更均衡, 借助imblearn.over_sampling.RandomOverSampler
+    # 查看均衡前的数据分布
+    # print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
+    # len(dataset)= 115 , type(dataset)= <class 'dpcv.data.datasets.audio_visual_data_udiva.AudioVisualLstmDataUdiva'> , dataset[0].keys()= dict_keys(['image', 'label']) , type(dataset[0])= <class 'dict'>
+    # print('image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
+    # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率
+    
+    #****************** 1. 构造X_train, y_train 作为fit_resample的输入参数********************
+    X_train, y_train = [], []
+    for i in range(len(dataset)):
+        X_train.append(dataset[i]['image'])
+        y_train.append(dataset[i]['label'])
+        # if i == 20: # TODO 待删除 # 临时测试，只保留dataset的前20个元素
+            # break # TODO 待删除
+    # print('[oversampling]- len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
+    # len(X_train)= 115 , len(y_train)= 115 , X_train[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
+    X_train = torch.stack(X_train, dim=0)
+    y_train = torch.stack(y_train, dim=0)
+    # print('[oversampling]- after stack: len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), 'X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
+    sample_size = X_train.shape[1]
+    # after stack: len(X_train)= 115 , len(y_train)= 115, X_train.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
+    
+    # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
+    X_train = X_train.reshape(X_train.shape[0], -1) # 将X_train转换为shape为[115, sample_size*6*224*224]的二维数组，方便后续的过采样
+    y_train = y_train.argmax(dim=1) # 将y_train转换为shape为[115, ]的一维数组，方便后续的过采样
+    # print('[oversampling]- after reshape: X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', type(X_train)=', type(X_train), ', type(y_train)=', type(y_train))
+    # after reshape: X_train.shape= torch.Size([115, 1204224]) , y_train.shape= torch.Size([115]) , type(X_train)= <class 'torch.Tensor'> , type(y_train)= <class 'torch.Tensor'>
+    # print('[oversampling]- ******** Counter(y_train)=', sorted(Counter(y_train.numpy()).items())) # 使用Counter查看均衡前的label类别数据分布 # 统计y_train中各类label的数量
+    # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
+    
+    #****************** 2. 核心：执行过采样 ******************
+    X_resampled, y_resampled = sampler.fit_resample(X_train, y_train) 
+    # print('[oversampling]- after oversampling: X_resampled.shape=', X_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_resampled)=', type(X_resampled), ', type(y_resampled)=', type(y_resampled))
+    # after oversampling: X_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
+    print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
+    # Counter(y_resampled)= [(0, 71), (1, 71)] 即认识的label有71个，不认识的label也有71个
+    # print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
+    
+    # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
+    a = X_train[:, :4]
+    # b = X_resampled[:, :4]
+    b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
+    # print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
+    # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
+    
+    X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
+    y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
+    
+    # print('[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
+    # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
+    
+    #****************** 3. 构造dataset 用于传给dataloader ******************
+    dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch
+    # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是一个shape为[2]的label
+    
+    # 查看dataset里的数据shape和类型
+    # print('[oversampling]- final dataset: len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0]=', dataset[0])
+    # len(dataset)= 142 , type(dataset)= <class 'torch.utils.data.dataset.TensorDataset'> , dataset[0]= (tensor([[[[-2.0323, -2.0494, ... ,  0.9668]]]]), tensor([1., 0.])) 即第一个元素是一个shape为[sample_size, 6, 224, 224]的tensor，第二个元素是一个shape为[2]的tensor
+    return dataset
+
+
 
 if __name__ == "__main__":
     # from tqdm import tqdm
@@ -833,54 +850,54 @@ if __name__ == "__main__":
 
 """
 [oversampling]- diff X_train[:, :4]=
- tensor([[-1.9980, -1.9980, -1.9980, -1.9980],
-        [-1.9467, -1.9295, -1.9124, -1.8953],
-        [ 0.1083,  0.1426,  0.1768,  0.2111],
-        [-0.4911, -0.4911, -0.4739, -0.4568],
-        [-1.4672, -1.4500, -1.4500, -1.4158],
-        [-1.8953, -1.8953, -1.8610, -1.8439],
-        [ 0.8104,  0.5193,  0.2111, -0.0972],
-        [ 1.3584,  1.3584,  1.3755,  1.3755],
-        [-1.5870, -1.5699, -1.5699, -1.5699],
-        [-1.2274, -1.2959, -1.3473, -1.3987],
-        [-2.1008, -2.1008, -2.0837, -2.0665],
-        [-1.7412, -1.7069, -1.6727, -1.6384],
-        [ 0.5707,  0.5707,  0.5707,  0.5878],
-        [-1.0904, -1.1075, -1.1418, -1.1418],
-        [-1.7240, -1.7069, -1.6898, -1.6727],
-        [-1.0048, -0.7993, -0.5938, -0.3712],
-        [-0.3198, -0.4226, -0.5253, -0.6452],
-        [-1.5870, -1.5699, -1.5528, -1.5357],
-        [ 0.9988,  1.0159,  1.0331,  1.0331],
-        [-2.0837, -2.0665, -1.9980, -1.9467],
-        [-0.7822, -0.9877, -1.1932, -1.3987]])
+ tensor([[ 0.7591,  0.7762,  0.7762,  0.7933],
+        [-2.0665, -2.0665, -2.0665, -2.0494],
+        [ 1.1015,  1.1015,  1.0673,  1.0502],
+        [-0.4739, -0.4739, -0.4568, -0.4568],
+        [ 0.2967,  0.6734,  1.0502,  1.4269],
+        [-1.1760, -1.1760, -1.1760, -1.1932],
+        [-0.8849, -0.6452, -0.3883, -0.1486],
+        [ 2.0605,  1.8550,  1.5982,  1.3070],
+        [-1.6555, -1.7069, -1.6384, -1.5870],
+        [ 0.6392,  0.6392,  0.6392,  0.6392],
+        [-0.3369, -0.2342, -0.1486, -0.0629],
+        [-1.8439, -1.8439, -1.8268, -1.8097],
+        [-0.9020, -0.5938, -0.3027, -0.0116],
+        [-1.1075, -1.0733, -1.0390, -1.0048],
+        [-0.9363, -0.9363, -0.9363, -0.9020],
+        [ 0.8447,  0.8789,  0.9132,  0.9474],
+        [-0.9020, -0.7479, -0.5767, -0.4054],
+        [ 0.7248,  0.7248,  0.7248,  0.7419],
+        [ 1.1529,  1.2043,  1.2385,  1.2899],
+        [-2.0665, -2.0665, -2.0665, -2.0665],
+        [-1.3473, -1.3473, -1.3473, -1.3302]])
  X_resampled[:, :4]=
- tensor([[-1.9980, -1.9980, -1.9980, -1.9980],
-        [-1.9467, -1.9295, -1.9124, -1.8953],
-        [ 0.1083,  0.1426,  0.1768,  0.2111],
-        [-0.4911, -0.4911, -0.4739, -0.4568],
-        [-1.4672, -1.4500, -1.4500, -1.4158],
-        [-1.8953, -1.8953, -1.8610, -1.8439],
-        [ 0.8104,  0.5193,  0.2111, -0.0972],
-        [ 1.3584,  1.3584,  1.3755,  1.3755],
-        [-1.5870, -1.5699, -1.5699, -1.5699],
-        [-1.2274, -1.2959, -1.3473, -1.3987],
-        [-2.1008, -2.1008, -2.0837, -2.0665],
-        [-1.7412, -1.7069, -1.6727, -1.6384],
-        [ 0.5707,  0.5707,  0.5707,  0.5878],
-        [-1.0904, -1.1075, -1.1418, -1.1418],
-        [-1.7240, -1.7069, -1.6898, -1.6727],
-        [-1.0048, -0.7993, -0.5938, -0.3712],
-        [-0.3198, -0.4226, -0.5253, -0.6452],
-        [-1.5870, -1.5699, -1.5528, -1.5357],
-        [ 0.9988,  1.0159,  1.0331,  1.0331],
-        [-2.0837, -2.0665, -1.9980, -1.9467],
-        [-0.7822, -0.9877, -1.1932, -1.3987],
-        [-1.7240, -1.7069, -1.6898, -1.6727],
-        [ 0.9988,  1.0159,  1.0331,  1.0331],
-        [-1.9980, -1.9980, -1.9980, -1.9980],
-        [-2.1008, -2.1008, -2.0837, -2.0665],
-        [-2.1008, -2.1008, -2.0837, -2.0665],
-        [-2.1008, -2.1008, -2.0837, -2.0665],
-        [-1.9467, -1.9295, -1.9124, -1.8953]]) , a.shape= torch.Size([21, 4]) , b.shape= torch.Size([28, 4])
+ tensor([[ 0.7591,  0.7762,  0.7762,  0.7933],
+        [-2.0665, -2.0665, -2.0665, -2.0494],
+        [ 1.1015,  1.1015,  1.0673,  1.0502],
+        [-0.4739, -0.4739, -0.4568, -0.4568],
+        [ 0.2967,  0.6734,  1.0502,  1.4269],
+        [-1.1760, -1.1760, -1.1760, -1.1932],
+        [-0.8849, -0.6452, -0.3883, -0.1486],
+        [ 2.0605,  1.8550,  1.5982,  1.3070],
+        [-1.6555, -1.7069, -1.6384, -1.5870],
+        [ 0.6392,  0.6392,  0.6392,  0.6392],
+        [-0.3369, -0.2342, -0.1486, -0.0629],
+        [-1.8439, -1.8439, -1.8268, -1.8097],
+        [-0.9020, -0.5938, -0.3027, -0.0116],
+        [-1.1075, -1.0733, -1.0390, -1.0048],
+        [-0.9363, -0.9363, -0.9363, -0.9020],
+        [ 0.8447,  0.8789,  0.9132,  0.9474],
+        [-0.9020, -0.7479, -0.5767, -0.4054],
+        [ 0.7248,  0.7248,  0.7248,  0.7419],
+        [ 1.1529,  1.2043,  1.2385,  1.2899],
+        [-2.0665, -2.0665, -2.0665, -2.0665],
+        [-1.3473, -1.3473, -1.3473, -1.3302],
+        [-0.3256, -0.2978, -0.2793, -0.2515],
+        [-1.2792, -1.1195, -0.9483, -0.7829],
+        [-1.8194, -1.8047, -1.7925, -1.7656],
+        [-0.9029, -0.7468, -0.5796, -0.4116],
+        [-0.2529, -0.1530, -0.0703,  0.0134],
+        [ 0.5721,  0.6092,  0.6339,  0.6806],
+        [-0.9331, -0.9184, -0.9026, -0.8557]]) , a.shape= torch.Size([21, 4]) , b.shape= torch.Size([28, 4])
 """

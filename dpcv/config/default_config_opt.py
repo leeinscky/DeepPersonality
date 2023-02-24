@@ -22,6 +22,7 @@ __C.DATA.TYPE = "frame"
 __C.DATA.SESSION = "talk"
 # number of frames to sample from a video for each iteration
 __C.DATA.SAMPLE_SIZE = 16
+__C.DATA.SAMPLING_NAME = "BorderlineSMOTE"
 
 __C.DATA.TRAIN_IMG_DATA = "image_data/train_data"
 __C.DATA.TRAIN_IMG_FACE_DATA = "image_data/train_data_face"

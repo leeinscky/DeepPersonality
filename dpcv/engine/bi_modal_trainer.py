@@ -330,8 +330,8 @@ class BiModalTrainerUdiva(object):
         pred_list, label_list, pred_list2, label_list2 = [], [], [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
-            print('[bi_modal_trainer.py] train... type(data)=', type(data), ', len(data)=', len(data)) # type(data)= <class 'list'> , len(data)= 2
-            print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
+            # print('[bi_modal_trainer.py] train... type(data)=', type(data), ', len(data)=', len(data)) # type(data)= <class 'list'> , len(data)= 2
+            # print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
             """ 1、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
                 2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
             inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
