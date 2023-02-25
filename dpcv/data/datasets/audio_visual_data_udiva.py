@@ -22,7 +22,6 @@ from collections import Counter
 import torch.nn.functional as F
 
 
-
 class AudioVisualDataUdiva(VideoDataUdiva):
 
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=100):
@@ -236,14 +235,15 @@ class AudioVisualDataUdiva(VideoDataUdiva):
         # return wav_tmp
         return fc1_wav_tmp, fc2_wav_tmp
 
-# 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-class AudioVisualLstmDataUdiva(VideoDataUdiva): 
+
+class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
     def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None):
         super().__init__(data_root, img_dir, label_file, audio_dir)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         self.frame_idx = 0
-        wandb.config.sample_size = sample_size
+        if config.TRAIN.USE_WANDB:
+            wandb.config.sample_size = sample_size
         self.cfg = config
         self.img_dtype = None
 
@@ -555,6 +555,7 @@ def make_data_loader(cfg, mode):
 
     return data_loader
 
+
 """ 
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_data_loader_udiva(cfg, mode):
@@ -621,26 +622,23 @@ def bimodal_resnet_data_loader_udiva(cfg, mode):
 
  """
 
+
 @DATA_LOADER_REGISTRY.register()
-def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
+def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_spatial(cfg) # TRANSFORM: "standard_frame_transform"
     if mode == "train":
-        # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行训练集的dataloader初始化...')
-        
         # 如果 cfg.DATA.SESSION 字符串里包含了 'ANIMALS' 关键词，那么就在list里添加cfg.DATA.ANIMALS_TRAIN_IMG_DATA, 否则就不添加 # 如果 cfg.DATA.SESSION 字符串里包含了 'GHOST' 关键词，那么就在list里添加cfg.DATA.GHOST_TRAIN_IMG_DATA, 否则就不添加 # 如果 cfg.DATA.SESSION 字符串里包含了 'LEGO' 关键词，那么就在list里添加cfg.DATA.LEGO_TRAIN_IMG_DATA, 否则就不添加 # 如果 cfg.DATA.SESSION 字符串里包含了 'TALK' 关键词，那么就在list里添加cfg.DATA.TALK_TRAIN_IMG_DATA, 否则就不添加
         train_img_data = [
             cfg.DATA.ANIMALS_TRAIN_IMG_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
             cfg.DATA.GHOST_TRAIN_IMG_DATA if 'GHOST' in cfg.DATA.SESSION else None,
             cfg.DATA.LEGO_TRAIN_IMG_DATA if 'LEGO' in cfg.DATA.SESSION else None,
-            cfg.DATA.TALK_TRAIN_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,
-        ]
+            cfg.DATA.TALK_TRAIN_IMG_DATA if 'TALK' in cfg.DATA.SESSION else None,]
         train_aud_data = [
             cfg.DATA.ANIMALS_TRAIN_AUD_DATA if 'ANIMALS' in cfg.DATA.SESSION else None,
             cfg.DATA.GHOST_TRAIN_AUD_DATA if 'GHOST' in cfg.DATA.SESSION else None,
             cfg.DATA.LEGO_TRAIN_AUD_DATA if 'LEGO' in cfg.DATA.SESSION else None,
-            cfg.DATA.TALK_TRAIN_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,
-        ]
+            cfg.DATA.TALK_TRAIN_AUD_DATA if 'TALK' in cfg.DATA.SESSION else None,]
         train_img_data = [x for x in train_img_data if x is not None] # 去掉list里的None元素
         train_aud_data = [x for x in train_aud_data if x is not None]
         # print('[audio_visual_data_udiva.py]- train_img_data = ', train_img_data, ', train_aud_data = ', train_aud_data, ', len(train_img_data)=', len(train_img_data), ' len(train_aud_data)=', len(train_aud_data))
@@ -657,10 +655,10 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
         
         # 过采样
         if cfg.DATA.SAMPLING_NAME is not None:
-            dataset = over_sampling(dataset, cfg.DATA.SAMPLING_NAME)
-        image, label = dataset[0]
-        print('[oversampling]- final return dataset: len(dataset)=', len(dataset), 'dataset[0]的image.shape=', image.shape, ', dataset[0]的label.shape=', label)
-        # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
+            dataset = over_sampling(dataset, cfg.DATA.SAMPLING_NAME, cfg.TRAIN.BIMODAL_OPTION)
+            image, label = dataset[0]
+            print('[oversampling]- final return dataset: len(dataset)=', len(dataset), 'dataset[0]的image.shape=', image.shape, ', dataset[0]的label.shape=', label)
+            # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
         
     elif mode == "valid":
         # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行验证集的dataloader初始化...')
@@ -750,7 +748,7 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # # 基于AudioVisualDataU
     )
     return data_loader
 
-def over_sampling(dataset, sampler_name): 
+def over_sampling(dataset, sampler_name, bimodal_option): 
     #****************** 以下是为了让数据集更均衡，使用 oversampling 过采样方法来让数据集更均衡 ******************
     # choose sampler
     if sampler_name == 'RandomOverSampler':
@@ -774,12 +772,18 @@ def over_sampling(dataset, sampler_name):
     # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率
     
     #****************** 1. 构造X_train, y_train 作为fit_resample的输入参数********************
-    X_train, y_train = [], []
+    X_train, y_train, X_train_img, X_train_audio = [], [], [], []
     for i in range(len(dataset)):
-        X_train.append(dataset[i]['image'])
+        if bimodal_option == 1: # bimodal_option=1, 表示只使用image数据
+            X_train.append(dataset[i]['image'])
+        elif bimodal_option == 2: # bimodal_option=2, 表示只使用audio数据
+            X_train.append(dataset[i]['audio'])
+        elif bimodal_option == 3: # bimodal_option=3, 表示使用image和audio数据
+            X_train_img.append(dataset[i]['image'])
+            X_train_audio.append(dataset[i]['image'])
+        else:
+            raise ValueError('bimodal_option must be 1, 2 or 3')
         y_train.append(dataset[i]['label'])
-        # if i == 20: # TODO 待删除 # 临时测试，只保留dataset的前20个元素
-            # break # TODO 待删除
     # print('[oversampling]- len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
     # len(X_train)= 115 , len(y_train)= 115 , X_train[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
     X_train = torch.stack(X_train, dim=0)
@@ -805,20 +809,28 @@ def over_sampling(dataset, sampler_name):
     # print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
     
     # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
-    a = X_train[:, :4]
+    # a = X_train[:, :4]
     # b = X_resampled[:, :4]
-    b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
+    # b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
     # print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
     # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
     
-    X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
+    if bimodal_option == 1: # bimodal_option=1, 表示只使用image数据
+        X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
+    elif bimodal_option == 2: # bimodal_option=2, 表示只使用audio数据
+        X_resampled = torch.from_numpy(X_resampled.reshape(-1, 2, 1, sample_size*16000))
+    elif bimodal_option == 3: # bimodal_option=3, 表示使用image和audio数据
+        
+    else:
+        raise ValueError('bimodal_option must be 1, 2 or 3')
+    # X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
     y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
     
     # print('[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
     # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
     
     #****************** 3. 构造dataset 用于传给dataloader ******************
-    dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch
+    dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch # torch TensorDataset 可以接受一个或多个参数，每个参数都是一个张量（Tensor），并将它们打包成一个数据集（Dataset）。dataset = TensorDataset(tensor1, tensor2, tensor3, ...) 张量的第一个维度大小应该相同，以确保它们能够正确地打包成数据集。 tensors that have the same size of the first dimension.
     # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是一个shape为[2]的label
     
     # 查看dataset里的数据shape和类型

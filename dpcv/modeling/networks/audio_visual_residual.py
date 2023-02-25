@@ -16,7 +16,7 @@ from dpcv.modeling.module.weight_init_helper import initialize_weights
 from dpcv.modeling.networks.build import NETWORK_REGISTRY
 
 
-class AudioVisualResNet18(nn.Module): # nn.Module是所有神经网络模块的基类，你的网络也应该继承这个类，这样可以方便地使用各种神经网络模块，比如卷积、全连接、激活函数等等，这些模块都是nn.Module的子类。你可以直接调用，也可以自己定义，然后继承nn.Module，这样就可以使用了，这样做的好处是可以方便地组合各种模块，构建复杂的网络结构，而且可以方便地调用各种模块的参数，比如权重、偏置等等。
+class AudioVisualResNet18(nn.Module):
 
     def __init__(self, init_weights=True, return_feat=False):
         super(AudioVisualResNet18, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
@@ -40,23 +40,23 @@ class AudioVisualResNet18(nn.Module): # nn.Module是所有神经网络模块的�
 
     def forward(self, aud_input, vis_input): # forward函数是必须要定义的，这个函数是用来定义网络的前向传播的，这里的aud_input和vis_input是输入的音频和视频数据, aud_input的shape是[batch_size, 1, 1, 50176], vis_input的shape是[batch_size, 3, 224, 224]
         # 将音频和视频数据分别输入到音频分支和视频分支中，得到音频分支和视频分支的输出
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
         aud_x = self.audio_branch(aud_input) # aud_x的shape是[batch_size, 256, 1, 1]
         vis_x = self.visual_branch(vis_input) # vis_x的shape是[batch_size, 256, 1, 1]
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
         aud_x = aud_x.view(aud_x.size(0), -1) #view函数是用来改变tensor的形状的，这里的aud_x.size(0)表示的是batch_size, -1表示的是自动计算剩下的维度的大小，这里的aud_x的shape是[batch_size, 256]，也就是把aud_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
         vis_x = vis_x.view(vis_x.size(0), -1) # 这里的vis_x的shape是[batch_size, 256]，也就是把vis_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
 
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
         # 将音频分支和视频分支的输出进行拼接
         feat = torch.cat([aud_x, vis_x], dim=-1) # torch.cat是用来拼接tensor的，这里的dim=-1表示的是拼接的维度，这里的feat的shape是[batch_size, 512]，也就是把aud_x和vis_x拼接在了一起
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
         x = self.linear(feat) # self.linear = nn.Linear(512, 5) 这里的x的shape是[batch_size, 5]，也就是把feat输入到全连接层中，全连接层的输出是5个类别的概率，这里的5表示的是5个类别。
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape)
         x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]
         if self.return_feature: 
@@ -64,12 +64,12 @@ class AudioVisualResNet18(nn.Module): # nn.Module是所有神经网络模块的�
         return x
 
 
-class AudioVisualResNet18Udiva(nn.Module): # 基于UDIVA的纯CNN模型结构：没有LSTM层处理特征序列
+class AudioVisualResNet18Udiva(nn.Module): # UDIVA: 纯ResNet模型结构
     def __init__(self, init_weights=True, return_feat=False):
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 开始执行构造函数__init__... ')
+        # print('[AudioVisualResNet18LSTMUdiva] class AudioVisualResNet18Udiva - 开始执行构造函数__init__... ')
         super(AudioVisualResNet18Udiva, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18Udiva是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
         self.return_feature = return_feat
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 正在执行构造函数__init__... 准备调用 AudioVisualResNetUdiva 类的构造函数, 传入的参数 in_channels=2, init_stage=AudInitStageUdiva, block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], channels=[32, 64, 128, 256], layers=[2, 2, 2, 2] ')
+        # print('[AudioVisualResNet18LSTMUdiva] class AudioVisualResNet18Udiva - 正在执行构造函数__init__... 准备调用 AudioVisualResNetUdiva 类的构造函数, 传入的参数 in_channels=2, init_stage=AudInitStageUdiva, block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], channels=[32, 64, 128, 256], layers=[2, 2, 2, 2] ')
         self.audio_branch = AudioVisualResNetUdiva(
             in_channels=2, init_stage=AudInitStageUdiva, # in_channels=1表示输入的通道数为1，init_stage=AudInitStage表示使用AudInitStage这个类作为初始化层
             block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], # block是一个类，conv是一个函数
@@ -86,27 +86,27 @@ class AudioVisualResNet18Udiva(nn.Module): # 基于UDIVA的纯CNN模型结构：
 
         if init_weights:
             initialize_weights(self)
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
+        # print('[AudioVisualResNet18LSTMUdiva] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
 
     def forward(self, aud_input, vis_input): # forward函数是必须要定义的，这个函数是用来定义网络的前向传播的，这里的aud_input和vis_input是输入的音频和视频数据, aud_input的shape是[batch_size, 1, 1, 50176], vis_input的shape是[batch_size, 3, 224, 224]
         # 将音频和视频数据分别输入到音频分支和视频分支中，得到音频分支和视频分支的输出
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
         aud_x = self.audio_branch(aud_input) # aud_x的shape是[batch_size, 256, 1, 1]
         vis_x = self.visual_branch(vis_input) # vis_x的shape是[batch_size, 256, 1, 1]
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
         aud_x = aud_x.view(aud_x.size(0), -1) #view函数是用来改变tensor的形状的，这里的aud_x.size(0)表示的是batch_size, -1表示的是自动计算剩下的维度的大小，这里的aud_x的shape是[batch_size, 256]，也就是把aud_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
         vis_x = vis_x.view(vis_x.size(0), -1) # 这里的vis_x的shape是[batch_size, 256]，也就是把vis_x的形状从[batch_size, 256, 1, 1]变成了[batch_size, 256]
 
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 经过view函数之后, 音频分支和视频分支的输出数据的维度为 aud_x.shape: ', aud_x.shape, ' vis_x.shape: ', vis_x.shape)
 
         # 将音频分支和视频分支的输出进行cat拼接，然后输入全连接层，最后输入激活函数中得到最终输出
         feat = torch.cat([aud_x, vis_x], dim=-1) # torch.cat是用来拼接tensor的，这里的dim=-1表示的是拼接的维度，这里的feat的shape是[batch_size, 512]，也就是把aud_x和vis_x拼接在了一起
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 经过torch.cat函数之后即将音频分支和视频分支的输出进行拼接 拼接后得到的feat维度为 feat.shape: ', feat.shape)
         x = self.linear(feat) # self.linear = nn.Linear(512, 5) 这里的x的shape是[batch_size, 5]，也就是把feat输入到全连接层中，全连接层的输出是5个类别的概率，这里的5表示的是5个类别。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 5]
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape, ' x=', x)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 将音频分支和视频分支的输出进行拼接之后的数据feat, 输入到全连接层中, 得到的输出数据x的维度为 x.shape: ', x.shape, ' x=', x)
         x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape, ' x=', x)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... x经过sigmoid激活函数处理后, 得到的输出数据的维度为 x.shape: ', x.shape, ' x=', x)
         # x = torch.tanh(x)
         # x = (x + 1) / 2  # scale tanh output to [0, 1]
         if self.return_feature: 
@@ -114,13 +114,11 @@ class AudioVisualResNet18Udiva(nn.Module): # 基于UDIVA的纯CNN模型结构：
         return x
 
 
-class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型结构：加入了LSTM层处理特征序列
+class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
     def __init__(self, init_weights=True, return_feat=False, bimodal_option=1):
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 开始执行构造函数__init__... ')
         super(AudioVisualResNet18LSTMUdiva, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18Udiva是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
         self.return_feature = return_feat
         self.bimodal_option = bimodal_option
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 正在执行构造函数__init__... 准备调用 AudioVisualResNetUdiva 类的构造函数, 传入的参数 in_channels=2, init_stage=AudInitStageUdiva, block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], channels=[32, 64, 128, 256], layers=[2, 2, 2, 2] ')
         self.audio_branch = AudioVisualResNetUdiva(
             in_channels=2, init_stage=AudInitStageUdiva, # in_channels=2表示音频输入的通道数为2，init_stage=AudInitStage表示使用AudInitStage这个类作为初始化层
             block=BiModalBasicBlockUdiva, conv=[aud_conv1x9_udiva, aud_conv1x1_udiva], # block是一个类，conv是一个函数
@@ -137,7 +135,6 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
         )
         # self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
         self.linear = nn.Linear(256, 2)
-        self.bn = nn.BatchNorm1d(2) # nn.BatchNorm1d是对输入的特征进行归一化处理的，这里的512表示的是输入的特征维度
         
         # 打印模型的权重
         # self.print_model_weights(self.audio_branch)
@@ -146,45 +143,45 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
         # DeepPersonality代码库提供的预训练模型ResNet： dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl  Reference: https://github.com/liaorongfan/DeepPersonality
         # '''
         # load pretrained weights of restnet18
-        # print ('[dpcv/modeling/networks/audio_visual_residual.py] audio_branch model weights before loading pretrained model: ')
+        # print ('[AudioVisualResNet18LSTMUdiva] audio_branch model weights before loading pretrained model: ')
         # self.print_model_weights(self.audio_branch)
         # self.audio_branch.load_state_dict(torch.load('dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl'))
         # self.print_model_weights(self.audio_branch)
-        # print ('[dpcv/modeling/networks/audio_visual_residual.py] audio_branch model weights after loading pretrained model: ')
+        # print ('[AudioVisualResNet18LSTMUdiva] audio_branch model weights after loading pretrained model: ')
         
-        # print ('[dpcv/modeling/networks/audio_visual_residual.py] visual_branch model weights before loading pretrained model: ')
+        # print ('[AudioVisualResNet18LSTMUdiva] visual_branch model weights before loading pretrained model: ')
         # self.print_model_weights(self.visual_branch)
         # checkpoint_path = 'dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl'
         # checkpoint = torch.load(checkpoint_path, map_location=lambda storage, loc: storage) # lambda storage, loc: storage表示的是将模型加载到内存中
         # self.visual_branch.load_state_dict(checkpoint["model_state_dict"])
         # self.print_model_weights(self.visual_branch)
-        # print ('[dpcv/modeling/networks/audio_visual_residual.py] visual_branch model weights after loading pretrained model: ')
+        # print ('[AudioVisualResNet18LSTMUdiva] visual_branch model weights after loading pretrained model: ')
         # TODO 使用pretrain的模型会报错 size mismatch, 即我们初始化的audio_branch和visual_branch的模型参数的维度和pretrain的模型参数的维度不一致，不一致的原因是pretrain的模型只在单个image上训练，通道数为3，而我们的训练数据是2个image拼接后的，通道数为6，除了这个，其他方面也有不一致，这里需要解决这个问题。
         # '''
         
         if init_weights:
             initialize_weights(self)
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
+        # print('[AudioVisualResNet18LSTMUdiva] class AudioVisualResNet18Udiva - 结束执行构造函数__init__... ')
 
     def print_model_weights(self, model):
         # print the weights of the model: name of the layer and the shape of the weights
-        print('[dpcv/modeling/networks/audio_visual_residual.py] print_model_weights...')
+        print('[AudioVisualResNet18LSTMUdiva] print_model_weights...')
         for name, param in model.named_parameters():
             print(name, param.shape)
 
-    def forward(self, aud_input=None, vis_input=None): # forward函数是必须要定义的，这个函数是用来定义网络的前向传播的，这里的aud_input和vis_input是输入的音频和视频数据, aud_input的shape是[batch_size, 1, 1, 50176], vis_input是一个list，里面的每个元素是一个tensor: [batch_size, 3, 224, 224]
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' len(vis_input)', len(vis_input), ' vis_input.shape: ', vis_input.shape) # aud_input.shape:  torch.Size([1, 2=1*2个视频, 1, 256000=16秒*采样率16000])  len(vis_input) 1  vis_input.shape:  torch.Size([1, sample_size, 6=3*2个视频, 224, 224])
+    def forward(self, aud_input=None, vis_input=None):
+        # print('[AudioVisualResNet18LSTMUdiva] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' len(vis_input)', len(vis_input), ' vis_input.shape: ', vis_input.shape) # aud_input.shape:  torch.Size([1, 2=1*2个视频, 1, 256000=16秒*采样率16000])  len(vis_input) 1  vis_input.shape:  torch.Size([1, sample_size, 6=3*2个视频, 224, 224])
         if self.bimodal_option == 1: # 仅仅将图像数据输入到视频分支中
-            # print('model forward... only visual, vis_input.shape: ', vis_input.shape) # torch.Size([batch_size, 16, 6, 224, 224]) 16是sample_size, 6是6个通道，224是图像的高和宽
+            print('model forward... only visual branch, vis_input.shape: ', vis_input.shape) # torch.Size([batch_size, 16, 6, 224, 224]) 16是sample_size, 6是6个通道，224是图像的高和宽
             vis_x = self.visual_branch(vis_input)
             feat = vis_x # feat.shape:  torch.Size([batch_size, 256])
         elif self.bimodal_option == 2: # 仅仅将音频数据输入到音频分支中
-            print('model forward... only audio, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
+            print('model forward... only audio branch, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
             aud_x = self.audio_branch(aud_input)
             aud_x = aud_x.view(aud_x.size(0), -1)
             feat = aud_x
         elif self.bimodal_option == 3: # 将音频和图像数据分别输入到音频分支和图像分支中，得到音频分支和图像分支的输出
-            print('model forward... audio and visual, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
+            print('model forward... both audio and visual branch, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
             aud_x = self.audio_branch(aud_input)
             vis_x = self.visual_branch(vis_input)
             aud_x = aud_x.view(aud_x.size(0), -1)
@@ -194,19 +191,12 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # 基于UDIVA的CNN-LSTM模型�
         # print('model forward... feat.shape: ', feat.shape)
         
         x = self.linear(feat) # self.linear = nn.Linear(512, 2) x的shape是[batch_size, 2]，也就是把feat输入到全连接层中，全连接层的输出是2个类别的概率。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 2]
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... feat输入到全连接层中, 输出数据x的 x.shape: ', x.shape, ' x=', x)
+        # print('[AudioVisualResNet18LSTMUdiva] forward... feat输入到全连接层中, 输出数据x的 x.shape: ', x.shape, ' x=', x)
         
-        # add batch normalization
-        # x = self.bn(x)
-        # wandb.config.note = "use batch normalization"
-        
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... x经过batch normalization处理后, 输出 x.shape: ', x.shape, ' x=', x)
         x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
-        # print('[dpcv/modeling/networks/audio_visual_residual.py] forward... x经过sigmoid激活函数处理后, 输出 x.shape: ', x.shape, ' x=', x)
-        # x = torch.tanh(x)
-        # x = (x + 1) / 2  # scale tanh output to [0, 1]
+        # print('[AudioVisualResNet18LSTMUdiva] forward... x经过sigmoid激活函数处理后, 输出 x.shape: ', x.shape, ' x=', x)
         
-        if self.return_feature: 
+        if self.return_feature:
             return x, feat
         return x
 
@@ -271,17 +261,29 @@ def audiovisual_resnet(cfg=None):
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 
+
 @NETWORK_REGISTRY.register()
-def audiovisual_resnet_udiva(cfg=None): # 基于UDIVA的纯CNN模型结构：没有LSTM层处理特征序列
+def audiovisual_resnet_udiva(cfg=None): # UDIVA音频+视觉: 纯ResNet模型结构
     multi_modal_model = AudioVisualResNet18Udiva(return_feat=cfg.MODEL.RETURN_FEATURE) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 
+
 @NETWORK_REGISTRY.register()
-def audiovisual_resnet_lstm_udiva(cfg=None): # 基于UDIVA的CNN-LSTM模型结构：加入了LSTM层处理特征序列
+def audiovisual_resnet_lstm_udiva(cfg=None): # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
+    assert cfg.TRAIN.BIMODAL_OPTION == 1 or cfg.TRAIN.BIMODAL_OPTION == 3, "cfg.TRAIN.BIMODAL_OPTION should be 1 (visual branch) or 3 (audiovisual branch)"
     multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
+
+
+@NETWORK_REGISTRY.register()
+def audio_resnet_udiva(cfg=None): # UDIVA音频分支: 纯ResNet模型结构
+    assert cfg.TRAIN.BIMODAL_OPTION == 2, "cfg.TRAIN.BIMODAL_OPTION should be 2 for only audio branch"
+    multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION) #  cfg.MODEL.RETURN_FEATURE = False
+    multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return multi_modal_model
+
 
 def get_audiovisual_resnet_model():
     multi_modal_model = AudioVisualResNet18()

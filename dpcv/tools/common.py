@@ -15,13 +15,14 @@ def setup_config(args, cfg):
 
 
 def setup_seed(seed=12345):
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.manual_seed(seed)     # cpu
+    np.random.seed(seed) # numpy 
+    random.seed(seed) # python
+    torch.manual_seed(seed) # 为CPU设置随机种子
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = True
+        torch.cuda.manual_seed(seed) # 为当前GPU设置随机种子
+        torch.cuda.manual_seed_all(seed) # 为所有GPU设置随机种子
+        # torch.backends.cudnn.deterministic = True
+        # torch.backends.cudnn.benchmark = True
 
 
 def parse_args():
@@ -83,9 +84,9 @@ def parse_args():
         help='extract sample_size frames per video',
     )
     parser.add_argument(
-        '--wandb',
-        type=int,
-        default=1,
+        '--use_wandb',
+        type=str,
+        default="True",
         help='use wandb to log',
     )
     args = parser.parse_args()

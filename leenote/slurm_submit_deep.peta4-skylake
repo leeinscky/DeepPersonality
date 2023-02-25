@@ -106,6 +106,8 @@ conda activate DeepPersonality
 echo "> Python version : $(which python)"
 
 echo "==================== Run program ===================="
+cd /home/zl525/code/DeepPersonality/
+wandb online
 
 #### ==================== resnet3D: resnet_3d_udiva_full.yaml ==================== ####
 cfg_file=./config/demo/resnet_3d_udiva_full.yaml

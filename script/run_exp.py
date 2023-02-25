@@ -6,7 +6,7 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 work_path = os.path.join(current_path, "../")
 sys.path.append(work_path)
 
-from dpcv.tools.common import parse_args
+from dpcv.tools.common import parse_args, setup_seed
 from dpcv.config.default_config_opt import cfg, cfg_from_file, cfg_from_list
 # from torch.utils.tensorboard import SummaryWriter
 from dpcv.experiment.exp_runner import ExpRunner
@@ -15,7 +15,9 @@ import wandb
 
 def setup():
     args = parse_args()
-    wandb.init(config=args, project="DeepPersonality", settings=wandb.Settings(start_method="fork"))
+    if args.use_wandb == 'True':
+        wandb.init(config=args, project="DeepPersonality", settings=wandb.Settings(start_method="fork"))
+
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 
@@ -32,6 +34,9 @@ def setup():
         cfg.DATA_LOADER.TRAIN_BATCH_SIZE = int(args.bs)
     if args.sample_size:
         cfg.DATA.SAMPLE_SIZE = args.sample_size
+    if args.use_wandb:
+        cfg.TRAIN.USE_WANDB = (args.use_wandb == 'True')
+        # print('type(cfg.TRAIN.USE_WANDB): ', type(cfg.TRAIN.USE_WANDB))
 
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
@@ -39,10 +44,13 @@ def setup():
 
 
 def main():
+    setup_seed(12345)
     args = setup()
-    wandb.config.epoch = cfg.TRAIN.MAX_EPOCH
-    wandb.config.frame_per_sec = 5 # 每秒抽取5帧
-    wandb.config.cfg = cfg
+    # print('cfg.TRAIN.USE_WANDB:', cfg.TRAIN.USE_WANDB, ', type(cfg.TRAIN.USE_WANDB): ', type(cfg.TRAIN.USE_WANDB))
+    if cfg.TRAIN.USE_WANDB == True:
+        wandb.config.epoch = cfg.TRAIN.MAX_EPOCH
+        wandb.config.frame_per_sec = 5 # 每秒抽取5帧
+        wandb.config.cfg = cfg
     # print('args: ', args)
     # print('cfg: ', cfg)
     # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')

@@ -98,7 +98,7 @@ echo "==================== Run program ===================="
 
 #### 并行执行多个脚本
 cd /home/zl525/code/DeepPersonality/
-
+wandb online
 nvidia-smi
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 JOBID=$SLURM_JOB_ID

@@ -35,7 +35,8 @@ class ExpRunner:
         self.cfg = cfg
         # self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE)
         self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE)
-        wandb.config.log_dir = self.log_dir
+        if self.cfg.TRAIN.USE_WANDB:
+            wandb.config.log_dir = self.log_dir
         self.log_cfg_info()
         if not feature_extract:
             self.data_loader = self.build_dataloader()
@@ -190,23 +191,26 @@ class ExpRunner:
         if cfg.COMPUTE_PCC: # "COMPUTE_PCC":true 计算皮尔逊相关系数，即线性相关系数，值域[-1,1]，1表示完全正相关，-1表示完全负相关，0表示不相关，0.8表示强相关
             pcc_dict, pcc_mean = compute_pcc(dataset_output, dataset_label, self.cfg.DATA_LOADER.DATASET_NAME)
             self.logger.info(f"pcc: {pcc_dict} mean: {pcc_mean}")
-            wandb.log({"test_pcc":pcc_mean})
+            if self.cfg.TRAIN.USE_WANDB:
+                wandb.log({"test_pcc":pcc_mean})
 
         if cfg.COMPUTE_CCC: # "COMPUTE_CCC":true 计算皮尔逊相关系数，即线性相关系数，值域[-1,1]，1表示完全正相关，-1表示完全负相关，0表示不相关，0.8表示强相关
             ccc_dict, ccc_mean = compute_ccc(dataset_output, dataset_label, self.cfg.DATA_LOADER.DATASET_NAME)
             self.logger.info(f"ccc: {ccc_dict} mean: {ccc_mean}")
-            wandb.log({"test_ccc":ccc_mean})
+            if self.cfg.TRAIN.USE_WANDB:
+                wandb.log({"test_ccc":ccc_mean})
 
         if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":""
             os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
             torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
             torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
-        wandb.log({
-            "test_mse": mse[1],             # 最终测试得到的mse均值，评价模型效果以这个为准
-            "test_acc":test_acc,            # 最终测试得到的acc均值，评价模型效果以这个为准
-            # "test_pcc":pcc_mean,          # 最终测试得到的pcc均值，评价模型效果以这个为准
-            # "test_ccc":ccc_mean,          # 最终测试得到的ccc均值，评价模型效果以这个为准
-            })
+        if self.cfg.TRAIN.USE_WANDB:
+            wandb.log({
+                "test_mse": mse[1],             # 最终测试得到的mse均值，评价模型效果以这个为准
+                "test_acc":test_acc,            # 最终测试得到的acc均值，评价模型效果以这个为准
+                # "test_pcc":pcc_mean,          # 最终测试得到的pcc均值，评价模型效果以这个为准
+                # "test_ccc":ccc_mean,          # 最终测试得到的ccc均值，评价模型效果以这个为准
+                })
         
         return
 

@@ -1,0 +1,21 @@
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+Changed directory to /home/zl525/code/DeepPersonality/leenote.
+
+JobID: 14919056
+======
+Time: Sat Feb 25 00:03:47 GMT 2023
+Running on master node: gpu-q-26
+Current directory: /home/zl525/code/DeepPersonality/leenote
+
+Nodes allocated:
+================
+gpu-q-26
+
+numtasks=1, numnodes=1, mpi_tasks_per_node=1 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+ 
+

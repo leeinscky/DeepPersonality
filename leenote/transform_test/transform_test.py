@@ -10,6 +10,18 @@ img_root_dir = '/home/zl525/code/DeepPersonality/datasets/udiva_full/train/recor
 img_file = os.path.join(img_root_dir, '002003/FC2_T/frame_50.jpg')
 
 
+class AddGaussianNoise(object):
+    # copy from https://discuss.pytorch.org/t/how-to-add-noise-to-mnist-dataset-when-using-pytorch/59745/23
+    def __init__(self, mean=0., std=1.):
+        self.std = std
+        self.mean = mean
+        
+    def __call__(self, tensor):
+        return tensor + torch.randn(tensor.size()) * self.std + self.mean
+    
+    def __repr__(self):
+        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
+
 # 定义转换
 # transform = transforms.Compose([
 #     transforms.Resize(256),   # 调整图像大小为 256 x 256, 保持长宽比不变，图像较小的一边填充为 256，较大的一边等比例缩放，多余部分裁剪。例如：原始图像为 200 x 100，调整后为 256 x 128
@@ -42,11 +54,15 @@ face_image_transform = transforms.Compose([
 # 增加噪声处理，个人测试
 noise_frame_transform = transforms.Compose([
     transforms.Resize(256), 
-    transforms.RandomHorizontalFlip(1), 
-    transforms.CenterCrop((224, 224)), 
-    transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.CenterCrop((224, 224)),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2), # 随机更改图像颜色
+    transforms.RandomRotation(degrees=10), # 设计角度旋转图像
+    transforms.GaussianBlur(kernel_size=(3,3)), # 高斯模糊 kernel_size: 高斯核的大小(模糊半径), 模糊半径越大, 正态分布标准差越大, 图像就越模糊; sigma: 高斯核的标准差, sigma越大，模糊程度越大, 一般设置为0.1到2.0之间
     transforms.ToTensor(), 
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    AddGaussianNoise(mean=0., std=0.2), # 增加噪声, 0.2是标准差, 0.是均值, 这么做的目的是为了让模型更加鲁棒, 也就是说模型不会因为图片中有一些噪声而导致模型的效果变差
+    transforms.RandomErasing(p=0.5, scale=(0.02, 0.23)) # 随机擦除, scale: 遮挡区域的面积。如(a, b)，则会随机选择 (a, b) 中的一个遮挡比例 ; ratio: 遮挡区域长宽比。如(a, b)，则会随机选择 (a, b) 中的一个长宽比 例如: scale=(0.02, 0.33), ratio=(0.3, 3) 会随机选择一个遮挡比例为 0.02 到 0.33 之间的一个值, 然后随机选择一个长宽比为 0.3 到 3 之间的一个值, 然后根据这个长宽比和遮挡比例来确定遮挡区域的大小, 然后在图片中随机选择一个位置, ratio=(0.99, 0.99) 会用一个正方形来遮挡图片
 ])
 
 # 加载和转换图像

@@ -474,17 +474,18 @@ class BiModalTrainerUdiva(object):
             f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
             f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1))
 
-            wandb.log({
-                "train_loss":  float(loss.item()),
-                "train_acc": float(acc_avg), # 当前batch的acc
-                "train_epoch_current_acc": float(epoch_current_acc), # 当前epoch的持续记录的acc
-                "train_batch_auc": float(batch_auc), # 当前batch的auc
-                "train_batch_auc2": float(batch_auc2),
-                "train_batch_f1": float(f1), # 当前batch的f1
-                "train_batch_f1_2": float(f1_2), # 当前batch的f1
-                "learning rate": lr,
-                "epoch": epoch_idx + 1,
-            })
+            if self.cfg.USE_WANDB:
+                wandb.log({
+                    "train_loss":  float(loss.item()),
+                    "train_acc": float(acc_avg), # 当前batch的acc
+                    "train_epoch_current_acc": float(epoch_current_acc), # 当前epoch的持续记录的acc
+                    "train_batch_auc": float(batch_auc), # 当前batch的auc
+                    "train_batch_auc2": float(batch_auc2),
+                    "train_batch_f1": float(f1), # 当前batch的f1
+                    "train_batch_f1_2": float(f1_2), # 当前batch的f1
+                    "learning rate": lr,
+                    "epoch": epoch_idx + 1,
+                })
 
             if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1: #  self.cfg.LOG_INTERVAL = 10，即每10个batch打印一次loss和acc_avg
                 remain_iter = epo_iter_num - i # epo_iter_num(一个epoch里的batch数)-当前的batch数=剩余的batch数
@@ -525,13 +526,14 @@ class BiModalTrainerUdiva(object):
                 f1, f1_2, # Epo F1_Score
             ))
         
-        wandb.log({
-            "train_epoch_summary_acc": float(epoch_summary_acc),  # 记录当前epoch全部batch遍历完后的总体acc
-            "train_epoch_summary_auc": float(epoch_auc), # 比epoch_auc2更准确的auc
-            "train_epoch_summary_auc2": float(epoch_auc2),
-            "train_epoch_summary_f1_score": float(f1), # 比f1_2更准确的f1
-            "train_epoch_summary_f1_score2": float(f1_2),
-            "epoch": epoch_idx + 1})
+        if self.cfg.USE_WANDB:
+            wandb.log({
+                "train_epoch_summary_acc": float(epoch_summary_acc),  # 记录当前epoch全部batch遍历完后的总体acc
+                "train_epoch_summary_auc": float(epoch_auc), # 比epoch_auc2更准确的auc
+                "train_epoch_summary_auc2": float(epoch_auc2),
+                "train_epoch_summary_f1_score": float(f1), # 比f1_2更准确的f1
+                "train_epoch_summary_f1_score2": float(f1_2),
+                "epoch": epoch_idx + 1})
         
         self.clt.record_train_loss(loss_list) # 将loss_list里的loss值记录到self.clt里
         self.clt.record_train_acc(acc_avg_list) # 将acc_avg_list里的acc_avg值记录到self.clt里
@@ -592,17 +594,17 @@ class BiModalTrainerUdiva(object):
                             batch_auc, batch_auc2, # AUC
                             f1, f1_2, # F1
                         ))
-                
-                wandb.log({
-                    "valid_loss": float(loss.item()),
-                    "valid_acc": float(batch_acc),
-                    "valid_epoch_current_acc": float(epoch_current_acc),
-                    "valid_batch_auc": float(batch_auc),
-                    "valid_batch_auc2": float(batch_auc2),
-                    "valid_batch_f1": float(f1),
-                    "valid_batch_f1_2": float(f1_2),
-                    "epoch": epoch_idx + 1,
-                })
+                if self.cfg.USE_WANDB:
+                    wandb.log({
+                        "valid_loss": float(loss.item()),
+                        "valid_acc": float(batch_acc),
+                        "valid_epoch_current_acc": float(epoch_current_acc),
+                        "valid_batch_auc": float(batch_auc),
+                        "valid_batch_auc2": float(batch_auc2),
+                        "valid_batch_f1": float(f1),
+                        "valid_batch_f1_2": float(f1_2),
+                        "epoch": epoch_idx + 1,
+                    })
                 acc_batch_list.append(batch_acc)
             self.tb_writer.add_scalar("valid_acc", batch_acc, epoch_idx)
         
@@ -633,19 +635,19 @@ class BiModalTrainerUdiva(object):
                 epoch_auc, epoch_auc2, # Epo AUC
                 f1, f1_2, # Epo F1_Score
             ))
-
-        wandb.log({
-            # "valid_acc_batch_avg": acc_batch_avg,
-            # "valid_ocean_acc_avg": ocean_acc_avg,
-            # "Train Mean_Acc": float(self.clt.epoch_train_acc),
-            # "Valid Mean_Acc": float(self.clt.epoch_valid_acc),
-            "val_epoch_summary_acc": float(epoch_summary_acc),
-            "val_epoch_summary_auc": float(epoch_auc),
-            "val_epoch_summary_auc2": float(epoch_auc2),
-            "val_epoch_summary_f1": float(f1),
-            "val_epoch_summary_f1_2": float(f1_2),
-            "epoch": epoch_idx + 1,
-        })
+        if self.cfg.USE_WANDB:
+            wandb.log({
+                # "valid_acc_batch_avg": acc_batch_avg,
+                # "valid_ocean_acc_avg": ocean_acc_avg,
+                # "Train Mean_Acc": float(self.clt.epoch_train_acc),
+                # "Valid Mean_Acc": float(self.clt.epoch_valid_acc),
+                "val_epoch_summary_acc": float(epoch_summary_acc),
+                "val_epoch_summary_auc": float(epoch_auc),
+                "val_epoch_summary_auc2": float(epoch_auc2),
+                "val_epoch_summary_f1": float(f1),
+                "val_epoch_summary_f1_2": float(f1_2),
+                "epoch": epoch_idx + 1,
+            })
 
     def test(self, data_loader, model, epoch_idx=None):
         model.eval()
@@ -710,19 +712,21 @@ class BiModalTrainerUdiva(object):
                                 epoch_auc, epoch_auc2, # Epo AUC
                                 f1, f1_2, # Epo F1_Score
                             ))
-            wandb.log({
-                "test_acc": float(test_acc),
-                "test_auc": float(epoch_auc),
-                "test_auc2": float(epoch_auc2),
-                "test_f1": float(f1),
-                "test_f1_2": float(f1_2),
-                "epoch": epoch_idx + 1})
+            if self.cfg.USE_WANDB:
+                wandb.log({
+                    "test_acc": float(test_acc),
+                    "test_auc": float(epoch_auc),
+                    "test_auc2": float(epoch_auc2),
+                    "test_f1": float(f1),
+                    "test_f1_2": float(f1_2),
+                    "epoch": epoch_idx + 1})
         else:
             self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f})\n".format(test_acc, total_acc, total_num, epoch_auc, epoch_auc2))
-            wandb.log({
-                "test_final_acc": float(test_acc),
-                "test_final_auc": float(epoch_auc),
-                })
+            if self.cfg.USE_WANDB:
+                wandb.log({
+                    "test_final_acc": float(test_acc),
+                    "test_final_auc": float(epoch_auc),
+                    })
 
         return test_acc
 
@@ -784,7 +788,7 @@ class BiModalTrainerUdiva(object):
                 torch.save(video_extract, save_to_file)
 
     def data_fmt(self, data):
-        print('[bi_modal_trainer] type of data: ', type(data))
+        # print('[bi_modal_trainer] type of data: ', type(data))
         if isinstance(data, dict): 
             # 1、如果data_loader中没有使用RandomOverSampler data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据
             for k, v in data.items(): # Python 字典(Dictionary) items() 函数以列表返回可遍历的(键, 值) 元组数组。

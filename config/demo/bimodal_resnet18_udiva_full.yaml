@@ -1,7 +1,7 @@
 DATA:
   ROOT: "datasets"
   SESSION: "TALK"
-  SAMPLE_SIZE: 256
+  SAMPLE_SIZE: 16
   SAMPLING_NAME: "BorderlineSMOTE"
   ANIMALS_TRAIN_IMG_DATA: "udiva_full/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_full/train/recordings/ghost_recordings_train_img"
@@ -38,14 +38,14 @@ DATA:
   TEST_LABEL_DATA: "udiva_full/test/label/sessions_test.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
-  TRANSFORM: "standard_frame_transform"
+  TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 4
-  NUM_WORKERS: 1
+  VALID_BATCH_SIZE: 9
+  NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
 MODEL:
-  NAME: "audiovisual_resnet_lstm_udiva"
+  NAME: "audio_resnet_udiva"
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
@@ -54,10 +54,15 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [10, 20, 30]
+  MILESTONE: [10, 20, 40, 80, 150, 200]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
-  MAX_EPOCH: 5
+  MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
   BIMODAL_OPTION: 2
   LOG_INTERVAL: 1
+  VALID_INTERVAL: 1
+  TEST_INTERVAL: 1
+TEST:
+  COMPUTE_PCC: False
+  COMPUTE_CCC: False

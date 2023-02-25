@@ -35,7 +35,7 @@ DATA:
   TEST_LABEL_DATA: "udiva_tiny/test/label/sessions_test.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
-  TRANSFORM: "standard_frame_transform"
+  TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 2
   VALID_BATCH_SIZE: 1
   NUM_WORKERS: 2

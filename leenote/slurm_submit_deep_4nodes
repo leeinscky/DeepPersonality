@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=6:00:00
+#SBATCH --time=4:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -96,6 +96,7 @@ echo "==================== Run program ===================="
 
 #### 并行执行多个脚本
 cd /home/zl525/code/DeepPersonality/
+wandb online
 JOBID=$SLURM_JOB_ID
 #### ==================== resnet3D: resnet_3d_udiva_full.yaml ==================== ####
 # epoch和SBATCH --time的设置值参考：
@@ -108,22 +109,37 @@ JOBID=$SLURM_JOB_ID
     # batch_size=8时， sample_size >= 256时就会OOM爆内存
     # batch_size=4时， sample_size >= 256时就会OOM爆内存
 
+# experiment-1实验结果较好的参数设置备份，https://wandb.ai/hyllbd-1009694687/DeepPersonality/reports/ResNet-3D-Experiments-Report--VmlldzozNTcyMTIy
+    # sample_size=32
+    # sample_size2=48
+    # sample_size3=64
+    # sample_size4=64
+    # sample_size5=64
+    # sample_size6=144
+
+    # batch_size=16
+    # batch_size2=16
+    # batch_size3=16
+    # batch_size4=8
+    # batch_size5=32
+    # batch_size6=8
+
 cfg_file=./config/demo/resnet_3d_udiva_full.yaml
 epoch=300
 
-sample_size=48
-sample_size2=64
-sample_size3=32
-sample_size4=80
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=64
 sample_size5=64
-sample_size6=80
+sample_size6=144
 
 batch_size=16
 batch_size2=16
 batch_size3=16
-batch_size4=16
-batch_size5=16
-batch_size6=16
+batch_size4=8
+batch_size5=32
+batch_size6=8
 
 learning_rate=0.0005
 learning_rate2=0.0005
@@ -135,9 +151,9 @@ learning_rate6=0.0005
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size}_${batch_size}.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size2}_${batch_size2}.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size3}_${batch_size3}.log 2>&1 &
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size4}_${batch_size4}.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size4}_${batch_size4}.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size5 --max_epoch $epoch --bs $batch_size5 --lr $learning_rate5 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size5}_${batch_size5}.log 2>&1 &
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size6}_${batch_size6}.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/slurm-${JOBID}_T_${sample_size6}_${batch_size6}.log 2>&1 &
 wait
 
 ###############################################################
@@ -171,10 +187,12 @@ eval $CMD
 
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_4nodes
+
 # 14576875:sample_size = 160 176 192 208
 # 14576877:sample_size = 64 176 192 208
 # 14576896 bs=12 sample_size = 160 176 192 208
 # 14576900 bs=8 sample_size = 208 224 240 256
 # 14577325 bs=4 sample_size = 256 272 288 304
 # ResNet 3D: 14800293 14800328 14800348 14826735 14826745 14826755 14826840
+# ResNet 3D - 202302242213 - experiment-2: 14919003 14919037 14919038 14919047 14919056 14919057
 # ViViT: 14716832 14729675 14729707

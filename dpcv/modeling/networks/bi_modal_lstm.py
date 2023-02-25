@@ -174,7 +174,7 @@ class ImgLSTMUdiva(nn.Module):
         # y_temp = torch.softmax(x, dim=2)
         # print('y_temp:', y_temp, ' y_temp.shape', y_temp.shape)
         y = torch.softmax(x, dim=2).mean(dim=1) # shape of y: [bs, 2]
-        wandb.config.activation='softmax'
+        # wandb.config.activation='softmax'
         # print('y:', y, ' y.shape', y.shape)
         
         '''

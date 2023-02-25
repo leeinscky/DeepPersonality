@@ -96,6 +96,7 @@ echo "==================== Run program ===================="
 
 #### 并行执行多个脚本
 cd /home/zl525/code/DeepPersonality/
+wandb online
 JOBID=$SLURM_JOB_ID
 
 #### ==================== transformer ViViT: transformer_udiva.yaml ==================== ####
