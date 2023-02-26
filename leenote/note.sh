@@ -219,8 +219,50 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
             # vision.shape= torch.Size([24, 500, 35])
 
 ######## wandb上的对比实验记录 #########
-将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示
+Tag解释:
+    1. testjob: 提交正式slurm作业前的预测试，运行时间短，用于测试sbatch脚本是否能跑通
+    2. experiment-x: 正式slurm作业，将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示
 
 1. Project: DeepPersonality
-    experiment-1: 控制其他超参数不变，递增sample_size，观察acc的变化
-    experiment-2: 相比于experiment-1增加了auc、f1score指标，控制其他超参数不变，递增sample_size，观察auc的变化
+    experiment-1: 
+        【模型】：resnet50_3d_model_udiva 
+        【分支】：视觉分支
+        【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
+    experiment-2: 
+        【相比于上一个实验的变化】：相比于experiment-1，增加了auc、f1score指标，
+        【模型】：resnet50_3d_model_udiva 
+        【分支】：视觉分支
+        【变量】：控制其他超参数不变，递增sample_size，观察auc的变化
+    experiment-3: 
+        【相比于上一个实验的变化】：相比于experiment-2，从视觉分支改为音频分支，且模型改为audio_resnet_udiva, 且数据集进行了过采样避免不均衡
+        【模型】：audio_resnet_udiva 
+        【分支】：音频分支
+        【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
+        【GPU job id】 14970054(5mins test, success✅) 14956420 14956425 14956433 14956435 14956438 14956441 (全部job都success✅)
+        【CPU job id】 1+2: 14977081, 3+4: 14977083, 5+6: 14977084
+        【总结】audio跑的很快，bs16_sp32:gpu8分钟跑完，cpu5h跑完
+    experiment-4: 
+        【相比于上一个实验的变化】：相比于experiment-3，使用Transformer模型:timesformer_udiva 来处理视觉分支
+        【模型】：timesformer_udiva
+        【分支】：视觉分支
+        【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
+        【job id】 10mins test: 14976665(success✅); 5h: 1-14976675(success✅), 2-14976697(CUDA OOM), 3-14977044(CUDA OOM), 4-14977045(CUDA OOM), 5-14977046(CUDA OOM), 6-14977049(CUDA OOM)
+    
+    
+    
+    (DeepPersonality) [zl525@login-q-1 leenote]$ squeue -u zl525 --start
+                JOBID PARTITION     NAME     USER ST          START_TIME  NODES SCHEDNODES           NODELIST(REASON)
+            14976665    ampere   gpujob    zl525 PD 2023-02-26T08:25:00      1 gpu-q-69             (Priority)
+            14956420    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-64             (Priority)
+            14956425    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-14             (Priority)
+            14956433    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-21             (Priority)
+            14956435    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-24             (Priority)
+            14956436    ampere   gpujob    zl525 PD 2023-02-26T12:06:40      1 gpu-q-57             (Priority)
+            14956438    ampere   gpujob    zl525 PD 2023-02-26T12:06:40      1 gpu-q-73             (Priority)
+            14956441    ampere   gpujob    zl525 PD 2023-02-26T12:16:05      1 gpu-q-25             (Priority)
+            14976675    ampere   gpujob    zl525 PD 2023-02-26T19:09:12      1 gpu-q-13             (Priority)
+            14976697    ampere   gpujob    zl525 PD 2023-02-27T04:00:00      1 gpu-q-73             (Priority)
+            14977044    ampere   gpujob    zl525 PD 2023-02-27T04:10:00      1 gpu-q-25             (Priority)
+            14977045    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-26             (Priority)
+            14977046    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-28             (Priority)
+            14977049    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-53             (Priority)

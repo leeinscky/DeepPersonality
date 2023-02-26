@@ -336,7 +336,8 @@ class BiModalTrainerUdiva(object):
                 2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
             inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             # print('[bi_modal_trainer.py] train... model.device=', model.device, 'inputs[0].device=', inputs[0].device)
-            outputs = model(*inputs) # 加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+            # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+            outputs = model(*inputs)
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             loss = loss_f(outputs.cpu(), labels.cpu().float())
             if i in [0, 1, 2, 3, 4]:
@@ -554,7 +555,7 @@ class BiModalTrainerUdiva(object):
                 loss = loss_f(outputs.cpu(), labels.cpu().float())
                 
                 print(torch.cat([outputs, labels], dim=1))
-                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} ***********')
+                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
                 
                 loss_batch_list.append(loss.item())
                 
@@ -585,7 +586,7 @@ class BiModalTrainerUdiva(object):
 
                 if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
                     self.logger.info(
-                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f})".format(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) \n".format(
                             epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
                             i + 1, epo_iter_num,                 # Iter
                             float(loss.item()),                  # LOSS
@@ -831,6 +832,9 @@ class BiModalTrainerUdiva(object):
             img_in = img_in.permute(0, 2, 1, 3, 4) # img_in: [batch, channel, time, height, width], # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             # print('[data_fmt] img_in.device: ', img_in.device, ', labels.device: ', labels.device)
             return (img_in, ), labels 
+        elif self.cfg_model.NAME == "timesformer_udiva":
+            img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
+            return (img_in, ), labels
         else:
             return (aud_in, img_in), labels
     

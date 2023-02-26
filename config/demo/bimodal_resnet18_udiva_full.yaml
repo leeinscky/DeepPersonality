@@ -46,6 +46,7 @@ DATA_LOADER:
   DROP_LAST: False
 MODEL:
   NAME: "audio_resnet_udiva"
+  # NAME: "audiovisual_resnet_lstm_udiva"
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:

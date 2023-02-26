@@ -3,6 +3,7 @@ transform operation for different networks
 for vgg face mean = (131.0912, 103.8827, 91.4953) no std
 """
 from .build import TRANSFORM_REGISTRY
+import torch
 
 
 def set_transform_op():

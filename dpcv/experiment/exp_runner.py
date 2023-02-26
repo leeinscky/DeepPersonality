@@ -88,7 +88,7 @@ class ExpRunner:
     def before_train(self, cfg):
         cfg = self.cfg.TRAIN
         
-        # 手动加载预训练模型用于测试 
+        # # 手动加载预训练模型用于测试 
         # # DeepPersonality代码库提供的预训练模型ResNet：checkpoint_297.pkl  Reference: https://github.com/liaorongfan/DeepPersonality
         # checkpoint_path = 'dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl'
         # checkpoint = torch.load(checkpoint_path, map_location=lambda storage, loc: storage) # lambda storage, loc: storage表示的是将模型加载到内存中
@@ -142,7 +142,7 @@ class ExpRunner:
             #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
             #     self.collector.update_best_epoch(epoch)
             
-            if epoch == (cfg.MAX_EPOCH - 1): # 最后一个epoch时，保存模型
+            if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
                 save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
 
     def after_train(self, cfg):

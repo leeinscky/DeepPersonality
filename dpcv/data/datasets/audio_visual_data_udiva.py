@@ -654,11 +654,15 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
         batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
         
         # 过采样
-        if cfg.DATA.SAMPLING_NAME is not None:
+        if cfg.DATA.SAMPLING_NAME != "":
             dataset = over_sampling(dataset, cfg.DATA.SAMPLING_NAME, cfg.TRAIN.BIMODAL_OPTION)
-            image, label = dataset[0]
-            print('[oversampling]- final return dataset: len(dataset)=', len(dataset), 'dataset[0]的image.shape=', image.shape, ', dataset[0]的label.shape=', label)
-            # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
+            if cfg.TRAIN.BIMODAL_OPTION == 1 or cfg.TRAIN.BIMODAL_OPTION == 2:
+                image_or_audio, label = dataset[0]
+                print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image or audio, label = dataset[0], image or audio.shape=', image_or_audio.shape, ', label=', label)
+                # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
+            else:
+                image, audio, label = dataset[0]
+                print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image, audio, label = dataset[0], image.shape=', image.shape, ', audio.shape=', audio.shape, ', label=', label)
         
     elif mode == "valid":
         # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行验证集的dataloader初始化...')
@@ -771,71 +775,115 @@ def over_sampling(dataset, sampler_name, bimodal_option):
     # print('image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
     # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率
     
-    #****************** 1. 构造X_train, y_train 作为fit_resample的输入参数********************
-    X_train, y_train, X_train_img, X_train_audio = [], [], [], []
-    for i in range(len(dataset)):
-        if bimodal_option == 1: # bimodal_option=1, 表示只使用image数据
-            X_train.append(dataset[i]['image'])
-        elif bimodal_option == 2: # bimodal_option=2, 表示只使用audio数据
-            X_train.append(dataset[i]['audio'])
-        elif bimodal_option == 3: # bimodal_option=3, 表示使用image和audio数据
-            X_train_img.append(dataset[i]['image'])
-            X_train_audio.append(dataset[i]['image'])
-        else:
-            raise ValueError('bimodal_option must be 1, 2 or 3')
-        y_train.append(dataset[i]['label'])
-    # print('[oversampling]- len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
-    # len(X_train)= 115 , len(y_train)= 115 , X_train[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
-    X_train = torch.stack(X_train, dim=0)
-    y_train = torch.stack(y_train, dim=0)
-    # print('[oversampling]- after stack: len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), 'X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
-    sample_size = X_train.shape[1]
-    # after stack: len(X_train)= 115 , len(y_train)= 115, X_train.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
-    
-    # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
-    X_train = X_train.reshape(X_train.shape[0], -1) # 将X_train转换为shape为[115, sample_size*6*224*224]的二维数组，方便后续的过采样
-    y_train = y_train.argmax(dim=1) # 将y_train转换为shape为[115, ]的一维数组，方便后续的过采样
-    # print('[oversampling]- after reshape: X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', type(X_train)=', type(X_train), ', type(y_train)=', type(y_train))
-    # after reshape: X_train.shape= torch.Size([115, 1204224]) , y_train.shape= torch.Size([115]) , type(X_train)= <class 'torch.Tensor'> , type(y_train)= <class 'torch.Tensor'>
-    # print('[oversampling]- ******** Counter(y_train)=', sorted(Counter(y_train.numpy()).items())) # 使用Counter查看均衡前的label类别数据分布 # 统计y_train中各类label的数量
-    # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
-    
-    #****************** 2. 核心：执行过采样 ******************
-    X_resampled, y_resampled = sampler.fit_resample(X_train, y_train) 
-    # print('[oversampling]- after oversampling: X_resampled.shape=', X_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_resampled)=', type(X_resampled), ', type(y_resampled)=', type(y_resampled))
-    # after oversampling: X_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
-    print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
-    # Counter(y_resampled)= [(0, 71), (1, 71)] 即认识的label有71个，不认识的label也有71个
-    # print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
-    
-    # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
-    # a = X_train[:, :4]
-    # b = X_resampled[:, :4]
-    # b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
-    # print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
-    # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
-    
-    if bimodal_option == 1: # bimodal_option=1, 表示只使用image数据
-        X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
-    elif bimodal_option == 2: # bimodal_option=2, 表示只使用audio数据
-        X_resampled = torch.from_numpy(X_resampled.reshape(-1, 2, 1, sample_size*16000))
-    elif bimodal_option == 3: # bimodal_option=3, 表示使用image和audio数据
+    if bimodal_option == 1 or bimodal_option == 2:
+        #****************** 1. 构造 X_train, y_train 作为fit_resample的输入参数********************
+        X_train, y_train = [], []
+        for i in range(len(dataset)):
+            if bimodal_option == 1: # only image modality
+                X_train.append(dataset[i]['image'])
+            else: # only audio modality
+                X_train.append(dataset[i]['audio'])
+            y_train.append(dataset[i]['label'])
+        # print('[oversampling]- len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
+        # len(X_train)= 115 , len(y_train)= 115 , X_train[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
         
+        X_train = torch.stack(X_train, dim=0)
+        y_train = torch.stack(y_train, dim=0)
+        # print('[oversampling]- after stack: len(X_train)=', len(X_train), ', len(y_train)=', len(y_train), 'X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', X_train[0].shape=', X_train[0].shape, ', y_train[0].shape=', y_train[0].shape)
+        if bimodal_option == 1: # only image modality
+            sample_size = X_train.shape[1]
+        else: # only audio modality
+            sample_size = int(X_train.shape[3]/16000)
+        # print('[oversampling]- sample_size=', sample_size)
+        # after stack: len(X_train)= 115 , len(y_train)= 115, X_train.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
+        
+        # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
+        X_train = X_train.reshape(X_train.shape[0], -1) # 将X_train转换为shape为[115, sample_size*6*224*224]的二维数组，方便后续的过采样
+        y_train = y_train.argmax(dim=1) # 将y_train转换为shape为[115, ]的一维数组，方便后续的过采样
+        # print('[oversampling]- after reshape: X_train.shape=', X_train.shape, ', y_train.shape=', y_train.shape, ', type(X_train)=', type(X_train), ', type(y_train)=', type(y_train))
+        # after reshape: X_train.shape= torch.Size([115, 1204224]) , y_train.shape= torch.Size([115]) , type(X_train)= <class 'torch.Tensor'> , type(y_train)= <class 'torch.Tensor'>
+        # print('[oversampling]- ******** Counter(y_train)=', sorted(Counter(y_train.numpy()).items())) # 使用Counter查看均衡前的label类别数据分布 # 统计y_train中各类label的数量
+        # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
+        
+        #****************** 2. 核心：执行过采样 ******************
+        X_resampled, y_resampled = sampler.fit_resample(X_train, y_train) 
+        # print('[oversampling]- after oversampling: X_resampled.shape=', X_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_resampled)=', type(X_resampled), ', type(y_resampled)=', type(y_resampled))
+        # after oversampling: X_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
+        print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
+        # Counter(y_resampled)= [(0, 71), (1, 71)] 即认识的label有71个，不认识的label也有71个
+        # print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
+        
+        # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
+        a = X_train[:, :4]
+        b = X_resampled[:, :4]
+        b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
+        # print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
+        # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
+        
+        if bimodal_option == 1: # image
+            X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
+        else: # audio
+            X_resampled = torch.from_numpy(X_resampled.reshape(-1, 2, 1, sample_size*16000))
+        y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
+        
+        # print('[oversampling]- X_resampled.shape=', X_resampled.shape, ', type(X_resampled)=', type(X_resampled))
+        # print('[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
+        # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
+        #****************** 3. 构造dataset 用于传给dataloader ******************
+        dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch # torch TensorDataset 可以接受一个或多个参数，每个参数都是一个张量（Tensor），并将它们打包成一个数据集（Dataset）。dataset = TensorDataset(tensor1, tensor2, tensor3, ...) 张量的第一个维度大小应该相同，以确保它们能够正确地打包成数据集。 tensors that have the same size of the first dimension.
+        # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是一个shape为[2]的label
+    elif bimodal_option == 3: # bimodal_option=3, 表示使用image和audio数据
+        #****************** 1. 构造 X_train, y_train 作为fit_resample的输入参数********************
+        X_train_img, X_train_audio, y_train = [], [], []
+        for i in range(len(dataset)):
+            X_train_img.append(dataset[i]['image'])
+            X_train_audio.append(dataset[i]['audio'])
+            y_train.append(dataset[i]['label'])
+        # print('1-[oversampling]- len(X_train_img)=', len(X_train_img), ', len(y_train)=', len(y_train), ', X_train_img[0].shape=', X_train_img[0].shape, ', y_train[0].shape=', y_train[0].shape)
+        # print('1-[oversampling]- len(X_train_audio)=', len(X_train_audio), ', X_train_audio[0].shape=', X_train_audio[0].shape)
+        # len(X_train_img)= 115 , len(y_train)= 115 , X_train_img[0].shape= torch.Size([sample_size, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
+        
+        X_train_img = torch.stack(X_train_img, dim=0)
+        X_train_audio = torch.stack(X_train_audio, dim=0)
+        y_train = torch.stack(y_train, dim=0)
+        # print('2-[oversampling]- after stack: len(X_train_img)=', len(X_train_img), ', len(y_train)=', len(y_train), 'X_train_img.shape=', X_train_img.shape, ', y_train.shape=', y_train.shape, ', X_train_img[0].shape=', X_train_img[0].shape, ', y_train[0].shape=', y_train[0].shape)
+        # print('2-[oversampling]- after stack: len(X_train_audio)=', len(X_train_audio), 'X_train_audio.shape=', X_train_audio.shape, ', X_train_audio[0].shape=', X_train_audio[0].shape)
+        img_sample_size = X_train_img.shape[1]
+        audio_sample_size = int(X_train_audio.shape[3]/16000)
+        # after stack: len(X_train_img)= 115 , len(y_train)= 115, X_train_img.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train_img[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
+        
+        # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
+        X_train_img = X_train_img.reshape(X_train_img.shape[0], -1) # 将X_train_img转换为shape为[115, sample_size*6*224*224]的二维数组，方便后续的过采样
+        X_train_audio = X_train_audio.reshape(X_train_audio.shape[0], -1) # 将X_train_audio转换为shape为[115, 2*1*sample_size*16000]的二维数组，方便后续的过采样
+        y_train = y_train.argmax(dim=1) # 将y_train转换为shape为[115, ]的一维数组，方便后续的过采样
+        # print('3-[oversampling]- after reshape: X_train_img.shape=', X_train_img.shape, ', y_train.shape=', y_train.shape, ', type(X_train_img)=', type(X_train_img), ', type(y_train)=', type(y_train))
+        # print('3-[oversampling]- after reshape: X_train_audio.shape=', X_train_audio.shape, ', y_train.shape=', y_train.shape, ', type(X_train_audio)=', type(X_train_audio))
+        # after reshape: X_train_img.shape= torch.Size([115, 1204224]) , y_train.shape= torch.Size([115]) , type(X_train_img)= <class 'torch.Tensor'> , type(y_train)= <class 'torch.Tensor'>
+        # print('4-[oversampling]- ******** Counter(y_train)=', sorted(Counter(y_train.numpy()).items())) # 使用Counter查看均衡前的label类别数据分布 # 统计y_train中各类label的数量
+        # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
+        
+        #****************** 2. 核心：执行过采样 ******************
+        X_img_resampled, y_resampled = sampler.fit_resample(X_train_img, y_train) 
+        X_audio_resampled, y_resampled = sampler.fit_resample(X_train_audio, y_train)
+        # print('5-[oversampling]- after oversampling: X_img_resampled.shape=', X_img_resampled.shape, ', X_audio_resampled.shape=', X_audio_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_img_resampled)=', type(X_img_resampled), ', type(y_resampled)=', type(y_resampled))
+        # after oversampling: X_img_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_img_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
+        print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
+        # Counter(y_resampled)= [(0, 71), (1, 71)] 即认识的label有71个，不认识的label也有71个
+        # print('7-[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
+
+        X_img_resampled = torch.from_numpy(X_img_resampled.reshape(-1, img_sample_size, 6, 224, 224))
+        X_audio_resampled = torch.from_numpy(X_audio_resampled.reshape(-1, 2, 1, audio_sample_size*16000))
+        y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
+        
+        # print('8-[oversampling]- after torch.from_numpy: X_img_resampled.shape=', X_img_resampled.shape, ', X_audio_resampled.shape=', X_audio_resampled.shape)
+        # print('8-[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
+        # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
+        
+        #****************** 3. 构造dataset 用于传给dataloader ******************
+        dataset = TensorDataset(X_img_resampled, X_audio_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch # torch TensorDataset 可以接受一个或多个参数，每个参数都是一个张量（Tensor），并将它们打包成一个数据集（Dataset）。dataset = TensorDataset(tensor1, tensor2, tensor3, ...) 张量的第一个维度大小应该相同，以确保它们能够正确地打包成数据集。 tensors that have the same size of the first dimension.
+        # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是shape为[2, 1, sample_size*16000]的audio tensor，第3个元素是一个shape为[2]的label
     else:
         raise ValueError('bimodal_option must be 1, 2 or 3')
-    # X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
-    y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
-    
-    # print('[oversampling]- after one_hot: y_resampled.shape=', y_resampled.shape, ', type(y_resampled)=', type(y_resampled), ', y_resampled=', y_resampled)
-    # after torch.tensor: y_resampled.shape= torch.Size([142, 2]) , type(y_resampled)= <class 'torch.Tensor'> , y_resampled= tensor([[1., 0.], ... , [0., 1.]])
-    
-    #****************** 3. 构造dataset 用于传给dataloader ******************
-    dataset = TensorDataset(X_resampled, y_resampled) # refer: https://stackoverflow.com/questions/67683406/difference-between-dataset-and-tensordataset-in-pytorch # torch TensorDataset 可以接受一个或多个参数，每个参数都是一个张量（Tensor），并将它们打包成一个数据集（Dataset）。dataset = TensorDataset(tensor1, tensor2, tensor3, ...) 张量的第一个维度大小应该相同，以确保它们能够正确地打包成数据集。 tensors that have the same size of the first dimension.
-    # dataset 是一个TensorDataset对象，一共有142个元素，每个元素是一个tuple，tuple的第一个元素是一个shape为[sample_size, 6, 224, 224]的image tensor，第二个元素是一个shape为[2]的label
-    
-    # 查看dataset里的数据shape和类型
-    # print('[oversampling]- final dataset: len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0]=', dataset[0])
-    # len(dataset)= 142 , type(dataset)= <class 'torch.utils.data.dataset.TensorDataset'> , dataset[0]= (tensor([[[[-2.0323, -2.0494, ... ,  0.9668]]]]), tensor([1., 0.])) 即第一个元素是一个shape为[sample_size, 6, 224, 224]的tensor，第二个元素是一个shape为[2]的tensor
     return dataset
 
 
@@ -912,4 +960,5 @@ if __name__ == "__main__":
         [-0.2529, -0.1530, -0.0703,  0.0134],
         [ 0.5721,  0.6092,  0.6339,  0.6806],
         [-0.9331, -0.9184, -0.9026, -0.8557]]) , a.shape= torch.Size([21, 4]) , b.shape= torch.Size([28, 4])
+
 """

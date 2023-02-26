@@ -1,0 +1,22 @@
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+W&B online. Running your script from this directory will now sync to the cloud.
+Changed directory to /home/zl525/code/DeepPersonality/leenote.
+
+JobID: 14977046
+======
+Time: Sun Feb 26 03:16:12 GMT 2023
+Running on master node: gpu-q-57
+Current directory: /home/zl525/code/DeepPersonality/leenote
+
+Nodes allocated:
+================
+
+
+numtasks=1, numnodes=1, mpi_tasks_per_node=1 (OMP_NUM_THREADS=1)
+
+Executing command:
+==================
+ 
+

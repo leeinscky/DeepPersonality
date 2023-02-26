@@ -1,3 +1,7 @@
+"""
+code modified from ViViT: A Video Vision Transformer, https://github.com/drv-agwl/ViViT-pytorch
+
+"""
 from torch import nn, einsum
 import torch
 import torch.nn.functional as F

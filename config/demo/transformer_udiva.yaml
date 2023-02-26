@@ -45,7 +45,9 @@ DATA_LOADER:
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
 MODEL:
-  NAME: "vivit_model3_udiva"
+  # NAME: "vivit_model_udiva"  # https://github.com/rishikksh20/ViViT-pytorch
+  # NAME: "vivit_model3_udiva" # https://github.com/drv-agwl/ViViT-pytorch
+  NAME: "timesformer_udiva"    # https://github.com/facebookresearch/TimeSformer
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:

@@ -6,16 +6,17 @@ cd /home/zl525/code/DeepPersonality/
 use_wandb="False"
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
-# sample_size=16
-# epoch=2
-# batch_size=32
-# learning_rate=0.0001
+sample_size=32
+epoch=1
+batch_size=8
+learning_rate=0.0001
 
-# python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \
-# --sample_size $sample_size \
-# --max_epoch $epoch \
-# --bs $batch_size \
-# --lr $learning_rate
+python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \
+--sample_size $sample_size \
+--max_epoch $epoch \
+--bs $batch_size \
+--lr $learning_rate \
+--use_wandb $use_wandb
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
 # sample_size=4
@@ -43,18 +44,19 @@ use_wandb="False"
 # --max_epoch $epoch \
 # --bs $batch_size \
 # --lr $learning_rate \
+# --use_wandb $use_wandb \
 # --resume $resume
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=4
-epoch=1
-batch_size=5
-learning_rate=0.0001
+# sample_size=4
+# epoch=1
+# batch_size=5
+# learning_rate=0.0001
 
-python3 -u ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml \
---sample_size $sample_size \
---max_epoch $epoch \
---bs $batch_size \
---lr $learning_rate \
---use_wandb $use_wandb
+# python3 -u ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml \
+# --sample_size $sample_size \
+# --max_epoch $epoch \
+# --bs $batch_size \
+# --lr $learning_rate \
+# --use_wandb $use_wandb
 

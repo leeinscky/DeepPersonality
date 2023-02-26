@@ -133,15 +133,17 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
             layers=[2, 2, 2, 2],
             branch_type='visual'
         )
-        # self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
-        self.linear = nn.Linear(256, 2)
+        if self.bimodal_option == 1 or self.bimodal_option == 2:
+            self.linear = nn.Linear(256, 2)
+        else:
+            self.linear = nn.Linear(512, 2)
         
         # 打印模型的权重
         # self.print_model_weights(self.audio_branch)
         # self.print_model_weights(self.visual_branch)
         
         # DeepPersonality代码库提供的预训练模型ResNet： dpcv/modeling/networks/pretrain_model/deeppersonality_resnet_pretrain_checkpoint_297.pkl  Reference: https://github.com/liaorongfan/DeepPersonality
-        # '''
+        '''
         # load pretrained weights of restnet18
         # print ('[AudioVisualResNet18LSTMUdiva] audio_branch model weights before loading pretrained model: ')
         # self.print_model_weights(self.audio_branch)
@@ -157,7 +159,7 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
         # self.print_model_weights(self.visual_branch)
         # print ('[AudioVisualResNet18LSTMUdiva] visual_branch model weights after loading pretrained model: ')
         # TODO 使用pretrain的模型会报错 size mismatch, 即我们初始化的audio_branch和visual_branch的模型参数的维度和pretrain的模型参数的维度不一致，不一致的原因是pretrain的模型只在单个image上训练，通道数为3，而我们的训练数据是2个image拼接后的，通道数为6，除了这个，其他方面也有不一致，这里需要解决这个问题。
-        # '''
+        '''
         
         if init_weights:
             initialize_weights(self)
@@ -172,16 +174,16 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
     def forward(self, aud_input=None, vis_input=None):
         # print('[AudioVisualResNet18LSTMUdiva] forward... 音频和视频数据输入数据的维度为, aud_input.shape: ', aud_input.shape, ' len(vis_input)', len(vis_input), ' vis_input.shape: ', vis_input.shape) # aud_input.shape:  torch.Size([1, 2=1*2个视频, 1, 256000=16秒*采样率16000])  len(vis_input) 1  vis_input.shape:  torch.Size([1, sample_size, 6=3*2个视频, 224, 224])
         if self.bimodal_option == 1: # 仅仅将图像数据输入到视频分支中
-            print('model forward... only visual branch, vis_input.shape: ', vis_input.shape) # torch.Size([batch_size, 16, 6, 224, 224]) 16是sample_size, 6是6个通道，224是图像的高和宽
+            # print('model forward... only visual branch, vis_input.shape: ', vis_input.shape) # torch.Size([batch_size, 16, 6, 224, 224]) 16是sample_size, 6是6个通道，224是图像的高和宽
             vis_x = self.visual_branch(vis_input)
             feat = vis_x # feat.shape:  torch.Size([batch_size, 256])
         elif self.bimodal_option == 2: # 仅仅将音频数据输入到音频分支中
-            print('model forward... only audio branch, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
+            # print('model forward... only audio branch, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
             aud_x = self.audio_branch(aud_input)
             aud_x = aud_x.view(aud_x.size(0), -1)
             feat = aud_x
         elif self.bimodal_option == 3: # 将音频和图像数据分别输入到音频分支和图像分支中，得到音频分支和图像分支的输出
-            print('model forward... both audio and visual branch, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
+            # print('model forward... both audio and visual branch, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
             aud_x = self.audio_branch(aud_input)
             vis_x = self.visual_branch(vis_input)
             aud_x = aud_x.view(aud_x.size(0), -1)
@@ -271,7 +273,6 @@ def audiovisual_resnet_udiva(cfg=None): # UDIVA音频+视觉: 纯ResNet模型结
 
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet_lstm_udiva(cfg=None): # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
-    assert cfg.TRAIN.BIMODAL_OPTION == 1 or cfg.TRAIN.BIMODAL_OPTION == 3, "cfg.TRAIN.BIMODAL_OPTION should be 1 (visual branch) or 3 (audiovisual branch)"
     multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
