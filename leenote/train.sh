@@ -7,8 +7,8 @@ use_wandb="False"
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 sample_size=32
-epoch=1
-batch_size=8
+epoch=500
+batch_size=16
 learning_rate=0.0001
 
 python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \
@@ -16,7 +16,7 @@ python3 -u ./script/run_exp.py --cfg_file ./config/demo/transformer_udiva.yaml \
 --max_epoch $epoch \
 --bs $batch_size \
 --lr $learning_rate \
---use_wandb $use_wandb
+# --use_wandb $use_wandb
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
 # sample_size=4

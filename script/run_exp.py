@@ -54,6 +54,12 @@ def main():
     # print('args: ', args)
     # print('cfg: ', cfg)
     # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')
+    
+    # avoid CUDA out of memory
+    if cfg.MODEL.NAME == "timesformer_udiva" and cfg.DATA_LOADER.TRAIN_BATCH_SIZE >= 16 and cfg.DATA.SAMPLE_SIZE > 16:
+        print('set os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"')
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:1024"
+    
     runner = ExpRunner(cfg)
     # print('[DeepPersonality/script/run_exp.py] - 结束执行 runner = ExpRunner(cfg)')
     # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner.run()')

@@ -2,7 +2,7 @@ DATA:
   ROOT: "datasets"
   SESSION: "TALK"
   SAMPLE_SIZE: 16
-  SAMPLING_NAME: "BorderlineSMOTE"
+  # SAMPLING_NAME: "BorderlineSMOTE"
   ANIMALS_TRAIN_IMG_DATA: "udiva_full/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_full/train/recordings/ghost_recordings_train_img"
   LEGO_TRAIN_IMG_DATA: "udiva_full/train/recordings/lego_recordings_train_img"

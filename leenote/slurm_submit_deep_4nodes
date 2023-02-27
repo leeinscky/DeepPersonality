@@ -29,8 +29,8 @@
 #! interrupted by node failure or system downtime):
 ##SBATCH --no-requeue
 
-#SBATCH --output=slurm_log/slurm-%j.%x.out
-#SBATCH --error=slurm_log/slurm-%j.%x.err
+#SBATCH --output=slurm_log/gpu/backup/slurm-%j.%x
+#SBATCH --error=slurm_log/gpu/backup/slurm-%j.%x
 
 #! Do not change:
 #SBATCH -p ampere
@@ -125,29 +125,33 @@ JOBID=$SLURM_JOB_ID
     # batch_size6=8
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
+# model="Res3D"
 # cfg_file=./config/demo/resnet_3d_udiva_full.yaml
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
-# cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
+# model="Res18"
+# cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml 
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
+model="T"
 cfg_file=./config/demo/transformer_udiva.yaml
+
 
 epoch=300
 
 sample_size=16
 sample_size2=32
 sample_size3=48
-sample_size4=64
-sample_size5=80
-sample_size6=96
+# sample_size4=64
+# sample_size5=80
+# sample_size6=96
 
-batch_size=16
-batch_size2=16
-batch_size3=16
-batch_size4=16
-batch_size5=16
-batch_size6=16
+batch_size=4
+batch_size2=4
+batch_size3=4
+batch_size4=4
+batch_size5=4
+batch_size6=4
 
 learning_rate=0.0005
 learning_rate2=0.0005
@@ -156,12 +160,12 @@ learning_rate4=0.0005
 learning_rate5=0.0005
 learning_rate6=0.0005
 
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size}_bs${batch_size}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size5 --max_epoch $epoch --bs $batch_size5 --lr $learning_rate5 > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size5}_bs${batch_size5}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/gpu/slurm-${JOBID}_T_sp${sample_size6}_bs${batch_size6}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size}_bs${batch_size}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size5 --max_epoch $epoch --bs $batch_size5 --lr $learning_rate5 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size5}_bs${batch_size5}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size6}_bs${batch_size6}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 wait
 
 ###############################################################

@@ -1,0 +1,7 @@
+rhel8/default-icl(17):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-compilers/2022.1.0/gcc'
+rhel8/default-icl(18):ERROR:105: Unable to locate a modulefile for 'intel-oneapi-mpi/2021.6.0/intel'
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+W&B online. Running your script from this directory will now sync to the cloud.
+slurmstepd: error: *** JOB 14970034 ON cpu-e-1004 CANCELLED AT 2023-02-25T22:29:24 DUE TO TIME LIMIT ***

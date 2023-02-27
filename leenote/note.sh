@@ -246,7 +246,15 @@ Tag解释:
         【模型】：timesformer_udiva
         【分支】：视觉分支
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
-        【job id】 10mins test: 14976665(success✅); 5h: 1-14976675(success✅), 2-14976697(CUDA OOM), 3-14977044(CUDA OOM), 4-14977045(CUDA OOM), 5-14977046(CUDA OOM), 6-14977049(CUDA OOM)
+        【job id】 
+            bs16: 10mins test: 14976665(success✅); 5h: 1-14976675(success✅), 2-14976697(CUDA OOM❌), 3-14977044(CUDA OOM), 4-14977045(CUDA OOM), 5-14977046(CUDA OOM), 6-14977049(CUDA OOM)
+            bs8 bs4: 8mins test: 14994245(success✅) ; 5h: 1-14994284(success✅) 2-14994289(success✅) 3-14994300(CUDA OOM❌) 4-14994301(success✅) 5-14994312(CUDA OOM❌) 6-14994315(CUDA OOM❌)
+            bs4: sp16-14995294 sp32-14995308 sp48-14995324
+
+        【总结】 
+            当batch_size=16,sample_size>=32时，timesformer跑不起来，CUDA OOM
+            当batch_size=8,sample_size>=48时，timesformer跑不起来，CUDA OOM
+            当batch_size=4,sample_size>=80时，timesformer跑不起来，CUDA OOM
     
     
     

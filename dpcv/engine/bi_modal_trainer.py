@@ -336,10 +336,27 @@ class BiModalTrainerUdiva(object):
                 2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
             inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
             # print('[bi_modal_trainer.py] train... model.device=', model.device, 'inputs[0].device=', inputs[0].device)
-            # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
-            outputs = model(*inputs)
+            # if i in [0, 1] and torch.cuda.is_available():
+            #     print('before model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
+            try: # refer: https://zhuanlan.zhihu.com/p/497192910
+                # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+                outputs = model(*inputs)
+            except RuntimeError as exception:
+                if "out of memory" in str(exception):
+                    print(exception)
+                    # print('Train WARNING: out of memory')
+                    if hasattr(torch.cuda, 'empty_cache'):
+                        torch.cuda.empty_cache()
+                        if i in [0, 1] and torch.cuda.is_available():
+                            print('after model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
+                    else:
+                        raise exception
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             loss = loss_f(outputs.cpu(), labels.cpu().float())
+
+            outputs = outputs.detach().cpu()
+            labels = labels.detach().cpu()
+
             if i in [0, 1, 2, 3, 4]:
                 print(torch.cat([outputs, labels], dim=1))
                 print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
@@ -444,8 +461,8 @@ class BiModalTrainerUdiva(object):
             '''
             
             # 因为我们需要预测的是认识/不认识，属于分类问题而不是回归问题，所以计算acc的方式为：acc = (y_pred.argmax(dim=1) == y_true).float()
-            outputs = outputs.cpu()
-            labels = labels.cpu()
+            # outputs = outputs.detach().cpu()
+            # labels = labels.detach().cpu()
             
             #### 计算指标：acc
             batch_total_acc = (outputs.argmax(dim=-1) == labels.argmax(dim=-1)).sum() # 当前batch里分类预测正确的样本数
@@ -455,11 +472,12 @@ class BiModalTrainerUdiva(object):
             epoch_total_num += batch_total_num
             epoch_current_acc = epoch_total_acc / epoch_total_num
             
-            acc_avg = batch_acc.detach().numpy()
+            acc_avg = batch_acc.numpy()
             acc_avg_list.append(acc_avg)
             
-            outputs = torch.round(outputs.detach() * 1000000) / 1000000 # 小数点后保留6位
-            labels = labels.detach().type(torch.int64)
+            outputs = torch.round(outputs * 1000000) / 1000000 # 小数点后保留6位
+            labels = labels.type(torch.int64)
+            
             # print('outputs[:, 0]:', outputs[:, 0], 'outputs.shape:', outputs.shape, ', outputs.argmax(dim=-1)=', outputs.argmax(dim=-1))
             # print('labels[:, 0]:', labels[:, 0], 'labels.shape:', labels.shape)
             pred_list.extend(outputs[:, 0].tolist())
@@ -559,8 +577,8 @@ class BiModalTrainerUdiva(object):
                 
                 loss_batch_list.append(loss.item())
                 
-                outputs = outputs.cpu()
-                labels = labels.cpu()
+                outputs = outputs.detach().cpu()
+                labels = labels.detach().cpu()
                 
                 #### 计算acc
                 batch_total_acc = (outputs.argmax(dim=-1) == labels.argmax(dim=-1)).sum() # 当前batch里分类预测正确的样本数
@@ -571,8 +589,7 @@ class BiModalTrainerUdiva(object):
                 epoch_current_acc = epoch_total_acc / epoch_total_num
                 
                 #### 计算AUC
-                outputs = outputs.detach()
-                labels = labels.detach().type(torch.int64)
+                labels = labels.type(torch.int64)
                 pred_list.extend(outputs[:, 0].tolist()) # 比pred_list2更准确
                 label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确
                 pred_list2.extend(outputs.argmax(dim=-1).tolist())
@@ -663,8 +680,8 @@ class BiModalTrainerUdiva(object):
                 inputs, labels = self.data_fmt(data)
                 outputs = model(*inputs)
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
-                outputs = outputs.cpu().detach()
-                labels = labels.cpu().detach()
+                outputs = outputs.detach().cpu()
+                labels = labels.detach().cpu()
                 
                 print(torch.cat([outputs, labels], dim=1))
                 print(f'*********** Test outputs and labels ***********')
@@ -675,8 +692,7 @@ class BiModalTrainerUdiva(object):
                 test_acc = total_acc / total_num 
                 
                 #### 计算AUC
-                outputs = outputs.detach()
-                labels = labels.detach().type(torch.int64)
+                labels = labels.type(torch.int64)
                 pred_list.extend(outputs[:, 0].tolist()) # 比pred_list2更准确
                 label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确
                 pred_list2.extend(outputs.argmax(dim=-1).tolist())

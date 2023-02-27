@@ -8,3 +8,8 @@ Loading rhel8/default-amp
     knem/1.1.4/gcc-9.4.0-bpbxgva libnl/3.3.0/gcc-9.4.0-whwhrwb
     rdma-core/34.0/gcc-9.4.0-5eo5n2u ucx/1.11.1/gcc-9.4.0-lktqyl4
     openmpi/4.1.1/gcc-9.4.0-epagguv
+==================== Activating conda environment ====================
+> Python version : /home/zl525/.conda/envs/DeepPersonality/bin/python
+==================== Run program ====================
+W&B online. Running your script from this directory will now sync to the cloud.
+slurmstepd: error: *** JOB 14995324 ON gpu-q-43 CANCELLED AT 2023-02-26T17:32:29 DUE TO TIME LIMIT ***
