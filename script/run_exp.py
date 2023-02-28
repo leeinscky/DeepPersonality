@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import sys
 import os
+import time
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 work_path = os.path.join(current_path, "../")
@@ -44,6 +45,7 @@ def setup():
 
 
 def main():
+    print("I am process %s, running on %s: starting (%s)" % (os.getpid(), os.uname()[1], time.asctime()))
     setup_seed(12345)
     args = setup()
     # print('cfg.TRAIN.USE_WANDB:', cfg.TRAIN.USE_WANDB, ', type(cfg.TRAIN.USE_WANDB): ', type(cfg.TRAIN.USE_WANDB))

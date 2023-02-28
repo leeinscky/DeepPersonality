@@ -20,6 +20,7 @@ import wandb
 from imblearn.over_sampling import RandomOverSampler, BorderlineSMOTE, SMOTE
 from collections import Counter
 import torch.nn.functional as F
+import torchaudio
 
 
 class AudioVisualDataUdiva(VideoDataUdiva):
@@ -186,22 +187,22 @@ class AudioVisualDataUdiva(VideoDataUdiva):
             # judge file is a file and start with FC1 and end with .wav.npy
             if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC1') and file.endswith('.wav.npy'):
                 fc1_wav_path = os.path.join(wav_dir_path, file)
-                # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_path:', fc1_wav_path)
+                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_path:', fc1_wav_path)
             # judge file is a file and start with FC2 and end with .wav.npy
             if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC2') and file.endswith('.wav.npy'):
                 fc2_wav_path = os.path.join(wav_dir_path, file)
-                # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
+                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
         
         # process fc1 wave data
         fc1_wav_ft = np.load(fc1_wav_path) # fc1_wav_ft.shape: (1, 1, 4626530) len(fc1_wav_ft):  1
-        # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
+        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
         try:
             n = np.random.randint(0, len(fc1_wav_ft) - 50176) # np.random.randint 生成一个随机整数，范围是[0, len(fc1_wav_ft) - 50176)
         except:
             # 看日志发现程序在这里执行了，说明len(fc1_wav_ft) - 50176 < 0
             n = 0
         fc1_wav_tmp = fc1_wav_ft[..., n: n + 50176] # 日志：fc1_wav_tmp.shape: (1, 1, 50176)  n: n + 50176 表示从n开始，取50176个采样点，每个采样点是1个声道，每个声道是1个采样点。
-        # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp:', fc1_wav_tmp, 'fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
+        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp:', fc1_wav_tmp, 'fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
         if fc1_wav_tmp.shape[-1] < 50176: # 如果采样点数小于50176，就用0填充  实际程序没有进入这个if语句
             fc1_wav_fill = np.zeros((1, 1, 50176)) # fc1_wav_fill.shape: (1, 1, 50176) np.zeros((1, 1, 50176)) 表示生成一个1行1列50176个元素的矩阵，每个元素都是0
             fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # fc1_wav_tmp.shape[-1] 表示取fc1_wav_tmp的最后一个维度的元素个数，也就是50176，也就是取fc1_wav_tmp的前50176个元素，然后赋值给fc1_wav_fill的前50176个元素
@@ -375,10 +376,13 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         return fc1_img_tensor_list, fc2_img_tensor_list
 
     def get_audio_input(self, idx):
+        if self.cfg.MODEL.NAME == 'ssast_udiva':
+            return self.ssast_audio_preprocess(idx)
+        
         ### get audio data ###
         fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象
         fc1_wav = torch.as_tensor(fc1_wav, dtype=self.img_dtype) # shape=(1,1,50176)
-        fc2_wav = torch.as_tensor(fc1_wav, dtype=self.img_dtype) # shape=(1,1,50176)
+        fc2_wav = torch.as_tensor(fc2_wav, dtype=self.img_dtype) # shape=(1,1,50176)
         wav = torch.cat((fc1_wav, fc2_wav), 0) # shape=(2,1,50176)  # 将两个tensor拼接在一起 concatenate the fc1_wav and fc2_wav, 拼接后的维度为(2,1,50176)，即将两个(1,1,50176)的tensor拼接在一起
         # print('[audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 wav.shape=', wav.shape, ', fc1_wav.shape=', fc1_wav.shape, ', fc2_wav.shape=', fc2_wav.shape) # wav.shape= torch.Size([2, 1, 256000]) fc1_wav.shape= torch.Size([1, 1, 256000]) fc2_wav.shape= torch.Size([1, 1, 256000])
         return wav
@@ -409,15 +413,15 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             # judge file is a file and start with FC1 and end with .wav.npy
             if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC1') and file.endswith('.wav.npy'):
                 fc1_wav_path = os.path.join(wav_dir_path, file)
-                # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_path:', fc1_wav_path)
+                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_path:', fc1_wav_path)
             # judge file is a file and start with FC2 and end with .wav.npy
             if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC2') and file.endswith('.wav.npy'):
                 fc2_wav_path = os.path.join(wav_dir_path, file)
-                # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
+                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
         
         ########### process fc1 wave data ###########
         fc1_wav_ft = np.load(fc1_wav_path) # fc1_wav_ft.shape: (1, 1, 4626530) len(fc1_wav_ft):  1
-        # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
+        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
         # 举例：animals_recordings_test_wav/008105/FC1_A.wav   时长:6分20秒=380秒    其对应的fc1_wav_ft.shape: (1, 1, 6073598)   6073598/380=15983.1526316，即每秒采样15983.1526316个采样点，为什么不完全等于16000呢？通过运行soxi -D FC1_A.wav，得到其精确的时长=379.599819秒，因此 379.599819*16000=6073597.104，四舍五入为6073598，能匹配！！
         # 举例：animals_recordings_val_wav/001081/FC1_A.wav    时长:10分07秒=607秒   其对应的fc1_wav_ft.shape: (1, 1, 9707799)   9707799/607=15993.0790774，即每秒采样15993.0790774个采样点, 精确时间: 606.737415秒, 因此 606.737415*16000=9707798.64，四舍五入为9707799，能匹配！！
         # 举例：animals_recordings_val_wav/001080/FC1_A.wav    时长:8分59秒=539秒    其对应的fc1_wav_ft.shape: (1, 1, 8621477)   8621477/539=15995.3191095，即每秒采样15995.3191095个采样点
@@ -433,7 +437,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc1 start_point:', start_point, 'end_point:', end_point)
         fc1_wav_tmp = fc1_wav_ft[..., start_point: end_point] # fc1_wav_tmp.shape: 
 
-        # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
+        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
         if fc1_wav_tmp.shape[-1] < self.sample_size * 16000: # 如果采样点数小于self.sample_size * 16000，就用0填充剩余的采样点
             fc1_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
             fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # 将fc1_wav_tmp的采样点填充到fc1_wav_fill的前fc1_wav_tmp.shape[-1]个采样点
@@ -454,9 +458,64 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             fc2_wav_fill[..., :fc2_wav_tmp.shape[-1]] = fc2_wav_tmp
             fc2_wav_tmp = fc2_wav_fill
 
-        # print('[Daudio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape, 'fc2_wav_tmp.shape:', fc2_wav_tmp.shape) # fc1_wav_tmp.shape: (1, 1, 256000) fc2_wav_tmp.shape: (1, 1, 256000)
+        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape, 'fc2_wav_tmp.shape:', fc2_wav_tmp.shape) # fc1_wav_tmp.shape: (1, 1, 256000) fc2_wav_tmp.shape: (1, 1, 256000)
         return fc1_wav_tmp, fc2_wav_tmp
 
+    def ssast_audio_preprocess(self, idx):
+        """audio preprocess for ssast model: https://github.com/YuanGongND/ssast
+        Args:
+            idx (int): index of the data
+            dataset_mean (float): mean of the dataset, default: -4.2677393
+            dataset_std (float): std of the dataset, default: 4.5689974
+        Returns:
+            _type_: _description_
+        """
+        
+        fc1_wav, fc2_wav  = self.get_wave_data(idx) # 分别从2个视频的完整音频中截取时长为self.sample_size秒的音频片段，共有连续的self.sample_size*16000个采样点，得到fc1_wav和fc2_wav, 2个wav都是一个numpy.ndarray对象
+        # fc1_wav.shape: (1, 1, 256000) fc2_wav.shape: (1, 1, 256000), sample_size*16000=256000
+        fc1_fbank = self.ssast_wav_process(fc1_wav) 
+        fc2_fbank = self.ssast_wav_process(fc2_wav)
+        wav = torch.cat([fc1_fbank, fc2_fbank], dim=1) # 将fc1_fbank和fc2_fbank沿着列方向拼接，得到wav, shape, e.g (1598, 128+128) -> (1598, 256)
+        # print('[audio_visual_data_udiva.py]-ssast_audio_preprocess wav.shape:', wav.shape) # wav.shape: (1598, 256)
+        return wav
+
+    def ssast_wav_process(self, wav, dataset_mean=-4.2677393, dataset_std=4.5689974):
+        """audio preprocess for ssast model: https://github.com/YuanGongND/ssast
+        Args:
+            wav (torch.tensor): shape=(1,1,256000), 256000=16000*self.sample_size
+            dataset_mean (float): mean of the dataset, default: -4.2677393
+            dataset_std (float): std of the dataset, default: 4.5689974
+        Returns:
+            _type_: _description_
+        """
+        wav = torch.as_tensor(wav, dtype=self.img_dtype) # 将wav从numpy.ndarray对象转为torch.tensor对象，shape=(1,1,256000), 256000=16000*self.sample_size
+        wav = wav.squeeze(0) # 将wav的shape从(1,1,256000)转为(1,256000)
+        wav_fbank = self._wav2fbank(wav) # [n_frames(帧数), num_mel_bins] e.g. [1598, 128]
+        wav_fbank = (wav_fbank - dataset_mean) / (dataset_std * 2) # use dataset mean and std to normalize the input.
+        return wav_fbank
+
+    def _wav2fbank(self, waveform, sr=16000, num_mel_bins=128):
+        """convert wav to fbank
+        Args:
+            wav (tensor): input wave tensor, e.g (1,256000) 256000=16000*self.sample_size
+            sr (int): sample rate of wav, default 16000
+            num_mel_bins (int): 滤波器的数量 num of mel bins, default 128 num_mel_bins 是 torchaudio.compliance.kaldi.fbank() 函数的一个参数，
+                        用于指定计算梅尔频率倒谱系数（Mel Frequency Cepstral Coefficients，简称MFCC）时使用的梅尔滤波器的数量。梅尔滤波器是一组三角形的滤波器，它们在频域上重叠并覆盖整个频谱，用于模拟人耳的听觉特性。
+                        MFCC是一种常用的语音特征提取方法，它可以将语音信号转换为一个维度较低的特征向量，常用于语音识别、说话人识别等任务。
+                        通常，num_mel_bins 的值可以设置为 20 ~ 40 之间的整数，用于计算一段语音信号的 MFCC 特征向量。这个值不是越大越好，过大会导致计算量增加而且可能会引入噪声，过小会导致丢失一些重要的语音特征。可以根据具体任务的需要和数据集的特点进行调整。
+        Returns:
+            _type_: _description_
+        """
+        waveform = waveform - waveform.mean() # 对fc1_wav的每个采样点减去fc1_wav的均值
+        fbank = torchaudio.compliance.kaldi.fbank(waveform, htk_compat=True, sample_frequency=sr, use_energy=False,
+                                                  window_type='hanning', num_mel_bins=num_mel_bins, dither=0.0, frame_shift=10)
+        # print('[audio_visual_data_udiva.py]-_wav2fbank函数 waveform.shape:', waveform.shape, ', fbank.shape:', fbank.shape)
+        # fbank函数返回的shape为[帧数, 特征维度], 如果fbank.shape: torch.Size([1598, 128]), 那么帧数就是1598约等于16秒*100帧，正好和sample_size*100对应, 即一秒100帧。在fbank.shape中，帧数frames的计算方式为：将处理后的音频数据按照固定的帧长和帧移进行分割，帧长和帧移一般是预先设定的参数，比如在本代码中的帧移是10毫秒。分割后，每个帧就对应一个音频特征向量，frames即为分割后的帧数。
+        # sample_size=16秒: waveform.shape: torch.Size([1, 256000]) , fbank.shape: torch.Size([1598, 128]) 根据 1598计算公式：(256000-400)/160=1598, 400=16000*0.025, 160=16000*0.01, 0.025和0.01是kaldi的默认参数, 0.025是窗口长度，0.01是窗口移动步长, 0.025和0.01都是以秒为单位
+        # sample_size=32秒: waveform.shape: torch.Size([1, 512000]) , fbank.shape: torch.Size([3198, 128]) 根据SSAST代码库里1024 frames (i.e., 10.24s)的解释，3198帧对应31.98秒 https://github.com/YuanGongND/ssast#Self-Supervised-Pretraining 
+        # sample_size=48秒: waveform.shape: torch.Size([1, 768000]) , fbank.shape: torch.Size([4798, 128])
+        # sample_size=64秒: waveform.shape: torch.Size([1, 1024000]) , fbank.shape: torch.Size([6398, 128])
+        return fbank
 
 class ALLSampleAudioVisualDataUdiva(AudioVisualDataUdiva):
 

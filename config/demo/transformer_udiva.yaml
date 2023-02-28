@@ -45,9 +45,10 @@ DATA_LOADER:
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
 MODEL:
-  # NAME: "vivit_model_udiva"  # https://github.com/rishikksh20/ViViT-pytorch
-  # NAME: "vivit_model3_udiva" # https://github.com/drv-agwl/ViViT-pytorch
-  NAME: "timesformer_udiva"    # https://github.com/facebookresearch/TimeSformer
+  # NAME: "vivit_model_udiva"  # visual: https://github.com/rishikksh20/ViViT-pytorch
+  # NAME: "vivit_model3_udiva" # visual: https://github.com/drv-agwl/ViViT-pytorch
+  # NAME: "timesformer_udiva"  # visual: https://github.com/facebookresearch/TimeSformer
+  NAME: "ssast_udiva"          # audio: https://github.com/YuanGongND/ssast
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
@@ -58,10 +59,11 @@ SOLVER:
   MOMENTUM: 0.9
   MILESTONE: [10, 20, 40, 80, 150, 200]
 TRAIN:
-  TRAINER: "BiModalTrainerUdiva"
+  # TRAINER: "BiModalTrainerUdiva"
+  TRAINER: "SSASTTrainer"
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/vivit_udiva"
-  BIMODAL_OPTION: 1
+  BIMODAL_OPTION: 2
   LOG_INTERVAL: 1
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1

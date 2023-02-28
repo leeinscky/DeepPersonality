@@ -27,3 +27,7 @@ def crnet_solver(cfg, model):
 @SOLVER_REGISTRY.register()
 def adam(cfg, model):
     return optim.Adam(model.parameters(), lr=cfg.SOLVER.LR_INIT,)
+
+@SOLVER_REGISTRY.register()
+def ssast_adam(cfg, model):
+    return optim.Adam(model.parameters(), lr=cfg.SOLVER.LR_INIT, weight_decay=cfg.SOLVER.WEIGHT_DECAY, betas=(cfg.SOLVER.BETA_1, cfg.SOLVER.BETA_2))

@@ -557,7 +557,7 @@ class BiModalTrainerUdiva(object):
         self.clt.record_train_loss(loss_list) # 将loss_list里的loss值记录到self.clt里
         self.clt.record_train_acc(acc_avg_list) # 将acc_avg_list里的acc_avg值记录到self.clt里
 
-    def valid(self, data_loader, model, loss_f, epoch_idx):
+    def valid(self, data_loader, model, loss_f, scheduler, epoch_idx):
         model.eval()
         with torch.no_grad():
             loss_batch_list = []
@@ -851,6 +851,8 @@ class BiModalTrainerUdiva(object):
         elif self.cfg_model.NAME == "timesformer_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             return (img_in, ), labels
+        elif self.cfg_model.NAME == "ssast_udiva":
+            return(aud_in, ), labels
         else:
             return (aud_in, img_in), labels
     

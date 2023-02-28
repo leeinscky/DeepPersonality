@@ -2,7 +2,7 @@ DATA:
   ROOT: "datasets"
   SESSION: "TALK"
   SAMPLE_SIZE: 16
-  SAMPLING_NAME: "BorderlineSMOTE"
+  # SAMPLING_NAME: "BorderlineSMOTE"
   ANIMALS_TRAIN_IMG_DATA: "udiva_full/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_full/train/recordings/ghost_recordings_train_img"
   LEGO_TRAIN_IMG_DATA: "udiva_full/train/recordings/lego_recordings_train_img"
@@ -45,25 +45,32 @@ DATA_LOADER:
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
 MODEL:
-  NAME: "audio_resnet_udiva"
-  # NAME: "audiovisual_resnet_lstm_udiva"
+  # NAME: "vivit_model_udiva"  # visual: https://github.com/rishikksh20/ViViT-pytorch
+  # NAME: "vivit_model3_udiva" # visual: https://github.com/drv-agwl/ViViT-pytorch
+  # NAME: "timesformer_udiva"  # visual: https://github.com/facebookresearch/TimeSformer
+  NAME: "ssast_udiva"          # audio: https://github.com/YuanGongND/ssast
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
-  NAME: "adam"
-  SCHEDULER: "multi_step_scale"
-  LR_INIT: 0.001
-  WEIGHT_DECAY: 0.0005
-  MOMENTUM: 0.9
-  MILESTONE: [50, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
+  NAME: "ssast_adam"
+  SCHEDULER: "reduce_lr_on_plateau"
+  LR_INIT: 0.0001
+  WEIGHT_DECAY: !!float 5e-7
+  BETA_1: 0.95
+  BETA_2: 0.999
+  MODE: 'max'
+  FACTOR: 0.5
+  LR_PATIENCE: 2
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
+  # TRAINER: "SSASTTrainer"
   MAX_EPOCH: 2
-  OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
+  OUTPUT_DIR: "results/demo/unified_frame_images/ssast_udiva"
   BIMODAL_OPTION: 2
   LOG_INTERVAL: 1
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
+  PRE_TRAINED_MODEL: "../../pre_trained_weights/SSAST/save_mask01-tiny-f16-t16-epo300-lr0.0005-m400-pretrain_mpc-udiva/models/best_audio_model.pth"
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

@@ -14,3 +14,4 @@ from .bi_modal_trainer import (
     MultiModalTrainer,
 )
 from .crnet_trainer import CRNetTrainer2
+from .ssast_trainer import SSASTTrainer

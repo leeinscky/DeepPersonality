@@ -21,4 +21,5 @@ from .multi_modal_pred_net import multi_modal_visual_model, multi_modal_audio_mo
 from .vivit_model2 import vivit_model_udiva
 from .vivit_model3 import vivit_model3_udiva
 from .timesformer.vit import TimeSformer
+from .ssast_models import ASTModel
 

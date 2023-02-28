@@ -21,3 +21,8 @@ def exponential(cfg, optimizer):
 @SOLVER_REGISTRY.register()
 def crnet_multi_step_scale(cfg, optimizer):
     return optim.lr_scheduler.MultiStepLR(optimizer[1], gamma=cfg.SOLVER.FACTOR, milestones=cfg.SOLVER.MILESTONE)
+
+
+@SOLVER_REGISTRY.register()
+def reduce_lr_on_plateau(cfg, optimizer):
+    return optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode=cfg.SOLVER.MODE, factor=cfg.SOLVER.FACTOR, patience=cfg.SOLVER.LR_PATIENCE, verbose=True)

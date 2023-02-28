@@ -112,6 +112,8 @@ __C.SOLVER.BETA_2 = 0.999
 __C.SOLVER.SCHEDULER = "multi_step_scale"
 __C.SOLVER.FACTOR = 0.1
 __C.SOLVER.MILESTONE = [200, 280]
+__C.SOLVER.MODE = 'max'
+__C.SOLVER.LR_PATIENCE = 2
 
 # ------------------------------------------- step 6:  train config node -----------------------------------------------
 __C.TRAIN = CfgNode()
@@ -126,6 +128,7 @@ __C.TRAIN.TEST_INTERVAL = 1
 __C.TRAIN.OUTPUT_DIR = "results"
 __C.TRAIN.BIMODAL_OPTION = 1 # 1: image only, 2: audio only, 3: image + audio
 __C.TRAIN.USE_WANDB = True # True: use wandb, False: not use wandb
+__C.TRAIN.PRETRAIN = False
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False

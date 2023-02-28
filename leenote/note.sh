@@ -219,6 +219,9 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
             # vision.shape= torch.Size([24, 500, 35])
 
 ######## wandb上的对比实验记录 #########
+backup: 
+    sp16- ; sp32- ; sp48- ; sp64- ; sp80- ; sp96-
+
 Tag解释:
     1. testjob: 提交正式slurm作业前的预测试，运行时间短，用于测试sbatch脚本是否能跑通
     2. experiment-x: 正式slurm作业，将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示
@@ -239,8 +242,17 @@ Tag解释:
         【分支】：音频分支
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
         【GPU job id】 14970054(5mins test, success✅) 14956420 14956425 14956433 14956435 14956438 14956441 (全部job都success✅)
+                    bs16: sp112-15025516 sp128-15025517 sp144-15025518 sp160-15025523 sp176-15025524 sp192-15025526
+                    bs32: sp16-15025577 sp32-15025578 sp48-15025583 sp80-15025584 sp96-15025585 sp112-15025594
+                    bs8:  sp16-15025605 sp32-15025607 sp48-15025610 sp80-15025611 sp96-15025612 sp112-15025614
+                    bs48: sp16-15025617 sp32-15025620 sp48-15025621 sp64-15025622 sp80-15025627 sp96-15025628
         【CPU job id】 1+2: 14977081, 3+4: 14977083, 5+6: 14977084
         【总结】audio跑的很快，bs16_sp32:gpu8分钟跑完，cpu5h跑完
+        【更新】要全部重新跑❎，因为代码里有bug，之前代码里是把2个相同的音频cat了，没有真正的把两个人的音频拼接起来
+            bs8: sp16-15095034 ; sp32-15095409 ; sp48-15095411 ; sp64-15095425 ; sp80-15095426 ; sp96-15095427
+            bs16:(sp192 不会OOM gpu 20mins 跑完) sp16-15096165 ; sp32-15096166 ; sp48-15096167 ; sp64-15096168 ; sp80-15096192 ; sp96-15096193
+            bs32:(sp112 不会OOM gpu 12mins跑完) sp16-15096292 ; sp32-15096293 ; sp48-15096294 ; sp64-15096295 ; sp80-15096304 ; sp96-15096305
+            bs48:(sp96 不会OOM gpu 12mins跑完) sp16-15096345 ; sp32-15096347 ; sp48-15096348 ; sp64-15096349 ; sp80-15096350 ; sp96-15096351
     experiment-4: 
         【相比于上一个实验的变化】：相比于experiment-3，使用Transformer模型:timesformer_udiva 来处理视觉分支
         【模型】：timesformer_udiva
@@ -250,13 +262,28 @@ Tag解释:
             bs16: 10mins test: 14976665(success✅); 5h: 1-14976675(success✅), 2-14976697(CUDA OOM❌), 3-14977044(CUDA OOM), 4-14977045(CUDA OOM), 5-14977046(CUDA OOM), 6-14977049(CUDA OOM)
             bs8 bs4: 8mins test: 14994245(success✅) ; 5h: 1-14994284(success✅) 2-14994289(success✅) 3-14994300(CUDA OOM❌) 4-14994301(success✅) 5-14994312(CUDA OOM❌) 6-14994315(CUDA OOM❌)
             bs4: sp16-14995294 sp32-14995308 sp48-14995324
-
         【总结】 
             当batch_size=16,sample_size>=32时，timesformer跑不起来，CUDA OOM
             当batch_size=8,sample_size>=48时，timesformer跑不起来，CUDA OOM
             当batch_size=4,sample_size>=80时，timesformer跑不起来，CUDA OOM
+    experiment-5.1: 
+        【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, 预训练阶段
+        【模型】：预训练阶段 ssast_udiva  https://github.com/YuanGongND/ssast
+        【分支】：音频分支
+        【变量】：无
+        【GPU job id】30mins test: 15149208(finished✅) 
+                bs16: sp16-15149222
+        【CPU job id】bs16&8: 15149495
+    experiment-5.2: 
+        【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, fine tunning调优阶段
+        【模型】：fine tunning调优阶段, ssast_udiva  https://github.com/YuanGongND/ssast
+        【分支】：音频分支
+        【变量】：无
+        【GPU job id】30mins test: 
+                bs16: sp16-
+        【CPU job id】bs16&8:
     
-    
+
     
     (DeepPersonality) [zl525@login-q-1 leenote]$ squeue -u zl525 --start
                 JOBID PARTITION     NAME     USER ST          START_TIME  NODES SCHEDNODES           NODELIST(REASON)
@@ -274,3 +301,108 @@ Tag解释:
             14977045    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-26             (Priority)
             14977046    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-28             (Priority)
             14977049    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-53             (Priority)
+
+####### SSAST 模型对比总结 # 
+
+UDIVA:
+    模型的构造函数：
+                label_dim=2, 
+                fshape=16, tshape=16, fstride=16, tstride=16,
+                input_fdim=256, input_tdim=cfg.DATA.SAMPLE_SIZE,
+                 model_size='tiny', pretrain_stage=True
+
+    模型的输入数据：
+        [ASTModel] input x.shape:  torch.Size([4, 1598, 256]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
+    
+    gen_maskid_patch:
+        修改后：[ASTModel ****重要] 参数fstride: 16 tstride: 16 input_fdim: 256 input_tdim: 1598 fshape: 16 tshape: 16
+        
+        self.p_f_dim, self.p_t_dim = self.get_shape(fstride, tstride, input_fdim, input_tdim, fshape, tshape)
+        num_patches = self.p_f_dim * self.p_t_dim
+        self.num_patches = num_patches
+        即 sequence_len = self.p_f_dim * self.p_t_dim
+
+        [ASTModel - gen_maskid_patch] sequence_len: 1584 mask_size: 400 cluster: 3 , cur_clus: 4
+
+
+官方代码:
+    模型的构造函数：
+    【****重要】lee 打印构造的ASTModel模型的所有__init__参数 
+        fshape:  16 tshape:  16 fstride:  16 tstride:  16 
+        input_fdim:  128 input_tdim:  1024 
+        model_size:  base pretrain_stage:  True
+
+
+    模型的输入数据：
+        1-input x.shape:  torch.Size([2, 1024, 128]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
+        
+        
+    gen_maskid_patch:
+        [lee ASTModel ****重要]计算num_patches的参数 fstride: 16 tstride: 16 input_fdim: 128 input_tdim: 1024 fshape: 16 tshape: 16
+        [lee ASTModel - gen_maskid_patch] sequence_len: 512 mask_size: 400 cluster: 3 , cur_clus: 4
+        
+        sequence_len: 512 是怎么计算的：参数 
+            fstride: 16 tstride: 16 
+            input_fdim: 128 input_tdim: 1024 
+            fshape: 16 tshape: 16
+
+""" SSAST备份
+Namespace(adaptschedule=False, bal='none', batch_size=2, 
+          cluster_factor=3, data_eval=None, data_train='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json',
+          data_val='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
+          dataset='esc50', dataset_mean=-4.2677393, dataset_std=4.5689974, epoch_iter=4000, 
+          exp_dir='./exp/mask01-base-f16-t16-b2-lr1e-4-m400-pretrain_mpc-esc50', 
+          freqm=0, fshape=16, fstride=16, head_lr=1, 
+          label_csv='/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
+          loss='BCE', lr=0.0001, lr_patience=2, lrscheduler_decay=0.5, lrscheduler_start=10, lrscheduler_step=5, 
+          mask_patch=400, metrics='mAP', mixup=0.0, model_size='base', n_class=527, n_epochs=2, n_print_steps=100, 
+          noise=None, num_mel_bins=128, num_workers=16, optim='adam', pretrained_mdl_path=None, save_model=False, 
+          target_length=1024, task='pretrain_mpc', timem=0, tshape=16, tstride=16, wa=None, wa_end=30, wa_start=16, warmup=True)
+
+args_dict备份
+        args_dict = {'data_train': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json', 
+                     'data_val': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
+                     'data_eval': None, 
+                     'label_csv': '/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
+                     'n_class': 2, 
+                     'dataset': 'udiva', 
+                     'dataset_mean': -4.2677393, 
+                     'dataset_std': 4.5689974, 
+                     'target_length': 1024, 
+                     'num_mel_bins': 128, 
+                     'exp_dir': '', 
+                     'lr': 0.0001, 
+                     'warmup': True, 
+                     'optim': 'adam', 
+                     'batch_size': 2, 
+                     'num_workers': 16, 
+                     'n_epochs': 2, 
+                     'lr_patience': 2, 
+                     'adaptschedule': False, 
+                     'n_print_steps': 100, 
+                     'save_model': False, 
+                     'freqm': 0, 
+                     'timem': 0, 
+                     'mixup': 0.0, 
+                     'bal': 'none', 
+                     'fstride': 16, 
+                     'tstride': 16, 
+                     'fshape': 16, 
+                     'tshape': 16, 
+                     'model_size': 'base', 
+                     'task': 'pretrain_mpc', 
+                     'mask_patch': 400, 
+                     'cluster_factor': 3, 
+                     'epoch_iter': 4000, 
+                     'pretrained_mdl_path': None, 
+                     'head_lr': 1, 
+                     'noise': None, 
+                     'metrics': 'mAP', 
+                     'lrscheduler_start': 10, 
+                     'lrscheduler_step': 5, 
+                     'lrscheduler_decay': 0.5, 
+                     'wa': None, 
+                     'wa_start': 16, 
+                     'wa_end': 30,
+                     'loss': 'BCE'}
+"""

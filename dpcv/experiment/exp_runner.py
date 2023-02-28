@@ -118,15 +118,19 @@ class ExpRunner:
         for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
             # 训练用到的文件路径 self.trainer: dpcv/engine/bi_modal_trainer.py;  self.model: dpcv/modeling/networks/audio_visual_residual.py;  self.data_loader["train"]:  备注：结合config/demo/bimodal_resnet18_udiva.yaml里的信息就可以看到class类名
             
-            ### 1. train 
+            ### 1. train
+            print(f'\n================================== Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
             self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
             
             ### 2. valid
+            print(f'\n================================== Epo:{epoch+1} [train_epochs] start valid...     ==================================')
             if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
-                self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, epoch)
-            self.scheduler.step() # 每个epoch都进行学习率调整
+                self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, self.scheduler, epoch)
+            if cfg.TRAINER != "SSASTTrainer": # SSASTTrainer 的学习率调整已经在valid函数里面进行，此处不需要再进行学习率调整
+                self.scheduler.step() # 每个epoch都进行学习率调整
             
             ### 3. test
+            print(f'\n================================== Epo:{epoch+1} [train_epochs] start test...     ==================================')
             if epoch % cfg.TEST_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都在数据集上进行测试
                 self.trainer.test(self.data_loader["test"], self.model, epoch)
             
@@ -142,8 +146,8 @@ class ExpRunner:
             #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
             #     self.collector.update_best_epoch(epoch)
             
-            if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
-                save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            # if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
+            #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
 
     def after_train(self, cfg):
         cfg = self.cfg.TRAIN
@@ -176,7 +180,7 @@ class ExpRunner:
                 weight_file = os.path.join(self.log_dir, weights[-1])
             except IndexError:
                 weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl")
-            self.logger.info(f"test with model {weight_file}")
+            self.logger.info(f"Test with model {weight_file}")
             self.model = load_model(self.model, weight_file)
 
         if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
@@ -228,8 +232,14 @@ class ExpRunner:
                 weight_file = os.path.join(self.log_dir, weights[-1]) # 最新的模型的路径
             except IndexError:
                 weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl") # 如果没有找到最新的模型, 则使用checkpoint_last.pkl
-            self.logger.info(f"Test with model {weight_file}")
-            self.model = load_model(self.model, weight_file)
+            self.logger.info(f"[TEST] Test with model {weight_file}")
+            
+            # 如果load_model报错, 则打印警告，不退出程序
+            try:
+                self.model = load_model(self.model, weight_file)
+            except Exception as e:
+                self.logger.warning(f"[TEST] Error when loading model {weight_file}: {e}")
+                return
 
         if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
             test_acc = self.trainer.test(self.data_loader["test"], self.model)
@@ -243,14 +253,14 @@ class ExpRunner:
         return
 
     def run(self):
-        print('================================== start training... ==================================')
+        print('\n================================== [run] start training... ==================================')
         self.train()
-        print('================================== start test...     ==================================')
-        if self.cfg.TRAIN.TRAINER == "BiModalTrainerUdiva":
+        print('\n================================== [run] start test...     ==================================')
+        if self.cfg.TRAIN.TRAINER in ['BiModalTrainerUdiva', 'SSASTTrainer']:
             self.test_classification() # test for classification task
         else:
             self.test() # test for regression task
-        print('================================== done test ...     ==================================')
+        print('================================== [run] done test ...     ==================================')
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
 
     def log_cfg_info(self):
