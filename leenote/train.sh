@@ -6,19 +6,20 @@ cd /home/zl525/code/DeepPersonality/
 use_wandb="False"
 
 #### **************************** SSAST: ssast_udiva.yaml  音频Transformer **************************** ####
-sample_size=16
-epoch=3
-batch_size=8
-learning_rate=0.0001
-cfg_file=./config/demo/ssast_udiva.yaml
+# sample_size=48
+# epoch=3
+# batch_size=8
+# learning_rate=0.0001
+# # cfg_file=./config/demo/ssast_pretrain_udiva.yaml # 预训练
+# cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-python3 -u ./script/run_exp.py --cfg_file $cfg_file \
---sample_size $sample_size \
---max_epoch $epoch \
---bs $batch_size \
---lr $learning_rate \
---use_wandb $use_wandb \
-# >temp_train.log 2>&1
+# python3 -u ./script/run_exp.py --cfg_file $cfg_file \
+# --sample_size $sample_size \
+# --max_epoch $epoch \
+# --bs $batch_size \
+# --lr $learning_rate \
+# --use_wandb $use_wandb \
+# # >temp_train.log 2>&1
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 # sample_size=16
@@ -66,15 +67,18 @@ python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 # --resume $resume
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-# sample_size=4
-# epoch=1
-# batch_size=8
-# learning_rate=0.0001
+sample_size=16
+epoch=1
+batch_size=8
+learning_rate=0.0001
+# cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
+cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
 
-# python3 -u ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml \
-# --sample_size $sample_size \
-# --max_epoch $epoch \
-# --bs $batch_size \
-# --lr $learning_rate \
-# --use_wandb $use_wandb
+python3 -u ./script/run_exp.py --cfg_file $cfg_file \
+--sample_size $sample_size \
+--max_epoch $epoch \
+--bs $batch_size \
+--lr $learning_rate \
+--use_wandb $use_wandb \
+>temp_train.log 2>&1
 

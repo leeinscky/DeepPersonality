@@ -92,6 +92,18 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
     验证集loss不断上升，训练集loss一直下降：
         - 一般情况下，训练集loss下降，测试集loss上升是因为过拟合问题。20个epoch就出现过拟合，应该是训练样本严重不足或者训练样本相似性过高，建议找一些比较大的开源数据集来跑。
         - 解决办法：打乱数据，增加数据，数据增广，加正则项等等都是方法 https://www.zhihu.com/question/399992175/answer/1271494711
+    
+    验证集loss上升，准确率却上升：
+        - 验证集loss上升，acc也上升这种现象很常见，原因是过拟合或者训练验证数据分布不一致导致，即在训练后期，预测的结果趋向于极端，使少数预测错的样本主导了loss，但同时少数样本不影响整体的验证acc情况。
+            在我把所有分类信息打印出来之后发现是模型过于极端导致的，即模型会出现在正确分类上给出0.00..x的概率值，导致loss异常的高，超过20，因此极大的提高了平均loss，导致出现了loss升高，acc也升高的奇怪现象。 说了多少次了，不要看loss，loss波动很正常，loss设的不够好导致部分上升占主导，掩盖了另一部分的下降也很正常。 https://www.cnblogs.com/emanlee/p/14815390.html
+        - 可以明显看出训练200轮后结果趋于极端，而这些极端的负面Loss拉大了总体Loss导致验证集Loss飙升。出现这种情况大多是训练集验证集数据分布不一致，或者训练集过小，未包含验证集中所有情况，也就是过拟合导致的 验证集loss上升，准确率却上升该如何理解？ - 刘国洋的回答 - 知乎 https://www.zhihu.com/question/318399418/answer/1202932315
+        解决办法：增加训练样本
+                增加正则项系数权重，减小过拟合
+                加入早停机制，ValLoss上升几个epoch直接停止
+                采用Focal Loss
+                加入Label Smoothing
+        
+        
 
     为什么会发生train loss上升？
         - 数据有坏点 起始学习率 batchsize太小 https://www.zhihu.com/question/396221084/answer/1236081752
@@ -238,7 +250,7 @@ Tag解释:
         【变量】：控制其他超参数不变，递增sample_size，观察auc的变化
     experiment-3: 
         【相比于上一个实验的变化】：相比于experiment-2，从视觉分支改为音频分支，且模型改为audio_resnet_udiva, 且数据集进行了过采样避免不均衡
-        【模型】：audio_resnet_udiva 
+        【模型】：audio_resnet_udiva
         【分支】：音频分支
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
         【GPU job id】 14970054(5mins test, success✅) 14956420 14956425 14956433 14956435 14956438 14956441 (全部job都success✅)
@@ -266,22 +278,24 @@ Tag解释:
             当batch_size=16,sample_size>=32时，timesformer跑不起来，CUDA OOM
             当batch_size=8,sample_size>=48时，timesformer跑不起来，CUDA OOM
             当batch_size=4,sample_size>=80时，timesformer跑不起来，CUDA OOM
-    experiment-5.1: 
+    experiment-5_1: 预训练
         【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, 预训练阶段
-        【模型】：预训练阶段 ssast_udiva  https://github.com/YuanGongND/ssast
+        【模型】：ssast_udiva - 预训练阶段 https://github.com/YuanGongND/ssast
         【分支】：音频分支
         【变量】：无
         【GPU job id】30mins test: 15149208(finished✅) 
                 bs16: sp16-15149222
         【CPU job id】bs16&8: 15149495
-    experiment-5.2: 
+    experiment-5_2: 调优
         【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, fine tunning调优阶段
-        【模型】：fine tunning调优阶段, ssast_udiva  https://github.com/YuanGongND/ssast
+        【模型】：ssast_udiva - fine tunning调优阶段 https://github.com/YuanGongND/ssast 和5_1区别，有pretrain参数
         【分支】：音频分支
         【变量】：无
-        【GPU job id】30mins test: 
-                bs16: sp16-
-        【CPU job id】bs16&8:
+        【GPU job id】10mins test: 15161247(success✅) 15166250
+                bs8: sp16-15166513(success✅) ; sp32-15166928 (success✅); sp48-15166930(success✅) ; sp64-15166931(CUDA OOM❌) ; sp80-15166933 ; sp96-15167058; sp112-15169007 ; sp128-15169008 ; sp144-15169009 ; sp160-15169138 ; sp176-15169139 ; sp192-15169140
+                bs16: sp16-15164654(success✅) ; sp32-15164988(success✅) ; sp48-15165009(CUDA OOM❌) ; sp64-15165010 ; sp80-15165111 ; sp96-15165455
+                bs32: sp16-15167983(success✅) ; sp32-15168511(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
+                bs48: sp16-15168733(success✅) ; sp32-15168758(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
     
 
     
