@@ -238,8 +238,8 @@ class AudioVisualDataUdiva(VideoDataUdiva):
 
 
 class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None):
-        super().__init__(data_root, img_dir, label_file, audio_dir)
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None, mode=None):
+        super().__init__(data_root, img_dir, label_file, audio_dir, sample_size=sample_size, mode=mode)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         self.frame_idx = 0
@@ -247,93 +247,98 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             wandb.config.sample_size = sample_size
         self.cfg = config
         self.img_dtype = None
+        self.mode = mode
 
     def __getitem__(self, idx): # idx means the index of session in the directory
         sample = {} # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
         # cfg.TRAIN.BIMODAL_OPTION == 1 表示仅仅使用视觉数据，cfg.TRAIN.BIMODAL_OPTION == 2 表示仅仅使用语音数据，cfg.TRAIN.BIMODAL_OPTION == 3 表示同时使用视觉和语音数据
         if self.cfg.TRAIN.BIMODAL_OPTION == 1:
-            img = self.get_visual_input(idx)
+            img, session_id, segment_id = self.get_visual_input(idx)
             sample['image'] = img
         elif self.cfg.TRAIN.BIMODAL_OPTION == 2:
-            wav = self.get_audio_input(idx)
-            sample['audio'] = wav
+            wav, session_id, segment_id = self.get_audio_input(idx)
+            sample['audio'] = wav # [2, 1, (sample_size / 5) x 16000 = duration_seconds x 16000]
         elif self.cfg.TRAIN.BIMODAL_OPTION == 3:
-            img = self.get_visual_input(idx)
-            wav = self.get_audio_input(idx)
+            img, session_id_img, segment_id_img = self.get_visual_input(idx) # TODO
+            wav, session_id_wav, segment_id_wav = self.get_audio_input(idx) # TODO
+            assert session_id_img == session_id_wav and segment_id_img == segment_id_wav, 'session_id_img != session_id_wav or segment_id_img != segment_id_wav'
             sample['image'] = img
             sample['audio'] = wav
+            session_id = session_id_img
+            segment_id = segment_id_img
 
         ### get label data ###
         label = self.get_ocean_label(idx)  # label是True或者False, 代表关系Known是True或者False
-        label = torch.as_tensor(label, dtype=self.img_dtype)
-        sample['label'] = label
-        # print('[audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 type(label)=', type(label), 'label=', label, ' label.shape=', label.shape) # type(label)= <class 'torch.Tensor'> label= tensor([0.5111, 0.4563, 0.4019, 0.3626, 0.4167])
+        sample['label'] = torch.as_tensor(label, dtype=self.img_dtype)
 
-        return sample # sample是一个dict对象, 例如：{'image': ..., 'audio': ..., 'label': ...}
+        # get session_id and segment_id
+        sample['session_id'] = session_id
+        sample['segment_id'] = segment_id
+        
+        # print('[__getitem__] dataset:', self.mode, ', idx:', idx, ', session_id:', session_id, ', segment_id:', segment_id, ', label:', label, ', label.shape:', sample['label'].shape)
+        return sample # sample是一个dict字典, {'image': [sample_size, c=6, h=224, w=224], 'audio': [2, 1, sample_size*16000], 'label.shape': [2]}
 
     def get_visual_input(self, idx):
         ### get image data ###
-        # print('[audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 __getitem__ , idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
-        fc1_img_tensor_list, fc2_img_tensor_list = self.get_image_data(idx)
+        # print('[get_visual_input] dataloader random idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
+        fc1_img_tensor_list, fc2_img_tensor_list, session_id, segment_id = self.get_image_data(idx)
         img_tensor_list = []
-        # print('[audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
+        # print('[get_visual_input] len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
         for i in range(len(fc1_img_tensor_list)):
             fc1_img_tensor = fc1_img_tensor_list[i]
             fc2_img_tensor = fc2_img_tensor_list[i]
             img = torch.cat((fc1_img_tensor, fc2_img_tensor), 0) # concatenate the fc1_img_tensor and fc2_img_tensor
-            # print('[audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , img.shape = ', img.shape) # img.shape =  torch.Size([6, 224, 224])
+            # print('[get_visual_input] img.shape = ', img.shape) # img.shape =  torch.Size([6, 224, 224])
             img_tensor_list.append(img)
         img = torch.stack(img_tensor_list) # 将img_tensor_list中的tensor拼接在一起, 拼接后的维度为(16,6,224,224)，即将16个6x224x224的tensor拼接在一起
-        # print('[audio_visual_data_udiva.py] - class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ , len(img_tensor_list) = ', len(img_tensor_list), ', img.shape = ', img.shape, ', img.dtype=', img.dtype)  # len(img_tensor_list) =  16 , img.shape =  torch.Size([sample_size=16, 3*2=6, 224, 224]) img.dtype= torch.float32
+        # print('[get_visual_input] len(img_tensor_list) = ', len(img_tensor_list), ', img.shape = ', img.shape, ', img.dtype=', img.dtype)  # len(img_tensor_list) =  16 , img.shape =  torch.Size([sample_size=16, 3*2=6, 224, 224]) img.dtype= torch.float32
         self.img_dtype = img.dtype
-        return img
+        
+        session_id = torch.as_tensor(session_id) # convert into tensor
+        segment_id = torch.as_tensor(segment_id)
+        return img, session_id, segment_id
 
     def get_image_data(self, idx):
-        # print('[ audio_visual_data_udiva.py ] - get_image_data 函数开始执行')
-        # get image data, return PIL.Image.Image object, for example: PIL.Image.Image object, mode=RGB, size=224x224, means the image size is 224x224, and is RGB three channels
-        # print('[audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) 开始执行 get_image_data')
-        img_dir_path = self.img_dir_ls[idx]
-        # print('[audio_visual_data_udiva.py]- img_dir_path=', img_dir_path)
-        # img_dir_path = 'datasets/udiva_full/train/recordings/talk_recordings_train_img/025044' # 手动指定img_dir_path测试
-        # img_dir_path 是session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
-        # 对session路径下的FC1_A 文件夹和FC2_A文件夹分别进行提取帧
+        session_dir_path = self.img_dir_ls[idx] # session的路径
+        # print('[audio_visual_data_udiva.py]- session_dir_path=', session_dir_path) # e.g. datasets/udiva_tiny/train/recordings/animals_recordings_train_img/058110_17
+        # 对session路径下的FC1_A 文件夹和FC2_A文件夹分别提取sample_size个连续的帧图片
+        session_dir_path, segment_idx = session_dir_path.rsplit("_", 1) # segment_idx表示session的第几个segment，例如058110_17中的17表示第17个segment，每个segment包含sample_size张图片
+        # print('[get_image_data] session_dir_path:', session_dir_path, ', segment_idx:', segment_idx)
+        session_id = session_dir_path.split('/')[-1]
+        
         fc1_img_dir_path, fc2_img_dir_path = '', ''
-        for file in os.listdir(img_dir_path):
-            # print('file:', file, 'type:', type(file))
-            # judge file is a directory and start with FC1 and not end with .mp4
-            if os.path.isdir(os.path.join(img_dir_path, file)) and file.startswith("FC1") and not file.endswith(".mp4"):
-                fc1_img_dir_path = os.path.join(img_dir_path, file)
-            # judge file is a directory and start with FC2 and not end with .mp4
-            if os.path.isdir(os.path.join(img_dir_path, file)) and file.startswith("FC2") and not file.endswith(".mp4"):
-                fc2_img_dir_path = os.path.join(img_dir_path, file)
-        # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
-        # 打印结果: get_image_data fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
+        for file in os.listdir(session_dir_path):
+            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC1") and not file.endswith(".mp4"): # judge file is a directory and start with FC1 and not end with .mp4
+                fc1_img_dir_path = os.path.join(session_dir_path, file)
+            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC2") and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
+                fc2_img_dir_path = os.path.join(session_dir_path, file)
+        # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path) # fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
         fc1_img_paths = glob.glob(fc1_img_dir_path + "/*.jpg") # fc1_img_paths是FC1_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc1_img_paths): 7228
         fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg") # fc2_img_paths是FC2_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc2_img_paths): 7228
-        # print('[audio_visual_data_udiva.py]- get_image_data, len(fc1_img_paths):', len(fc1_img_paths), 'len(fc2_img_paths):', len(fc2_img_paths))
-        ########### get fc1 image - start ###########
-        # print('[audio_visual_data_udiva.py]- get_image_data fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
-        # 将fc1_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
-        fc1_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-        # print('[audio_visual_data_udiva.py]- get_image_data, after sort, fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
+        # print('[get_image_data] len(fc1_img_paths):', len(fc1_img_paths), 'len(fc2_img_paths):', len(fc2_img_paths))
         
-        # 由于 fc1_img_paths 和 fc2_img_paths 里的帧个数有时候不完全一样(因为只提取人脸，视频里并非每一帧都能检测到完整的人脸)，所以这里要取两者中较小的那个值
-        smaller_len = min(len(fc1_img_paths), len(fc2_img_paths))
-        # 如果 self.sample_size 比 smaller_len还大，那么就把 self.sample_size 设置为 smaller_len，即取这个session里的所有帧作为输入
-        if self.sample_size > smaller_len:
-            self.sample_size = smaller_len
-        # 在0，len(fc1_img_paths)-sample_size 之间，生成一个随机数frame_idx，表示索引为frame_idx的图片帧
-        # print('test smaller_len:', smaller_len, 'self.sample_size:', self.sample_size)
-        self.frame_idx = random.randint(0, (smaller_len - self.sample_size)) # 如果一共16帧,索引值候选范围:从index=0到15, 共16个, sample_size=4, 那么frame_index=随机数，且取值范围是[0,12], 12=16-4
-        # print('[audio_visual_data_udiva.py]- get_image_data, self.frame_idx:', self.frame_idx, ' img_dir_path=', img_dir_path)
-        # 在 fc1_img_paths 取出从frame_idx开始的sample_size个图片帧
-        sample_fc1_frames = fc1_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片，包含self.frame_idx，不包含self.frame_idx+sample_size，左闭右开
-        # print('[audio_visual_data_udiva.py]- get_image_data, sample_fc1_frames:', sample_fc1_frames, 'len(sample_fc1_frames):', len(sample_fc1_frames))
+        # ************************* get fc1 image - start *************************
+        fc1_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0])) # 将fc1_img_paths中所有的图片按照后缀数字升序排序
+        # print('[get_image_data] after sort, fc1_img_paths:', fc1_img_paths, 'len(fc1_img_paths):', len(fc1_img_paths))
+        
+        """ 采样方式一：随机取sample_size个连续的帧图片
+        # smaller_len = min(len(fc1_img_paths), len(fc2_img_paths)) # 由于 fc1_img_paths 和 fc2_img_paths 里的帧个数有时候不完全一样(因为只提取人脸，视频里并非每一帧都能检测到完整的人脸)，所以这里要取两者中较小的那个值
+        # if self.sample_size > smaller_len: # 如果 self.sample_size 比 smaller_len还大，那么就把 self.sample_size 设置为 smaller_len，即取这个session里的所有帧作为输入
+        #     self.sample_size = smaller_len
+        # self.frame_idx = random.randint(0, (smaller_len - self.sample_size)) # 在0，len(fc1_img_paths)-sample_size 之间，生成一个随机数frame_idx，表示索引为frame_idx的图片帧 # 如果一共16帧,索引值候选范围:从index=0到15, 共16个, sample_size=4, 那么frame_index=随机数，且取值范围是[0,12], 12=16-4
+        # sample_fc1_frames = fc1_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 在 fc1_img_paths 取出从frame_idx开始的sample_size个图片帧，从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片，包含self.frame_idx，不包含self.frame_idx+sample_size，左闭右开 """
+        
+        # 采样方式二：按照segment_idx取sample_size个连续的帧图片
+        start_frame_id = int(self.sample_size) * (int(segment_idx) - 1) # 例如，如果self.sample_size=4，segment_idx=2，那么start_frame_id=4*(2-1)=4
+        end_frame_id = start_frame_id + self.sample_size # 例如，如果self.sample_size=4，segment_idx=2，那么end_frame_id=4+4=8, 即[4:8]，共4个frame, 是该视频的第2个segment，第一个segment是[0:3], 第二个segment是[4:7], 第三个segment是[8:11]
+        sample_fc1_frames = fc1_img_paths[start_frame_id:end_frame_id]
+        # print('[get_image_data] start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size, ', len(sample_fc1_frames):', len(sample_fc1_frames))
+        
         # 遍历sample_fc1_frames里的每个图片帧，将其转换为RGB模式
         fc1_img_tensor_list = []
         for i, fc1_frame_path in enumerate(sample_fc1_frames):
-            # print('[audio_visual_data_udiva.py]- get_image_data, enumerate(sample_fc1_frames), fc1_frame_path:', fc1_frame_path, 'i:', i)
+            # print('[get_image_data] enumerate(sample_fc1_frames), fc1_frame_path:', fc1_frame_path, 'i:', i)
             try:
                 fc1_img = Image.open(fc1_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
             except Exception as e:
@@ -344,122 +349,123 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 fc1_img_tensor = self.transform(fc1_img)
             # 将图片tensor添加到fc1_imgs中
             fc1_img_tensor_list.append(fc1_img_tensor)
-        # print('[audio_visual_data_udiva.py]- get_image_data, fc1_img_tensor_list:', fc1_img_tensor_list, 'len(fc1_img_tensor_list):', len(fc1_img_tensor_list))
-        ########### get fc1 image - done ###########
+        # print('[get_image_data] fc1_img_tensor_list:', fc1_img_tensor_list, 'len(fc1_img_tensor_list):', len(fc1_img_tensor_list))
+        # ************************* get fc1 image - done *************************
         
-        ########### get fc2 image - start###########
-        # print('[audio_visual_data_udiva.py]- get_image_data fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
-        # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
-        fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-        # print('[audio_visual_data_udiva.py]- get_image_data, after sort, fc2_img_paths:', fc2_img_paths, 'len(fc2_img_paths):', len(fc2_img_paths))
-        # print('[audio_visual_data_udiva.py]- get_image_data, self.frame_idx:', self.frame_idx)
-        # 在 fc2_img_paths 取出从self.frame_idx开始的sample_size个图片帧
-        sample_fc2_frames = fc2_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
-        # print('[audio_visual_data_udiva.py]- get_image_data, sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
-        # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
+        
+        # ************************* get fc2 image - start*************************
+        fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0])) # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
+        # sample_fc2_frames = fc2_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 采样方式一：随机取sample_size个连续的帧图片。从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
+        sample_fc2_frames = fc2_img_paths[start_frame_id:end_frame_id] # 采样方式二：按照segment_idx取sample_size个连续的帧图片
+        # print('[get_image_data] sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
+        
         fc2_img_tensor_list = []
-        for i, fc2_frame_path in enumerate(sample_fc2_frames):
-            # print('[audio_visual_data_udiva.py]- get_image_data, enumerate(sample_fc2_frames), fc2_frame_path:', fc2_frame_path, 'i:', i)
+        for i, fc2_frame_path in enumerate(sample_fc2_frames): # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
+            # print('[get_image_data] enumerate(sample_fc2_frames), fc2_frame_path:', fc2_frame_path, 'i:', i)
             try:
                 fc2_img = Image.open(fc2_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
             except Exception as e:
                 # print('[audio_visual_data_udiva.py]exception:', e, 'fc2_frame_path:', fc2_frame_path)
                 return None
-            # 将图片转换为tensor
-            if self.transform:
+            if self.transform: # 将图片转换为tensor
                 fc2_img_tensor = self.transform(fc2_img)
-            # 将图片tensor添加到fc2_imgs中
-            fc2_img_tensor_list.append(fc2_img_tensor)
+            fc2_img_tensor_list.append(fc2_img_tensor) # 将图片tensor添加到fc2_imgs中
         # print('[audio_visual_data_udiva.py]- get_image_data len(fc1_img_tensor_list):', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list))
-        ########### get fc2 image - done ###########
+        # ************************* get fc2 image - done *************************
         
-        return fc1_img_tensor_list, fc2_img_tensor_list
+        return fc1_img_tensor_list, fc2_img_tensor_list, int(session_id), int(segment_idx)
 
     def get_audio_input(self, idx):
         if self.cfg.MODEL.NAME == 'ssast_udiva':
-            return self.ssast_audio_preprocess(idx)
+            return self.ssast_audio_preprocess(idx) 
         
         ### get audio data ###
-        fc1_wav, fc2_wav  = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象
+        fc1_wav, fc2_wav, session_id, segment_id = self.get_wave_data(idx) # fc1_wav是一个numpy.ndarray对象
         fc1_wav = torch.as_tensor(fc1_wav, dtype=self.img_dtype) # shape=(1,1,50176)
         fc2_wav = torch.as_tensor(fc2_wav, dtype=self.img_dtype) # shape=(1,1,50176)
         wav = torch.cat((fc1_wav, fc2_wav), 0) # shape=(2,1,50176)  # 将两个tensor拼接在一起 concatenate the fc1_wav and fc2_wav, 拼接后的维度为(2,1,50176)，即将两个(1,1,50176)的tensor拼接在一起
         # print('[audio_visual_data_udiva.py]-class AudioVisualDataUdiva(VideoDataUdiva) __getitem__ - torch.as_tensor之后 wav.shape=', wav.shape, ', fc1_wav.shape=', fc1_wav.shape, ', fc2_wav.shape=', fc2_wav.shape) # wav.shape= torch.Size([2, 1, 256000]) fc1_wav.shape= torch.Size([1, 1, 256000]) fc2_wav.shape= torch.Size([1, 1, 256000])
-        return wav
+        return wav, session_id, segment_id
 
     def get_wave_data(self, idx):
-        # get wave data, return numpy.ndarray object, for example: numpy.ndarray object, shape=(1, 1, 128), means the wave data is 1x1x128, 音频数据是1x1x128，1代表1个声道，1代表1个采样点，128代表128个采样点，也就是说音频数据是128个采样点，每个采样点是1个声道，每个声道是1个采样点。
-        # print('[audio_visual_data_udiva.py]-get_wave_data 函数开始执行')
+        session_dir_path = self.img_dir_ls[idx] # session_dir_path 是训练集图像帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
+        # print('[get_wave_data] idx:', idx, ', session_dir_path:', session_dir_path) # 验证每次dataloader调用时，idx的值是否是shuffle后的, 即idx的值是否是随机的
+        session_dir_path, segment_idx = session_dir_path.rsplit("_", 1) # segment_idx表示session的第几个segment，例如058110_17中的17表示第17个segment，每个segment包含sample_size张图片
+        segment_idx = int(segment_idx) # 将segment_idx从str转换为int类型
+        session_id = session_dir_path.split("/")[-1]
+        # print('[audio_visual_data_udiva.py]-get_wave_data, session_id:', os.path.basename(session_dir_path)) # session_id 是训练集图像帧session的名称，例如 '055128'
         
-        img_dir_path = self.img_dir_ls[idx] # img_dir_path 是训练集图像帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128'
-        # print('[audio_visual_data_udiva.py]-get_wave_data, img_dir_path:', img_dir_path)
-        session_id = os.path.basename(img_dir_path) # session_id 是训练集图像帧session的名称，例如 '055128'
-        # print('[audio_visual_data_udiva.py]-get_wave_data, session_id:', session_id)
-        # print('[audio_visual_data_udiva.py]-get_wave_data, self.audio_dir:', self.audio_dir)
-        
-        # 原始的生成wav_dir_path的方式
-        # wav_dir_path = os.path.join(self.data_root, self.audio_dir, session_id) # wav_dir_path 是训练集音频帧session的路径，例如 'datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/055128'
-        
-        # 修改后的生成wav_dir_path的方式
-        # 构造wav所在的路径，需要和img的路径保持一致，为同一task的同一个session，即如果 img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134，那么 wav_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
-        # 将 img_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
-        wav_dir_path = img_dir_path.replace('_img', '_wav')
-        # print('[audio_visual_data_udiva.py]-get_wave_data, img_dir_path:', img_dir_path, 'session_id:', session_id, 'wav_dir_path:', wav_dir_path)
+        # 构造wav所在的路径，需要和img的路径保持一致，为同一task的同一个session，即如果 session_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134，那么 wav_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        wav_dir_path = session_dir_path.replace('_img', '_wav') # 将 session_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        # print('[audio_visual_data_udiva.py]-get_wave_data, session_dir_path:', img_dir_path, 'session_id:', session_id, 'wav_dir_path:', wav_dir_path)
         
         fc1_wav_path, fc2_wav_path = '', ''
         for file in os.listdir(wav_dir_path):
             # print('file:', file, 'type:', type(file)) # datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/128129/FC1_A.wav.npy 
-            # datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/055128/FC1_A.wav.npy
-            # judge file is a file and start with FC1 and end with .wav.npy
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC1') and file.endswith('.wav.npy'):
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC1') and file.endswith('.wav.npy'): # judge file is a file and start with FC1 and end with .wav.npy
                 fc1_wav_path = os.path.join(wav_dir_path, file)
-                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_path:', fc1_wav_path)
-            # judge file is a file and start with FC2 and end with .wav.npy
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC2') and file.endswith('.wav.npy'):
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC2') and file.endswith('.wav.npy'): # judge file is a file and start with FC2 and end with .wav.npy
                 fc2_wav_path = os.path.join(wav_dir_path, file)
-                # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc2_wav_path:', fc2_wav_path)
         
-        ########### process fc1 wave data ###########
+        # ************************* process fc1 wave data *************************
         fc1_wav_ft = np.load(fc1_wav_path) # fc1_wav_ft.shape: (1, 1, 4626530) len(fc1_wav_ft):  1
         # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_ft:', fc1_wav_ft, 'fc1_wav_ft.shape:', fc1_wav_ft.shape, '  len(fc1_wav_ft): ', len(fc1_wav_ft))
-        # 举例：animals_recordings_test_wav/008105/FC1_A.wav   时长:6分20秒=380秒    其对应的fc1_wav_ft.shape: (1, 1, 6073598)   6073598/380=15983.1526316，即每秒采样15983.1526316个采样点，为什么不完全等于16000呢？通过运行soxi -D FC1_A.wav，得到其精确的时长=379.599819秒，因此 379.599819*16000=6073597.104，四舍五入为6073598，能匹配！！
+        # 举例：animals_recordings_test_wav/008105/FC1_A.wav   时长:6分20秒=380秒    其对应的fc1_wav_ft.shape: (1, 1, 6073598)   6073598/380=15983.1526316，即每秒采样15983.1526316个采样点，为什么不完全等于 16000 呢？通过运行soxi -D FC1_A.wav，得到其精确的时长=379.599819秒，因此 379.599819*16000=6073597.104，四舍五入为6073598，能匹配！！
         # 举例：animals_recordings_val_wav/001081/FC1_A.wav    时长:10分07秒=607秒   其对应的fc1_wav_ft.shape: (1, 1, 9707799)   9707799/607=15993.0790774，即每秒采样15993.0790774个采样点, 精确时间: 606.737415秒, 因此 606.737415*16000=9707798.64，四舍五入为9707799，能匹配！！
         # 举例：animals_recordings_val_wav/001080/FC1_A.wav    时长:8分59秒=539秒    其对应的fc1_wav_ft.shape: (1, 1, 8621477)   8621477/539=15995.3191095，即每秒采样15995.3191095个采样点
         # 举例：animals_recordings_train_wav/055125/FC1_A.wav  时长:6分25秒=385秒    其对应的fc1_wav_ft.shape: (1, 1, 6161648)   6161648/385=16004.2805195，即每秒采样16004.2805195个采样点
         # 举例：animals_recordings_train_wav/058110/FC1_A.wav  时长:7分07秒=427秒    其对应的fc1_wav_ft.shape: (1, 1, 6824438)   6824438/427=15982.2903981，即每秒采样15982.2903981个采样点
         # 结合 leenote/video_to_wav/raw_audio_process.py 里的librosa_extract函数，wav_ft = librosa.load(wav_file_path, 16000)[0][None, None, :]，即当wav转为npy时，采样率为16000，所以每秒采样16000个点，所以每个npy文件的第三个维度值就是时长*16000
         
+        """采样方式一
+        # 采样方式一：随机取sample_size个连续的帧图片
         # 从音频中的第self.frame_idx秒开始，取时长为self.sample_size秒的音频片段, 即从第self.frame_idx*16000个采样点开始，取连续的self.sample_size*16000个采样点
-        start_point = self.frame_idx * 16000
-        end_point = start_point + self.sample_size * 16000
+        # start_point = self.frame_idx * 16000
+        # end_point = start_point + self.sample_size * 16000
+        """
+        
+        """采样方式二 （代码已验证）
+        采样方式二：与图片的采样方式保持一致，图片采样了sample_size个连续的帧图片，对应的耗时是sample_size/5秒的视频时长，因此音频也需要采样同等时长的音频片段
+        一个视频片段的时长，即sample_size个连续的帧图片的时长，为sample_size/5秒，因为每秒钟有5帧图片（5是由数据预处理阶段的降采样决定的）
+        当前需要取第segment_idx个视频片段，即音频的取样开始时间为segment_idx*sample_size秒
+        举例：如果sample_size=16, 当前segment_idx=30,即需要取第30个视频片段，说明采样的开始时间需要在前29个视频片段结束后，前29个视频片段的时长为 29*segment_duration=29*(16/5)=29*3.2=92.8秒, 对应的有 92.8*16000=1487360个采样点，因此音频的采样开始点为 1487360
+        为了和图片的采样时长保持一样，我们需要采样的时长为：sample_size/5 秒，对应的有 sample_size/5*16000 个采样点，因此音频的采样结束点为： 1487360 + sample_size/5*16000 = 1487360 + 16/5*16000 = 1487360 + 3200 = 1490560
+        """
+        segment_duration = self.sample_size / 5  # 单位：秒，例如sample_size=5，即每个视频片段的时长为1秒
+        start_point = int((segment_idx-1) * segment_duration * 16000)
+        end_point = int(start_point + segment_duration * 16000)
+        # print('[get_wave_data] sample_size:', self.sample_size, ', segment_idx:', segment_idx, ', start_point:', start_point, ', end_point:', end_point)
+        
         if end_point > fc1_wav_ft.shape[-1]: # 如果end_point > fc1_wav_ft.shape[-1]，则说明从采样的那一秒往后加sample_size秒会超过音频的最后一秒，因此只需要取到音频的最后一秒（最后一个采样点）即可
             end_point = fc1_wav_ft.shape[-1]
         # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc1 start_point:', start_point, 'end_point:', end_point)
         fc1_wav_tmp = fc1_wav_ft[..., start_point: end_point] # fc1_wav_tmp.shape: 
 
         # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
-        if fc1_wav_tmp.shape[-1] < self.sample_size * 16000: # 如果采样点数小于self.sample_size * 16000，就用0填充剩余的采样点
-            fc1_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
-            fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # 将fc1_wav_tmp的采样点填充到fc1_wav_fill的前fc1_wav_tmp.shape[-1]个采样点
-            fc1_wav_tmp = fc1_wav_fill # 赋值给fc1_wav_tmp
+        # if fc1_wav_tmp.shape[-1] < self.sample_size * 16000: # 如果采样点数小于self.sample_size * 16000，就用0填充剩余的采样点
+        #     fc1_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
+        #     fc1_wav_fill[..., :fc1_wav_tmp.shape[-1]] = fc1_wav_tmp # 将fc1_wav_tmp的采样点填充到fc1_wav_fill的前fc1_wav_tmp.shape[-1]个采样点
+        #     fc1_wav_tmp = fc1_wav_fill # 赋值给fc1_wav_tmp
         
-        ########### process fc2 wave data ###########
+        # ************************* process fc2 wave data *************************
         fc2_wav_ft = np.load(fc2_wav_path)
         
+        """ 采样方式一：随机取sample_size个连续的帧图片
         start_point = self.frame_idx * 16000
-        end_point = start_point + self.sample_size * 16000
+        end_point = start_point + self.sample_size * 16000 """
+        
         if end_point > fc2_wav_ft.shape[-1]: 
             end_point = fc2_wav_ft.shape[-1]
         # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc2 start_point:', start_point, 'end_point:', end_point)
         fc2_wav_tmp = fc2_wav_ft[..., start_point: end_point]
         
-        if fc2_wav_tmp.shape[-1] < self.sample_size * 16000:
-            fc2_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
-            fc2_wav_fill[..., :fc2_wav_tmp.shape[-1]] = fc2_wav_tmp
-            fc2_wav_tmp = fc2_wav_fill
+        # if fc2_wav_tmp.shape[-1] < self.sample_size * 16000:
+        #     fc2_wav_fill = np.zeros((1, 1, self.sample_size * 16000))
+        #     fc2_wav_fill[..., :fc2_wav_tmp.shape[-1]] = fc2_wav_tmp
+        #     fc2_wav_tmp = fc2_wav_fill
 
-        # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape, 'fc2_wav_tmp.shape:', fc2_wav_tmp.shape) # fc1_wav_tmp.shape: (1, 1, 256000) fc2_wav_tmp.shape: (1, 1, 256000)
-        return fc1_wav_tmp, fc2_wav_tmp
+        # print('[get_wave_data] fc1_wav_tmp.shape:', fc1_wav_tmp.shape, 'fc2_wav_tmp.shape:', fc2_wav_tmp.shape) # fc1_wav_tmp.shape: (1, 1, 256000) fc2_wav_tmp.shape: (1, 1, 256000)
+        return fc1_wav_tmp, fc2_wav_tmp, int(session_id), segment_idx
 
     def ssast_audio_preprocess(self, idx):
         """audio preprocess for ssast model: https://github.com/YuanGongND/ssast
@@ -709,8 +715,11 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
             transforms,
             sample_size=cfg.DATA.SAMPLE_SIZE,
             config=cfg,
+            mode=mode
         )
+        
         batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
+        shuffle=cfg.DATA_LOADER.SHUFFLE
         
         # 过采样
         if cfg.DATA.SAMPLING_NAME != "":
@@ -722,7 +731,6 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
             else:
                 image, audio, label = dataset[0]
                 print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image, audio, label = dataset[0], image.shape=', image.shape, ', audio.shape=', audio.shape, ', label=', label)
-        
     elif mode == "valid":
         # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行验证集的dataloader初始化...')
         val_img_data = [
@@ -748,8 +756,10 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
             transforms,
             sample_size=cfg.DATA.SAMPLE_SIZE,
             config=cfg,
+            mode=mode,
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+        shuffle=False
     elif mode == "full_test":
         # print('[audio_visual_data_udiva.py]- bimodal_resnet_lstm_data_loader_udiva 开始进行测试集的dataloader初始化...')
         test_img_data = [
@@ -798,16 +808,18 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
             transforms,
             sample_size=cfg.DATA.SAMPLE_SIZE,
             config=cfg,
+            mode=mode,
         )
-        # batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
-        batch_size = 11 # 待修改 # TODO
+        batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
+        shuffle=False
     # print('[audio_visual_data_udiva.py] batch_size: ', batch_size, ' mode: ', mode)
     data_loader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=cfg.DATA_LOADER.SHUFFLE,
+        shuffle=shuffle,
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
         drop_last=cfg.DATA_LOADER.DROP_LAST,
+        prefetch_factor=cfg.DATA_LOADER.PREFETCH_FACTOR,
     )
     return data_loader
 
@@ -829,14 +841,14 @@ def over_sampling(dataset, sampler_name, bimodal_option):
     
     # 由于udiva 训练集所有的116个session中，认识的label有44个，不认识的label有72个(有一个坏数据，所以减去1为71个)，所以使用 oversampling 过采样方法来让数据集更均衡, 借助imblearn.over_sampling.RandomOverSampler
     # 查看均衡前的数据分布
-    # print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
+    print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
     # len(dataset)= 115 , type(dataset)= <class 'dpcv.data.datasets.audio_visual_data_udiva.AudioVisualLstmDataUdiva'> , dataset[0].keys()= dict_keys(['image', 'label']) , type(dataset[0])= <class 'dict'>
-    # print('image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
+    # print('[oversampling]- image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
     # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率
     
     if bimodal_option == 1 or bimodal_option == 2:
         #****************** 1. 构造 X_train, y_train 作为fit_resample的输入参数********************
-        X_train, y_train = [], []
+        X_train, y_train, X_session, X_segment = [], [], [], []
         for i in range(len(dataset)):
             if bimodal_option == 1: # only image modality
                 X_train.append(dataset[i]['image'])
@@ -852,7 +864,7 @@ def over_sampling(dataset, sampler_name, bimodal_option):
         if bimodal_option == 1: # only image modality
             sample_size = X_train.shape[1]
         else: # only audio modality
-            sample_size = int(X_train.shape[3]/16000)
+            audio_last_shape = X_train.shape[-1]
         # print('[oversampling]- sample_size=', sample_size)
         # after stack: len(X_train)= 115 , len(y_train)= 115, X_train.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
         
@@ -865,7 +877,8 @@ def over_sampling(dataset, sampler_name, bimodal_option):
         # Counter(y_train)= [(0, 44), (1, 71)] 即认识的label有44个，不认识的label有71个
         
         #****************** 2. 核心：执行过采样 ******************
-        X_resampled, y_resampled = sampler.fit_resample(X_train, y_train) 
+        # print('[oversampling]- sampler: ', sampler)
+        X_resampled, y_resampled = sampler.fit_resample(X_train, y_train)
         # print('[oversampling]- after oversampling: X_resampled.shape=', X_resampled.shape, ', y_resampled.shape=', y_resampled.shape, ', type(X_resampled)=', type(X_resampled), ', type(y_resampled)=', type(y_resampled))
         # after oversampling: X_resampled.shape= (142, 1204224) , y_resampled.shape= (142,) , type(X_resampled)= <class 'numpy.ndarray'> , type(y_resampled)= <class 'numpy.ndarray'>
         print('[oversampling]- ******** Before oversampling: Counter(y_train)=', sorted(Counter(y_train.numpy()).items()), '; After  oversampling: Counter(y_resampled)=', sorted(Counter(y_resampled).items())) # 使用Counter查看均衡后的label类别数据分布
@@ -873,16 +886,16 @@ def over_sampling(dataset, sampler_name, bimodal_option):
         # print('[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
         
         # 打印 X_resampled中的所有len(X_resampled)个元素，但是每个元素只打印前4个tensor数值, 且都把tensor中的元素保留前4位小数
-        a = X_train[:, :4]
-        b = X_resampled[:, :4]
-        b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
+        # a = X_train[:, :4]
+        # b = X_resampled[:, :4]
+        # b = torch.from_numpy(np.round(X_resampled[:, :4], decimals=4))
         # print('[oversampling]- diff X_train[:, :4]=\n', a, '\n X_resampled[:, :4]=\n', b, ', a.shape=', a.shape, ', b.shape=', b.shape)
         # 经过print可以看到，X_resampled比X_train多的部分，是通过复制X_train中的元素得到的，但并不只是复制同一个。例如增加了10个元素，这10个元素虽然可能有3个元素是一样的，但是也有7个元素是不一样的 即多的部分不是完全重复的，符合预期
         
         if bimodal_option == 1: # image
             X_resampled = torch.from_numpy(X_resampled.reshape(-1, sample_size, 6, 224, 224))
         else: # audio
-            X_resampled = torch.from_numpy(X_resampled.reshape(-1, 2, 1, sample_size*16000))
+            X_resampled = torch.from_numpy(X_resampled.reshape(-1, 2, 1, audio_last_shape))
         y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
         
         # print('[oversampling]- X_resampled.shape=', X_resampled.shape, ', type(X_resampled)=', type(X_resampled))
@@ -908,7 +921,7 @@ def over_sampling(dataset, sampler_name, bimodal_option):
         # print('2-[oversampling]- after stack: len(X_train_img)=', len(X_train_img), ', len(y_train)=', len(y_train), 'X_train_img.shape=', X_train_img.shape, ', y_train.shape=', y_train.shape, ', X_train_img[0].shape=', X_train_img[0].shape, ', y_train[0].shape=', y_train[0].shape)
         # print('2-[oversampling]- after stack: len(X_train_audio)=', len(X_train_audio), 'X_train_audio.shape=', X_train_audio.shape, ', X_train_audio[0].shape=', X_train_audio[0].shape)
         img_sample_size = X_train_img.shape[1]
-        audio_sample_size = int(X_train_audio.shape[3]/16000)
+        audio_last_shape = X_train_audio.shape[-1]
         # after stack: len(X_train_img)= 115 , len(y_train)= 115, X_train_img.shape= torch.Size([115, sample_size, 6, 224, 224]) , y_train.shape= torch.Size([115, 2]) , X_train_img[0].shape= torch.Size([4, 6, 224, 224]) , y_train[0].shape= torch.Size([2])
         
         # fit_resample的输入参数 第一个参数X_tarin需要是 (n_samples, n_features), 第二个参数y_train需要是 (n_samples,)，所以需要对X_train和y_train进行reshape
@@ -931,7 +944,7 @@ def over_sampling(dataset, sampler_name, bimodal_option):
         # print('7-[oversampling]- y_resampled=', y_resampled, ', type(y_resampled)=', type(y_resampled)) # type(y_resampled)= <class 'numpy.ndarray'>
 
         X_img_resampled = torch.from_numpy(X_img_resampled.reshape(-1, img_sample_size, 6, 224, 224))
-        X_audio_resampled = torch.from_numpy(X_audio_resampled.reshape(-1, 2, 1, audio_sample_size*16000))
+        X_audio_resampled = torch.from_numpy(X_audio_resampled.reshape(-1, 2, 1, audio_last_shape))
         y_resampled = F.one_hot(torch.tensor(y_resampled), num_classes=2).float() # 将y_resampled恢复为维度为[num_samples, 2]的tensor
         
         # print('8-[oversampling]- after torch.from_numpy: X_img_resampled.shape=', X_img_resampled.shape, ', X_audio_resampled.shape=', X_audio_resampled.shape)

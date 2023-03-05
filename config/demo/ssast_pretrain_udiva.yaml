@@ -41,9 +41,11 @@ DATA_LOADER:
   TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 16
   VALID_BATCH_SIZE: 9
+  TEST_BATCH_SIZE: 16
   NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
+  PREFETCH_FACTOR: 10
 MODEL:
   # NAME: "vivit_model_udiva"  # visual: https://github.com/rishikksh20/ViViT-pytorch
   # NAME: "vivit_model3_udiva" # visual: https://github.com/drv-agwl/ViViT-pytorch
@@ -62,8 +64,7 @@ SOLVER:
   FACTOR: 0.5
   LR_PATIENCE: 2
 TRAIN:
-  TRAINER: "BiModalTrainerUdiva"
-  # TRAINER: "SSASTTrainer"
+  TRAINER: "SSASTTrainer"
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/ssast_udiva"
   BIMODAL_OPTION: 2
@@ -71,6 +72,7 @@ TRAIN:
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
   PRE_TRAINED_MODEL: "../../pre_trained_weights/SSAST/save_mask01-tiny-f16-t16-epo300-lr0.0005-m400-pretrain_mpc-udiva/models/best_audio_model.pth"
+  # TASK: "ft_avgtok"
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

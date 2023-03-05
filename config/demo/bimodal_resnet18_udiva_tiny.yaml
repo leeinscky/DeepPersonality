@@ -1,5 +1,8 @@
 DATA:
   ROOT: "datasets"
+  SESSION: "ANIMALS"
+  SAMPLE_SIZE: 16
+  # SAMPLING_NAME: "SMOTE"
   ANIMALS_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/ghost_recordings_train_img"
   LEGO_TRAIN_IMG_DATA: "udiva_tiny/train/recordings/lego_recordings_train_img"
@@ -36,23 +39,34 @@ DATA:
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "udiva_frame_transforms"
-  TRAIN_BATCH_SIZE: 2
-  VALID_BATCH_SIZE: 1
-  NUM_WORKERS: 2
+  TRAIN_BATCH_SIZE: 32
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
+  NUM_WORKERS: 5
   DATASET_NAME: "UDIVA"
+  DROP_LAST: False
+  PREFETCH_FACTOR: 10
 MODEL:
-  NAME: "audiovisual_resnet_lstm_udiva"
+  # NAME: "resnet50_3d_model_udiva" 
+  # NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
+  NAME: "audiovisual_resnet_lstm_udiva" # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
 LOSS:
-  NAME: "mean_square_error"
+  NAME: "binary_cross_entropy"
 SOLVER:
-  NAME: "sgd"
+  NAME: "adam"
   SCHEDULER: "multi_step_scale"
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [100, 200]
+  MILESTONE: [50, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
-  MAX_EPOCH: 1
+  MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
-  BIMODAL_OPTION: 1
+  BIMODAL_OPTION: 3
+  LOG_INTERVAL: 1
+  VALID_INTERVAL: 1
+  TEST_INTERVAL: 1
+TEST:
+  COMPUTE_PCC: False
+  COMPUTE_CCC: False

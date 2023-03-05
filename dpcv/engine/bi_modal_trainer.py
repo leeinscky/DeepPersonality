@@ -10,6 +10,7 @@ import time
 import wandb
 from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
+torch.set_printoptions(sci_mode=False) # 使得print时不用科学计数法
 
 @TRAINER_REGISTRY.register()
 class BiModalTrainer(object):
@@ -327,6 +328,7 @@ class BiModalTrainerUdiva(object):
         epoch_total_acc = 0
         epoch_total_num = 0
         epo_iter_num = len(data_loader)
+        # print('[bi_modal_trainer] train... epo_iter_num=', epo_iter_num)
         pred_list, label_list, pred_list2, label_list2 = [], [], [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
@@ -334,32 +336,39 @@ class BiModalTrainerUdiva(object):
             # print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
             """ 1、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
                 2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
-            inputs, labels = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
+            inputs, labels, session_id, segment_id = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
+            # print('[bi_modal_trainer.py] train... labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id))
             # print('[bi_modal_trainer.py] train... model.device=', model.device, 'inputs[0].device=', inputs[0].device)
+            # print('[bi_modal_trainer.py] train... inputs[0].shape=', inputs[0].shape, ', inputs[1]=', inputs[1], ', labels.shape=', labels.shape)
             # if i in [0, 1] and torch.cuda.is_available():
             #     print('before model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
-            try: # refer: https://zhuanlan.zhihu.com/p/497192910
-                # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
-                outputs = model(*inputs)
-            except RuntimeError as exception:
-                if "out of memory" in str(exception):
-                    print(exception)
-                    # print('Train WARNING: out of memory')
-                    if hasattr(torch.cuda, 'empty_cache'):
-                        torch.cuda.empty_cache()
-                        if i in [0, 1] and torch.cuda.is_available():
-                            print('after model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
-                    else:
-                        raise exception
+
+            # try: # refer: https://zhuanlan.zhihu.com/p/497192910
+            #     # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
+            #     outputs = model(*inputs)
+            # except RuntimeError as exception:
+            #     if "out of memory" in str(exception):
+            #         print(exception)
+            #         print('Train WARNING: out of memory')
+            #         if hasattr(torch.cuda, 'empty_cache'):
+            #             torch.cuda.empty_cache()
+            #             if i in [0, 1] and torch.cuda.is_available():
+            #                 print('after model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
+            #         else:
+            #             raise exception
+                
+            outputs = model(*inputs)
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
             loss = loss_f(outputs.cpu(), labels.cpu().float())
 
             outputs = outputs.detach().cpu()
             labels = labels.detach().cpu()
 
-            if i in [0, 1, 2, 3, 4]:
-                print(torch.cat([outputs, labels], dim=1))
-                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+            if i in [0, 1, 2, 3, 4] and session_id is not None and segment_id is not None:
+                print(f'{torch.cat([outputs, labels, session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+            else:
+                print(f'{torch.cat([outputs, labels], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+                
             '''
             # batch_size = 3时
             # tensor([[0.4946, 0.5024],
@@ -513,7 +522,7 @@ class BiModalTrainerUdiva(object):
                 eta = int(eta) # 将eta转换成int类型
                 eta_string = f"{eta // 3600}h:{eta % 3600 // 60}m:{eta % 60}s"  # 将eta转换成时分秒的形式
                 self.logger.info(
-                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) ETA:{} \n".format(
+                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) ETA:{}".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo 
                         i + 1, epo_iter_num,                 # Iter
                         iter_time,                           # IterTime
@@ -537,7 +546,7 @@ class BiModalTrainerUdiva(object):
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
 
         self.logger.info(
-            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
+            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
@@ -568,12 +577,13 @@ class BiModalTrainerUdiva(object):
             epo_iter_num = len(data_loader)
             pred_list, label_list, pred_list2, label_list2 = [], [], [], []
             for i, data in enumerate(data_loader):
-                inputs, labels = self.data_fmt(data)
+                inputs, labels, session_id, segment_id = self.data_fmt(data) # labels:[batch_size, 2], session_id:[batch_size], segment_id:[batch_size] e.g. session_id: tensor([1080, ... 1080]) segment_id: tensor([ 1,  2, 3, ... 32])
+                # print('[bi_modal_trainer.py] valid... labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id), ', session_id:', session_id, ', segment_id:', segment_id)
+                
                 outputs = model(*inputs)
                 loss = loss_f(outputs.cpu(), labels.cpu().float())
                 
-                print(torch.cat([outputs, labels], dim=1))
-                print(f'*********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
+                print(f'{torch.cat([outputs, labels, session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
                 
                 loss_batch_list.append(loss.item())
                 
@@ -603,7 +613,7 @@ class BiModalTrainerUdiva(object):
 
                 if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1:
                     self.logger.info(
-                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) \n".format(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] LOSS: {:.4f} Batch ACC:{:.4f} ({}/{}) Epo Current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f})".format(
                             epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
                             i + 1, epo_iter_num,                 # Iter
                             float(loss.item()),                  # LOSS
@@ -626,6 +636,7 @@ class BiModalTrainerUdiva(object):
                 acc_batch_list.append(batch_acc)
             self.tb_writer.add_scalar("valid_acc", batch_acc, epoch_idx)
         
+        #### 计算指标：Epoch ACC (Video segment level)
         epoch_summary_acc = epoch_total_acc / epoch_total_num # 当前epoch的总体acc
         self.clt.record_valid_loss(loss_batch_list) # loss over batches
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
@@ -646,7 +657,7 @@ class BiModalTrainerUdiva(object):
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         self.logger.info(
-            "Valid: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".
+            "Valid: Epo[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
@@ -676,25 +687,42 @@ class BiModalTrainerUdiva(object):
             total_num = 0
             test_acc = 0
             pred_list, label_list, pred_list2, label_list2 = [], [], [], []
+            session_result = {}
             for data in tqdm(data_loader): # 遍历data_loader
-                inputs, labels = self.data_fmt(data)
+                inputs, labels, session_id, segment_id = self.data_fmt(data) # labels: [batch_size, 2], session_id: torch.Size([batch_size]), segment_id: torch.Size([batch_size]), e.g. when bs=6, session_id: tensor([8105., 8105., 8105., 8105., 8105., 8105.]) , segment_id: tensor([1., 2., 3., 4., 5., 6.])
+                # print('[bi_modal_trainer.test]. labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id), ', session_id:', session_id, ', segment_id:', segment_id)
+                
                 outputs = model(*inputs)
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
                 outputs = outputs.detach().cpu()
                 labels = labels.detach().cpu()
                 
-                print(torch.cat([outputs, labels], dim=1))
-                print(f'*********** Test outputs and labels ***********')
-                
-                #### 计算ACC
+                print(f'\n{torch.cat([outputs, labels, session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Test outputs and labels ***********')
+            
+                #### 计算session ACC，即每个session层面的ACC，分母是测试集中session的个数，分子是预测正确的session的个数
+                for i in range(len(session_id)):
+                    # 如果当前循环的session_id已经是session_result中的key，则将当前循环的outputs和segment_id拼接到session_result[session_id]["predict"]中，且拼接时在列上拼接 并且将该session_id对应的唯一一个label存入session_result[session_id]["label"]中，且只在第一次存入
+                    # 否则将当前循环的outputs和segment_id作为value，session_id作为key，存入session_result中，且将该session_id对应的唯一一个label存入session_result[session_id]["label"]中，且只在第一次存入
+                    new_predict = torch.cat([outputs[i], segment_id[i].unsqueeze(0)], dim=0).unsqueeze(0)
+                    # print('new_predict=', new_predict, ', shape=', new_predict.shape)
+                    if session_id[i].item() in session_result:
+                        session_result[session_id[i].item()]["predict"] =  torch.cat([session_result[session_id[i].item()]["predict"], new_predict], dim=0) # 拼接时：如果原先的向量为[6,2], 拼接的向量为[3,2], 则拼接后的向量为[9,2], 即在第0维上拼接，dim=0
+                        # print('i:', i, ', after concat predict shape=', session_result[session_id[i].item()]["predict"].shape)
+                        if "label" not in session_result[session_id[i].item()]:
+                            session_result[session_id[i].item()]["label"] = labels[i]
+                    else:
+                        session_result[session_id[i].item()] = {"predict": new_predict, "label": labels[i]}
+                # print('session_result=\n', session_result)
+            
+                #### 计算batch ACC, 即每个视频片段segment层面的ACC计算，分母是测试集中视频片段的个数(session个数 x 每个session的segments个数)，分子是预测正确的视频片段个数
                 total_acc += (outputs.argmax(dim=-1) == labels.argmax(dim=-1)).sum()
                 total_num += outputs.shape[0]
                 test_acc = total_acc / total_num 
                 
                 #### 计算AUC
                 labels = labels.type(torch.int64)
-                pred_list.extend(outputs[:, 0].tolist()) # 比pred_list2更准确
-                label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确
+                pred_list.extend(outputs[:, 0].tolist()) # 比pred_list2更准确 outputs.shape:[batch_size, 2], outputs[:, 0].shape: [batch_size]
+                label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确 labels.shape:[batch_size, 2], labels[:, 0].shape: [batch_size]
                 pred_list2.extend(outputs.argmax(dim=-1).tolist())
                 label_list2.extend(labels.argmax(dim=-1).tolist())
                 
@@ -712,22 +740,75 @@ class BiModalTrainerUdiva(object):
             #                 [0.502379   0.49847925]]
             # dataset_label= [[1. 0.]
             #                 [0. 1.]]
-        self.tb_writer.add_scalar("test_acc", test_acc)
+        # self.tb_writer.add_scalar("test_acc", test_acc)
         
-        #### 计算指标：AUC
+        #### 计算指标：session ACC  即每个session层面的ACC，分母是测试集中session的个数，分子是预测正确的session的个数。如果测试集有N个session，每个session有M个segment，对于某个session，将所有segments的outputs的第0列概率值求平均作为Known的概率值，第1列概率值求平均作为Unknown的概率值，如果Known的概率值大于Unknown的概率值，则认为该session的预测值为Known，否则为Unknown，最后与该session的真实label进行比较，如果相同则认为该session的预测正确，否则认为该session的预测错误，最后计算所有session的预测正确率
+        print('[bi_modal_trainer.test] final session_result=\n', session_result)
+        # 遍历session_result，计算每个session对应的ACC。计算方式：对于每个session的predict，将其所有segment的outputs的第0列概率值求平均作为Known的概率值，将其所有segment的outputs的第1列概率值求平均作为Unknown的概率值，如果Known的概率值大于Unknown的概率值，则认为该session的label为Known，否则认为该session的label为Unknown，最后与该session的真实label进行比较，如果相同则认为该session的预测正确，否则认为该session的预测错误，最后计算所有session的预测正确率
+        session_total_acc, session_total_num, session_acc = 0, 0, 0
+        session_pred_list, session_label_list = [], [] 
+        for session_id in session_result:
+            session_predict = session_result[session_id]["predict"][:, :-1] # 将 shape=[segments_num, 3] 变为 [segments_num, 2], 去掉session_id对应的predict中的segment_id列, :-1 表示从第0列到倒数第2列，即去掉最后一列 
+            session_label = session_result[session_id]["label"] # shape=[2] ，即[Known的概率值, Unknown的概率值]
+
+            ### 1. compute quarter acc
+            # 将当前session_id对应的所有segments_num个预测值分成四等分（四个quarter），每个quarter的shape=[segments_num/4, 2]，然后将四个quarter的第0列概率值求平均作为Known的概率值，第1列概率值求平均作为Unknown的概率值。如果Known的概率值大于Unknown的概率值，则认为该session的label为Known，否则认为该session的label为Unknown，最后与该session的真实label进行比较，如果相同则认为该session的预测正确，否则认为该session的预测错误，最后计算q1、q2、q3、q4四个quarter各自的预测正确率
+            # print('[bi_modal_trainer.test] len(session_predict):', len(session_predict), ', len(session_predict)//4=', len(session_predict)//4, ', len(session_predict)//2=', len(session_predict)//2, ', len(session_predict)//4*3=', len(session_predict)//4*3) # e.g. len(session_predict): 25 , len(session_predict)//4= 6 , len(session_predict)//2= 12 , len(session_predict)//4*3= 18, then quarter1_predict.shape= torch.Size([6, 2]) , quarter2_predict.shape= torch.Size([6, 2]) , quarter3_predict.shape= torch.Size([6, 2]) , quarter4_predict.shape= torch.Size([7, 2])    e.g.2.len(session_predict): 29 , len(session_predict)//4= 7 , len(session_predict)//2= 14 , len(session_predict)//4*3= 21, quarter1_predict.shape= torch.Size([7, 2]) , quarter2_predict.shape= torch.Size([7, 2]) , quarter3_predict.shape= torch.Size([7, 2]) , quarter4_predict.shape= torch.Size([8, 2]) 
+            quarter1_predict = session_predict[:len(session_predict)//4] # shape=[segments_num/4, 2]
+            quarter2_predict = session_predict[len(session_predict)//4: len(session_predict)//2] # shape=[segments_num/4, 2]
+            quarter3_predict = session_predict[len(session_predict)//2: len(session_predict)//4*3] # shape=[segments_num/4, 2]
+            quarter4_predict = session_predict[len(session_predict)//4*3:] # shape=[segments_num/4, 2]
+            # print('[bi_modal_trainer.test] quarter1_predict.shape=', quarter1_predict.shape, ', quarter2_predict.shape=', quarter2_predict.shape, ', quarter3_predict.shape=', quarter3_predict.shape, ', quarter4_predict.shape=', quarter4_predict.shape, ', \nquarter1_predict=', quarter1_predict, '\nquarter2_predict=', quarter2_predict, '\nquarter3_predict=', quarter3_predict, '\nquarter4_predict=', quarter4_predict)
+            
+            quarter1_predict = quarter1_predict.mean(dim=0) # shape=[segments_num/4, 2] -> [segments_num/4] 
+            quarter2_predict = quarter2_predict.mean(dim=0)
+            quarter3_predict = quarter3_predict.mean(dim=0)
+            quarter4_predict = quarter4_predict.mean(dim=0)
+            
+            quarter_label = session_label
+            # print('[bi_modal_trainer.test] after mean, quarter1_predict=', quarter1_predict, ', quarter1_predict.argmax(dim=-1)=', quarter1_predict.argmax(dim=-1), ', quarter_label.argmax(dim=-1)=', quarter_label.argmax(dim=-1), ', quarter2_predict=', quarter2_predict, ', quarter2_predict.argmax(dim=-1)=', quarter2_predict.argmax(dim=-1), ', quarter_label.argmax(dim=-1)=', quarter_label.argmax(dim=-1), ', quarter3_predict=', quarter3_predict, ', quarter3_predict.argmax(dim=-1)=', quarter3_predict.argmax(dim=-1), ', quarter_label.argmax(dim=-1)=', quarter_label.argmax(dim=-1), ', quarter4_predict=', quarter4_predict, ', quarter4_predict.argmax(dim=-1)=', quarter4_predict.argmax(dim=-1), ', quarter_label.argmax(dim=-1)=', quarter_label.argmax(dim=-1))
+            quarter1_acc = (quarter1_predict.argmax(dim=-1) == quarter_label.argmax(dim=-1)).sum()
+            quarter2_acc = (quarter2_predict.argmax(dim=-1) == quarter_label.argmax(dim=-1)).sum()
+            quarter3_acc = (quarter3_predict.argmax(dim=-1) == quarter_label.argmax(dim=-1)).sum()
+            quarter4_acc = (quarter4_predict.argmax(dim=-1) == quarter_label.argmax(dim=-1)).sum()
+            print('[bi_modal_trainer.test] session_id:', session_id, ', quarter1_acc=', quarter1_acc.item(), ', quarter2_acc=', quarter2_acc, ', quarter3_acc=', quarter3_acc, ', quarter4_acc=', quarter4_acc)
+
+            ### 2. compute session acc
+            session_predict = session_predict.mean(dim=0) # 将所有segments的outputs求平均，得到[2]的向量，即[Known的概率值, Unknown的概率值]
+            # print('[bi_modal_trainer.test] session_id:', session_id, ', session_predict=', session_predict, ', session_label=', session_label, ', session_predict.argmax=', session_predict.argmax(dim=-1), ', session_label.argmax=', session_label.argmax(dim=-1), ', session_predict==session_label:', (session_predict.argmax(dim=-1) == session_label.argmax(dim=-1)).sum())
+            session_total_acc += (session_predict.argmax(dim=-1) == session_label.argmax(dim=-1)).sum()
+            session_total_num += 1
+            session_acc = session_total_acc / session_total_num
+            
+            ### 3. used for session AUC
+            session_label = session_label.type(torch.int64)
+            # print('[bi_modal_trainer.test]. session_predict.shape=', session_predict.shape, ', session_label.shape=', session_label.shape)
+            session_pred_list.extend(session_predict.unsqueeze(0)[:, 0].tolist()) # session_predict.shape=torch.Size([2]) 分别是Known和Unknown的概率值，session_predict.unsqueeze(0).shape=torch.Size([1, 2])，session_predict.unsqueeze(0)[:, 0].shape=torch.Size([1])，session_predict.unsqueeze(0)[:, 0].tolist()=[0.5023816823959351]
+            session_label_list.extend(session_label.unsqueeze(0)[:, 0].tolist())
+            
+        # print(f'[bi_modal_trainer] session_acc={session_acc}, {session_total_acc}/{session_total_num}')
+        
+        #### 计算指标：session AUC
+        # print('[bi_modal_trainer] session AUC, session_pred_list=', session_pred_list, ', session_label_list=', session_label_list)
+        session_auc = auroc(torch.tensor(session_pred_list), torch.tensor(session_label_list), task="binary") # session_pred_list= [0.579576849937439, 0.6079692244529724, ...] , session_label_list= [1, 0, ...]
+        
+        #### 计算指标：batch AUC
+        # print('[bi_modal_trainer] segment AUC, pred_list=', pred_list, ', label_list=', label_list)
         epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
-        epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
+        epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary") # pred_list= [0.5700229406356812, 0.567983090877533, ...] , label_list= [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         
         #### 计算指标：F1 score
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         if epoch_idx is not None:
-            self.logger.info("Test: Epo of Train[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f})\n".format(
+            self.logger.info("Test: Epo of Train[{:0>3}/{:0>3}] Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f}) Session Acc:{:.4f} ({}/{}) Session AUC: {:.4f}".format(
                                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                                 test_acc, total_acc, total_num,    # Epo ACC
                                 epoch_auc, epoch_auc2, # Epo AUC
                                 f1, f1_2, # Epo F1_Score
+                                session_acc, session_total_acc, session_total_num, # Session ACC
+                                session_auc, # Session AUC
                             ))
             if self.cfg.USE_WANDB:
                 wandb.log({
@@ -736,13 +817,22 @@ class BiModalTrainerUdiva(object):
                     "test_auc2": float(epoch_auc2),
                     "test_f1": float(f1),
                     "test_f1_2": float(f1_2),
+                    "test_session_acc": float(session_acc),
+                    "test_session_auc": float(session_auc),
                     "epoch": epoch_idx + 1})
         else:
-            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f})\n".format(test_acc, total_acc, total_num, epoch_auc, epoch_auc2))
+            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f}) Final Session Acc:{:.4f} ({}/{}) Final Session AUC:{:.4f}\n".format(
+                test_acc, total_acc, total_num,  # Epo ACC
+                epoch_auc, epoch_auc2,           # Epo AUC
+                session_acc, session_total_acc, session_total_num, # Session ACC
+                session_auc,                     # Session AUC
+                ))
             if self.cfg.USE_WANDB:
                 wandb.log({
                     "test_final_acc": float(test_acc),
                     "test_final_auc": float(epoch_auc),
+                    "test_final_session_acc": float(session_acc),
+                    "test_final_session_auc": float(session_auc)
                     })
 
         return test_acc
@@ -806,18 +896,19 @@ class BiModalTrainerUdiva(object):
 
     def data_fmt(self, data):
         # print('[bi_modal_trainer] type of data: ', type(data))
+        session_id, segment_id = None, None
         if isinstance(data, dict): 
             # 1、如果data_loader中没有使用RandomOverSampler data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据
             for k, v in data.items(): # Python 字典(Dictionary) items() 函数以列表返回可遍历的(键, 值) 元组数组。
                 data[k] = v.to(self.device)
             if self.cfg.BIMODAL_OPTION == 1:
                 aud_in = None
-                img_in, labels = data["image"], data["label"]
+                img_in, labels, session_id, segment_id = data["image"], data["label"], data["session_id"], data["segment_id"]
             elif self.cfg.BIMODAL_OPTION == 2:
-                aud_in, labels = data["audio"], data["label"]
+                aud_in, labels, session_id, segment_id = data["audio"], data["label"], data["session_id"], data["segment_id"]
                 img_in = None
             elif self.cfg.BIMODAL_OPTION == 3:
-                img_in, aud_in, labels = data["image"], data["audio"], data["label"]
+                img_in, aud_in, labels, session_id, segment_id = data["image"], data["audio"], data["label"], data["session_id"], data["segment_id"]
             else:
                 raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
         elif isinstance(data, list):
@@ -826,7 +917,7 @@ class BiModalTrainerUdiva(object):
                 data[i] = v.to(self.device)
             if self.cfg.BIMODAL_OPTION == 1:
                 aud_in = None
-                img_in, labels = data[0], data[1] # img_in.shape: [batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
+                img_in, labels= data[0], data[1] # img_in.shape: [batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
                 # print('[bi_modal_trainer] img_in.shape: ', img_in.shape, ' labels.shape: ', labels.shape)
             elif self.cfg.BIMODAL_OPTION == 2:
                 aud_in, labels = data[0], data[1]
@@ -841,20 +932,20 @@ class BiModalTrainerUdiva(object):
         # 不同的模型需要不同的维度格式，这里根据不同的模型进行数据格式的转换
         if self.cfg_model.NAME == "resnet50_3d_model_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
-            return (img_in, ), labels
+            return (img_in, ), labels, session_id, segment_id
         elif self.cfg_model.NAME == "vivit_model_udiva":
-            return (img_in, ), labels # img_in: [batch, time, channel, height, width]
+            return (img_in, ), labels, session_id, segment_id # img_in: [batch, time, channel, height, width]
         elif self.cfg_model.NAME == "vivit_model3_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # img_in: [batch, channel, time, height, width], # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             # print('[data_fmt] img_in.device: ', img_in.device, ', labels.device: ', labels.device)
-            return (img_in, ), labels 
+            return (img_in, ), labels, session_id, segment_id
         elif self.cfg_model.NAME == "timesformer_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
-            return (img_in, ), labels
+            return (img_in, ), labels, session_id, segment_id
         elif self.cfg_model.NAME == "ssast_udiva":
-            return(aud_in, ), labels
+            return(aud_in, self.cfg.TASK), labels, session_id, segment_id
         else:
-            return (aud_in, img_in), labels
+            return (aud_in, img_in), labels, session_id, segment_id
     
     def full_test_data_fmt(self, data):
         images, wav, label = data["image"], data["audio"], data["label"]

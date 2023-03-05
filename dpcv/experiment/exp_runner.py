@@ -122,7 +122,7 @@ class ExpRunner:
             print(f'\n================================== Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
             self.trainer.train(self.data_loader["train"], self.model, self.loss_f, self.optimizer, epoch)
             
-            ### 2. valid
+            ## 2. valid
             print(f'\n================================== Epo:{epoch+1} [train_epochs] start valid...     ==================================')
             if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
                 self.trainer.valid(self.data_loader["valid"], self.model, self.loss_f, self.scheduler, epoch)

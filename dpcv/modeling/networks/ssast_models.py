@@ -253,39 +253,42 @@ class ASTModel(nn.Module):
         return torch.tensor(mask_id)
 
     def finetuningavgtok(self, x):
-        print('[ASTModel - finetuningavgtok] input x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] input x.shape:', x.shape)  # [8, 1, 256, 1598] (B, C, F, T)
         B = x.shape[0]
         x = self.v.patch_embed(x)
-        print('[ASTModel - finetuningavgtok] after patch_embed, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after patch_embed, x.shape:', x.shape)
         if self.cls_token_num == 2:
             cls_tokens = self.v.cls_token.expand(B, -1, -1)
             dist_token = self.v.dist_token.expand(B, -1, -1)
             x = torch.cat((cls_tokens, dist_token, x), dim=1)
-            print('[ASTModel - finetuningavgtok] after cls_token, x.shape:', x.shape, 'cls_tokens.shape:', cls_tokens.shape, 'dist_token.shape:', dist_token.shape)
+            # print('[ASTModel - finetuningavgtok] after cls_token, x.shape:', x.shape, 'cls_tokens.shape:', cls_tokens.shape, 'dist_token.shape:', dist_token.shape)
         else:
             cls_tokens = self.v.cls_token.expand(B, -1, -1)
             x = torch.cat((cls_tokens, x), dim=1)
-            print('[ASTModel - finetuningavgtok] after cls_token, x.shape:', x.shape, 'cls_tokens.shape:', cls_tokens.shape)
+            # print('[ASTModel - finetuningavgtok] after cls_token, x.shape:', x.shape, 'cls_tokens.shape:', cls_tokens.shape)
         x = x + self.v.pos_embed
-        print('[ASTModel - finetuningavgtok] after pos_embed, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after pos_embed, x.shape:', x.shape)
         x = self.v.pos_drop(x)
-        print('[ASTModel - finetuningavgtok] after pos_drop, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after pos_drop, x.shape:', x.shape)
 
         for blk_id, blk in enumerate(self.v.blocks):
             x = blk(x)
-        print('[ASTModel - finetuningavgtok] after blocks, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after blocks, x.shape:', x.shape)
         x = self.v.norm(x)
-        print('[ASTModel - finetuningavgtok] after norm, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after norm, x.shape:', x.shape)
 
         # average output of all tokens except cls token(s)
         x = torch.mean(x[:, self.cls_token_num:, :], dim=1)
-        print('[ASTModel - finetuningavgtok] after mean, x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after mean, x.shape:', x.shape)
         x = self.mlp_head(x)
-        print('[ASTModel - finetuningavgtok] after mlp_head, final return x.shape:', x.shape)
+        # print('[ASTModel - finetuningavgtok] after mlp_head, final return x.shape:', x.shape)
+        
+        # add sigmoid to the output
+        x = torch.sigmoid(x)
         return x
 
     def finetuningcls(self, x):
-        print('[ASTModel - finetuningcls] input x.shape:', x.shape)
+        print('[ASTModel - finetuningcls] input x.shape:', x.shape) # e.g. [8, 1, 256, 1598] (B, C, H, W)
         B = x.shape[0]
         x = self.v.patch_embed(x)
         print('[ASTModel - finetuningcls] after patch_embed, x.shape:', x.shape)
@@ -318,6 +321,10 @@ class ASTModel(nn.Module):
             print('[ASTModel - finetuningcls] after x[:, 0], x.shape:', x.shape)
         x = self.mlp_head(x)
         print('[ASTModel - finetuningcls] after mlp_head, final return x.shape:', x.shape)
+        
+        # add sigmoid to the output
+        x = torch.sigmoid(x)
+        
         return x
 
     # masked patch pretraining with discriminative objective
@@ -482,12 +489,12 @@ class ASTModel(nn.Module):
         return mse
 
     def forward(self, x, task='pretrain_mpc', cluster=True, mask_patch=400):
-        task = 'pretrain_mpc'
         # expect input x = (batch_size, time_frame_num, frequency_bins), e.g., (12, 1024, 128)
+        
         # print('[ASTModel] input x.shape: ', x.shape, ', task: ', task, ', cluster: ', cluster, ', mask_patch: ', mask_patch)
-        x = x.unsqueeze(1)
+        x = x.unsqueeze(1) # (batch_size, 1, time_frame_num, frequency_bins), e.g., (12, 1, 1024, 128)
         # print('[ASTModel] input x.unsqueeze(1).shape: ', x.shape)
-        x = x.transpose(2, 3)
+        x = x.transpose(2, 3) # (batch_size, 1, frequency_bins, time_frame_num), e.g., (12, 1, 128, 1024)
         # print('[ASTModel] input x.transpose(2, 3).shape: ', x.shape)
 
         # finetuning (ft), use the mean of all token (patch) output as clip-level representation.
@@ -513,12 +520,15 @@ class ASTModel(nn.Module):
 @NETWORK_REGISTRY.register()
 def ssast_udiva(cfg):
     num_mel_bins = 256 # 128(default) * 2(2个视频) = 256
-    target_length = 1598 # fbank的输出长度
+    # target_length = 1598 # fbank的输出长度 
+    target_length = (cfg.DATA.SAMPLE_SIZE * 100) - 2  # fbank的输出长度 #根据对应关系找出来的规律 sample_size=16秒: fbank.shape: torch.Size([1598, 128]) # sample_size=32秒: fbank.shape: torch.Size([3198, 128]) # sample_size=48秒: fbank.shape: torch.Size([4798, 128]) # sample_size=64秒: fbank.shape: torch.Size([6398, 128])
 
     if cfg.TRAIN.PRE_TRAINED_MODEL is None: # 如果没有预训练模型，即进行预训练
+        print('Pretrain AST model...')
         is_pretrain = True # 预训练状态为True
         pretrained_model_path = None # 预训练模型路径为None
     else:
+        print('Finetune AST model...')
         is_pretrain = False # 预训练状态为False
         pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL # 预训练模型路径为cfg.TRAIN.PRE_TRAINED_MODEL
         

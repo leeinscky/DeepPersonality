@@ -67,7 +67,7 @@ use_wandb="False"
 # --resume $resume
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=16
+sample_size=15
 epoch=1
 batch_size=8
 learning_rate=0.0001
@@ -80,5 +80,5 @@ python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --bs $batch_size \
 --lr $learning_rate \
 --use_wandb $use_wandb \
->temp_train.log 2>&1
+# >temp_train.log 2>&1
 
