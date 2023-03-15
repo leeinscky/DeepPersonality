@@ -40,10 +40,12 @@ DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 2
-  TEST_BATCH_SIZE: 16
-  NUM_WORKERS: 1
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
+  NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
+  DROP_LAST: False
+  PREFETCH_FACTOR: 2
 MODEL:
   NAME: "get_img_modal_lstm_model_udiva"
 LOSS:
@@ -60,7 +62,9 @@ TRAIN:
   MAX_EPOCH: 5
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_lstm_udiva"
   BIMODAL_OPTION: 1
-  LOG_INTERVAL: 1
+  LOG_INTERVAL: 10
+  VALID_INTERVAL: 1
+  TEST_INTERVAL: 1
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

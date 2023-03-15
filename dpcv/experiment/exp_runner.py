@@ -34,7 +34,7 @@ class ExpRunner:
         # print('[DeepPersonality/dpcv/experiment/exp_runner.py] def __init__ - start')
         self.cfg = cfg
         # self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE)
-        self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE)
+        self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE, cfg.TRAIN.MAX_EPOCH)
         if self.cfg.TRAIN.USE_WANDB:
             wandb.config.log_dir = self.log_dir
         self.log_cfg_info()

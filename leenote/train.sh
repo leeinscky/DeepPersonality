@@ -4,10 +4,11 @@
 
 cd /home/zl525/code/DeepPersonality/
 use_wandb="False"
+# use_wandb="True"
 
 #### **************************** SSAST: ssast_udiva.yaml  音频Transformer **************************** ####
-# sample_size=48
-# epoch=3
+# sample_size=16
+# epoch=1
 # batch_size=8
 # learning_rate=0.0001
 # # cfg_file=./config/demo/ssast_pretrain_udiva.yaml # 预训练
@@ -19,7 +20,7 @@ use_wandb="False"
 # --bs $batch_size \
 # --lr $learning_rate \
 # --use_wandb $use_wandb \
-# # >temp_train.log 2>&1
+# >leenote/train.log 2>&1
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 # sample_size=16
@@ -34,14 +35,14 @@ use_wandb="False"
 # --bs $batch_size \
 # --lr $learning_rate \
 # --use_wandb $use_wandb \
-# # >temp_train.log 2>&1
+# # >leenote/train.log 2>&1
 
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-# sample_size=4
-# epoch=2
-# batch_size=5
-# learning_rate=0.0001
+# sample_size=32
+# epoch=1
+# batch_size=4
+# learning_rate=0.0005
 
 # python3 -u ./script/run_exp.py --cfg_file ./config/demo/resnet_3d_udiva_full.yaml \
 # --sample_size $sample_size \
@@ -67,8 +68,8 @@ use_wandb="False"
 # --resume $resume
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=15
-epoch=1
+sample_size=16
+epoch=10
 batch_size=8
 learning_rate=0.0001
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
@@ -80,5 +81,5 @@ python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --bs $batch_size \
 --lr $learning_rate \
 --use_wandb $use_wandb \
-# >temp_train.log 2>&1
+>leenote/train.log 2>&1
 

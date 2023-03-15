@@ -245,12 +245,55 @@ Tag解释:
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
     experiment-2: 
         【相比于上一个实验的变化】：相比于experiment-1，增加了auc、f1score指标，
-        【模型】：resnet50_3d_model_udiva 
+        【模型】： resnet50_3d_model_udiva 
         【分支】：视觉分支
         【变量】：控制其他超参数不变，递增sample_size，观察auc的变化
+        【更新-experiment-2_1】 增加session_acc指标，quarter_acc指标, 用于周会展示
+            30mins test: 15629279 15629280 15629281 15629401
+            bs8: sp144(OOM❌)
+            bs16:
+            bs32:
+
+            sample_size=32
+            sample_size2=48
+            sample_size3=64
+            sample_size4=64
+            sample_size5=64
+            sample_size6=144
+
+            batch_size=16
+            batch_size2=16
+            batch_size3=16
+            batch_size4=8
+            batch_size5=32
+            batch_size6=8
+
+            Submitted batch job 15630606
+            Submitted batch job 15630608
+            Submitted batch job 15630609
+            Submitted batch job 15630610
+            Submitted batch job 15630611
+            Submitted batch job 15630612(OOM❌)
+
+            第一轮跑的太慢，导致就跑了几个epoch，所以第二轮重新跑了一遍，把job运行时间增大到8小时：
+            Submitted batch job 15767933
+            Submitted batch job 15767935
+            Submitted batch job 15767936
+            Submitted batch job 15767937
+            Submitted batch job 15767938
+            Submitted batch job 15767940(OOM❌)
+
+
+            quarter_acc_results 结果总结：(选取test_session_auc 从高到底排序的前几个来展示)
+            sp, bs, quarter_acc_results, test_session_acc, test_session_auc:
+            64 8 {"8105":[1,1,0,1],"56109":[1,1,1,1],"66067":[0,1,1,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[1,1,1,1],"88089":[1,1,1,1],"105117":[1,1,0,1],"111130":[0,1,0,0],"137138":[1,1,1,1]} 0.5455 0.8889
+            48 16 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.5
+            32 16 {"8105":[1,1,1,1],"56109":[0,0,0,0],"66067":[1,1,1,1],"86087":[1,1,1,1],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[1,1,1,1],"105117":[0,1,0,0],"111130":[0,0,0,0],"137138":[0,0,0,0]} 0.5455 0.3333
+            64 32 {"8105":[0,0,0,0],"56109":[0,0,0,0],"66067":[1,1,1,1],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.3333
+
     experiment-3: 
         【相比于上一个实验的变化】：相比于experiment-2，从视觉分支改为音频分支，且模型改为audio_resnet_udiva, 且数据集进行了过采样避免不均衡
-        【模型】：audio_resnet_udiva
+        【模型】： audio_resnet_udiva
         【分支】：音频分支
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
         【GPU job id】 14970054(5mins test, success✅) 14956420 14956425 14956433 14956435 14956438 14956441 (全部job都success✅)
@@ -265,6 +308,83 @@ Tag解释:
             bs16:(sp192 不会OOM gpu 20mins 跑完) sp16-15096165 ; sp32-15096166 ; sp48-15096167 ; sp64-15096168 ; sp80-15096192 ; sp96-15096193
             bs32:(sp112 不会OOM gpu 12mins跑完) sp16-15096292 ; sp32-15096293 ; sp48-15096294 ; sp64-15096295 ; sp80-15096304 ; sp96-15096305
             bs48:(sp96 不会OOM gpu 12mins跑完) sp16-15096345 ; sp32-15096347 ; sp48-15096348 ; sp64-15096349 ; sp80-15096350 ; sp96-15096351
+
+        【子实验-experiment-3_1】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
+            test: 15652018
+            sample_size=16
+            sample_size2=32
+            sample_size3=48
+            sample_size4=64
+            sample_size5=80
+            sample_size6=96
+
+            batch_size=48
+            batch_size2=48
+            batch_size3=48
+            batch_size4=48
+            batch_size5=48
+            batch_size6=48
+
+            Submitted batch job 15652020
+            Submitted batch job 15652031
+            Submitted batch job 15652040
+            Submitted batch job 15652051
+            Submitted batch job 15652213
+            Submitted batch job 15652076
+
+            sample_size=32
+            sample_size2=48
+            sample_size3=64
+            sample_size4=80
+            sample_size5=96
+            sample_size6=112
+
+            batch_size=64
+            batch_size2=64
+            batch_size3=64
+            batch_size4=64
+            batch_size5=64
+            batch_size6=64
+
+            Submitted batch job 15652450
+            Submitted batch job 15652461
+            Submitted batch job 15652472
+            Submitted batch job 15652482
+            Submitted batch job 15652492
+            Submitted batch job 15652501
+
+            sample_size=32
+            sample_size2=48
+            sample_size3=64
+            sample_size4=80
+            sample_size5=96
+            sample_size6=112
+
+            batch_size=128
+            batch_size2=128
+            batch_size3=128
+            batch_size4=128
+            batch_size5=128
+            batch_size6=128
+
+            Submitted batch job 15652646
+            Submitted batch job 15652676
+            Submitted batch job 15652700
+            Submitted batch job 15652782
+            Submitted batch job 15652831
+            Submitted batch job 15652848
+
+
+            quarter_acc_results 结果总结：(选取test_session_auc 从高到底排序的前几个来展示)
+
+            sp, bs, quarter_acc_results, test_session_acc, test_session_auc:
+            96 128 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,1,1,1],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.8333
+            32 128 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[0,0,1,0],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.3636 0.7778
+            48 48 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[1,0,1,1],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.7222
+            64 48 {"8105":[0,0,0,0],"56109":[1,1,0,1],"66067":[1,0,1,0],"86087":[0,0,1,0],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.6667
+
+
+
     experiment-4: 
         【相比于上一个实验的变化】：相比于experiment-3，使用Transformer模型:timesformer_udiva 来处理视觉分支
         【模型】：timesformer_udiva
@@ -288,7 +408,7 @@ Tag解释:
         【CPU job id】bs16&8: 15149495
     experiment-5_2: 调优
         【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, fine tunning调优阶段
-        【模型】：ssast_udiva - fine tunning调优阶段 https://github.com/YuanGongND/ssast 和5_1区别，有pretrain参数
+        【模型】： ssast_udiva - fine tunning调优阶段 https://github.com/YuanGongND/ssast 和5_1区别，有pretrain参数
         【分支】：音频分支
         【变量】：无
         【GPU job id】10mins test: 15161247(success✅) 15166250
@@ -296,9 +416,42 @@ Tag解释:
                 bs16: sp16-15164654(success✅) ; sp32-15164988(success✅) ; sp48-15165009(CUDA OOM❌) ; sp64-15165010 ; sp80-15165111 ; sp96-15165455
                 bs32: sp16-15167983(success✅) ; sp32-15168511(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
                 bs48: sp16-15168733(success✅) ; sp32-15168758(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
-    
+        
+        【子实验-experiment-5_3】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
+            sample_size=16
+            sample_size2=16
+            sample_size3=16
+            sample_size4=16
+            sample_size5=32
+            sample_size6=48
 
+            batch_size=8
+            batch_size2=16
+            batch_size3=32
+            batch_size4=48
+            batch_size5=8
+            batch_size6=8
+
+            Submitted batch job 15767446
+            Submitted batch job 15767447
+            Submitted batch job 15767451
+            Submitted batch job 15767452
+            Submitted batch job 15767453
+            Submitted batch job 15767458
+
+            sample_size5=32
+            batch_size5=16
+            Submitted batch job 15767560
     
+            quarter_acc_results 结果总结：(选取test_session_auc 从高到底排序的前几个来展示)
+            sp, bs, quarter_acc_results, test_session_acc, test_session_auc:
+            32 16 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.8333
+            32 8 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.7778
+            16 8 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.7222
+            16 32 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.6667
+
+
+
     (DeepPersonality) [zl525@login-q-1 leenote]$ squeue -u zl525 --start
                 JOBID PARTITION     NAME     USER ST          START_TIME  NODES SCHEDNODES           NODELIST(REASON)
             14976665    ampere   gpujob    zl525 PD 2023-02-26T08:25:00      1 gpu-q-69             (Priority)
@@ -419,4 +572,4 @@ args_dict备份
                      'wa_start': 16, 
                      'wa_end': 30,
                      'loss': 'BCE'}
-"""
+""" 

@@ -40,17 +40,17 @@ DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 9
-  TEST_BATCH_SIZE: 16
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
   NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
-  PREFETCH_FACTOR: 10
+  PREFETCH_FACTOR: 2
 MODEL:
   # NAME: "vivit_model_udiva"  # visual: https://github.com/rishikksh20/ViViT-pytorch
   # NAME: "vivit_model3_udiva" # visual: https://github.com/drv-agwl/ViViT-pytorch
-  # NAME: "timesformer_udiva"  # visual: https://github.com/facebookresearch/TimeSformer
-  NAME: "ssast_udiva"          # audio: https://github.com/YuanGongND/ssast
+  NAME: "timesformer_udiva"  # visual: https://github.com/facebookresearch/TimeSformer
+  # NAME: "ssast_udiva"          # audio: https://github.com/YuanGongND/ssast
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
@@ -66,7 +66,7 @@ TRAIN:
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/vivit_udiva"
   BIMODAL_OPTION: 2
-  LOG_INTERVAL: 1
+  LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
 TEST:

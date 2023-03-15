@@ -521,8 +521,8 @@ class ASTModel(nn.Module):
 def ssast_udiva(cfg):
     num_mel_bins = 256 # 128(default) * 2(2个视频) = 256
     # target_length = 1598 # fbank的输出长度 
-    target_length = (cfg.DATA.SAMPLE_SIZE * 100) - 2  # fbank的输出长度 #根据对应关系找出来的规律 sample_size=16秒: fbank.shape: torch.Size([1598, 128]) # sample_size=32秒: fbank.shape: torch.Size([3198, 128]) # sample_size=48秒: fbank.shape: torch.Size([4798, 128]) # sample_size=64秒: fbank.shape: torch.Size([6398, 128])
-
+    target_length = (cfg.DATA.SAMPLE_SIZE/5 * 100) - 2  # fbank的输出长度 #根据对应关系找出来的规律 sample_size=16秒: fbank.shape: torch.Size([1598, 128]) # sample_size=32秒: fbank.shape: torch.Size([3198, 128]) # sample_size=48秒: fbank.shape: torch.Size([4798, 128]) # sample_size=64秒: fbank.shape: torch.Size([6398, 128])
+    # print('num_mel_bins: ', num_mel_bins, ', target_length: ', target_length)
     if cfg.TRAIN.PRE_TRAINED_MODEL is None: # 如果没有预训练模型，即进行预训练
         print('Pretrain AST model...')
         is_pretrain = True # 预训练状态为True
@@ -534,7 +534,7 @@ def ssast_udiva(cfg):
         
     model = ASTModel(
                  label_dim=2, fshape=16, tshape=16, fstride=16, tstride=16,
-                 input_fdim=num_mel_bins, input_tdim=target_length,
+                 input_fdim=num_mel_bins, input_tdim=int(target_length),
                  model_size='tiny', pretrain_stage=is_pretrain, load_pretrained_mdl_path=pretrained_model_path)
     """ 
     class ASTModel(nn.Module):

@@ -7,6 +7,7 @@ nohup*
 leenote/slurm-*
 leenote/machine.file.*
 leenote/wandb/*
+leenote/slurm_log/gpu/backup/*
 
 
 # output dir

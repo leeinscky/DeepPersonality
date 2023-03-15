@@ -276,7 +276,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         sample['segment_id'] = segment_id
         
         # print('[__getitem__] dataset:', self.mode, ', idx:', idx, ', session_id:', session_id, ', segment_id:', segment_id, ', label:', label, ', label.shape:', sample['label'].shape)
-        return sample # sample是一个dict字典, {'image': [sample_size, c=6, h=224, w=224], 'audio': [2, 1, sample_size*16000], 'label.shape': [2]}
+        return sample # sample是一个dict字典, {'image': [sample_size, c=6, h=224, w=224], 'audio': [2, 1, sample_size*16000], 'label.shape': [2], 'session_id': '55025', 'segment_id': '1'}
 
     def get_visual_input(self, idx):
         ### get image data ###
@@ -477,13 +477,13 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             _type_: _description_
         """
         
-        fc1_wav, fc2_wav  = self.get_wave_data(idx) # 分别从2个视频的完整音频中截取时长为self.sample_size秒的音频片段，共有连续的self.sample_size*16000个采样点，得到fc1_wav和fc2_wav, 2个wav都是一个numpy.ndarray对象
+        fc1_wav, fc2_wav, session_id, segment_id = self.get_wave_data(idx) # 分别从2个视频的完整音频中截取时长为self.sample_size秒的音频片段，共有连续的self.sample_size*16000个采样点，得到fc1_wav和fc2_wav, 2个wav都是一个numpy.ndarray对象
         # fc1_wav.shape: (1, 1, 256000) fc2_wav.shape: (1, 1, 256000), sample_size*16000=256000
         fc1_fbank = self.ssast_wav_process(fc1_wav) 
         fc2_fbank = self.ssast_wav_process(fc2_wav)
         wav = torch.cat([fc1_fbank, fc2_fbank], dim=1) # 将fc1_fbank和fc2_fbank沿着列方向拼接，得到wav, shape, e.g (1598, 128+128) -> (1598, 256)
         # print('[audio_visual_data_udiva.py]-ssast_audio_preprocess wav.shape:', wav.shape) # wav.shape: (1598, 256)
-        return wav
+        return wav, session_id, segment_id
 
     def ssast_wav_process(self, wav, dataset_mean=-4.2677393, dataset_std=4.5689974):
         """audio preprocess for ssast model: https://github.com/YuanGongND/ssast
@@ -517,10 +517,18 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                                                   window_type='hanning', num_mel_bins=num_mel_bins, dither=0.0, frame_shift=10)
         # print('[audio_visual_data_udiva.py]-_wav2fbank函数 waveform.shape:', waveform.shape, ', fbank.shape:', fbank.shape)
         # fbank函数返回的shape为[帧数, 特征维度], 如果fbank.shape: torch.Size([1598, 128]), 那么帧数就是1598约等于16秒*100帧，正好和sample_size*100对应, 即一秒100帧。在fbank.shape中，帧数frames的计算方式为：将处理后的音频数据按照固定的帧长和帧移进行分割，帧长和帧移一般是预先设定的参数，比如在本代码中的帧移是10毫秒。分割后，每个帧就对应一个音频特征向量，frames即为分割后的帧数。
+        
+        # old sample strategy:
         # sample_size=16秒: waveform.shape: torch.Size([1, 256000]) , fbank.shape: torch.Size([1598, 128]) 根据 1598计算公式：(256000-400)/160=1598, 400=16000*0.025, 160=16000*0.01, 0.025和0.01是kaldi的默认参数, 0.025是窗口长度，0.01是窗口移动步长, 0.025和0.01都是以秒为单位
         # sample_size=32秒: waveform.shape: torch.Size([1, 512000]) , fbank.shape: torch.Size([3198, 128]) 根据SSAST代码库里1024 frames (i.e., 10.24s)的解释，3198帧对应31.98秒 https://github.com/YuanGongND/ssast#Self-Supervised-Pretraining 
         # sample_size=48秒: waveform.shape: torch.Size([1, 768000]) , fbank.shape: torch.Size([4798, 128])
         # sample_size=64秒: waveform.shape: torch.Size([1, 1024000]) , fbank.shape: torch.Size([6398, 128])
+        # 规律: fbank.shape[0] = sample_size * 100 - 2
+        
+        # new sample strategy:
+        # sample_size = 16, time = 16/5 = 3.2s, waveform.shape: torch.Size([1, 51200]) , fbank.shape: torch.Size([318, 128])
+        # sample_size = 32, time = 32/5 = 6.4s, waveform.shape: torch.Size([1, 102400]) , fbank.shape: torch.Size([638, 128])
+        # 规律: fbank.shape[0] = (sample_size/5) * 100 - 2
         return fbank
 
 class ALLSampleAudioVisualDataUdiva(AudioVisualDataUdiva):
@@ -841,7 +849,7 @@ def over_sampling(dataset, sampler_name, bimodal_option):
     
     # 由于udiva 训练集所有的116个session中，认识的label有44个，不认识的label有72个(有一个坏数据，所以减去1为71个)，所以使用 oversampling 过采样方法来让数据集更均衡, 借助imblearn.over_sampling.RandomOverSampler
     # 查看均衡前的数据分布
-    print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
+    # print('[oversampling]- len(dataset)=', len(dataset), ', type(dataset)=', type(dataset), ', dataset[0].keys()=', dataset[0].keys(), ', type(dataset[0])=', type(dataset[0])) 
     # len(dataset)= 115 , type(dataset)= <class 'dpcv.data.datasets.audio_visual_data_udiva.AudioVisualLstmDataUdiva'> , dataset[0].keys()= dict_keys(['image', 'label']) , type(dataset[0])= <class 'dict'>
     # print('[oversampling]- image, label shape=', dataset[0]['image'].shape, dataset[0]['label'].shape) 
     # image shape= torch.Size([sample_size, channel:6, w:224, h:224]) label shape: torch.Size([2]) label的shape固定是[2]，因为是二分类问题，所以只有两个元素，分别是认识和不认识的概率

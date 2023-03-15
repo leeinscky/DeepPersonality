@@ -2,7 +2,8 @@ DATA:
   ROOT: "datasets"
   SESSION: "TALK"
   SAMPLE_SIZE: 16
-  SAMPLING_NAME: "BorderlineSMOTE"
+  # SAMPLING_NAME: "BorderlineSMOTE"
+  # SAMPLING_NAME: "SMOTE"
   ANIMALS_TRAIN_IMG_DATA: "udiva_full/train/recordings/animals_recordings_train_img"
   GHOST_TRAIN_IMG_DATA: "udiva_full/train/recordings/ghost_recordings_train_img"
   LEGO_TRAIN_IMG_DATA: "udiva_full/train/recordings/lego_recordings_train_img"
@@ -39,13 +40,13 @@ DATA:
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   TRANSFORM: "udiva_frame_transforms"
-  TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 9
-  TEST_BATCH_SIZE: 16
+  TRAIN_BATCH_SIZE: 32
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
   NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
-  PREFETCH_FACTOR: 10
+  PREFETCH_FACTOR: 2
 MODEL:
   NAME: "resnet50_3d_model_udiva"
 LOSS:
@@ -56,13 +57,14 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [10, 20, 40, 80, 150, 200]
+  # MILESTONE: [20, 40, 80, 150, 200]
+  MILESTONE: [2, 5, 20, 40, 80, 150, 200]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/resnet_3d_udiva"
   BIMODAL_OPTION: 1
-  LOG_INTERVAL: 1
+  LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
 TEST:

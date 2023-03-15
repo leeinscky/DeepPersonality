@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=01:00:00
+#SBATCH --time=08:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -124,14 +124,20 @@ JOBID=$SLURM_JOB_ID
     # batch_size5=32
     # batch_size6=8
 
+#### **************************** temp test **************************** ####
+# model="temp"
+# cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
+
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-# model="Res3D"
-# cfg_file=./config/demo/resnet_3d_udiva_full.yaml
+model="Res3D"
+cfg_file=./config/demo/resnet_3d_udiva_full.yaml
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
 # model="Res18-Audio"
 # # model="Res18-Visual"
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml 
+
+# 好的参数设置：
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 # model="ViT"
@@ -140,31 +146,32 @@ JOBID=$SLURM_JOB_ID
 #### **************************** SSAST: ssast_udiva.yaml  音频Transformer **************************** ####
 # model="AST_Pretrain"
 # cfg_file=./config/demo/ssast_pretrain_udiva.yaml # 预训练
-model="AST_Finetune"
-cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-epoch=600
+# model="AST_Finetune"
+# cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-sample_size=112
-sample_size2=128
-sample_size3=144
-sample_size4=160
-sample_size5=176
-sample_size6=192
+epoch=300
 
-batch_size=8
-batch_size2=8
-batch_size3=8
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=64
+sample_size5=64
+sample_size6=144
+
+batch_size=16
+batch_size2=16
+batch_size3=16
 batch_size4=8
-batch_size5=8
+batch_size5=32
 batch_size6=8
 
-learning_rate=0.0005
-learning_rate2=0.0005
-learning_rate3=0.0005
-learning_rate4=0.0005
-learning_rate5=0.0005
-learning_rate6=0.0005
+learning_rate=0.0001
+learning_rate2=0.0001
+learning_rate3=0.0001
+learning_rate4=0.0001
+learning_rate5=0.0001
+learning_rate6=0.0001
 
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size}_bs${batch_size}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
@@ -203,9 +210,6 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 eval $CMD 
 
 
-### To submit this script to the queue, you can use the command
-### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_4nodes
-
 # 14576875:sample_size = 160 176 192 208
 # 14576877:sample_size = 64 176 192 208
 # 14576896 bs=12 sample_size = 160 176 192 208
@@ -216,3 +220,7 @@ eval $CMD
 # ResNet 3D, 2023年2月24日22:13, experiment-2: 14919003 14919037 14919038 14919047 14919056 14919057
 # ResNet18, experiment-3: 14956420 14956425 14956433 14956435 14956438 14956441 14970054(5mins test, success✅)
 # timesformer_udiva, experiment-4: 10mins test: 14976665; 5h: 1-14976675, 2-14976697, 3-14977044, 4-14977045, 5-14977046, 6-14977049
+
+
+### To submit this script to the queue, you can use the command
+### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_4nodes

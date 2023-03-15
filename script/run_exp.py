@@ -18,7 +18,6 @@ def setup():
     args = parse_args()
     if args.use_wandb == 'True':
         wandb.init(config=args, project="DeepPersonality", settings=wandb.Settings(start_method="fork"))
-
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 
@@ -45,9 +44,9 @@ def setup():
 
 
 def main():
-    print("I am process %s, running on %s: starting (%s)" % (os.getpid(), os.uname()[1], time.asctime()))
     setup_seed(12345)
     args = setup()
+    print("I am process %s, running on %s: starting (%s)" % (os.getpid(), os.uname()[1], time.asctime()))
     # print('cfg.TRAIN.USE_WANDB:', cfg.TRAIN.USE_WANDB, ', type(cfg.TRAIN.USE_WANDB): ', type(cfg.TRAIN.USE_WANDB))
     if cfg.TRAIN.USE_WANDB == True:
         wandb.config.epoch = cfg.TRAIN.MAX_EPOCH
