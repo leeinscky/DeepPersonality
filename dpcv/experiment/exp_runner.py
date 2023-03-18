@@ -12,6 +12,7 @@ from dpcv.evaluation.summary import TrainSummary
 from dpcv.checkpoint.save import save_model, resume_training, load_model
 from dpcv.evaluation.metrics import compute_pcc, compute_ccc
 from dpcv.tools.logger import make_logger
+from sklearn.model_selection import StratifiedKFold
 import wandb
 
 
@@ -38,7 +39,7 @@ class ExpRunner:
         if self.cfg.TRAIN.USE_WANDB:
             wandb.config.log_dir = self.log_dir
         self.log_cfg_info()
-        if not feature_extract:
+        if not feature_extract and cfg.DATA_LOADER.DATASET_NAME != 'NOXI': # NoXi 数据集需要交叉验证，因此使用的是def cross_validation里定义的数据加载器，不需要使用 build_dataloader 函数
             self.data_loader = self.build_dataloader()
             # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - data_loader: ', self.data_loader)
 
@@ -148,6 +149,65 @@ class ExpRunner:
             
             # if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
             #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+            pass
+
+    def cross_validation(self, cfg):
+        skf = StratifiedKFold(n_splits=cfg.DATA_LOADER.NUM_FOLD)
+        fold_valid_loss = []
+        fold_valid_acc = []
+        for fold_id in range(cfg.DATA_LOADER.NUM_FOLD):
+            print('\n================================== start K-fold cross validation, fold_id:', fold_id, '==================================')
+            dataloader = build_dataloader(self.cfg, fold_id)
+            model = build_model(self.cfg)
+
+            cfg = self.cfg.TRAIN
+            best_valid_loss = 1e10
+            best_valid_acc = 0
+            for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
+                # 训练用到的文件路径 self.trainer: dpcv/engine/bi_modal_trainer.py;  self.model: dpcv/modeling/networks/audio_visual_residual.py;  self.data_loader["train"]:  备注：结合config/demo/bimodal_resnet18_udiva.yaml里的信息就可以看到class类名
+                
+                ### 1. train
+                print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
+                self.trainer.train(dataloader["train"], model, self.loss_f, self.optimizer, epoch)
+                
+                ## 2. valid
+                print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start valid...     ==================================')
+                if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
+                    best_valid_loss, best_valid_acc= self.trainer.valid(dataloader["valid"], model, self.loss_f, self.scheduler, epoch)
+                if cfg.TRAINER != "SSASTTrainer": # SSASTTrainer 的学习率调整已经在valid函数里面进行，此处不需要再进行学习率调整
+                    self.scheduler.step() # 每个epoch都进行学习率调整
+                
+                print('[cross_validation] Fold:', fold_id, ', Epo:', epoch+1, ', best_valid_loss:', best_valid_loss, ', best_valid_acc:', best_valid_acc)
+                # ### 3. test
+                # print(f'\n================================== Epo:{epoch+1} [train_epochs] start test...     ==================================')
+                # if epoch % cfg.TEST_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都在数据集上进行测试
+                #     self.trainer.test(self.data_loader["test"], self.model, epoch)
+                
+                # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
+                
+                # # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
+                # if (epoch+1) in [40]:
+                #     print('current epoch:', epoch+1, ', save model with specific epoch')
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                
+                # if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
+                #     print('current epoch:', epoch+1, ', save model with best valid acc')
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                #     self.collector.update_best_epoch(epoch)
+                
+                # if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                pass
+            
+            fold_valid_loss.append(best_valid_loss)
+            fold_valid_acc.append(best_valid_acc)
+        print('[Cross_Validation] fold_valid_loss =', fold_valid_loss, ', fold_valid_acc =', fold_valid_acc)
+        print('[Cross_Validation] average fold_valid_loss =', np.mean(fold_valid_loss), ', average fold_valid_acc =', np.mean(fold_valid_acc))
+        if self.cfg.TRAIN.USE_WANDB:
+            wandb.log({
+                "avg_fold_valid_loss": float(np.mean(fold_valid_loss)),
+                "avg_fold_valid_acc": float(np.mean(fold_valid_acc)),
+            })
 
     def after_train(self, cfg):
         cfg = self.cfg.TRAIN
@@ -163,7 +223,10 @@ class ExpRunner:
         # cfg = self.cfg.TRAIN
         cfg = self.cfg
         self.before_train(cfg) # 实际实验没有执行 只是检查下
-        self.train_epochs(cfg)
+        if cfg.DATA_LOADER.DATASET_NAME == "NOXI":
+            self.cross_validation(cfg) # K折交叉验证
+        elif cfg.DATA_LOADER.DATASET_NAME == "UDIVA":
+            self.train_epochs(cfg) # 正常按照划分的训练集验证集测试集来训练
         self.after_train(cfg)
 
     def test(self, weight=None):
@@ -261,7 +324,6 @@ class ExpRunner:
         else:
             self.test() # test for regression task
         print('================================== [run] done test ...     ==================================')
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def run - test end ======================')
 
     def log_cfg_info(self):
         """

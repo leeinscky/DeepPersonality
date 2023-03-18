@@ -68,12 +68,13 @@ use_wandb="False"
 # --resume $resume
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=16
-epoch=10
-batch_size=8
+sample_size=4
+epoch=3
+batch_size=2
 learning_rate=0.0001
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
-cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
+# cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
+cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
 
 python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \

@@ -69,6 +69,12 @@ __C.DATA.VA_ROOT = "datasets"
 __C.DATA.VA_DATA = "va_data/cropped_aligned"
 __C.DATA.VA_TRAIN_LABEL = "va_data/va_label/VA_Set/Train_Set"
 __C.DATA.VA_VALID_LABEL = "va_data/va_label/VA_Set/Validation_Set"
+
+# NoXI dataset
+__C.DATA.NOXI_IMG_DATA = "noxi/img"
+__C.DATA.NOXI_AUD_DATA = "noxi/wav"
+__C.DATA.NOXI_LABEL_DATA = "noxi/session_label.pkl"
+
 # ------------------------------------------ step 2 : dataloader config node -------------------------------------------
 __C.DATA_LOADER = CfgNode()
 # name of dataloader build function
@@ -89,12 +95,13 @@ __C.DATA_LOADER.SECOND_STAGE.TYPE = ""
 
 # name of dataset type 
 __C.DATA_LOADER.DATASET_NAME = ""
+__C.DATA_LOADER.NUM_FOLD = 5 # number of fold for cross validation
 
 # ------------------------------------------ step 3 : model config node ------------------------------------------------
 __C.MODEL = CfgNode()
 __C.MODEL.NAME = "se_resnet50"
 __C.MODEL.PRETRAIN = False
-__C.MODEL.NUM_CLASS = 5
+__C.MODEL.NUM_CLASS = 2
 __C.MODEL.SPECTRUM_CHANNEL = 50
 __C.MODEL.RETURN_FEATURE = False
 

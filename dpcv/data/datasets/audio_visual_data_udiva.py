@@ -21,6 +21,7 @@ from imblearn.over_sampling import RandomOverSampler, BorderlineSMOTE, SMOTE
 from collections import Counter
 import torch.nn.functional as F
 import torchaudio
+from sklearn.model_selection import StratifiedKFold
 
 
 class AudioVisualDataUdiva(VideoDataUdiva):
@@ -238,8 +239,8 @@ class AudioVisualDataUdiva(VideoDataUdiva):
 
 
 class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
-    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None, mode=None):
-        super().__init__(data_root, img_dir, label_file, audio_dir, sample_size=sample_size, mode=mode)
+    def __init__(self, data_root, img_dir, audio_dir, label_file, transform=None, sample_size=16, config=None, mode=None, dataset_name="UDIVA", prefix1="FC1", prefix2="FC2", img_dir_ls=None):
+        super().__init__(data_root, img_dir, label_file, audio_dir, sample_size=sample_size, mode=mode, dataset_name=dataset_name, prefix1=prefix1, prefix2=prefix2, img_dir_ls=img_dir_ls)
         self.transform = transform
         self.sample_size = sample_size # 表示从一个视频中采样sample_size个连续的帧图片
         self.frame_idx = 0
@@ -248,6 +249,8 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         self.cfg = config
         self.img_dtype = None
         self.mode = mode
+        self.prefix1 = prefix1
+        self.prefix2 = prefix2
 
     def __getitem__(self, idx): # idx means the index of session in the directory
         sample = {} # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
@@ -259,8 +262,8 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             wav, session_id, segment_id = self.get_audio_input(idx)
             sample['audio'] = wav # [2, 1, (sample_size / 5) x 16000 = duration_seconds x 16000]
         elif self.cfg.TRAIN.BIMODAL_OPTION == 3:
-            img, session_id_img, segment_id_img = self.get_visual_input(idx) # TODO
-            wav, session_id_wav, segment_id_wav = self.get_audio_input(idx) # TODO
+            img, session_id_img, segment_id_img = self.get_visual_input(idx)
+            wav, session_id_wav, segment_id_wav = self.get_audio_input(idx)
             assert session_id_img == session_id_wav and segment_id_img == segment_id_wav, 'session_id_img != session_id_wav or segment_id_img != segment_id_wav'
             sample['image'] = img
             sample['audio'] = wav
@@ -308,9 +311,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         
         fc1_img_dir_path, fc2_img_dir_path = '', ''
         for file in os.listdir(session_dir_path):
-            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC1") and not file.endswith(".mp4"): # judge file is a directory and start with FC1 and not end with .mp4
+            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"): # judge file is a directory and start with FC1 and not end with .mp4
                 fc1_img_dir_path = os.path.join(session_dir_path, file)
-            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC2") and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
+            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
                 fc2_img_dir_path = os.path.join(session_dir_path, file)
         # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path) # fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
@@ -402,9 +405,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         fc1_wav_path, fc2_wav_path = '', ''
         for file in os.listdir(wav_dir_path):
             # print('file:', file, 'type:', type(file)) # datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/128129/FC1_A.wav.npy 
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC1') and file.endswith('.wav.npy'): # judge file is a file and start with FC1 and end with .wav.npy
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix1) and file.endswith('.wav.npy'): # judge file is a file and start with FC1 and end with .wav.npy
                 fc1_wav_path = os.path.join(wav_dir_path, file)
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith('FC2') and file.endswith('.wav.npy'): # judge file is a file and start with FC2 and end with .wav.npy
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix2) and file.endswith('.wav.npy'): # judge file is a file and start with FC2 and end with .wav.npy
                 fc2_wav_path = os.path.join(wav_dir_path, file)
         
         # ************************* process fc1 wave data *************************
@@ -530,6 +533,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # sample_size = 32, time = 32/5 = 6.4s, waveform.shape: torch.Size([1, 102400]) , fbank.shape: torch.Size([638, 128])
         # 规律: fbank.shape[0] = (sample_size/5) * 100 - 2
         return fbank
+
 
 class ALLSampleAudioVisualDataUdiva(AudioVisualDataUdiva):
 
@@ -697,6 +701,151 @@ def bimodal_resnet_data_loader_udiva(cfg, mode):
 
 
 @DATA_LOADER_REGISTRY.register()
+def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi dataset
+    print('[audio_visual_data_udiva.py] input fold_id=', fold_id)
+    assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
+    transforms = build_transform_spatial(cfg) # TRANSFORM: "standard_frame_transform"
+    
+    img_data = cfg.DATA.NOXI_IMG_DATA
+    aud_data = cfg.DATA.NOXI_AUD_DATA
+    # noxi 全量数据集
+    noxi_full_dataset = AudioVisualLstmDataUdiva(
+        cfg.DATA.ROOT,
+        img_data,
+        aud_data,
+        cfg.DATA.NOXI_LABEL_DATA,
+        transforms,
+        sample_size=cfg.DATA.SAMPLE_SIZE,
+        config=cfg,
+        mode="noxi_full_dataset",
+        dataset_name="NoXi",
+        prefix1="Expert",
+        prefix2="Novice"
+    )
+    print('[audio_visual_data_udiva.py]noxi_full_dataset len=', len(noxi_full_dataset), ' img_dir_ls type:', type(noxi_full_dataset.img_dir_ls)) # img_dir_ls type: <class 'list'>
+    session_dir_ls = noxi_full_dataset.img_dir_ls
+    
+    # video_data_udiva = VideoDataUdiva(data_root=cfg.DATA.ROOT, img_dir=img_data, label_file=cfg.DATA.NOXI_LABEL_DATA)
+    # session_dir_ls = video_data_udiva.parse_data_dir_v2(img_data)
+    print('[audio_visual_data_udiva.py]session_dir_ls len=', len(session_dir_ls), ' type:', type(session_dir_ls)) # session_dir_ls len= 100  type: <class 'list
+    X = [] # data
+    y = [] # label
+    for session_dir_path in session_dir_ls:
+        idx = session_dir_ls.index(session_dir_path) # session_dir_path 在session_dir_ls中的索引
+        # session_id, segment_idx = session_dir_path.rsplit("_", 1)
+        label = noxi_full_dataset.get_ocean_label(idx)
+        # 获得元素1在label中的索引, 索引0到3分别代表: 'N/A', 'Acquaintances', 'Friends', 'Very good friends'
+        for i, x in enumerate(label):
+            if x == 1:
+                relation_index = i
+                break
+        
+        # print('idx:', idx, ', session_dir_path=', session_dir_path, ', label=', label, ', relation_index:', relation_index) # e.g. idx: 0 , session_dir_path= datasets/noxi/img/004_1 , label= [0, 0, 1, 0] , relation_index: 2
+        X.append(session_dir_path)
+        y.append(relation_index)
+
+    print('[audio_visual_data_udiva.py]before fold, X len=', len(X), ', y len=', len(y), ', X[:3]=', X[:3], ', y[:3]=', y[:3], ', X[-3:]=', X[-3:], ', y[-3:]=', y[-3:])
+    
+    # 将 X 和 y 转换为 numpy array
+    X = np.array(X)
+    y = np.array(y)
+    skf = StratifiedKFold(n_splits=5)
+    # 遍历每一折
+    X_train_list, X_valid_list, y_train_list, y_valid_list = [], [], [], []
+    for fold_idx, (train_idx, valid_idx) in enumerate(skf.split(X, y)):
+        # 根据索引划分训练集和验证集
+        X_train, y_train = X[train_idx], y[train_idx]
+        X_valid, y_valid = X[valid_idx], y[valid_idx]
+        # print('[audio_visual_data_udiva.py]fold_idx:', fold_idx) # when K=5, fold_idx=0, 1, 2, 3, 4
+        # print('[audio_visual_data_udiva.py]train_idx:', train_idx, 'len(train_idx): ', len(train_idx))
+        # print('[audio_visual_data_udiva.py]valid_idx:', valid_idx, 'len(valid_idx): ', len(valid_idx))
+        # [重要] 经过对比日志，不同时间段运行脚本时 train_idx valid_idx 一致！！因此，可以在这里进行for循环; 如果不一致，会导致每次运行脚本时，训练集和验证集的划分不一致
+        print('[audio_visual_data_udiva.py]after fold, fold_idx:', fold_idx, ', len(X_train):', len(X_train), 'len(y_train): ', len(y_train), 'len(X_valid): ', len(X_valid), 'len(y_valid): ', len(y_valid))
+        # print('[audio_visual_data_udiva.py]after fold, fold_idx:', fold_idx, ', X_train[:3]:', list(X_train[:3]), 'y_train[:3]: ', y_train[:3])
+        X_train_list.append(X_train)
+        y_train_list.append(y_train)
+        X_valid_list.append(X_valid)
+        y_valid_list.append(y_valid)
+    
+    # print('[audio_visual_data_udiva.py]len(X_train_list): ', len(X_train_list), 'len(y_train_list): ', len(y_train_list), 'len(X_valid_list): ', len(X_valid_list), 'len(y_valid_list): ', len(y_valid_list)) # 5, 5, 5, 5
+    # print('[audio_visual_data_udiva.py]list(X_train_list[0]):', list(X_train_list[0]))
+    
+    if mode == "train":
+        img_dir_ls = list(X_train_list[fold_id]) if fold_id is not None else None
+        print('[audio_visual_data_udiva.py]train mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] train mode, img_dir_ls is None')
+        dataset = AudioVisualLstmDataUdiva(
+            cfg.DATA.ROOT,
+            img_data,
+            aud_data,
+            cfg.DATA.NOXI_LABEL_DATA,
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
+            mode=mode,
+            dataset_name="NoXi",
+            prefix1="Expert",
+            prefix2="Novice",
+            img_dir_ls = img_dir_ls
+        )
+        batch_size = cfg.DATA_LOADER.TRAIN_BATCH_SIZE
+        shuffle=cfg.DATA_LOADER.SHUFFLE
+        
+        # 过采样
+        if cfg.DATA.SAMPLING_NAME != "":
+            dataset = over_sampling(dataset, cfg.DATA.SAMPLING_NAME, cfg.TRAIN.BIMODAL_OPTION)
+            if cfg.TRAIN.BIMODAL_OPTION == 1 or cfg.TRAIN.BIMODAL_OPTION == 2:
+                image_or_audio, label = dataset[0]
+                print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image or audio, label = dataset[0], image or audio.shape=', image_or_audio.shape, ', label=', label)
+                # image.shape= torch.Size([sample_size, 6, 224, 224]) , label= tensor([1., 0.])
+            else:
+                image, audio, label = dataset[0]
+                print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image, audio, label = dataset[0], image.shape=', image.shape, ', audio.shape=', audio.shape, ', label=', label)
+    elif mode == "valid":
+        img_dir_ls = list(X_valid_list[fold_id]) if fold_id is not None else None
+        print('[audio_visual_data_udiva.py]valid mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] valid mode, img_dir_ls is None')
+        dataset = AudioVisualLstmDataUdiva(
+            cfg.DATA.ROOT,
+            img_data,
+            aud_data,
+            cfg.DATA.NOXI_LABEL_DATA,
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
+            mode=mode,
+            dataset_name="NoXi",
+            prefix1="Expert",
+            prefix2="Novice",
+            img_dir_ls = img_dir_ls
+        )
+        batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+        shuffle=False
+    elif mode == "full_test":
+        test_img_data = img_data
+        test_aud_data = aud_data
+        return ALLSampleAudioVisualDataUdiva(
+            cfg.DATA.ROOT,
+            test_img_data,
+            test_aud_data,
+            cfg.DATA.NOXI_LABEL_DATA,
+            transforms,
+        )
+    else:
+        dataset = noxi_full_dataset # 使用全量数据集，因为NoXi数据集后续会进行K折交叉验证来训练，所以这里不需要再进行划分，具体划分逻辑由交叉验证完成
+        batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
+        shuffle=False
+    # print('[audio_visual_data_udiva.py] batch_size: ', batch_size, ' mode: ', mode)
+    data_loader = DataLoader(
+        dataset=dataset, 
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
+        drop_last=cfg.DATA_LOADER.DROP_LAST,
+        prefetch_factor=cfg.DATA_LOADER.PREFETCH_FACTOR,
+    )
+    return data_loader
+
+
+@DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdiva 增加针对LSTM的数据处理
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_spatial(cfg) # TRANSFORM: "standard_frame_transform"
@@ -830,6 +979,7 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
         prefetch_factor=cfg.DATA_LOADER.PREFETCH_FACTOR,
     )
     return data_loader
+
 
 def over_sampling(dataset, sampler_name, bimodal_option): 
     #****************** 以下是为了让数据集更均衡，使用 oversampling 过采样方法来让数据集更均衡 ******************

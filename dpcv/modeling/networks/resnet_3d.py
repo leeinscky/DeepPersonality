@@ -377,7 +377,7 @@ def resnet50_3d_model(cfg):
 
 @NETWORK_REGISTRY.register()
 def resnet50_3d_model_udiva(cfg):
-    model = ResNetUdiva(Bottleneck, [3, 4, 6, 3], get_inplanes())
+    model = ResNetUdiva(Bottleneck, [3, 4, 6, 3], get_inplanes(), n_classes=cfg.MODEL.NUM_CLASS)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 if __name__ == "__main__":

@@ -18,8 +18,8 @@ mac本地：
     cd /home/zl525/code/DeepPersonality/ && python3 ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 1 --bs 32
 
 # 命令模板
-conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup python3 ./script/run_exp.py \
---cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 50 --bs 16 --lr 0.001 >nohup_full_epo50_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
+    conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup python3 ./script/run_exp.py \
+    --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml --max_epoch 50 --bs 16 --lr 0.001 >nohup_full_epo50_bs16_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 
 ####### 提交任务到HPC的CPU上 在CPU上跑 #######
     cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
@@ -81,7 +81,6 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
             batch_size6=64
 
 ####### 调参总结 #######
-参考:
     train loss与test loss结果分析 原文链接：https://blog.csdn.net/ytusdc/article/details/107738749
     train loss 不断下降，test loss不断下降，说明网络仍在学习;
     train loss 不断下降，test loss趋于不变，说明网络过拟合;
@@ -160,10 +159,10 @@ conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/ && nohup 
 
 
 # 一些结果相对比较好的保存模型
-resume="results/demo/unified_frame_images/bimodal_resnet_udiva/02-03_21-46/checkpoint_0.pkl"
-resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimodal_resnet_udiva/02-04_02-10/checkpoint_0.pkl"
+    resume="results/demo/unified_frame_images/bimodal_resnet_udiva/02-03_21-46/checkpoint_0.pkl"
+    resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimodal_resnet_udiva/02-04_02-10/checkpoint_0.pkl"
 
-    # 根据wandb的链接id来查找日志所在文件夹
+# 根据wandb的链接id来查找日志所在文件夹
     find . -name "d7lcr806"
 
 # 验证 以下两种方法计算的auroc是否相同
@@ -179,17 +178,44 @@ resume="/home/zl525/code/DeepPersonality/results/demo/unified_frame_images/bimod
 # 替换print，将下面的两行的第一行替换成第二行即可注释所有print信息
   print('[
   # print('[
-
-但是不要替换Exception这里的print信息
-    except Exception as e:
-        printxx
-解决办法: 在print后面加上return None
+    但是不要替换Exception这里的print信息
+        except Exception as e:
+            printxx
+    解决办法: 在print后面加上return None
 
 # 创建数据集软链接
     ln -s [源文件或目录] [目标文件或目录] # https://www.cnblogs.com/sueyyyy/p/10985443.html
     例子：当前路径创建test 引向/var/www/test 文件夹: ln –s  /var/www/test  test
-    ln -s /home/zl525/rds/hpc-work/datasets/udiva_tiny /home/zl525/code/DeepPersonality/datasets/
-    ln -s /home/zl525/rds/hpc-work/datasets/udiva_full /home/zl525/code/DeepPersonality/datasets/ 
+    # udiva
+        ln -s /home/zl525/rds/hpc-work/datasets/udiva_tiny /home/zl525/code/DeepPersonality/datasets/
+        ln -s /home/zl525/rds/hpc-work/datasets/udiva_full /home/zl525/code/DeepPersonality/datasets/ 
+    # NoXi
+        # 先删除之前的软链接
+        unlink /home/zl525/code/DeepPersonality/datasets/noxi_tiny
+
+        ln -s /home/zl525/rds/hpc-work/datasets/noxi_tiny /home/zl525/code/DeepPersonality/datasets/
+        ln -s /home/zl525/rds/hpc-work/datasets/noxi_full /home/zl525/code/DeepPersonality/datasets/
+
+
+
+# 将mac上的文件夹拷贝到linux上
+    # 速度对比:
+        scp命令 > 将文件从访达拖拽到VsCode界面
+    # 压缩mac本地的数据文件
+    cd /Users/lizejian/Downloads/NOXI/
+    tar -zcf 009_2016-03-25_Paris.tar.gz 009_2016-03-25_Paris.zip # 压缩效果: 387.3 MB -> 374.8 MB 效果不明显! 因此考虑直接拷贝zip文件
+    
+    # scp 传输
+    cd /Users/lizejian/tools
+    nohup scp /Users/lizejian/Downloads/NOXI/004_2016-03-18_Paris.zip /home/zl525/code/DeepPersonality/datasets/noxi
+    nohup scp /Users/lizejian/Downloads/NOXI/005_2016-03-18_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &
+    nohup scp /Users/lizejian/Downloads/NOXI/006_2016-03-18_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &
+    nohup scp /Users/lizejian/Downloads/NOXI/007_2016-03-21_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &
+    nohup scp /Users/lizejian/Downloads/NOXI/008_2016-03-23_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &;
+    nohup scp /Users/lizejian/Downloads/NOXI/009_2016-03-25_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &;
+    nohup scp /Users/lizejian/Downloads/NOXI/010_2016-03-25_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &;
+
+    rm 006* 007* 008* 010*
 
 # 查看输入数据inputs labels 和 模型models在哪个device上 
     参考：https://www.cnblogs.com/picassooo/p/13736843.html
@@ -563,6 +589,7 @@ args_dict备份
                      'epoch_iter': 4000, 
                      'pretrained_mdl_path': None, 
                      'head_lr': 1, 
+                   
                      'noise': None, 
                      'metrics': 'mAP', 
                      'lrscheduler_start': 10, 
@@ -573,3 +600,8 @@ args_dict备份
                      'wa_end': 30,
                      'loss': 'BCE'}
 """ 
+
+
+
+# TODO
+为了让label有变化，将005变为006 /home/zl525/code/DeepPersonality/datasets/noxi/img/005 手动重命名为 /home/zl525/code/DeepPersonality/datasets/noxi/img/006， 后续记得改回来

@@ -287,6 +287,7 @@ class BiModalTrainerUdiva(object):
         # tb_writer_dir = os.path.join(self.cfg.OUTPUT_DIR, "tensorboard_events")
         # self.tb_writer = SummaryWriter(tb_writer_dir)
         self.f1_metric = BinaryF1Score()
+        self.best_valid_loss = 1e10
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         ''' data_loader的调用逻辑如下
@@ -330,7 +331,8 @@ class BiModalTrainerUdiva(object):
         epoch_total_acc = 0
         epoch_total_num = 0
         epo_iter_num = len(data_loader)
-        # print('[bi_modal_trainer] train... epo_iter_num=', epo_iter_num)
+        batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meeting
+        print('[bi_modal_trainer] train... epo_iter_num=', epo_iter_num)
         pred_list, label_list, pred_list2, label_list2 = [], [], [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
@@ -365,14 +367,13 @@ class BiModalTrainerUdiva(object):
 
             outputs = outputs.detach().cpu()
             labels = labels.detach().cpu()
-
             if epoch_idx % 10 == 0 and i in [0, 1]: # epoch_idx % 10 == 0 代表每10个epoch打印一次
                 if session_id is not None and segment_id is not None:
                     session_id = session_id.detach().cpu()
                     segment_id = segment_id.detach().cpu()
-                    print(f'{torch.cat([outputs, labels, session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
                 else:
-                    print(f'{torch.cat([outputs, labels], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
                 
             '''
             # batch_size = 3时
@@ -500,13 +501,17 @@ class BiModalTrainerUdiva(object):
             pred_list2.extend(outputs.argmax(dim=-1).tolist())
             label_list2.extend(labels.argmax(dim=-1).tolist())
             
-            #### 计算指标：AUC
-            batch_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
-            batch_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
+            #### 计算指标：AUC #TODO uncomment this after week meeting
+            # if self.cfg_model.NUM_CLASS == 2: # Udiva 二分类，因此task="binary"
+            #     batch_auc = auroc(outputs[:, 0], labels[:, 0], task="binary")
+            #     batch_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="binary")
+            # elif self.cfg_model.NUM_CLASS == 4: # NoXi 四分类，因此task="multiclass"
+            #     batch_auc = auroc(outputs[:, 0], labels[:, 0], task="multiclass")
+            #     batch_auc2 = auroc(outputs.argmax(dim=-1).type(torch.float32), labels.argmax(dim=-1), task="multiclass")
             
-            #### 计算指标：F1
-            f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
-            f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1))
+            #### 计算指标：F1 #TODO uncomment this after week meeting
+            # f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
+            # f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1))
 
             if self.cfg.USE_WANDB:
                 wandb.log({
@@ -546,14 +551,14 @@ class BiModalTrainerUdiva(object):
         #### 计算指标：acc
         epoch_summary_acc = epoch_total_acc / epoch_total_num
         
-        #### 计算指标：AUC
+        """ #### 计算指标：AUC #TODO uncomment this after week meeting
         # print('pred_list:', pred_list, 'label_list:', label_list, 'pred_list2:', pred_list2, ', len(pred_list):', len(pred_list), ', len(label_list):', len(label_list), ', len(pred_list2):', len(pred_list2))
         epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
         epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
         
-        #### 计算指标：F1 score
+        #### 计算指标：F1 score #TODO uncomment this after week meeting
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
-        f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
+        f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2)) """
 
         self.logger.info(
             "Train: Epo[{:0>3}/{:0>3}] Train Epo Summary LOSS:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score: {:.4f} ({:.4f})".
@@ -589,6 +594,7 @@ class BiModalTrainerUdiva(object):
             epoch_total_num = 0
             epo_iter_num = len(data_loader)
             pred_list, label_list, pred_list2, label_list2 = [], [], [], []
+            batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meetingafter
             for i, data in enumerate(data_loader):
                 inputs, labels, session_id, segment_id = self.data_fmt(data) # labels:[batch_size, 2], session_id:[batch_size], segment_id:[batch_size] e.g. session_id: tensor([1080, ... 1080]) segment_id: tensor([ 1,  2, 3, ... 32])
                 # print('[bi_modal_trainer.py] valid... labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id), ', session_id:', session_id, ', segment_id:', segment_id)
@@ -616,7 +622,7 @@ class BiModalTrainerUdiva(object):
                 epoch_total_num += batch_total_num
                 epoch_current_acc = epoch_total_acc / epoch_total_num
                 
-                #### 计算AUC
+                """ #### 计算AUC #TODO uncomment this after week meeting
                 labels = labels.type(torch.int64)
                 pred_list.extend(outputs[:, 0].tolist()) # 比pred_list2更准确
                 label_list.extend(labels[:, 0].tolist()) # 比label_list2更准确
@@ -627,7 +633,7 @@ class BiModalTrainerUdiva(object):
                 
                 #### 计算指标：F1
                 f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
-                f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1)) # 不准确
+                f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1)) # 不准确 """
 
                 self.logger.info(
                     "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] Batch Loss: {:.4f} Batch Acc:{:.4f} ({}/{}) Epo Current Acc:{:.4f} ({}/{})".format(
@@ -654,12 +660,15 @@ class BiModalTrainerUdiva(object):
             # self.tb_writer.add_scalar("valid_acc", batch_acc, epoch_idx)
         #### 计算指标：valid loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num # 当前epoch的总体loss
+        if epoch_summary_loss < self.best_valid_loss:
+            print(f'Valid: Current epoch summary loss:{epoch_summary_loss:.4f} < best epoch summary loss: {self.best_valid_loss:.4f}, will update best loss')
+            self.best_valid_loss = epoch_summary_loss # 保存当前最佳的loss
         
         #### 计算指标：Epoch ACC (Video segment level)
         epoch_summary_acc = epoch_total_acc / epoch_total_num # 当前epoch的总体acc
         self.clt.record_valid_loss(loss_batch_list) # loss over batches
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
-        if epoch_summary_acc > self.clt.best_valid_acc: # 如果当前的epoch_summary_acc大于之前的最好的epoch_summary_acc
+        if epoch_summary_acc > self.clt.best_valid_acc: # 如果当前的epoch_summary_acc大于之前的最好的epoch_summary_acc #TODO 0.6667 > 0.6667, need atol=1e-4
             self.clt.update_best_acc(epoch_summary_acc)
             self.clt.update_model_save_flag(1)   # 1表示需要保存模型
             print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best epoch summary acc: {self.clt.best_valid_acc:.4f}, will save model')
@@ -667,13 +676,13 @@ class BiModalTrainerUdiva(object):
             # print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} <= best epoch summary acc: {self.clt.best_valid_acc:.4f}, not save model')
             self.clt.update_model_save_flag(0)  # 0表示不需要保存模型
         
-        #### 计算指标：AUC
+        """ #### 计算指标：AUC #TODO uncomment this after week meeting
         epoch_auc = auroc(torch.tensor(pred_list), torch.tensor(label_list), task="binary")
         epoch_auc2 = auroc(torch.tensor(pred_list2).type(torch.float32), torch.tensor(label_list2), task="binary")
         
         #### 计算指标：F1 score
         f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
-        f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
+        f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2)) """
         
         self.logger.info(
             "Valid: Epo[{:0>3}/{:0>3}] Val Epo Summary LOSS:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score:{:.4f} ({:.4f})".
@@ -698,6 +707,7 @@ class BiModalTrainerUdiva(object):
                 "val_epoch_summary_f1_2": float(f1_2),
                 "epoch": epoch_idx + 1,
             })
+        return self.best_valid_loss, self.clt.best_valid_acc
 
     def test(self, data_loader, model, epoch_idx=None):
         model.eval()

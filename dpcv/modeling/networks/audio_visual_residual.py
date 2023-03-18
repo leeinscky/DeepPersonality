@@ -65,7 +65,7 @@ class AudioVisualResNet18(nn.Module):
 
 
 class AudioVisualResNet18Udiva(nn.Module): # UDIVA: 纯ResNet模型结构
-    def __init__(self, init_weights=True, return_feat=False):
+    def __init__(self, init_weights=True, return_feat=False, num_class=2):
         # print('[AudioVisualResNet18LSTMUdiva] class AudioVisualResNet18Udiva - 开始执行构造函数__init__... ')
         super(AudioVisualResNet18Udiva, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18Udiva是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
         self.return_feature = return_feat
@@ -82,7 +82,7 @@ class AudioVisualResNet18Udiva(nn.Module): # UDIVA: 纯ResNet模型结构
             channels=[32, 64, 128, 256],
             layers=[2, 2, 2, 2]
         )
-        self.linear = nn.Linear(512, 2) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
+        self.linear = nn.Linear(512, num_class) # nn.Linear是全连接层，这里的512表示的是输入的特征维度，2表示的是输出的特征维度，2表示的是输出的类别数，也就是输出有2个维度，每个维度表示的是一个类别的概率，这里的2表示的是二分类问题，如果是多分类问题，这里的2就要改成类别的个数，比如如果是5分类问题，这里的2就要改成5。
 
         if init_weights:
             initialize_weights(self)
@@ -115,7 +115,7 @@ class AudioVisualResNet18Udiva(nn.Module): # UDIVA: 纯ResNet模型结构
 
 
 class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
-    def __init__(self, init_weights=True, return_feat=False, bimodal_option=1):
+    def __init__(self, init_weights=True, return_feat=False, bimodal_option=1, num_class=2):
         super(AudioVisualResNet18LSTMUdiva, self).__init__() # super函数是用来调用父类的构造函数的，这里的AudioVisualResNet18Udiva是继承了nn.Module类的，所以这里的super函数就是调用了nn.Module类的构造函数，这里的init_weights表示的是是否初始化网络的权重，return_feat表示的是是否返回特征
         self.return_feature = return_feat
         self.bimodal_option = bimodal_option
@@ -134,9 +134,9 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
             branch_type='visual'
         )
         if self.bimodal_option == 1 or self.bimodal_option == 2:
-            self.linear = nn.Linear(256, 2)
+            self.linear = nn.Linear(256, num_class)
         else:
-            self.linear = nn.Linear(512, 2)
+            self.linear = nn.Linear(512, num_class)
         
         # 打印模型的权重
         # self.print_model_weights(self.audio_branch)
@@ -266,14 +266,14 @@ def audiovisual_resnet(cfg=None):
 
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet_udiva(cfg=None): # UDIVA音频+视觉: 纯ResNet模型结构
-    multi_modal_model = AudioVisualResNet18Udiva(return_feat=cfg.MODEL.RETURN_FEATURE) #  cfg.MODEL.RETURN_FEATURE = False
+    multi_modal_model = AudioVisualResNet18Udiva(return_feat=cfg.MODEL.RETURN_FEATURE, num_class=cfg.MODEL.NUM_CLASS) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 
 
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet_lstm_udiva(cfg=None): # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
-    multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION) #  cfg.MODEL.RETURN_FEATURE = False
+    multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION, num_class=cfg.MODEL.NUM_CLASS) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 
@@ -281,7 +281,7 @@ def audiovisual_resnet_lstm_udiva(cfg=None): # UDIVA音频+视觉: ResNet-LSTM�
 @NETWORK_REGISTRY.register()
 def audio_resnet_udiva(cfg=None): # UDIVA音频分支: 纯ResNet模型结构
     assert cfg.TRAIN.BIMODAL_OPTION == 2, "cfg.TRAIN.BIMODAL_OPTION should be 2 for only audio branch"
-    multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION) #  cfg.MODEL.RETURN_FEATURE = False
+    multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION, num_class=cfg.MODEL.NUM_CLASS) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model
 

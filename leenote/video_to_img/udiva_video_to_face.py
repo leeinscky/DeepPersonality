@@ -81,12 +81,12 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame
                         # print('frame.shape: ', frame.shape) # frame.shape:  (48, 42, 3) or (54, 46, 3) # (h, w, c) 由于每个人脸的尺寸不一样，所以打印出来的尺寸也不一样
                 ################# <-------------- 重要逻辑：从图片中提取人脸
                 
-                if count % 1000 == 0: # 如果count是200的倍数，打印一下
+                if count % 1000 == 0: # 如果count是xxx的倍数，打印
                     print(f"video:{str(video_path)} saved image {count}")
             
             if cv2.waitKey(1) & 0xFF == ord('q'): # 如果按下q键，退出
                 break
-    print(f"Extracted " + str(count_face) + " faces from " + str(count) + " images")
+    print( "Video:" + str(video_path) + "Extracted " + str(count_face) + " faces from " + str(count) + " images")
 
 def long_time_task(video, parent_dir, frame_num):
     # print(f"execute {video} ...")
@@ -110,22 +110,21 @@ if __name__ == "__main__":
 
     p = Pool(8)
     path = Path(args.video_dir)
-    print('session path:',path)
+    # print('session path:',path)
     i = 0
     video_pts = list(path.rglob("*.mp4"))
     print('video_pts:', video_pts)
     frame_num = int(args.frame_num) # 每秒抽取的帧数, 默认为1即每秒抽取1帧, 如果为5, 则每秒抽取5帧
     for video in tqdm(video_pts):
-        print('video index: ', i)
         i += 1
         video_path = str(video)
         if args.output_dir is not None:
             saved_dir = args.output_dir
         else:
             saved_dir = Path(video).parent
-        print('video_path:', video_path)
-        print('saved_dir:', saved_dir)
-        print('extract ', frame_num, ' frames per second')
+        print('index:', i, ', video_path:', video_path)
+        print('index:', i, ', saved_dir:', saved_dir)
+        # print('index:', i, ', extract ', frame_num, ' frames per second')
         p.apply_async(long_time_task, args=(video_path, saved_dir, frame_num)) # 异步执行
         print('---------------------')
     print('Waiting for all subprocesses done...')

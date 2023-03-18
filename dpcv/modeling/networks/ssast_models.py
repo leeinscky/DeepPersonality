@@ -533,7 +533,7 @@ def ssast_udiva(cfg):
         pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL # 预训练模型路径为cfg.TRAIN.PRE_TRAINED_MODEL
         
     model = ASTModel(
-                 label_dim=2, fshape=16, tshape=16, fstride=16, tstride=16,
+                 label_dim=cfg.MODEL.NUM_CLASS, fshape=16, tshape=16, fstride=16, tstride=16,
                  input_fdim=num_mel_bins, input_tdim=int(target_length),
                  model_size='tiny', pretrain_stage=is_pretrain, load_pretrained_mdl_path=pretrained_model_path)
     """ 

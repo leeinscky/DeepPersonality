@@ -10,25 +10,31 @@ import math
 
 class VideoDataUdiva(Dataset):
     """base class for bi-modal input data"""
-    def __init__(self, data_root, img_dir, label_file, audio_dir=None, parse_img_dir=True, parse_aud_dir=False, sample_size=16, mode='train'):
+    def __init__(self, data_root, img_dir, label_file, audio_dir=None, parse_img_dir=True, parse_aud_dir=False, sample_size=16, mode='train', dataset_name="UDIVA", prefix1="FC1", prefix2="FC2", img_dir_ls=None):
         # print('[bi_modal_data_udiva.py] - 开始执行 def __init__')
         self.data_root = data_root
         self.img_dir = img_dir
         self.audio_dir = audio_dir
         self.sample_size = sample_size
         self.mode = mode
-        self.annotation = self.parse_annotation(label_file) # self.annotation是一个字典，包含了五个键值对（5种personality），每个键值对对应一个字典，字典的键是视频名，值是对应的分数
+        self.dataset_name = dataset_name
+        self.prefix1 = prefix1
+        self.prefix2 = prefix2
+        self.annotation = self.parse_annotation(label_file)
         self.sessionid_numsegements = {} # key: sessionid, value: num_segments 即每个session文件夹对应的的segment数量/视频片段数量
-        if parse_img_dir:
-            self.img_dir_ls = self.parse_data_dir_v2(img_dir)  # every directory name indeed a video # img_dir_ls是一个列表，包含了所有视频的路径，每个路径是一个字符串，例如'datasets/ChaLearn2016_tiny/train_data/-AmMDnVl4s8.003'
-            # print('[bi_modal_data_udiva.py]__init__函数 self.img_dir_ls: ', self.img_dir_ls) # 打印结果在最下方，img_dir_ls是  self.img_dir_ls:  ['datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129']
-            print('[bi_modal_data_udiva]__init__函数 dataset:', self.mode, ', len(img_dir_ls): ', len(self.img_dir_ls), ', key(session_id)_value(num_segments): ', self.sessionid_numsegements)
-        # print('=============================================================')
-        if parse_aud_dir:
-            self.aud_file_ls = self.parse_data_dir_v2(audio_dir)
-            # print('[bi_modal_data_udiva.py]__init__函数 self.aud_file_ls: ', self.aud_file_ls)
-        
-        
+        if img_dir_ls is not None:
+            self.img_dir_ls = img_dir_ls
+            # print('[bi_modal_data_udiva.py]__init__函数 dataset type:', self.mode, ', input img_dir_ls != None, len(self.img_dir_ls): ', len(self.img_dir_ls), ', self.img_dir_ls[:3]: ', self.img_dir_ls[:3])
+        else:
+            if parse_img_dir:
+                self.img_dir_ls = self.parse_data_dir_v2(img_dir)  # every directory name indeed a video # img_dir_ls是一个列表，包含了所有视频的路径，每个路径是一个字符串，例如'datasets/ChaLearn2016_tiny/train_data/-AmMDnVl4s8.003'
+                # print('[bi_modal_data_udiva.py]__init__函数 dataset type:', self.mode, ',  input img_dir_ls == None, len(self.img_dir_ls):', len(self.img_dir_ls), ', self.img_dir_ls[:3]: ', self.img_dir_ls[:3]) # 打印结果在最下方，img_dir_ls是  self.img_dir_ls:  ['datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128', 'datasets/udiva_tiny/train/recordings/animals_recordings_train_img/128129'], NoXi: ['datasets/noxi/img/004_1', 'datasets/noxi/img/004_2', 'datasets/noxi/img/004_3']
+            # print('=============================================================')
+            if parse_aud_dir:
+                self.aud_file_ls = self.parse_data_dir_v2(audio_dir)
+                # print('[bi_modal_data_udiva.py]__init__函数 self.aud_file_ls: ', self.aud_file_ls)
+        print('[bi_modal_data_udiva.py]__init__函数 dataset type:', self.mode, ', len(img_dir_ls): ', len(self.img_dir_ls), ', key(session_id)_value(num_segments): ', self.sessionid_numsegements)
+    
     def parse_data_dir(self, data_dir):
         """
 
@@ -115,9 +121,9 @@ class VideoDataUdiva(Dataset):
             fc1_img_dir_path, fc2_img_dir_path = '', ''
             for file in os.listdir(session_dir_path):
                 # print('file:', file, 'type:', type(file))
-                if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC1") and not file.endswith(".mp4"):
+                if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"):
                     fc1_img_dir_path = os.path.join(session_dir_path, file)
-                if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith("FC2") and not file.endswith(".mp4"):
+                if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix2) and not file.endswith(".mp4"):
                     fc2_img_dir_path = os.path.join(session_dir_path, file)
             # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
             # 打印结果: get_image_data fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
@@ -128,7 +134,7 @@ class VideoDataUdiva(Dataset):
             
             # 将一个长视频分成多个短视频片段(segments or video clips)，每个video clips 包含sample_size个帧图片, 这里需要得到segment的数量, 向下取整
             num_segments = int(math.floor(min_len_frames / self.sample_size)) # floor 向下取整, 例如: math.floor(3.5) = 3
-
+            # print('min_len_frames:', min_len_frames, 'num_frames_FC1:', num_frames_FC1, 'num_frames_FC2:', num_frames_FC2, ', num_segments:', num_segments)
             self.sessionid_numsegements[session_dir_path.split('/')[-1]] = num_segments # key: sessionid, value: num_segments 即每个session文件夹对应的的segment数量/视频片段数量
             
             # 重新构造一个list:ret_dir_path，list里的每个元素是一个原先session文件夹路径，但是在原先session文件夹路径的结尾加上了一个下划线和一个数字，例如: datasets/udiva_tiny/train/recordings/ghost_recordings_train_img/055125_0，这个数字代表了当前session文件夹的第几个video clip，例如: /055125_0，代表了当前session文件夹的第1个video clip，055125_1，代表了当前session文件夹的第2个video clip
@@ -143,6 +149,7 @@ class VideoDataUdiva(Dataset):
 
     def parse_annotation(self, label_file):
         """
+        load label file
             args:(srt / list[str, str]) annotation file path
         """
         if isinstance(label_file, list):
@@ -162,15 +169,20 @@ class VideoDataUdiva(Dataset):
         # print('[bi_modal_data_udiva.py]parse_annotation函数 - annotation: ', annotation)
         return annotation
 
+
     def get_ocean_label(self, index): 
         # index是一个整数，表示video目录里的第几个video样本，从0开始，这个函数返回的是一个列表，包含了这个视频的所有5个个性标签值
         # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, index: ', index, ', self.img_dir_ls: ', self.img_dir_ls) # index:  7
         session_path = self.img_dir_ls[index] # session_path: 
         session_path, segment_idx = session_path.rsplit("_", 1)
-        session_id = f"{os.path.basename(session_path)}" # session_id:
+        session_id = f"{os.path.basename(session_path)}" # session_id: 055128, type(session_id):  <class 'str'>
+        
+        if self.dataset_name == "NoXi":
+            session_id = session_id.lstrip('0') # remove leading zeros e.g. 004 -> 4 ; 005 -> 5
+        
         # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, session_path: ', session_path, ',session_id: ', session_id, ', segment_idx: ', segment_idx)
         # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation: ', self.annotation, 'type: ', type(self.annotation))
-       
+
         # get the type of self.annotation[session_id]
         # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, self.annotation[session_id]: ', self.annotation[session_id], 'type of self.annotation[session_id]: ', type(self.annotation[session_id]))
         
@@ -181,6 +193,7 @@ class VideoDataUdiva(Dataset):
         relation = self.annotation[session_id]
         # print('[bi_modal_data_udiva.py]get_ocean_label函数 - 开始执行 def get_ocean_label, relation: ', relation)
         return relation
+
 
     def __getitem__(self, index):
         raise NotImplementedError

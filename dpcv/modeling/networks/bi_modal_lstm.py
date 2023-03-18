@@ -114,7 +114,7 @@ class AudioLSTM(nn.Module):
 
 # 用于Udiva数据集的视觉模态
 class ImgLSTMUdiva(nn.Module):
-    def __init__(self, sample_size=16):
+    def __init__(self, sample_size=16, num_class=2):
         super(ImgLSTMUdiva, self).__init__()
         self.sample_size = sample_size
         self.image_branch_conv = nn.Sequential(
@@ -135,7 +135,7 @@ class ImgLSTMUdiva(nn.Module):
             nn.Dropout(0.2)
         )
         self.lstm = nn.LSTM(input_size=128, hidden_size=128)
-        self.out_linear = nn.Linear(in_features=128, out_features=2)
+        self.out_linear = nn.Linear(in_features=128, out_features=num_class)
 
     def forward(self, aud_input=None, img_feature=None):
         # print('[bi_modal_lstm.py] img_feature.shape', img_feature.shape) # udiva: [bs, sample_size, 6, 224, 224]
@@ -203,7 +203,7 @@ class ImgLSTMUdiva(nn.Module):
 
 @NETWORK_REGISTRY.register()
 def get_img_modal_lstm_model_udiva(cfg=None):
-    img_lstm = ImgLSTMUdiva(sample_size=cfg.DATA.SAMPLE_SIZE)
+    img_lstm = ImgLSTMUdiva(sample_size=cfg.DATA.SAMPLE_SIZE, num_class=cfg.MODEL.NUM_CLASS)
     img_lstm.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return img_lstm
 
