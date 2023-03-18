@@ -69,8 +69,8 @@ use_wandb="False"
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
 sample_size=4
-epoch=3
-batch_size=2
+epoch=1
+batch_size=3
 learning_rate=0.0001
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml

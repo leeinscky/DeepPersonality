@@ -207,7 +207,6 @@ mac本地：
     
     # scp 传输
     cd /Users/lizejian/tools
-    nohup scp /Users/lizejian/Downloads/NOXI/004_2016-03-18_Paris.zip /home/zl525/code/DeepPersonality/datasets/noxi
     nohup scp /Users/lizejian/Downloads/NOXI/005_2016-03-18_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &
     nohup scp /Users/lizejian/Downloads/NOXI/006_2016-03-18_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &
     nohup scp /Users/lizejian/Downloads/NOXI/007_2016-03-21_Paris.zip zl525@login-icelake.hpc.cam.ac.uk:/home/zl525/code/DeepPersonality/datasets/noxi &

@@ -81,6 +81,7 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
             count_session = 0
             for session_id in os.scandir(task_dir):
                 # print('session_id: ', session_id)
+                session_dir = os.path.join(video_dir, task_dir, session_id)
                 # 如果当前遍历到的文件夹里没有FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹 就执行shell 命令
                 if  (not os.path.exists(os.path.join(video_dir, task_dir, session_id, 'FC1_A')) 
                     and not os.path.exists(os.path.join(video_dir, task_dir, session_id, 'FC2_A')) \
@@ -91,18 +92,27 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
                     and not os.path.exists(os.path.join(video_dir, task_dir, session_id, 'FC1_T')) \
                     and not os.path.exists(os.path.join(video_dir, task_dir, session_id, 'FC2_T')) \
                     ):
-                    continue
+                    
+                    ######## 处理方式0. 检查压缩包: 如果有FC1_和FC2_前缀开头的tar.gz文件，就执行解压命令, 无需运行udiva_video_to_face.py提取人脸
+                    # os.chdir(session_dir) # change to session_dir
+                    # print('change dir: current dir is ', os.getcwd())
+                    # for FC_name in [ 'FC1_A/',  'FC2_A/',  'FC1_G/',  'FC2_G/',  'FC1_L/',  'FC2_L/',  'FC1_T/',  'FC2_T/']:
+                    #     if os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz'): # e.g. 如果存在 FC1_A.tar.gz 文件，就执行解压命令
+                    #         ### 解压
+                    #         untar_command = 'tar -zxvf ' + FC_name[:-1] + '.tar.gz' + ' >/dev/null 2>&1'
+                    #         print('session_id: ', session_id.name, '执行解压命令：', untar_command)
+                    #         # os.system(untar_command)
+                    
                 
-                    # # 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
+                    ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
                     # print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + os.path.join(video_dir, task_dir, session_id) + ' --output-dir ' + os.path.join(video_dir, task_dir, session_id), ' --frame-num ' + frame_num)
                     # os.system('python3 ./udiva_video_to_image.py --video-dir '  + os.path.join(video_dir, task_dir, session_id) +  ' --output-dir '  + os.path.join(video_dir, task_dir, session_id) + ' --frame-num ' + frame_num)
                     
-                    # 处理方式2. 从mp4视频文件中提取人脸图片，即不包含背景
-                    print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + os.path.join(video_dir, task_dir, session_id) + ' --output-dir ' + os.path.join(video_dir, task_dir, session_id), ' --frame-num ' + frame_num)
-                    os.system('python3 ./udiva_video_to_face.py --video-dir '  + os.path.join(video_dir, task_dir, session_id) +  ' --output-dir '  + os.path.join(video_dir, task_dir, session_id) + ' --frame-num ' + frame_num)
+                    ######## 处理方式2. 从mp4视频文件中提取人脸图片，即不包含背景
+                    # print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + os.path.join(video_dir, task_dir, session_id) + ' --output-dir ' + os.path.join(video_dir, task_dir, session_id), ' --frame-num ' + frame_num)
+                    # os.system('python3 ./udiva_video_to_face.py --video-dir '  + os.path.join(video_dir, task_dir, session_id) +  ' --output-dir '  + os.path.join(video_dir, task_dir, session_id) + ' --frame-num ' + frame_num)
                     
-                    # 跳过
-                    # continue
+                    pass
                 else:
                     # continue
                     # print('session_id: ', session_id, '已经存在FC1_ 前缀 和 FC2_前缀开头的子文件夹，不需要执行命令')
@@ -117,30 +127,31 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
                     
                     ##### 处理方式2: 将 FC1_ 前缀和 FC2_ 前缀开头的子文件夹压缩成tar.gz文件, 并删除原来的FC1_ 前缀和 FC2_ 前缀开头的子文件夹
                     # print('session_id: ', session_id, '已经存在FC1_和FC2_前缀开头的子文件夹，准备压缩成tar.gz文件并删除原先的文件夹')
+                    os.chdir(session_dir) # change to session_dir
+                    print('change dir: current dir is ', os.getcwd())
                     for FC_name in [ 'FC1_A/',  'FC2_A/',  'FC1_G/',  'FC2_G/',  'FC1_L/',  'FC2_L/',  'FC1_T/',  'FC2_T/']:
-                        session_dir = os.path.join(video_dir, task_dir, session_id)
                         FC_dir = os.path.join(video_dir, task_dir, session_id, FC_name)
-                        if os.path.exists(FC_dir):
-                            tar_command = 'tar -zcvf ' + session_dir + '/' + FC_name[:-1] + '.tar.gz ' + FC_dir
-                            print('session_id: ', session_id, '执行压缩命令：', tar_command)
-                            # os.system(tar_command)
+                        if os.path.exists(FC_dir) and (os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz') == False): # e.g. 如果存在 FC1_A/ 文件夹 且 不存在FC1_A.tar.gz压缩包，就执行压缩命令
+                            ### 压缩打包
+                            # tar_command = 'tar -zcvf ' + session_dir + '/' + FC_name[:-1] + '.tar.gz ' + FC_dir
+                            tar_command = 'tar -zcvf ' + FC_name[:-1] + '.tar.gz ' + FC_name + ' >/dev/null 2>&1'
+                            print('session_id: ', session_id.name, '执行压缩命令：', tar_command)
+                            os.system(tar_command)
                             
+                            ### 删除原来的文件夹
                             rm_command = 'rm -rf ' + FC_dir
-                            print('session_id: ', session_id, '执行删除命令：', rm_command)
-                            # os.system(rm_command)
-                        if os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz'):
-                            untar_command = 'tar -zxvf ' + session_dir + '/' + FC_name[:-1] + '.tar.gz -C ' + session_dir
-                            print('session_id: ', session_id, '执行解压命令：', untar_command)
-                            # os.system(untar_command)
-                count_session += 1
-                if count_session == 1:
-                    break
-            count_task_dir += 1
-            if count_task_dir == 1:
-                break
-        count_video += 1
-        if count_video == 1:
-            break
+                            print('session_id: ', session_id.name, '执行删除命令：', rm_command)
+                            os.system(rm_command)
+
+        #         count_session += 1
+        #         if count_session == 1:
+        #             break
+        #     count_task_dir += 1
+        #     if count_task_dir == 1:
+        #         break
+        # count_video += 1
+        # if count_video == 1:
+        #     break
         pass
 
 

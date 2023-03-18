@@ -399,15 +399,16 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # print('[audio_visual_data_udiva.py]-get_wave_data, session_id:', os.path.basename(session_dir_path)) # session_id 是训练集图像帧session的名称，例如 '055128'
         
         # 构造wav所在的路径，需要和img的路径保持一致，为同一task的同一个session，即如果 session_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134，那么 wav_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
-        wav_dir_path = session_dir_path.replace('_img', '_wav') # 将 session_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
-        # print('[audio_visual_data_udiva.py]-get_wave_data, session_dir_path:', img_dir_path, 'session_id:', session_id, 'wav_dir_path:', wav_dir_path)
+        # wav_dir_path = session_dir_path.replace('_img', '_wav') # 将 session_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        wav_dir_path = session_dir_path.replace('img', 'wav') # 将 session_dir_path 路径里的 _img 替换为 _wav，例如 datasets/udiva_tiny/train/recordings/animals_recordings_train_img/059134 替换为 datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/059134
+        # print('[audio_visual_data_udiva.py]-get_wave_data, session_dir_path:', session_dir_path, 'session_id:', session_id, 'wav_dir_path:', wav_dir_path)
         
         fc1_wav_path, fc2_wav_path = '', ''
         for file in os.listdir(wav_dir_path):
             # print('file:', file, 'type:', type(file)) # datasets/udiva_tiny/train/recordings/animals_recordings_train_wav/128129/FC1_A.wav.npy 
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix1) and file.endswith('.wav.npy'): # judge file is a file and start with FC1 and end with .wav.npy
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix1) and file.endswith('.wav.npy'): # judge file is a file and start with prefix1 and end with .wav.npy
                 fc1_wav_path = os.path.join(wav_dir_path, file)
-            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix2) and file.endswith('.wav.npy'): # judge file is a file and start with FC2 and end with .wav.npy
+            if os.path.isfile(os.path.join(wav_dir_path, file)) and file.startswith(self.prefix2) and file.endswith('.wav.npy'): # judge file is a file and start with prefix2 and end with .wav.npy
                 fc2_wav_path = os.path.join(wav_dir_path, file)
         
         # ************************* process fc1 wave data *************************
@@ -744,7 +745,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
         X.append(session_dir_path)
         y.append(relation_index)
 
-    print('[audio_visual_data_udiva.py]before fold, X len=', len(X), ', y len=', len(y), ', X[:3]=', X[:3], ', y[:3]=', y[:3], ', X[-3:]=', X[-3:], ', y[-3:]=', y[-3:])
+    # print('[audio_visual_data_udiva.py]before fold, X len=', len(X), ', y len=', len(y), ', X[:3]=', X[:3], ', y[:3]=', y[:3], ', X[-3:]=', X[-3:], ', y[-3:]=', y[-3:])
     
     # 将 X 和 y 转换为 numpy array
     X = np.array(X)
@@ -772,7 +773,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
     
     if mode == "train":
         img_dir_ls = list(X_train_list[fold_id]) if fold_id is not None else None
-        print('[audio_visual_data_udiva.py]train mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] train mode, img_dir_ls is None')
+        # print('[audio_visual_data_udiva.py]train mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] train mode, img_dir_ls is None')
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
             img_data,
@@ -802,7 +803,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
                 print('[oversampling]- final return dataset: len(dataset)=', len(dataset), ', image, audio, label = dataset[0], image.shape=', image.shape, ', audio.shape=', audio.shape, ', label=', label)
     elif mode == "valid":
         img_dir_ls = list(X_valid_list[fold_id]) if fold_id is not None else None
-        print('[audio_visual_data_udiva.py]valid mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] valid mode, img_dir_ls is None')
+        # print('[audio_visual_data_udiva.py]valid mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] valid mode, img_dir_ls is None')
         dataset = AudioVisualLstmDataUdiva(
             cfg.DATA.ROOT,
             img_data,

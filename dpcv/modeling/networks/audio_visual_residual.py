@@ -195,7 +195,8 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
         x = self.linear(feat) # self.linear = nn.Linear(512, 2) x的shape是[batch_size, 2]，也就是把feat输入到全连接层中，全连接层的输出是2个类别的概率。全连接层的作用也就是把feat的维度从[batch_size, 512]变成了[batch_size, 2]
         # print('[AudioVisualResNet18LSTMUdiva] forward... feat输入到全连接层中, 输出数据x的 x.shape: ', x.shape, ' x=', x)
         
-        x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
+        # x = torch.sigmoid(x) # 这里的x的shape是[batch_size, 5]，也就是把x输入到sigmoid函数中，sigmoid函数的作用是把x的每一个元素都压缩到0到1之间，这里的x的每一个元素都表示的是一个类别的概率。
+        x = torch.softmax(x, dim=-1)
         # print('[AudioVisualResNet18LSTMUdiva] forward... x经过sigmoid激活函数处理后, 输出 x.shape: ', x.shape, ' x=', x)
         
         if self.return_feature:

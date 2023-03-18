@@ -608,7 +608,7 @@ class BiModalTrainerUdiva(object):
                 segment_id = segment_id.detach().cpu()
                 
                 if epoch_idx % 10 == 0 and i in [0, 1]:
-                    print(f'{torch.cat([outputs, labels, session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
                 
                 loss_batch_list.append(loss.item())
                 batch_loss_sum += loss.item()
