@@ -74,8 +74,10 @@ def process_udiva_dataset ():
                     pass
 
 def process_noxi_dataset():
-    noxi_dataset_dir = "/home/zl525/rds/hpc-work/datasets/noxi"
-    recordings_dir_list = [noxi_dataset_dir]
+    noxi_full_dir = '/home/zl525/rds/hpc-work/datasets/noxi_full'
+    noxi_tiny_dir = '/home/zl525/rds/hpc-work/datasets/noxi_tiny'
+
+    recordings_dir_list = [noxi_full_dir]
     
     for recordings_dir in recordings_dir_list:
         print('recordings_dir: ', recordings_dir) # recordings_dir: /home/zl525/rds/hpc-work/datasets/udiva_full/train/recordings
@@ -96,7 +98,7 @@ def process_noxi_dataset():
                 if not os.path.exists(task_dir_wav_full_path):
                     os.makedirs(task_dir_wav_full_path)
                 
-                for session_id in os.scandir(task_dir_img):
+                for session_id in sorted(os.scandir(task_dir_img), key=lambda x: x.name):
                     print('*******************************************************************************************************************************')
                     img_path = os.path.join(task_dir_img, session_id)
                     wav_path = os.path.join(task_dir_wav_full_path, session_id.name) # 注意需要用session_id.name 而不是session_id，因为session_id是一个对象，而不是字符串，所以需要用session_id.name来拼接路径，才能得到正确的路径，如果用session_id，拼接后打印路径会发现wav路径还是_img路径
@@ -137,4 +139,9 @@ if  __name__   ==   '__main__' :
 
 # 后台执行该脚本命令：
 # cd /home/zl525/code/DeepPersonality/leenote/video_to_wav/
-# nohup python -u main.py >nohup.log 2>&1 &
+# nohup python -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+
+# ps -ef | grep "python -u main.py" | grep -v grep
+
+# 3604614
+# ps -p 3604614

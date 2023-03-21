@@ -157,9 +157,10 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
 
 def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/zl525/rds/hpc-work/datasets/noxi)
     frame_num = "5" #frame_num表示每秒抽取frame_num数量的帧。如果fps=25, 则每秒抽取25/frame_num=5帧, 每秒抽取的帧数为5帧
-    noxi_dir = '/home/zl525/rds/hpc-work/datasets/noxi'
+    noxi_full_dir = '/home/zl525/rds/hpc-work/datasets/noxi_full'
+    noxi_tiny_dir = '/home/zl525/rds/hpc-work/datasets/noxi_tiny'
     
-    video_dir_list = [noxi_dir]
+    video_dir_list = [noxi_full_dir]
     
     count_video = 0
     for video_dir in video_dir_list:
@@ -168,19 +169,19 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
         print('video_dir: ', video_dir)
         for modal_type_dir in os.scandir(video_dir): # modal_type_dir.name: img, wav, label
             if modal_type_dir.name == "img":
-                for session_id in os.scandir(modal_type_dir):
+                for session_id in sorted(os.scandir(modal_type_dir), key=lambda x: x.name):
                     # 如果当前遍历到的文件夹里没有 Expert 和 Novice 前缀开头的子文件夹 就执行shell 命令
                     if  (not os.path.exists(os.path.join(video_dir, modal_type_dir, session_id, 'Expert_video')) 
                         and not os.path.exists(os.path.join(video_dir, modal_type_dir,  session_id, 'Novice_video'))):
                         
-                        # 如果session文件夹名称包含下划线"_"，就重命名，只保留第一个下划线的前面部分，即只保留session的id, e.g. 004_2016-03-18_Paris -> 004
-                        if session_id.name.find('_') != -1:
-                            session_id_new = session_id.name.split('_')[0]
-                            # 将 session_id的name 重命名为 session_id_new
-                            print('rename')
-                            os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
+                        # # 如果session文件夹名称包含下划线"_"，就重命名，只保留第一个下划线的前面部分，即只保留session的id, e.g. 004_2016-03-18_Paris -> 004
+                        # if session_id.name.find('_') != -1:
+                        #     session_id_new = session_id.name.split('_')[0]
+                        #     # 将 session_id的name 重命名为 session_id_new
+                        #     print('rename')
+                        #     os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
                         
-                        continue
+                        # continue
 
                         session_dir = os.path.join(video_dir, modal_type_dir, session_id)
                         ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
@@ -188,21 +189,21 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         # os.system('python3 ./udiva_video_to_image.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
                         
                         ######## 处理方式2. 从mp4视频文件中提取人脸图片，即不包含背景
-                        print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
+                        print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
                         os.system('python3 ./udiva_video_to_face.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
                         
-                        # 跳过
                         # continue
                     else:
+                        print('session_id: ', session_id, '已经存在Expert 和 Novice前缀开头的子文件夹，不需要执行命令')
+                        
+                        continue
+                    
                         # 如果session文件夹名称包含下划线"_"，就重命名，只保留第一个下划线的前面部分，即只保留session的id, e.g. 004_2016-03-18_Paris -> 004
                         if session_id.name.find('_') != -1:
                             session_id_new = session_id.name.split('_')[0]
                             # 将 session_id的name 重命名为 session_id_new
                             print('rename: ', session_id, ' -> ', session_id_new)
                             os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
-                        
-                        continue
-                        # print('session_id: ', session_id, '已经存在Expert 和 Novice前缀开头的子文件夹，不需要执行命令')
                         
                         ######## 删除FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹
                         print('session_id: ', session_id, '已经存在Expert和Novice前缀开头的子文件夹，准备删除')
@@ -222,8 +223,8 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
 
 if __name__ == '__main__':
     # process_udiva_tiny()
-    process_udiva_full()
-    # process_noxi()
+    # process_udiva_full()
+    process_noxi()
     print('main.py done')
 
 
@@ -232,6 +233,7 @@ if __name__ == '__main__':
 # nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 # python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
 
+# ps -ef | grep "python3 -u main.py" | grep -v grep
 
 
 """ debug

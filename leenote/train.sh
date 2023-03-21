@@ -74,7 +74,8 @@ batch_size=3
 learning_rate=0.0001
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
-cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
+# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
+cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
 python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \

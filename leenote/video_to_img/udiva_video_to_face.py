@@ -81,12 +81,16 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame
                         # print('frame.shape: ', frame.shape) # frame.shape:  (48, 42, 3) or (54, 46, 3) # (h, w, c) 由于每个人脸的尺寸不一样，所以打印出来的尺寸也不一样
                 ################# <-------------- 重要逻辑：从图片中提取人脸
                 
-                if count % 1000 == 0: # 如果count是xxx的倍数，打印
+                # 如果 video_path 中含有 noxi
+                if 'noxi' in str(video_path) and count_face == 5000:
+                    break # 如果提取到5000张人脸，就退出循环, 一个视频最多提取5000张人脸, 防止一个视频提取的人脸太多，导致hpc文件数限制不够用
+                
+                if count % 5000 == 0: # 如果count是xxx的倍数，打印
                     print(f"video:{str(video_path)} saved image {count}")
             
             if cv2.waitKey(1) & 0xFF == ord('q'): # 如果按下q键，退出
                 break
-    print( "Video:" + str(video_path) + "Extracted " + str(count_face) + " faces from " + str(count) + " images")
+    print( "Video:" + str(video_path) + " ********* Extracted " + str(count_face) + " faces from " + str(count) + " images")
 
 def long_time_task(video, parent_dir, frame_num):
     # print(f"execute {video} ...")
