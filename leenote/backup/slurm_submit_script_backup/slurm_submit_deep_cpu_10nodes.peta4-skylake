@@ -191,5 +191,5 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 
 eval $CMD 
 
-# cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_10nodes.peta4-skylake
+# cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_cpu_10nodes.peta4-skylake
 # ViViT: 14688968 14693953

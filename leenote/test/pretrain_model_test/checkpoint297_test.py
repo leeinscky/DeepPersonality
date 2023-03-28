@@ -22,6 +22,7 @@ for key in content["model_state_dict"].keys():
 
 # print result: print(f'key: {key}, \t \t \t \t{content["model_state_dict"][key].shape}')
 
+'''
 key: audio_branch.init_stage.conv1.weight, 	 	 	 	torch.Size([32, 1, 1, 49])
 key: audio_branch.init_stage.bn1.weight, 	 	 	 	torch.Size([32])
 key: audio_branch.init_stage.bn1.bias, 	 	 	 	torch.Size([32])
@@ -752,7 +753,7 @@ RuntimeError: Error(s) in loading state_dict for AudioVisualResNetUdiva:
      "visual_branch.layer4.1.bn2.num_batches_tracked", 
      "linear.weight", 
      "linear.bias".
-
+'''
 
 
 

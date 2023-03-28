@@ -184,7 +184,7 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 eval $CMD 
 
 
-# cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep.peta4-skylake
+# cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_cpu.peta4-skylake
 
 # ResNet3D: 14800438 14800443
 # timesformer_udiva: 14976052(30 mins)

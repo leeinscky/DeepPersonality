@@ -205,6 +205,6 @@ eval $CMD
 
 
 ### To submit this script to the queue, you can use the command
-### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_6nodes
+### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_gpu_6nodes
 # ResNet-3D: 14583321 14583364 14589749 14590606 14595310
 # ViViT: 14715935 (sample 8-80)  14716137 (sample 96-176)

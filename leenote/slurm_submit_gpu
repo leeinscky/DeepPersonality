@@ -225,4 +225,4 @@ eval $CMD
 
 
 ### To submit this script to the queue, you can use the command
-### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_deep_4nodes
+### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_gpu
