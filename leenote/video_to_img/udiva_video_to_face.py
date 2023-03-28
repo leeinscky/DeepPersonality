@@ -28,7 +28,7 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame
         print(f"video:{str(video_path)} length = {length}, fps = {fps}")
         # 打印结果：video:/home/zl525/rds/hpc-work/datasets/udiva_full/train/recordings/talk_recordings_train_img/023191/FC1_T.mp4 length = 8079.0, fps = 25.0
     except Exception as e:
-        # print('[frame_extract] exception = ', e)
+        print('[frame_extract] exception = ', e)
         return None
     
     # Running a loop to each frame and saving it in the created folder
@@ -38,6 +38,10 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame
         if length == count:
             break
         ret, frame = cap.read()
+        # print('[frame_extract]cap.read() ret = ', ret, ', frame.shape = ', frame.shape)
+        if not(ret):
+            cap = cv2.VideoCapture(video_path)
+            continue
         if frame is None:
             continue
         if ret:
@@ -82,7 +86,7 @@ def frame_extract(video_path, save_dir, resize=(456, 256), transform=None, frame
                 ################# <-------------- 重要逻辑：从图片中提取人脸
                 
                 # 如果 video_path 中含有 noxi
-                if 'noxi' in str(video_path) and count_face == 5000:
+                if 'noxi' in str(video_path) and count_face == 5001:
                     break # 如果提取到5000张人脸，就退出循环, 一个视频最多提取5000张人脸, 防止一个视频提取的人脸太多，导致hpc文件数限制不够用
                 
                 if count % 5000 == 0: # 如果count是xxx的倍数，打印

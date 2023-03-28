@@ -442,7 +442,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         
         if end_point > fc1_wav_ft.shape[-1]: # 如果end_point > fc1_wav_ft.shape[-1]，则说明从采样的那一秒往后加sample_size秒会超过音频的最后一秒，因此只需要取到音频的最后一秒（最后一个采样点）即可
             end_point = fc1_wav_ft.shape[-1]
-        # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc1 start_point:', start_point, 'end_point:', end_point)
+        # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc1_wav_ft.shape:', fc1_wav_ft.shape, ', fc1 start_point:', start_point, 'end_point:', end_point)
         fc1_wav_tmp = fc1_wav_ft[..., start_point: end_point] # fc1_wav_tmp.shape: 
 
         # print('[audio_visual_data_udiva.py]-get_wave_data函数 fc1_wav_tmp.shape:', fc1_wav_tmp.shape)
@@ -460,7 +460,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         
         if end_point > fc2_wav_ft.shape[-1]: 
             end_point = fc2_wav_ft.shape[-1]
-        # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc2 start_point:', start_point, 'end_point:', end_point)
+        # print('[dpcv/data/datasets/audio_visual_data_udiva.py] fc2_wav_ft.shape:', fc2_wav_ft.shape, ', fc2 start_point:', start_point, 'end_point:', end_point)
         fc2_wav_tmp = fc2_wav_ft[..., start_point: end_point]
         
         # if fc2_wav_tmp.shape[-1] < self.sample_size * 16000:

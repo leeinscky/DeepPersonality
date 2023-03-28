@@ -185,7 +185,7 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
 
                         session_dir = os.path.join(video_dir, modal_type_dir, session_id)
                         ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
-                        # print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
+                        # print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
                         # os.system('python3 ./udiva_video_to_image.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
                         
                         ######## 处理方式2. 从mp4视频文件中提取人脸图片，即不包含背景
@@ -194,7 +194,7 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         
                         # continue
                     else:
-                        print('session_id: ', session_id, '已经存在Expert 和 Novice前缀开头的子文件夹，不需要执行命令')
+                        print('session_id: ', session_id.name, '已经存在Expert 和 Novice前缀开头的子文件夹，不需要执行命令')
                         
                         continue
                     
@@ -233,7 +233,9 @@ if __name__ == '__main__':
 # nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 # python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
 
+# [1] 1865011
 # ps -ef | grep "python3 -u main.py" | grep -v grep
+# ps -p 1865011
 
 
 """ debug

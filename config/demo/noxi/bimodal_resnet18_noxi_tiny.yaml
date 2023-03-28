@@ -37,7 +37,7 @@ TRAIN:
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
   BIMODAL_OPTION: 2
-  LOG_INTERVAL: 3
+  LOG_INTERVAL: 2
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
 TEST:

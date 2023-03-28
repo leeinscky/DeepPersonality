@@ -178,7 +178,7 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
             vis_x = self.visual_branch(vis_input)
             feat = vis_x # feat.shape:  torch.Size([batch_size, 256])
         elif self.bimodal_option == 2: # 仅仅将音频数据输入到音频分支中
-            print('model forward... only audio branch, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
+            # print('model forward... only audio branch, aud_input.shape:', aud_input.shape) # [batch_size, 1*2个视频=2, 1, sample_size*采样率16000] e.g. [32, 2, 1, 320000]
             aud_x = self.audio_branch(aud_input)
             aud_x = aud_x.view(aud_x.size(0), -1)
             feat = aud_x

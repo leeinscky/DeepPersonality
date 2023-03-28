@@ -10,7 +10,7 @@ import time
 import wandb
 from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
-torch.set_printoptions(sci_mode=False) # 使得print时不用科学计数法
+torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
 import json
 
 @TRAINER_REGISTRY.register()
@@ -288,6 +288,7 @@ class BiModalTrainerUdiva(object):
         # self.tb_writer = SummaryWriter(tb_writer_dir)
         self.f1_metric = BinaryF1Score()
         self.best_valid_loss = 1e10
+        self.LOG_INTERVAL_VALID = 10
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         ''' data_loader的调用逻辑如下
@@ -561,7 +562,7 @@ class BiModalTrainerUdiva(object):
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2)) """
 
         self.logger.info(
-            "Train: Epo[{:0>3}/{:0>3}] Train Epo Summary LOSS:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score: {:.4f} ({:.4f})".
+            "Train: Epo[{:0>3}/{:0>3}] w:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score: {:.4f} ({:.4f})".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_loss, # Epo Loss
@@ -634,17 +635,18 @@ class BiModalTrainerUdiva(object):
                 #### 计算指标：F1
                 f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
                 f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1)) # 不准确 """
-
-                self.logger.info(
-                    "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] Batch Loss: {:.4f} Batch Acc:{:.4f} ({}/{}) Epo Current Acc:{:.4f} ({}/{})".format(
-                        epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
-                        i + 1, epo_iter_num,                 # Iter
-                        float(loss.item()),                  # LOSS
-                        float(batch_acc), batch_total_acc, batch_total_num,  # Batch ACC
-                        epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo Current ACC
-                        # batch_auc, batch_auc2, # AUC  AUC:{:.4f} ({:.4f})  由于valid时shuffle=False，所以是按照segment从1递增顺序进行测试，每个batch里label的值要么都是1，或者都是0，导致batch的AUC一直=0，因此不计算batch里的AUC，只看整个epoch的AUC
-                        # f1, f1_2, # F1 F1:{:.4f} ({:.4f}) 
-                    ))
+                
+                if i % self.LOG_INTERVAL_VALID == self.LOG_INTERVAL_VALID - 1:
+                    self.logger.info(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] Batch Loss: {:.4f} Batch Acc:{:.4f} ({}/{}) Epo Current Acc:{:.4f} ({}/{})".format(
+                            epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
+                            i + 1, epo_iter_num,                 # Iter
+                            float(loss.item()),                  # LOSS
+                            float(batch_acc), batch_total_acc, batch_total_num,  # Batch ACC
+                            epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo Current ACC
+                            # batch_auc, batch_auc2, # AUC  AUC:{:.4f} ({:.4f})  由于valid时shuffle=False，所以是按照segment从1递增顺序进行测试，每个batch里label的值要么都是1，或者都是0，导致batch的AUC一直=0，因此不计算batch里的AUC，只看整个epoch的AUC
+                            # f1, f1_2, # F1 F1:{:.4f} ({:.4f}) 
+                        ))
                 if self.cfg.USE_WANDB:
                     wandb.log({
                         "valid_loss": float(loss.item()),

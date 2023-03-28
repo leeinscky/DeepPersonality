@@ -119,6 +119,9 @@ class VideoDataUdiva(Dataset):
         # 遍历data_dir_path里的每个session文件夹路径，计算当前遍历到的session文件夹下FC1_X 和 FC2_X两个文件夹各自含有的帧图片数量 nummber_of_frames_FC1_X 和 nummber_of_frames_FC2_X
         for session_dir_path in data_dir_path:
             fc1_img_dir_path, fc2_img_dir_path = '', ''
+            if session_dir_path.endswith("031"): # TODO 临时处理，后续需要修改！！！
+                # print('[bi_modal_data_udiva.py]-session_dir_path:', session_dir_path)
+                continue
             for file in os.listdir(session_dir_path):
                 # print('file:', file, 'type:', type(file))
                 if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"):

@@ -407,6 +407,202 @@ Tag解释:
             32 128 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[0,0,1,0],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.3636 0.7778
             48 48 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[1,0,1,1],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.7222
             64 48 {"8105":[0,0,0,0],"56109":[1,1,0,1],"66067":[1,0,1,0],"86087":[0,0,1,0],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.6667
+        【子实验-experiment-3_2】 数据集从Udiva改为NoXi数据集
+            # 【重要】NOXI数据集耗时分析，用于设置epoch具体值参考：
+                # 当sp=32,bs=8 , 20mins跑完了7个epoch, (预估10个epoch需要 20mins*10/7=28.57mins，即大约半小时) 5折交叉验证，每折如果跑10个epoch，一共需要跑50个epoch，预估需要跑5*30mins=150mins，即大约2.5个小时
+                # 当bs=8, sp=32, epoch=10, 总计耗时2h 5mins; 当bs=8, sp=48, epoch=10, 总计耗时1h 23mins; 当bs=8, sp=112, epoch=10, 总计耗时37mins; 规律: sample_size越大，耗时越少
+                # 当bs=16, sp=32, epoch=5, 总计耗时是该bs下最大的 1h 22mins; 当bs=16, sp=112, epoch=5, 总计耗时是该bs下最小的 18mins; 规律: sample_size越大，耗时越少
+                # 当bs=32, 64, 128时，最大耗时和最小耗时与bs=8，16时的规律一致(1.5小时 -> 18mins)
+                # 总结: sample_size越大，耗时越少; batch_size与耗时无明显关系
+
+            16497481(20mins test)
+
+epoch=10
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=80
+sample_size5=96
+sample_size6=112
+batch_size=8
+batch_size2=8
+batch_size3=8
+batch_size4=8
+batch_size5=8
+batch_size6=8
+
+Submitted batch job 16497488
+Submitted batch job 16497489
+Submitted batch job 16497490
+Submitted batch job 16497491
+Submitted batch job 16497492
+Submitted batch job 16497494
+
+
+epoch=5
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=80
+sample_size5=96
+sample_size6=112
+batch_size=16
+batch_size2=16
+batch_size3=16
+batch_size4=16
+batch_size5=16
+batch_size6=16
+
+Submitted batch job 16497566
+Submitted batch job 16497567
+Submitted batch job 16497568
+Submitted batch job 16497569
+Submitted batch job 16497570
+Submitted batch job 16497573
+
+
+epoch=5
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=80
+sample_size5=96
+sample_size6=112
+batch_size=32
+batch_size2=32
+batch_size3=32
+batch_size4=32
+batch_size5=32
+batch_size6=32
+
+Submitted batch job 16497576
+Submitted batch job 16497577
+Submitted batch job 16497578
+Submitted batch job 16497579
+Submitted batch job 16497580
+Submitted batch job 16497581
+
+
+epoch=5
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=80
+sample_size5=96
+sample_size6=112
+batch_size=64
+batch_size2=64
+batch_size3=64
+batch_size4=64
+batch_size5=64
+batch_size6=64
+
+Submitted batch job 16497582
+Submitted batch job 16497584
+Submitted batch job 16497585
+Submitted batch job 16497586
+Submitted batch job 16497588
+Submitted batch job 16497589
+
+
+epoch=5
+sample_size=32
+sample_size2=48
+sample_size3=64
+sample_size4=80
+sample_size5=96
+sample_size6=112
+batch_size=128
+batch_size2=128
+batch_size3=128
+batch_size4=128
+batch_size5=128
+batch_size6=128
+
+Submitted batch job 16497597
+Submitted batch job 16497598
+Submitted batch job 16497599
+Submitted batch job 16497600
+Submitted batch job 16497601
+Submitted batch job 16497603
+
+
+epoch=70
+sample_size=112
+sample_size2=128
+sample_size3=144
+sample_size4=160
+sample_size5=176
+sample_size6=192
+batch_size=128
+batch_size2=128
+batch_size3=128
+batch_size4=64
+batch_size5=64
+batch_size6=64
+
+Submitted batch job 16531233
+Submitted batch job 16531237
+Submitted batch job 16531238
+Submitted batch job 16531239
+Submitted batch job 16531240
+Submitted batch job 16531242
+
+
+epoch=100
+sample_size=112
+sample_size2=128
+sample_size3=144
+sample_size4=160
+sample_size5=176
+sample_size6=192
+batch_size=128
+batch_size2=128
+batch_size3=128
+batch_size4=64
+batch_size5=64
+batch_size6=64
+
+Submitted batch job 16531276
+Submitted batch job 16531277
+Submitted batch job 16531278
+Submitted batch job 16531279
+Submitted batch job 16531281
+Submitted batch job 16531283
+
+
+
+epoch=200
+sample_size4=160
+sample_size5=176
+sample_size6=192
+batch_size4=64
+batch_size5=64
+batch_size6=64
+Submitted batch job 16531332
+Submitted batch job 16531334
+Submitted batch job 16531335
+
+
+epoch=300
+sample_size=256
+sample_size2=272
+sample_size3=288
+sample_size4=304
+sample_size5=320
+sample_size6=336
+batch_size=128
+batch_size2=128
+batch_size3=128
+batch_size4=64
+batch_size5=64
+batch_size6=64
+Submitted batch job 16531447
+Submitted batch job 16531449
+Submitted batch job 16531450
+Submitted batch job 16531451
+Submitted batch job 16531452
+Submitted batch job 16531459
 
 
 
@@ -475,132 +671,113 @@ Tag解释:
             16 8 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.7222
             16 32 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.6667
 
-
-
-    (DeepPersonality) [zl525@login-q-1 leenote]$ squeue -u zl525 --start
-                JOBID PARTITION     NAME     USER ST          START_TIME  NODES SCHEDNODES           NODELIST(REASON)
-            14976665    ampere   gpujob    zl525 PD 2023-02-26T08:25:00      1 gpu-q-69             (Priority)
-            14956420    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-64             (Priority)
-            14956425    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-14             (Priority)
-            14956433    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-21             (Priority)
-            14956435    ampere   gpujob    zl525 PD 2023-02-26T11:52:34      1 gpu-q-24             (Priority)
-            14956436    ampere   gpujob    zl525 PD 2023-02-26T12:06:40      1 gpu-q-57             (Priority)
-            14956438    ampere   gpujob    zl525 PD 2023-02-26T12:06:40      1 gpu-q-73             (Priority)
-            14956441    ampere   gpujob    zl525 PD 2023-02-26T12:16:05      1 gpu-q-25             (Priority)
-            14976675    ampere   gpujob    zl525 PD 2023-02-26T19:09:12      1 gpu-q-13             (Priority)
-            14976697    ampere   gpujob    zl525 PD 2023-02-27T04:00:00      1 gpu-q-73             (Priority)
-            14977044    ampere   gpujob    zl525 PD 2023-02-27T04:10:00      1 gpu-q-25             (Priority)
-            14977045    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-26             (Priority)
-            14977046    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-28             (Priority)
-            14977049    ampere   gpujob    zl525 PD 2023-02-27T04:25:00      1 gpu-q-53             (Priority)
-
 ####### SSAST 模型对比总结 # 
+    UDIVA:
+        模型的构造函数：
+                    label_dim=2, 
+                    fshape=16, tshape=16, fstride=16, tstride=16,
+                    input_fdim=256, input_tdim=cfg.DATA.SAMPLE_SIZE,
+                    model_size='tiny', pretrain_stage=True
 
-UDIVA:
-    模型的构造函数：
-                label_dim=2, 
-                fshape=16, tshape=16, fstride=16, tstride=16,
-                input_fdim=256, input_tdim=cfg.DATA.SAMPLE_SIZE,
-                 model_size='tiny', pretrain_stage=True
-
-    模型的输入数据：
-        [ASTModel] input x.shape:  torch.Size([4, 1598, 256]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
-    
-    gen_maskid_patch:
-        修改后：[ASTModel ****重要] 参数fstride: 16 tstride: 16 input_fdim: 256 input_tdim: 1598 fshape: 16 tshape: 16
+        模型的输入数据：
+            [ASTModel] input x.shape:  torch.Size([4, 1598, 256]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
         
-        self.p_f_dim, self.p_t_dim = self.get_shape(fstride, tstride, input_fdim, input_tdim, fshape, tshape)
-        num_patches = self.p_f_dim * self.p_t_dim
-        self.num_patches = num_patches
-        即 sequence_len = self.p_f_dim * self.p_t_dim
+        gen_maskid_patch:
+            修改后：[ASTModel ****重要] 参数fstride: 16 tstride: 16 input_fdim: 256 input_tdim: 1598 fshape: 16 tshape: 16
+            
+            self.p_f_dim, self.p_t_dim = self.get_shape(fstride, tstride, input_fdim, input_tdim, fshape, tshape)
+            num_patches = self.p_f_dim * self.p_t_dim
+            self.num_patches = num_patches
+            即 sequence_len = self.p_f_dim * self.p_t_dim
 
-        [ASTModel - gen_maskid_patch] sequence_len: 1584 mask_size: 400 cluster: 3 , cur_clus: 4
-
-
-官方代码:
-    模型的构造函数：
-    【****重要】lee 打印构造的ASTModel模型的所有__init__参数 
-        fshape:  16 tshape:  16 fstride:  16 tstride:  16 
-        input_fdim:  128 input_tdim:  1024 
-        model_size:  base pretrain_stage:  True
+            [ASTModel - gen_maskid_patch] sequence_len: 1584 mask_size: 400 cluster: 3 , cur_clus: 4
 
 
-    模型的输入数据：
-        1-input x.shape:  torch.Size([2, 1024, 128]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
-        
-        
-    gen_maskid_patch:
-        [lee ASTModel ****重要]计算num_patches的参数 fstride: 16 tstride: 16 input_fdim: 128 input_tdim: 1024 fshape: 16 tshape: 16
-        [lee ASTModel - gen_maskid_patch] sequence_len: 512 mask_size: 400 cluster: 3 , cur_clus: 4
-        
-        sequence_len: 512 是怎么计算的：参数 
-            fstride: 16 tstride: 16 
-            input_fdim: 128 input_tdim: 1024 
-            fshape: 16 tshape: 16
+    官方代码:
+        模型的构造函数：
+        【****重要】lee 打印构造的ASTModel模型的所有__init__参数 
+            fshape:  16 tshape:  16 fstride:  16 tstride:  16 
+            input_fdim:  128 input_tdim:  1024 
+            model_size:  base pretrain_stage:  True
 
-""" SSAST备份
-Namespace(adaptschedule=False, bal='none', batch_size=2, 
-          cluster_factor=3, data_eval=None, data_train='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json',
-          data_val='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
-          dataset='esc50', dataset_mean=-4.2677393, dataset_std=4.5689974, epoch_iter=4000, 
-          exp_dir='./exp/mask01-base-f16-t16-b2-lr1e-4-m400-pretrain_mpc-esc50', 
-          freqm=0, fshape=16, fstride=16, head_lr=1, 
-          label_csv='/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
-          loss='BCE', lr=0.0001, lr_patience=2, lrscheduler_decay=0.5, lrscheduler_start=10, lrscheduler_step=5, 
-          mask_patch=400, metrics='mAP', mixup=0.0, model_size='base', n_class=527, n_epochs=2, n_print_steps=100, 
-          noise=None, num_mel_bins=128, num_workers=16, optim='adam', pretrained_mdl_path=None, save_model=False, 
-          target_length=1024, task='pretrain_mpc', timem=0, tshape=16, tstride=16, wa=None, wa_end=30, wa_start=16, warmup=True)
 
-args_dict备份
-        args_dict = {'data_train': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json', 
-                     'data_val': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
-                     'data_eval': None, 
-                     'label_csv': '/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
-                     'n_class': 2, 
-                     'dataset': 'udiva', 
-                     'dataset_mean': -4.2677393, 
-                     'dataset_std': 4.5689974, 
-                     'target_length': 1024, 
-                     'num_mel_bins': 128, 
-                     'exp_dir': '', 
-                     'lr': 0.0001, 
-                     'warmup': True, 
-                     'optim': 'adam', 
-                     'batch_size': 2, 
-                     'num_workers': 16, 
-                     'n_epochs': 2, 
-                     'lr_patience': 2, 
-                     'adaptschedule': False, 
-                     'n_print_steps': 100, 
-                     'save_model': False, 
-                     'freqm': 0, 
-                     'timem': 0, 
-                     'mixup': 0.0, 
-                     'bal': 'none', 
-                     'fstride': 16, 
-                     'tstride': 16, 
-                     'fshape': 16, 
-                     'tshape': 16, 
-                     'model_size': 'base', 
-                     'task': 'pretrain_mpc', 
-                     'mask_patch': 400, 
-                     'cluster_factor': 3, 
-                     'epoch_iter': 4000, 
-                     'pretrained_mdl_path': None, 
-                     'head_lr': 1, 
-                   
-                     'noise': None, 
-                     'metrics': 'mAP', 
-                     'lrscheduler_start': 10, 
-                     'lrscheduler_step': 5, 
-                     'lrscheduler_decay': 0.5, 
-                     'wa': None, 
-                     'wa_start': 16, 
-                     'wa_end': 30,
-                     'loss': 'BCE'}
-""" 
+        模型的输入数据：
+            1-input x.shape:  torch.Size([2, 1024, 128]) , task:  pretrain_mpc , cluster:  True , mask_patch:  400
+            
+            
+        gen_maskid_patch:
+            [lee ASTModel ****重要]计算num_patches的参数 fstride: 16 tstride: 16 input_fdim: 128 input_tdim: 1024 fshape: 16 tshape: 16
+            [lee ASTModel - gen_maskid_patch] sequence_len: 512 mask_size: 400 cluster: 3 , cur_clus: 4
+            
+            sequence_len: 512 是怎么计算的：参数 
+                fstride: 16 tstride: 16 
+                input_fdim: 128 input_tdim: 1024 
+                fshape: 16 tshape: 16
+
+    """ SSAST备份
+    Namespace(adaptschedule=False, bal='none', batch_size=2, 
+            cluster_factor=3, data_eval=None, data_train='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json',
+            data_val='/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
+            dataset='esc50', dataset_mean=-4.2677393, dataset_std=4.5689974, epoch_iter=4000, 
+            exp_dir='./exp/mask01-base-f16-t16-b2-lr1e-4-m400-pretrain_mpc-esc50', 
+            freqm=0, fshape=16, fstride=16, head_lr=1, 
+            label_csv='/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
+            loss='BCE', lr=0.0001, lr_patience=2, lrscheduler_decay=0.5, lrscheduler_start=10, lrscheduler_step=5, 
+            mask_patch=400, metrics='mAP', mixup=0.0, model_size='base', n_class=527, n_epochs=2, n_print_steps=100, 
+            noise=None, num_mel_bins=128, num_workers=16, optim='adam', pretrained_mdl_path=None, save_model=False, 
+            target_length=1024, task='pretrain_mpc', timem=0, tshape=16, tstride=16, wa=None, wa_end=30, wa_start=16, warmup=True)
+
+    args_dict备份
+            args_dict = {'data_train': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_train_data_1.json', 
+                        'data_val': '/home/zl525/code/Audio-Transformer/ssast/src/prep_data/esc50/data/datafiles/esc_eval_data_1.json', 
+                        'data_eval': None, 
+                        'label_csv': '/home/zl525/code/Audio-Transformer/ssast/src/finetune/esc50/data/esc_class_labels_indices.csv', 
+                        'n_class': 2, 
+                        'dataset': 'udiva', 
+                        'dataset_mean': -4.2677393, 
+                        'dataset_std': 4.5689974, 
+                        'target_length': 1024, 
+                        'num_mel_bins': 128, 
+                        'exp_dir': '', 
+                        'lr': 0.0001, 
+                        'warmup': True, 
+                        'optim': 'adam', 
+                        'batch_size': 2, 
+                        'num_workers': 16, 
+                        'n_epochs': 2, 
+                        'lr_patience': 2, 
+                        'adaptschedule': False, 
+                        'n_print_steps': 100, 
+                        'save_model': False, 
+                        'freqm': 0, 
+                        'timem': 0, 
+                        'mixup': 0.0, 
+                        'bal': 'none', 
+                        'fstride': 16, 
+                        'tstride': 16, 
+                        'fshape': 16, 
+                        'tshape': 16, 
+                        'model_size': 'base', 
+                        'task': 'pretrain_mpc', 
+                        'mask_patch': 400, 
+                        'cluster_factor': 3, 
+                        'epoch_iter': 4000, 
+                        'pretrained_mdl_path': None, 
+                        'head_lr': 1, 
+                    
+                        'noise': None, 
+                        'metrics': 'mAP', 
+                        'lrscheduler_start': 10, 
+                        'lrscheduler_step': 5, 
+                        'lrscheduler_decay': 0.5, 
+                        'wa': None, 
+                        'wa_start': 16, 
+                        'wa_end': 30,
+                        'loss': 'BCE'}
+    """ 
+
 
 
 
 # TODO
-为了让label有变化，将005变为006 /home/zl525/code/DeepPersonality/datasets/noxi/img/005 手动重命名为 /home/zl525/code/DeepPersonality/datasets/noxi/img/006， 后续记得改回来
+为了让label有变化，将005变为006 /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/005 手动重命名为 /home/zl525/code/DeepPersonality/datasets/noxi/img/006， 后续记得改回来

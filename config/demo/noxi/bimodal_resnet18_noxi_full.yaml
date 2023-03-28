@@ -11,8 +11,8 @@ DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   TRANSFORM: "udiva_frame_transforms"
   TRAIN_BATCH_SIZE: 32
-  VALID_BATCH_SIZE: 1
-  TEST_BATCH_SIZE: 1
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
   NUM_WORKERS: 2
   DATASET_NAME: "NOXI"
   DROP_LAST: False
@@ -37,7 +37,7 @@ TRAIN:
   MAX_EPOCH: 2
   OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_udiva"
   BIMODAL_OPTION: 2
-  LOG_INTERVAL: 3
+  LOG_INTERVAL: 100
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
 TEST:
