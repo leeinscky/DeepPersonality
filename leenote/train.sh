@@ -69,14 +69,14 @@ use_wandb="False"
 
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=32
-epoch=1
+sample_size=4
+epoch=2
 batch_size=16
 learning_rate=0.0001
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
-# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
-cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
+cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
+# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
 python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \
@@ -84,5 +84,5 @@ python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --bs $batch_size \
 --lr $learning_rate \
 --use_wandb $use_wandb \
-# >leenote/train.log 2>&1
+>leenote/train.log 2>&1
 

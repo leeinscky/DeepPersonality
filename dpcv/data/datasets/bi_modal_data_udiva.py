@@ -128,7 +128,7 @@ class VideoDataUdiva(Dataset):
                     fc1_img_dir_path = os.path.join(session_dir_path, file)
                 if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix2) and not file.endswith(".mp4"):
                     fc2_img_dir_path = os.path.join(session_dir_path, file)
-            # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
+            # print('[audio_visual_data_udiva.py]- get_image_data fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path)
             # 打印结果: get_image_data fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
             
             num_frames_FC1 = len(os.listdir(fc1_img_dir_path))

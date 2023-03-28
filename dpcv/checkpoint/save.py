@@ -2,7 +2,7 @@ import os
 import torch
 
 
-def save_model(epoch, best_acc, model, optimizer, output_dir, cfg):
+def save_model(epoch, best_acc, model, optimizer, output_dir, cfg, fold_id=None):
     if isinstance(optimizer, list):
         optimizer = optimizer[1]  # for cr net
     checkpoint = {
@@ -11,7 +11,10 @@ def save_model(epoch, best_acc, model, optimizer, output_dir, cfg):
         "epoch": epoch,
         "best_acc": best_acc
     }
-    pkl_name = "checkpoint_{}.pkl".format(epoch) if epoch != (cfg.MAX_EPOCH - 1) else "checkpoint_last.pkl"
+    if fold_id is not None:
+        pkl_name = "checkpoint_fold{}_acc{}_ep{}.pkl".format(fold_id, best_acc, epoch) if epoch != (cfg.MAX_EPOCH - 1) else "checkpoint_last_fold{}_acc{}.pkl".format(fold_id, best_acc)
+    else:
+        pkl_name = "checkpoint_acc{}_ep{}.pkl".format(best_acc, epoch) if epoch != (cfg.MAX_EPOCH - 1) else "checkpoint_last_acc{}.pkl".format(best_acc)
     path_checkpoint = os.path.join(output_dir, pkl_name)
     torch.save(checkpoint, path_checkpoint)
 

@@ -609,7 +609,7 @@ class BiModalTrainerUdiva(object):
                 segment_id = segment_id.detach().cpu()
                 
                 if epoch_idx % 10 == 0 and i in [0, 1]:
-                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} *********** \n')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], val loss:{loss.item():.4f} ***********')
                 
                 loss_batch_list.append(loss.item())
                 batch_loss_sum += loss.item()
@@ -663,19 +663,20 @@ class BiModalTrainerUdiva(object):
         #### 计算指标：valid loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num # 当前epoch的总体loss
         if epoch_summary_loss < self.best_valid_loss:
-            print(f'Valid: Current epoch summary loss:{epoch_summary_loss:.4f} < best epoch summary loss: {self.best_valid_loss:.4f}, will update best loss')
-            self.best_valid_loss = epoch_summary_loss # 保存当前最佳的loss
+            # print(f'Valid: Current epoch summary loss:{epoch_summary_loss:.4f} < best epoch summary loss: {self.best_valid_loss:.4f}, will update best loss')
+            self.best_valid_loss = round(epoch_summary_loss, 4) # 保存当前最佳的loss
         
         #### 计算指标：Epoch ACC (Video segment level)
-        epoch_summary_acc = epoch_total_acc / epoch_total_num # 当前epoch的总体acc
+        epoch_summary_acc = (epoch_total_acc / epoch_total_num).item() # 当前epoch的总体acc  type(epoch_summary_acc): <class 'torch.Tensor'> , type(epoch_total_acc): <class 'torch.Tensor'> , type(epoch_total_num): <class 'int'>
+        epoch_summary_acc = round(epoch_summary_acc, 4) # type(epoch_summary_acc): <class 'float'>
         self.clt.record_valid_loss(loss_batch_list) # loss over batches
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
         if epoch_summary_acc > self.clt.best_valid_acc: # 如果当前的epoch_summary_acc大于之前的最好的epoch_summary_acc #TODO 0.6667 > 0.6667, need atol=1e-4
+            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best_valid_acc: {self.clt.best_valid_acc:.4f}, will save model') # type(self.clt.best_valid_acc): <class 'int'>
             self.clt.update_best_acc(epoch_summary_acc)
             self.clt.update_model_save_flag(1)   # 1表示需要保存模型
-            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best epoch summary acc: {self.clt.best_valid_acc:.4f}, will save model')
         else:
-            # print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} <= best epoch summary acc: {self.clt.best_valid_acc:.4f}, not save model')
+            # print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} <= best_valid_acc: {self.clt.best_valid_acc:.4f}, not save model')
             self.clt.update_model_save_flag(0)  # 0表示不需要保存模型
         
         """ #### 计算指标：AUC #TODO uncomment this after week meeting

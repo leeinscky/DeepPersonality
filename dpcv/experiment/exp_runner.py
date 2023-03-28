@@ -177,32 +177,37 @@ class ExpRunner:
                 if cfg.TRAINER != "SSASTTrainer": # SSASTTrainer 的学习率调整已经在valid函数里面进行，此处不需要再进行学习率调整
                     self.scheduler.step() # 每个epoch都进行学习率调整
                 
-                print('[cross_validation] Fold:', fold_id, ', Epo:', epoch+1, ', best_valid_loss:', best_valid_loss, ', best_valid_acc:', best_valid_acc)
+                print('[cross_validation] Fold:', fold_id, ', Epo:', epoch+1, ', best_valid_loss:', best_valid_loss, ', best_valid_acc:', best_valid_acc, ', self.collector.model_save:', self.collector.model_save) # type(best_valid_acc): <class 'torch.Tensor'>
                 # ### 3. test
                 # print(f'\n================================== Epo:{epoch+1} [train_epochs] start test...     ==================================')
                 # if epoch % cfg.TEST_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都在数据集上进行测试
-                #     self.trainer.test(self.data_loader["test"], self.model, epoch)
+                #     self.trainer.test(self.data_loader["test"], model, epoch)
                 
                 # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
                 
                 # # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
                 # if (epoch+1) in [40]:
                 #     print('current epoch:', epoch+1, ', save model with specific epoch')
-                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
                 
                 # if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
                 #     print('current epoch:', epoch+1, ', save model with best valid acc')
-                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
+                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
                 #     self.collector.update_best_epoch(epoch)
                 
                 # if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
-                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
-                pass
+                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
+                
+                if self.collector.model_save and self.collector.best_valid_acc >= cfg.ACC_THRESHOLD: # 当best_valid_acc大于等于Acc阈值时，保存模型
+                    print('[Cross_Validation] Current epoch:', epoch+1, ', save model with best valid acc:', self.collector.best_valid_acc, '>= cfg.ACC_THRESHOLD:', cfg.ACC_THRESHOLD)
+                    save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg, fold_id)
+                    self.collector.update_best_epoch(epoch)
+                    self.collector.update_best_fold(fold_id)
             
             fold_valid_loss.append(best_valid_loss)
             fold_valid_acc.append(best_valid_acc)
         print('[Cross_Validation] fold_valid_loss =', fold_valid_loss, ', fold_valid_acc =', fold_valid_acc)
-        print('[Cross_Validation] average fold_valid_loss =', np.mean(fold_valid_loss), ', average fold_valid_acc =', np.mean(fold_valid_acc))
+        print('[Cross_Validation] average fold_valid_loss =', np.mean(fold_valid_loss), ', average fold_valid_acc =', round(np.mean(fold_valid_acc), 6))
         if self.cfg.TRAIN.USE_WANDB:
             wandb.log({
                 "avg_fold_valid_loss": float(np.mean(fold_valid_loss)),
@@ -212,12 +217,21 @@ class ExpRunner:
     def after_train(self, cfg):
         cfg = self.cfg.TRAIN
         # self.collector.draw_epo_info(log_dir=self.log_dir)
-        self.logger.info("{} Train done, best valid acc: {:.5f} in epoch:{}".format(
-                datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
-                self.collector.best_valid_acc,
-                self.collector.best_epoch + 1,
-            )
-        )
+        if self.cfg.DATA_LOADER.DATASET_NAME == "NOXI":
+            self.logger.info("{} Train done, best valid acc: {:.5f} in fold:{} epoch:{}".format(
+                    datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
+                    self.collector.best_valid_acc,
+                    self.collector.best_fold,
+                    self.collector.best_epoch + 1,
+                ))
+        elif self.cfg.DATA_LOADER.DATASET_NAME == "UDIVA":
+            self.logger.info("{} Train done, best valid acc: {:.5f} in epoch:{}".format(
+                    datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
+                    self.collector.best_valid_acc,
+                    self.collector.best_epoch + 1,
+                ))
+
+
 
     def train(self):
         # cfg = self.cfg.TRAIN
@@ -289,12 +303,18 @@ class ExpRunner:
         if cfg.WEIGHT:
             self.model = load_model(self.model, cfg.WEIGHT)
         else:
-            try: # 从log_dir中找到最新的模型, 具体逻辑: 从log_dir中找到所有以.pkl结尾的文件，然后找到最新的文件, 如果没有找到最新的模型, 则使用checkpoint_last.pkl
-                weights = [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)] # 找到所有以.pkl结尾的文件, 并且不包含last
-                weights = sorted(weights, key=lambda x: int(x[11:-4])) # 从文件名中找到最新的模型, 具体逻辑: 从文件名中找到数字, 然后按照数字排序, 最后取最后一个, 也就是最新的模型, 例如: checkpoint_100.pkl, checkpoint_200.pkl, checkpoint_300.pkl, 则取checkpoint_300.pkl
-                weight_file = os.path.join(self.log_dir, weights[-1]) # 最新的模型的路径
-            except IndexError:
-                weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl") # 如果没有找到最新的模型, 则使用checkpoint_last.pkl
+            #### original logic
+            # try: # 从log_dir中找到最新的模型, 具体逻辑: 从log_dir中找到所有以.pkl结尾的文件，然后找到最新的文件, 如果没有找到最新的模型, 则使用checkpoint_last.pkl
+            #     weights = [file for file in os.listdir(self.log_dir) if file.endswith(".pkl") and ("last" not in file)] # 找到所有以.pkl结尾的文件, 并且不包含last
+            #     weights = sorted(weights, key=lambda x: int(x[11:-4])) # 从文件名中找到最新的模型, 具体逻辑: 从文件名中找到数字, 然后按照数字排序, 最后取最后一个, 也就是最新的模型, 例如: checkpoint_100.pkl, checkpoint_200.pkl, checkpoint_300.pkl, 则取checkpoint_300.pkl
+            #     weight_file = os.path.join(self.log_dir, weights[-1]) # 最新的模型的路径
+            # except IndexError:
+            #     weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl") # 如果没有找到最新的模型, 则使用checkpoint_last.pkl
+            
+            #### new logic
+            for file in os.listdir(self.log_dir):
+                if file.endswith(".pkl"):
+                    weight_file = os.path.join(self.log_dir, file) # 识别self.log_dir目录里后缀为.pkl的文件，作为weight_file
             self.logger.info(f"[TEST] Test with model {weight_file}")
             
             # 如果load_model报错, 则打印警告，不退出程序
@@ -303,16 +323,17 @@ class ExpRunner:
             except Exception as e:
                 self.logger.warning(f"[TEST] Error when loading model {weight_file}: {e}")
                 return
+        
+        if self.cfg.DATA_LOADER.DATASET_NAME == "UDIVA":
+            if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
+                test_acc = self.trainer.test(self.data_loader["test"], self.model)
+            else:
+                ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(self.data_loader["full_test"], self.model)
 
-        if not self.cfg.TEST.FULL_TEST: # "FULL_TEST":false
-            test_acc = self.trainer.test(self.data_loader["test"], self.model)
-        else:
-            ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(self.data_loader["full_test"], self.model)
-
-        if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":"" 即默认不保存
-            os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
-            torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
-            torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
+        # if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":"" 即默认不保存
+        #     os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)
+        #     torch.save(dataset_output, os.path.join(cfg.SAVE_DATASET_OUTPUT, "pred.pkl"))
+        #     torch.save(dataset_label, os.path.join(cfg.SAVE_DATASET_OUTPUT, "label.pkl"))
         return
 
     def run(self):

@@ -10,14 +10,19 @@ class TrainSummary:
         self.epoch_acc = {"train": [], "valid": []}
         self._best_acc = [0]
         self._best_epoch = [0]
+        self._best_fold = [0]
         self.model_save_flag = [0]
         self.valid_info = {"ocean_acc": []}
 
     def update_best_acc(self, acc):
         self._best_acc.append(acc)
+        # print('[update_best_acc] type(acc):', type(acc), ', acc: ', acc, ', type(self._best_acc):', type(self._best_acc), 'best acc:', self._best_acc)
 
     def update_best_epoch(self, epo):
         self._best_epoch.append(epo)
+        
+    def update_best_fold(self, fold):
+        self._best_fold.append(fold)
 
     def update_model_save_flag(self, flag):
         """
@@ -58,6 +63,10 @@ class TrainSummary:
     @property
     def best_epoch(self):
         return self._best_epoch[-1]
+
+    @property
+    def best_fold(self):
+        return self._best_fold[-1]
 
     @property
     def epoch_train_acc(self):
