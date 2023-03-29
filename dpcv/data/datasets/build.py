@@ -29,7 +29,7 @@ def build_dataloader(cfg, fold_id=None):
                 data_loader_dicts = {
                     "train": dataloader(cfg, mode="train", fold_id=fold_id),
                     "valid": dataloader(cfg, mode="valid", fold_id=fold_id),
-                    # "test": dataloader(cfg, mode="test", fold_id=fold_id),
+                    "test": dataloader(cfg, mode="test", fold_id=fold_id),
                 }
             else:
                 data_loader_dicts = {

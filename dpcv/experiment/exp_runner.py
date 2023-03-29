@@ -32,34 +32,24 @@ class ExpRunner:
         step 3: select optimizer for gradient descent algorithm
         step 4: prepare trainer for typical training in pytorch manner
         """
-        # print('[DeepPersonality/dpcv/experiment/exp_runner.py] def __init__ - start')
         self.cfg = cfg
         # self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE)
-        self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE, cfg.TRAIN.MAX_EPOCH)
+        # self.logger, self.log_dir = make_logger(cfg.TRAIN.OUTPUT_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE, cfg.TRAIN.MAX_EPOCH)
+        self.logger, self.log_dir = make_logger(cfg.TRAIN.SAVED_MODEL_DIR, cfg.DATA.SAMPLE_SIZE, cfg.DATA_LOADER.TRAIN_BATCH_SIZE, cfg.TRAIN.MAX_EPOCH)
         if self.cfg.TRAIN.USE_WANDB:
             wandb.config.log_dir = self.log_dir
         self.log_cfg_info()
         if not feature_extract and cfg.DATA_LOADER.DATASET_NAME != 'NOXI': # NoXi 数据集需要交叉验证，因此使用的是def cross_validation里定义的数据加载器，不需要使用 build_dataloader 函数
             self.data_loader = self.build_dataloader()
-            # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - data_loader: ', self.data_loader)
 
         self.model = self.build_model()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.model:', self.model)
         self.loss_f = self.build_loss_function()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.loss_f:', self.loss_f)
 
         self.optimizer = self.build_solver()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.optimizer:', self.optimizer)
         self.scheduler = self.build_scheduler()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.scheduler:', self.scheduler)
 
         self.collector = TrainSummary()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.collector:', self.collector)
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 准备执行：self.trainer = self.build_trainer()')
         self.trainer = self.build_trainer()
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - 结束执行：self.trainer = self.build_trainer()')
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - self.trainer:', self.trainer)
-        # print('[deeppersonality/dpcv/experiment/exp_runner.py] def __init__ - end')
 
     def build_dataloader(self):
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_dataloader')
@@ -299,6 +289,7 @@ class ExpRunner:
         self.logger.info("Test only mode")
         cfg = self.cfg.TEST
         cfg.WEIGHT = weight if weight else cfg.WEIGHT
+        weight_file = None
 
         if cfg.WEIGHT:
             self.model = load_model(self.model, cfg.WEIGHT)
@@ -315,9 +306,13 @@ class ExpRunner:
             for file in os.listdir(self.log_dir):
                 if file.endswith(".pkl"):
                     weight_file = os.path.join(self.log_dir, file) # 识别self.log_dir目录里后缀为.pkl的文件，作为weight_file
-            self.logger.info(f"[TEST] Test with model {weight_file}")
+                    self.logger.info(f"[TEST] Test with model {weight_file}")
             
-            # 如果load_model报错, 则打印警告，不退出程序
+            if weight_file is None:
+                self.logger.warning(f"[TEST] No saved model found in {self.log_dir}")
+                return
+            
+            # 如果load_model报错, 则打印警告，退出程序
             try:
                 self.model = load_model(self.model, weight_file)
             except Exception as e:
@@ -329,6 +324,9 @@ class ExpRunner:
                 test_acc = self.trainer.test(self.data_loader["test"], self.model)
             else:
                 ocean_acc_avg, ocean_acc, dataset_output, dataset_label = self.trainer.full_test(self.data_loader["full_test"], self.model)
+        elif self.cfg.DATA_LOADER.DATASET_NAME == "NOXI":
+            dataloader = build_dataloader(self.cfg, fold_id=0)
+            test_acc = self.trainer.test(dataloader["test"], self.model)
 
         # if cfg.SAVE_DATASET_OUTPUT: # "SAVE_DATASET_OUTPUT":"" 即默认不保存
         #     os.makedirs(cfg.SAVE_DATASET_OUTPUT, exist_ok=True)

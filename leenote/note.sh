@@ -195,7 +195,8 @@ mac本地：
 
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_tiny /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_full /home/zl525/code/DeepPersonality/datasets/
-
+# 创建模型checkpoint保存文件夹的软链接
+    ln -s /home/zl525/rds/hpc-work/runresults/deeppersonality /home/zl525/code/DeepPersonality/saved_model/
 
 
 # 将mac上的文件夹拷贝到linux上

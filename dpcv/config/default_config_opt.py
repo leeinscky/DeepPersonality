@@ -140,6 +140,7 @@ __C.TRAIN.BIMODAL_OPTION = 1 # 1: image only, 2: audio only, 3: image + audio
 __C.TRAIN.USE_WANDB = True # True: use wandb, False: not use wandb
 __C.TRAIN.TASK = "pretrain_mpc"
 __C.TRAIN.ACC_THRESHOLD = 0.8 # accuracy threshold, if best_val_accuracy >= threshold, then save model
+__C.TRAIN.SAVED_MODEL_DIR = ""
 
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()

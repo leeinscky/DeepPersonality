@@ -703,7 +703,7 @@ def bimodal_resnet_data_loader_udiva(cfg, mode):
 
 @DATA_LOADER_REGISTRY.register()
 def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi dataset
-    print('[audio_visual_data_udiva.py] input fold_id=', fold_id)
+    # print('[audio_visual_data_udiva.py] input fold_id=', fold_id)
     assert (mode in ["train", "valid", "test", "full_test"]), " 'mode' only supports 'train' 'valid' 'test' "
     transforms = build_transform_spatial(cfg) # TRANSFORM: "standard_frame_transform"
     
@@ -723,12 +723,12 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
         prefix1="Expert",
         prefix2="Novice"
     )
-    print('[audio_visual_data_udiva.py]noxi_full_dataset len=', len(noxi_full_dataset), ' img_dir_ls type:', type(noxi_full_dataset.img_dir_ls)) # img_dir_ls type: <class 'list'>
+    # print('[audio_visual_data_udiva.py]noxi_full_dataset len=', len(noxi_full_dataset), ' img_dir_ls type:', type(noxi_full_dataset.img_dir_ls)) # img_dir_ls type: <class 'list'>
     session_dir_ls = noxi_full_dataset.img_dir_ls
     
     # video_data_udiva = VideoDataUdiva(data_root=cfg.DATA.ROOT, img_dir=img_data, label_file=cfg.DATA.NOXI_LABEL_DATA)
     # session_dir_ls = video_data_udiva.parse_data_dir_v2(img_data)
-    print('[audio_visual_data_udiva.py]session_dir_ls len=', len(session_dir_ls), ' type:', type(session_dir_ls)) # session_dir_ls len= 100  type: <class 'list
+    # print('[audio_visual_data_udiva.py]session_dir_ls len=', len(session_dir_ls), ' type:', type(session_dir_ls)) # session_dir_ls len= 100  type: <class 'list
     X = [] # data
     y = [] # label
     for session_dir_path in session_dir_ls:
@@ -819,6 +819,25 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
             img_dir_ls = img_dir_ls
         )
         batch_size = cfg.DATA_LOADER.VALID_BATCH_SIZE
+        shuffle=False
+    elif mode == "test":
+        img_dir_ls = list(X_valid_list[fold_id]) if fold_id is not None else None
+        # print('[audio_visual_data_udiva.py]test mode, len(img_dir_ls)=', len(img_dir_ls), ', img_dir_ls[:3]=', img_dir_ls[:3]) if img_dir_ls is not None else print('[audio_visual_data_udiva.py] valid mode, img_dir_ls is None')
+        dataset = AudioVisualLstmDataUdiva(
+            cfg.DATA.ROOT,
+            img_data,
+            aud_data,
+            cfg.DATA.NOXI_LABEL_DATA,
+            transforms,
+            sample_size=cfg.DATA.SAMPLE_SIZE,
+            config=cfg,
+            mode=mode,
+            dataset_name="NoXi",
+            prefix1="Expert",
+            prefix2="Novice",
+            img_dir_ls = img_dir_ls
+        )
+        batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
         shuffle=False
     elif mode == "full_test":
         test_img_data = img_data
