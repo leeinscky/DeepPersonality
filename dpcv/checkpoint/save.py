@@ -9,7 +9,8 @@ def save_model(epoch, best_acc, model, optimizer, output_dir, cfg, fold_id=None)
         "model_state_dict": model.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "epoch": epoch,
-        "best_acc": best_acc
+        "best_acc": best_acc,
+        "fold": fold_id,
     }
     if fold_id is not None:
         pkl_name = "checkpoint_fold{}_acc{}_ep{}.pkl".format(fold_id, best_acc, epoch) if epoch != (cfg.MAX_EPOCH - 1) else "checkpoint_fold{}_acc{}_last.pkl".format(fold_id, best_acc)
@@ -25,6 +26,14 @@ def resume_training(checkpoint_path, model, optimizer):
     optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     epoch = checkpoint["epoch"]
     return model, optimizer, epoch
+
+def resume_cross_validation(checkpoint_path, model, optimizer):
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+    epoch = checkpoint["epoch"]
+    fold = checkpoint["fold"]
+    return model, optimizer, epoch, fold
 
 
 def load_model(model, checkpoint_path):

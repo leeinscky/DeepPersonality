@@ -144,12 +144,25 @@ class ExpRunner:
     def cross_validation(self, cfg):
         fold_valid_loss = []
         fold_valid_acc = []
+        
+        # if cfg.CROSS_RESUME:
+        #     _, _, _, fold_id = resume_cross_validation(cfg.CROSS_RESUME, self.model, self.optimizer)
+        #     cfg.TRAIN.START_FOLD = fold_id
+        #     self.logger.info(f"[cross_validation] resume cross validation from fold:{cfg.TRAIN.START_FOLD}")
+        
+        # for fold_id in range(cfg.TRAIN.START_FOLD, cfg.DATA_LOADER.NUM_FOLD):
         for fold_id in range(cfg.DATA_LOADER.NUM_FOLD):
             print('\n================================== start K-fold cross validation, fold_id:', fold_id, '==================================')
             dataloader = build_dataloader(self.cfg, fold_id)
-            model = build_model(self.cfg)
-
+            
             cfg = self.cfg.TRAIN
+            if cfg.CROSS_RESUME:
+                self.model, self.optimizer, cfg.START_EPOCH = resume_training(cfg.CROSS_RESUME, self.model, self.optimizer)
+                # self.model, self.optimizer, cfg.START_EPOCH, _ = resume_cross_validation(cfg.CROSS_RESUME, self.model, self.optimizer)
+                self.logger.info(f"[cross_validation] resume cross validation training from {cfg.CROSS_RESUME}, start epoch:{cfg.START_EPOCH}")
+            else:
+                self.model = build_model(self.cfg)
+            
             best_valid_loss = 1e10
             best_valid_acc = 0
             for epoch in range(cfg.START_EPOCH, cfg.MAX_EPOCH):
@@ -157,12 +170,12 @@ class ExpRunner:
                 
                 ### 1. train
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
-                self.trainer.train(dataloader["train"], model, self.loss_f, self.optimizer, epoch)
+                self.trainer.train(dataloader["train"], self.model, self.loss_f, self.optimizer, epoch)
                 
                 ## 2. valid
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start valid...     ==================================')
                 if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
-                    best_valid_loss, best_valid_acc= self.trainer.valid(dataloader["valid"], model, self.loss_f, self.scheduler, epoch)
+                    best_valid_loss, best_valid_acc= self.trainer.valid(dataloader["valid"], self.model, self.loss_f, self.scheduler, epoch)
                 if cfg.TRAINER != "SSASTTrainer": # SSASTTrainer 的学习率调整已经在valid函数里面进行，此处不需要再进行学习率调整
                     self.scheduler.step() # 每个epoch都进行学习率调整
                 
@@ -170,26 +183,26 @@ class ExpRunner:
                 # ### 3. test
                 # print(f'\n================================== Epo:{epoch+1} [train_epochs] start test...     ==================================')
                 # if epoch % cfg.TEST_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都在数据集上进行测试
-                #     self.trainer.test(self.data_loader["test"], model, epoch)
+                #     self.trainer.test(self.data_loader["test"], self.model, epoch)
                 
                 # print('current epoch:', epoch+1, ', self.collector.model_save =', self.collector.model_save, ', cfg.VALID_INTERVAL=', cfg.VALID_INTERVAL, ', epoch % cfg.VALID_INTERVAL =', epoch % cfg.VALID_INTERVAL)
                 
                 # # 定期保存模型：当epoch=4, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100时，保存模型
                 # if (epoch+1) in [40]:
                 #     print('current epoch:', epoch+1, ', save model with specific epoch')
-                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 
                 # if self.collector.model_save and epoch % cfg.VALID_INTERVAL == 0: #  cfg.VALID_INTERVAL=1, if epoch % 1 == 0 即每个epoch都进行模型保存
                 #     print('current epoch:', epoch+1, ', save model with best valid acc')
-                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 #     self.collector.update_best_epoch(epoch)
                 
                 # if epoch == (cfg.MAX_EPOCH - 1) and cfg.MAX_EPOCH >= 10: #  最后一个epoch时且epoch数大于等于10时，保存模型
-                #     save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg)
+                #     save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg)
                 
                 if self.collector.model_save and self.collector.best_valid_acc >= cfg.ACC_THRESHOLD: # 当best_valid_acc大于等于Acc阈值时，保存模型
                     print('[Cross_Validation] Current epoch:', epoch+1, ', save model with best valid acc:', self.collector.best_valid_acc, '>= cfg.ACC_THRESHOLD:', cfg.ACC_THRESHOLD)
-                    save_model(epoch, self.collector.best_valid_acc, model, self.optimizer, self.log_dir, cfg, fold_id)
+                    save_model(epoch, self.collector.best_valid_acc, self.model, self.optimizer, self.log_dir, cfg, fold_id)
                     self.collector.update_best_epoch(epoch)
                     self.collector.update_best_fold(fold_id)
             

@@ -54,7 +54,6 @@ def main():
         wandb.config.cfg = cfg
     # print('args: ', args)
     # print('cfg: ', cfg)
-    # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner = ExpRunner(cfg)')
     
     # avoid CUDA out of memory
     if cfg.MODEL.NAME == "timesformer_udiva" and cfg.DATA_LOADER.TRAIN_BATCH_SIZE >= 16 and cfg.DATA.SAMPLE_SIZE > 16:
@@ -62,13 +61,10 @@ def main():
         os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:1024"
     
     runner = ExpRunner(cfg)
-    # print('[DeepPersonality/script/run_exp.py] - 结束执行 runner = ExpRunner(cfg)')
-    # print('[DeepPersonality/script/run_exp.py] - 开始执行 runner.run()')
     # print('runner: ', runner)
     if args.test_only:
         return runner.test()
     runner.run()
-    # print('[DeepPersonality/script/run_exp.py] - 结束执行 runner.run()')
 
     ''' print结果
 	args:  Namespace(bs=None, cfg_file='./config/demo/bimodal_resnet18.yaml', lr=None, max_epoch=None, resume=None, set_cfgs=None, test_only=False, weight=None)

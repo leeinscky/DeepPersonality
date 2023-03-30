@@ -10,9 +10,9 @@ DATA_LOADER:
   # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   TRANSFORM: "udiva_frame_transforms"
-  TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 16
-  TEST_BATCH_SIZE: 16
+  TRAIN_BATCH_SIZE: 32
+  VALID_BATCH_SIZE: 32
+  TEST_BATCH_SIZE: 32
   NUM_WORKERS: 1
   DATASET_NAME: "NOXI"
   DROP_LAST: False
@@ -40,7 +40,8 @@ TRAIN:
   LOG_INTERVAL: 50
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
-  ACC_THRESHOLD: 0.2
+  ACC_THRESHOLD: 0.35
+  CROSS_RESUME: "saved_model/deeppersonality/resnet_3d_noxi/03-30_02-21_sp32_bs32_ep5/checkpoint_fold0_acc0.3622_ep0.pkl"
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

@@ -45,7 +45,7 @@ def make_logger(out_dir, sample_size, batch_size, epoch):
     now_time = datetime.now()
     time_str = datetime.strftime(now_time, '%m-%d_%H-%M')
     # log_dir = os.path.join(out_dir, time_str + '_sample' + str(sample_size))
-    log_dir = os.path.join(out_dir, time_str + '_sp' + str(sample_size) + '_bs' + str(batch_size) + '_ep' + str(epoch))
+    log_dir = os.path.join(out_dir, time_str + '_bs' + str(batch_size) + '_sp' + str(sample_size) + '_ep' + str(epoch))
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     # creat logger

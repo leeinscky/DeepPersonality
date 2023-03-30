@@ -142,6 +142,9 @@ __C.TRAIN.TASK = "pretrain_mpc"
 __C.TRAIN.ACC_THRESHOLD = 0.8 # accuracy threshold, if best_val_accuracy >= threshold, then save model
 __C.TRAIN.SAVED_MODEL_DIR = ""
 
+__C.TRAIN.START_FOLD = 0 # start fold for cross validation
+__C.TRAIN.CROSS_RESUME = "" # resume cross validation
+
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False

@@ -429,10 +429,9 @@ Tag解释:
         【子实验-experiment-2_2】 将数据集从Udiva 改为 NoXi 
             视觉分支训练时很容易OOM，记录OOM的参数配置，以便后续调参
             bs=16: sp=64(✅)
-            bs=32: sp=32(✅)    sp=64(✅)    sp=128(OOM❌)
-            bs=48: sp=16(✅)
+            bs=32: sp=32(✅)    sp=64(✅)    sp=80(OOM❌)      sp=96(OOM❌)  sp=112(OOM❌) sp=128(OOM❌)
+            bs=48: sp=16(✅)    sp=64(OOM❌)
             bs=64: sp=48(OOM❌) sp=64(OOM❌) sp=128(OOM❌)
-            bs=128:
 
     experiment-3 ResNet18-Audio: 
         【相比于上一个实验的变化】：相比于experiment-2，从视觉分支改为音频分支，且模型改为audio_resnet_udiva, 且数据集进行了过采样避免不均衡
