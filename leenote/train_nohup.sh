@@ -71,12 +71,14 @@ sample_size=16
 epoch=10
 batch_size=32
 learning_rate=0.001
+cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 
-nohup python3 -u ./script/run_exp.py --cfg_file ./config/demo/bimodal_resnet18_udiva_full.yaml \
+nohup python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \
 --max_epoch $epoch \
 --bs $batch_size \
 --lr $learning_rate \
+--use_wandb $use_wandb \
 >nohup_full_cfg1_samp${sample_size}_epo${epoch}_bs${batch_size}_lr${learning_rate}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 
 

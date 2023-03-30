@@ -142,7 +142,6 @@ class ExpRunner:
             pass
 
     def cross_validation(self, cfg):
-        skf = StratifiedKFold(n_splits=cfg.DATA_LOADER.NUM_FOLD)
         fold_valid_loss = []
         fold_valid_acc = []
         for fold_id in range(cfg.DATA_LOADER.NUM_FOLD):
@@ -212,15 +211,14 @@ class ExpRunner:
                     datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
                     self.collector.best_valid_acc,
                     self.collector.best_fold,
-                    self.collector.best_epoch + 1,
+                    self.collector.best_epoch,
                 ))
         elif self.cfg.DATA_LOADER.DATASET_NAME == "UDIVA":
             self.logger.info("{} Train done, best valid acc: {:.5f} in epoch:{}".format(
                     datetime.strftime(datetime.now(), '%m-%d_%H-%M'),
                     self.collector.best_valid_acc,
-                    self.collector.best_epoch + 1,
+                    self.collector.best_epoch,
                 ))
-
 
 
     def train(self):
@@ -290,6 +288,9 @@ class ExpRunner:
         cfg = self.cfg.TEST
         cfg.WEIGHT = weight if weight else cfg.WEIGHT
         weight_file = None
+        max_acc = -1
+        max_fold = -1
+        max_acc_file = None
 
         if cfg.WEIGHT:
             self.model = load_model(self.model, cfg.WEIGHT)
@@ -303,14 +304,42 @@ class ExpRunner:
             #     weight_file = os.path.join(self.log_dir, "checkpoint_last.pkl") # 如果没有找到最新的模型, 则使用checkpoint_last.pkl
             
             #### new logic
-            for file in os.listdir(self.log_dir):
-                if file.endswith(".pkl"):
-                    weight_file = os.path.join(self.log_dir, file) # 识别self.log_dir目录里后缀为.pkl的文件，作为weight_file
-                    self.logger.info(f"[TEST] Test with model {weight_file}")
+            # for file in os.listdir(self.log_dir):
+            #     if file.endswith(".pkl"):
+            #         weight_file = os.path.join(self.log_dir, file) # 识别self.log_dir目录里后缀为.pkl的文件，作为weight_file
+            #         self.logger.info(f"[TEST] Test with model {weight_file}")
+            # 目录下有多个pkl文件(e.g. checkpoint_fold1_acc0.6667_ep0.pkl)，识别每个pkl文件的acc数值，选取最大的那个pkl,如果有2个pkl的acc一样，那么就选择fold数值更大的那个
+            # self.log_dir = '/home/zl525/code/DeepPersonality/saved_model/deeppersonality/bimodal_resnet_noxi/03-29_15-58_sp2_bs16_ep2' # temp test
+            if self.cfg.DATA_LOADER.DATASET_NAME == "UDIVA":
+                for file in os.listdir(self.log_dir):
+                    # e.g. file: checkpoint_acc0.6667_ep0.pkl or checkpoint_acc0.6667_last.pkl
+                    if file.endswith(".pkl"):
+                        acc_str = file.split("_")[1]
+                        acc_float = float(acc_str[3:])
+                        if acc_float > max_acc:
+                            max_acc = acc_float
+                            max_acc_file = file
+                            weight_file = os.path.join(self.log_dir, max_acc_file)
+            elif self.cfg.DATA_LOADER.DATASET_NAME == "NOXI":
+                for file in os.listdir(self.log_dir):
+                    # e.g. file: checkpoint_fold1_acc0.6667_ep0.pkl or checkpoint_fold1_acc0.6667_last.pkl
+                    if file.endswith(".pkl"):
+                        fold_str = file.split("_")[1]
+                        fold_int = int(fold_str[4:])
+                        acc_str = file.split("_")[2]
+                        acc_float = float(acc_str[3:])
+                        if acc_float > max_acc or (acc_float == max_acc and fold_int > max_fold):
+                            max_acc = acc_float
+                            max_fold = fold_int
+                            max_acc_file = file
+                            # print('max_acc_file: ', max_acc_file, 'max_acc: ', max_acc, 'max_fold: ', max_fold)
+                            weight_file = os.path.join(self.log_dir, max_acc_file)
             
             if weight_file is None:
                 self.logger.warning(f"[TEST] No saved model found in {self.log_dir}")
                 return
+            else:
+                self.logger.info(f"[TEST] Test with model {weight_file}")
             
             # 如果load_model报错, 则打印警告，退出程序
             try:

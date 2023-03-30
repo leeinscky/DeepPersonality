@@ -12,7 +12,7 @@
 #! Name of the job:
 #SBATCH -J gpujob
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
-#SBATCH -A COMPUTERLAB-SL3-GPU
+#SBATCH -A COMPUTERLAB-SL4-GPU
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total?
@@ -90,11 +90,6 @@ conda activate DeepPersonality
 echo "> Python version : $(which python)"
 
 echo "==================== Run program ===================="
-#### 仅执行一个脚本
-# cd /home/zl525/code/DeepPersonality/leenote/
-# sh main_slurm_gpu.sh
-
-#### 并行执行多个脚本
 cd /home/zl525/code/DeepPersonality/
 wandb online
 JOBID=$SLURM_JOB_ID
@@ -129,14 +124,15 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-# model="Res3D"
-# cfg_file=./config/demo/resnet_3d_udiva_full.yaml
+model="Res3D-Visual"
+# cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
+cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
-model="Res18-Audio"
-# model="Res18-Visual"
-# cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
-cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
+# model="Res18-Audio"
+# # model="Res18-Visual"
+# # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
+# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 # model="ViT"
@@ -149,17 +145,20 @@ cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 # model="AST_Finetune"
 # cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-data="NoXi"
-epoch=300
 
-sample_size=256
+
+# data="UDIVA"
+data="NoXi"
+epoch=5
+
+sample_size=64
 sample_size2=272
 sample_size3=288
 sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=128
+batch_size=32
 batch_size2=128
 batch_size3=128
 batch_size4=64
@@ -173,12 +172,12 @@ learning_rate4=0.0005
 learning_rate5=0.0005
 learning_rate6=0.0005
 
-# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size}_bs${batch_size}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/noxi/${model}/slurm-${JOBID}_${data}_${model}_bs${batch_size}_sp${sample_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size5 --max_epoch $epoch --bs $batch_size5 --lr $learning_rate5 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size5}_bs${batch_size5}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size6}_bs${batch_size6}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size6 --max_epoch $epoch --bs $batch_size6 --lr $learning_rate6 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size6}_bs${batch_size6}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 wait
 
 ###############################################################
@@ -210,19 +209,24 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 eval $CMD 
 
 
-# 14576875:sample_size = 160 176 192 208
-# 14576877:sample_size = 64 176 192 208
-# 14576896 bs=12 sample_size = 160 176 192 208
-# 14576900 bs=8 sample_size = 208 224 240 256
-# 14577325 bs=4 sample_size = 256 272 288 304
-# ResNet 3D: 14800293 14800328 14800348 14826735 14826745 14826755 14826840
-# ViViT: 14716832 14729675 14729707
-# ResNet 3D, 2023年2月24日22:13, experiment-2: 14919003 14919037 14919038 14919047 14919056 14919057
-# ResNet18, 
-    # experiment-3: 14956420 14956425 14956433 14956435 14956438 14956441 14970054(5mins test, success✅)
-    # 16497481
-# timesformer_udiva, experiment-4: 10mins test: 14976665; 5h: 1-14976675, 2-14976697, 3-14977044, 4-14977045, 5-14977046, 6-14977049
+# 1. UDIVA
+    # ResNet 3D: 14800293 14800328 14800348 14826735 14826745 14826755 14826840
+    # ViViT: 14716832 14729675 14729707
+    # ResNet 3D, 2023年2月24日22:13, experiment-2: 14919003 14919037 14919038 14919047 14919056 14919057
+    # ResNet18, 
+        # experiment-3: 14956420 14956425 14956433 14956435 14956438 14956441 14970054(5mins test, success✅)
+        # 16497481
+    # timesformer_udiva, experiment-4: 10mins test: 14976665; 5h: 1-14976675, 2-14976697, 3-14977044, 4-14977045, 5-14977046, 6-14977049
+
+# 2. NoXi
+    # ResNet 3D: 
+        # 30mins test: 16866524(bs32 sp128)  16866527(bs64 sp128)
+        # 2h: 16869724(bs16 sp16) 16869728(bs32 sp16) 16869731(bs32 sp32) 16869736(bs16 sp64) 16869742(bs32 sp64)
+        # 5h: 16869680(bs48 sp16) 16869690(bs32 sp32) 16869692(bs32 sp64) 16869696(bs16 sp64)
 
 
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_gpu
+
+# 分析job
+    # sacct -j 16860995 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;

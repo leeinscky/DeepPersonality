@@ -750,7 +750,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
     # 将 X 和 y 转换为 numpy array
     X = np.array(X)
     y = np.array(y)
-    skf = StratifiedKFold(n_splits=5)
+    skf = StratifiedKFold(n_splits=cfg.DATA_LOADER.NUM_FOLD)
     # 遍历每一折
     X_train_list, X_valid_list, y_train_list, y_valid_list = [], [], [], []
     for fold_idx, (train_idx, valid_idx) in enumerate(skf.split(X, y)):
