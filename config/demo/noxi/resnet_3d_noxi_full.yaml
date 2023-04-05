@@ -17,7 +17,7 @@ DATA_LOADER:
   DATASET_NAME: "NOXI"
   DROP_LAST: False
   PREFETCH_FACTOR: 1
-  NUM_FOLD: 5
+  NUM_FOLD: 3
 MODEL:
   NAME: "resnet50_3d_model_udiva"         # 视觉: ResNet3D
   # NAME: "audio_resnet_udiva"            # 音频: 纯ResNet模型结构

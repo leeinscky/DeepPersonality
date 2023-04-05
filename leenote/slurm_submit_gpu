@@ -151,7 +151,7 @@ cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 data="NoXi"
 epoch=5
 
-sample_size=64
+sample_size=32
 sample_size2=272
 sample_size3=288
 sample_size4=304

@@ -126,23 +126,26 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
                     #         os.system('rm -rf ' + FC_dir)
                     
                     ##### 处理方式2: 将 FC1_ 前缀和 FC2_ 前缀开头的子文件夹压缩成tar.gz文件, 并删除原来的FC1_ 前缀和 FC2_ 前缀开头的子文件夹
-                    # print('session_id: ', session_id, '已经存在FC1_和FC2_前缀开头的子文件夹，准备压缩成tar.gz文件并删除原先的文件夹')
-                    os.chdir(session_dir) # change to session_dir
-                    print('change dir: current dir is ', os.getcwd())
-                    for FC_name in [ 'FC1_A/',  'FC2_A/',  'FC1_G/',  'FC2_G/',  'FC1_L/',  'FC2_L/',  'FC1_T/',  'FC2_T/']:
-                        FC_dir = os.path.join(video_dir, task_dir, session_id, FC_name)
-                        if os.path.exists(FC_dir) and (os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz') == False): # e.g. 如果存在 FC1_A/ 文件夹 且 不存在FC1_A.tar.gz压缩包，就执行压缩命令
-                            ### 压缩打包
-                            # tar_command = 'tar -zcvf ' + session_dir + '/' + FC_name[:-1] + '.tar.gz ' + FC_dir
-                            tar_command = 'tar -zcvf ' + FC_name[:-1] + '.tar.gz ' + FC_name + ' >/dev/null 2>&1'
-                            print('session_id: ', session_id.name, '执行压缩命令：', tar_command)
-                            os.system(tar_command)
+                    # # print('session_id: ', session_id, '已经存在FC1_和FC2_前缀开头的子文件夹，准备压缩成tar.gz文件并删除原先的文件夹')
+                    # os.chdir(session_dir) # change to session_dir
+                    # print('change dir: current dir is ', os.getcwd())
+                    # for FC_name in [ 'FC1_A/',  'FC2_A/',  'FC1_G/',  'FC2_G/',  'FC1_L/',  'FC2_L/',  'FC1_T/',  'FC2_T/']:
+                    #     FC_dir = os.path.join(video_dir, task_dir, session_id, FC_name)
+                    #     if os.path.exists(FC_dir) and (os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz') == False): # e.g. 如果存在 FC1_A/ 文件夹 且 不存在FC1_A.tar.gz压缩包，就执行压缩命令
+                    #         ### 压缩打包
+                    #         # tar_command = 'tar -zcvf ' + session_dir + '/' + FC_name[:-1] + '.tar.gz ' + FC_dir
+                    #         tar_command = 'tar -zcvf ' + FC_name[:-1] + '.tar.gz ' + FC_name + ' >/dev/null 2>&1'
+                    #         print('session_id: ', session_id.name, '执行压缩命令：', tar_command)
+                    #         os.system(tar_command)
                             
-                            ### 删除原来的文件夹
-                            rm_command = 'rm -rf ' + FC_dir
-                            print('session_id: ', session_id.name, '执行删除命令：', rm_command)
-                            os.system(rm_command)
+                    #         ### 删除原来的文件夹
+                    #         rm_command = 'rm -rf ' + FC_dir
+                    #         print('session_id: ', session_id.name, '执行删除命令：', rm_command)
+                    #         os.system(rm_command)
 
+                    ##### 处理方式3: 后置处理, 对齐FC1和FC2的人脸帧数id，使得两个文件夹中的人脸帧数id是一致的, 即FC1和FC2文件夹中的所有人脸都是一一对应的，时间上是一致的。
+                    # align_face_id(session_dir)
+                    pass
         #         count_session += 1
         #         if count_session == 1:
         #             break
@@ -159,8 +162,10 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
     frame_num = "5" #frame_num表示每秒抽取frame_num数量的帧。如果fps=25, 则每秒抽取25/frame_num=5帧, 每秒抽取的帧数为5帧
     noxi_full_dir = '/home/zl525/rds/hpc-work/datasets/noxi_full'
     noxi_tiny_dir = '/home/zl525/rds/hpc-work/datasets/noxi_tiny'
+    noxi_temp_img_dir = '/home/zl525/code/DeepPersonality/datasets/noxi_temp_test'
     
-    video_dir_list = [noxi_full_dir]
+    # video_dir_list = [noxi_full_dir]
+    video_dir_list = [noxi_temp_img_dir]
     
     count_video = 0
     for video_dir in video_dir_list:
@@ -170,6 +175,7 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
         for modal_type_dir in os.scandir(video_dir): # modal_type_dir.name: img, wav, label
             if modal_type_dir.name == "img":
                 for session_id in sorted(os.scandir(modal_type_dir), key=lambda x: x.name):
+                    session_dir = os.path.join(video_dir, modal_type_dir, session_id)
                     # 如果当前遍历到的文件夹里没有 Expert 和 Novice 前缀开头的子文件夹 就执行shell 命令
                     if  (not os.path.exists(os.path.join(video_dir, modal_type_dir, session_id, 'Expert_video')) 
                         and not os.path.exists(os.path.join(video_dir, modal_type_dir,  session_id, 'Novice_video'))):
@@ -181,37 +187,40 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         #     print('rename')
                         #     os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
                         
-                        # continue
-
-                        session_dir = os.path.join(video_dir, modal_type_dir, session_id)
+                        continue
+                        
                         ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
                         # print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
                         # os.system('python3 ./udiva_video_to_image.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
                         
-                        ######## 处理方式2. 从mp4视频文件中提取人脸图片，即不包含背景
-                        print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
-                        os.system('python3 ./udiva_video_to_face.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
-                        
-                        # continue
+                        ######## 处理方式2.1. 从mp4视频文件中提取人脸图片，即不包含背景，使用的模型：OpenCV’s deep neural network, Reference: https://towardsdatascience.com/extracting-faces-using-opencv-face-detection-neural-network-475c5cd0c260
+                        # print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_face.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
+                        # os.system('python3 ./udiva_video_to_face.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
+
+                        ####### 处理方式2.2. 从mp4视频文件中提取人脸图片，即不包含背景，使用的模型：MTCNN, Reference: Script for Video Face Extraction https://github.com/liaorongfan/DeepPersonality/blob/main/datasets/README.md
+                        print('session_id: ', session_id.name, ', 运行 python3 video_to_face/face_img_extractor.py --video-path ' + session_dir + ' --output-dir ' + session_dir)
+                        os.system('python3 video_to_face/face_img_extractor.py --video-path '  + session_dir +  ' --output-dir '  + session_dir)
                     else:
-                        print('session_id: ', session_id.name, '已经存在Expert 和 Novice前缀开头的子文件夹，不需要执行命令')
+                        # print('session_id: ', session_id.name, '已经存在Expert 和 Novice前缀开头的子文件夹')
                         
-                        continue
-                    
                         # 如果session文件夹名称包含下划线"_"，就重命名，只保留第一个下划线的前面部分，即只保留session的id, e.g. 004_2016-03-18_Paris -> 004
-                        if session_id.name.find('_') != -1:
-                            session_id_new = session_id.name.split('_')[0]
-                            # 将 session_id的name 重命名为 session_id_new
-                            print('rename: ', session_id, ' -> ', session_id_new)
-                            os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
+                        # if session_id.name.find('_') != -1:
+                        #     session_id_new = session_id.name.split('_')[0]
+                        #     # 将 session_id的name 重命名为 session_id_new
+                        #     print('rename: ', session_id, ' -> ', session_id_new)
+                        #     os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
                         
-                        ######## 删除FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹
-                        print('session_id: ', session_id, '已经存在Expert和Novice前缀开头的子文件夹，准备删除')
-                        for dir_name in ['Expert_video/', 'Novice_video/']:
-                            processed_frame_dir = os.path.join(video_dir, session_id, dir_name)
-                            if os.path.exists(processed_frame_dir):
-                                print('session_id: ', session_id, '执行命令： rm -rf ' + processed_frame_dir)
-                                os.system('rm -rf ' + processed_frame_dir)
+                        ######## 1. 删除FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹
+                        # print('session_id: ', session_id, '已经存在Expert和Novice前缀开头的子文件夹，准备删除')
+                        # for dir_name in ['Expert_video/', 'Novice_video/']:
+                        #     processed_frame_dir = os.path.join(video_dir, session_id, dir_name)
+                        #     if os.path.exists(processed_frame_dir):
+                        #         print('session_id: ', session_id, '执行命令： rm -rf ' + processed_frame_dir)
+                        #         os.system('rm -rf ' + processed_frame_dir)
+                        
+                        ######## 2. 后置处理: 对齐Expert和Novice的人脸帧数id，使得两个文件夹中的人脸帧数id是一致的, 即Expert和Novice文件夹中的所有人脸都是一一对应的，时间上是一致的。
+                        align_face_id(session_dir) # session_dir e.g. DeepPersonality/datasets/noxi_full/img/001
+                        pass
                 #     count_session += 1
                 #     if count_session == 1:
                 #         break
@@ -221,10 +230,158 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                 pass
 
 
+def align_face_id(session_dir):
+    """
+    session_dir: e.g. DeepPersonality/datasets/noxi_full/img/001
+    1、session_dir目录下有一对视频对应的帧文件夹，即两个包含有人脸帧的文件夹，例如Expert和Novice文件夹，文件夹中的文件名格式为：face_1.jpg, face_2.jpg, face_3.jpg, ...
+    2、分别从Expert和Novice文件夹识别出所有的文件名中下划线_右边的后缀序号的列表, 例如从Expert_video目录中的face_18.jpg文件中提取出id:18
+    3、然后找出Expert和Novice中非公有的序号（例: face_18.jpg只在Expert_video目录中出现但是没有出现在Novice_vide目录中），最后删除这些序号对应的文件(例:face_18.jpg)
+    """
+    # 从session_dir目录下提取出两个子文件夹名称，作为dir_name1和dir_name2
+    dir_names = [dir_name for dir_name in os.listdir(session_dir) if os.path.isdir(os.path.join(session_dir, dir_name))]
+    if len(dir_names) != 2:
+        print('session_dir: ', session_dir, 'num of dirs is not 2, please check!')
+        return
+    dir_name1, dir_name2 = dir_names[0], dir_names[1] # dir_name1: Expert_video, dir_name2: Novice_video
+    
+    path1 = os.path.join(session_dir, dir_name1)
+    path2 = os.path.join(session_dir, dir_name2)
+    print('session_dir: ', session_dir, '\npath1: ', path1, '\npath2: ', path2)
+    
+    frame_files1 = set(os.listdir(path1))
+    frame_files2 = set(os.listdir(path2))
+    
+    ids_set1 = sorted([int(file.split('_')[1].split('.')[0]) for file in frame_files1])
+    ids_set2 = sorted([int(file.split('_')[1].split('.')[0]) for file in frame_files2])
+    # print('\n\nsession_dir: ', session_dir, '\nids_set1: ', ids_set1, '\nids_set2: ', ids_set2)
+    
+    if ids_set1 == ids_set2:
+        print('session_dir: ', session_dir, 'ids_set1 == ids_set2, no need to align!')
+        return
+    
+    unique_ids_1 = set(ids_set1) - set(ids_set2)
+    unique_ids_2 = set(ids_set2) - set(ids_set1)
+    print('session_dir: ', session_dir, '\nunique_ids_1: ', unique_ids_1, '\nunique_ids_2: ', unique_ids_2)
+    
+    for uid in unique_ids_1:
+        file_to_delete = os.path.join(path1, 'face_' + str(uid) + '.jpg')
+        if os.path.exists(file_to_delete):
+            print('delete: ', file_to_delete)
+            # os.remove(file_to_delete)
+    
+    for uid in unique_ids_2:
+        file_to_delete = os.path.join(path2, 'face_' + str(uid) + '.jpg')
+        if os.path.exists(file_to_delete):
+            print('delete: ', file_to_delete)
+            # os.remove(file_to_delete)
+    pass
+
+'''
+def align_face_id(session_dir, dir_name1, dir_name2):
+    """
+    1、Expert和Novice文件夹 中的文件名格式为：face_1.jpg, face_2.jpg, face_3.jpg, ...
+    2、分别从Expert和Novice文件夹识别出所有的文件名中下划线_右边的后缀序号的列表, 例如从Expert_video目录中的face_18.jpg文件中提取出id:18
+    3、然后找出Expert和Novice中非公有的序号（例: face_18.jpg只在Expert_video目录中出现但是没有出现在Novice_vide目录中），最后删除这些序号对应的文件(例:face_18.jpg)
+    """
+    expert_path = os.path.join(session_dir, dir_name1)
+    novice_path = os.path.join(session_dir, dir_name2)
+    
+    expert_files = set(os.listdir(expert_path))
+    novice_files = set(os.listdir(novice_path))
+    
+    expert_ids = sorted([int(file.split('_')[1].split('.')[0]) for file in expert_files])
+    novice_ids = sorted([int(file.split('_')[1].split('.')[0]) for file in novice_files])
+    # print('\n\nsession_dir: ', session_dir, '\nexpert_ids: ', expert_ids, '\nnovice_ids: ', novice_ids)
+    
+    if expert_ids == novice_ids:
+        print('session_dir: ', session_dir, '中的Expert和Novice文件夹中的人脸帧数id是一致的, 不需要删除文件')
+        return
+    
+    expert_unique_ids = set(expert_ids) - set(novice_ids)
+    novice_unique_ids = set(novice_ids) - set(expert_ids)
+    print('session_dir: ', session_dir, '\nexpert_unique_ids: ', expert_unique_ids, '\nnovice_unique_ids: ', novice_unique_ids)
+    
+    for uid in expert_unique_ids:
+        file_to_delete = os.path.join(expert_path, 'face_' + str(uid) + '.jpg')
+        if os.path.exists(file_to_delete):
+            print('删除文件：', file_to_delete)
+            # os.remove(file_to_delete)
+    
+    for uid in novice_unique_ids:
+        file_to_delete = os.path.join(novice_path, 'face_' + str(uid) + '.jpg')
+        if os.path.exists(file_to_delete):
+            print('删除文件：', file_to_delete)
+            # os.remove(file_to_delete)
+'''
+
+def process_noxi_multiprocess(part_id=1):
+    """process noxi dataset, extract face images from videos, using multiprocess
+       经过测试，如果上一次的nohup处理中断了，可以直接再次运行本函数，因为 face_img_extractor.py 中有相应的判断逻辑，即如果已经存在对应的人脸图片face_{cnt}.jpg，就不会再次提取保存到对应的文件夹中，详见def reduce_frame_rate(self, fps_new)函数的实现 
+    """
+    # some test commands:
+    # 复制文件夹
+    # cp -r /home/zl525/code/DeepPersonality/datasets/noxi_full/img/003 /home/zl525/rds/hpc-work/datasets/noxi_temp_test/img
+    
+    # 删除已经存在的Expert_video/ Novice_video/ 文件夹
+    # cd /home/zl525/code/DeepPersonality/datasets/noxi_temp_test/img && rm -rf 001/Expert_video/ 002/Expert_video/ 003/Expert_video/ && tree
+    # cd /home/zl525/code/DeepPersonality/datasets/noxi_temp_test/img && rm -rf 001/Expert_video/ 002/Expert_video/ 003/Expert_video/ 001/Novice_video/ 002/Novice_video/ 003/Novice_video/ && tree
+    
+    # 查看文件夹中的文件数量
+    # ls 003/Expert_video/ | wc -l; ls 003/Novice_video/ | wc -l
+    # ls 001/Expert_video/ -v; ls 001/Novice_video/ -v; ls 003/Expert_video/ -v; ls 003/Novice_video/ -v
+    
+    ###################################### 处理方式1: ######################################
+    # noxi_full_img_dir = '/home/zl525/rds/hpc-work/datasets/noxi_full/img'
+    # noxi_temp_img_dir = '/home/zl525/code/DeepPersonality/datasets/noxi_temp_test/img'
+    # level = "dir"
+    
+    # video_path = noxi_full_img_dir # 正式
+    # # video_path = noxi_temp_img_dir # 测试
+    # print('运行 python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
+    # os.system('python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
+    
+    ###################################### 处理方式2: 将dir分为part1, part2, part3, 分别使用多线程并行处理 ######################################
+    #### 为了提高效率，将dir分为part1, part2, part3, 分别使用多线程并行处理
+    ### Linux 命令:
+        # cd /home/zl525/code/DeepPersonality/datasets/noxi_full/img
+        # mkdir part1 part2 part3
+        ## 当前目录下的所有文件夹一共有87个，分别为001到084文件夹以及 part1 part2 part3 文件夹. 84个文件节分为三个part: 84/3=28, 即将001-028文件夹移动到part1文件夹中，029-056文件夹移动到part2文件夹中，057-084文件夹移动到part3文件夹中
+        # mv 0{01..28} part1/
+        # mv 0{29..56} part2/
+        # mv 0{57..84} part3/
+    
+    noxi_full_part1 = '/home/zl525/rds/hpc-work/datasets/noxi_full/img/part1'
+    noxi_full_part2 = '/home/zl525/rds/hpc-work/datasets/noxi_full/img/part2'
+    noxi_full_part3 = '/home/zl525/rds/hpc-work/datasets/noxi_full/img/part3'
+    
+    if int(part_id) == 1:
+        video_path = noxi_full_part1
+    elif int(part_id) == 2:
+        video_path = noxi_full_part2
+    elif int(part_id) == 3:
+        video_path = noxi_full_part3
+    else:
+        raise ValueError('part_id should be 1, 2 or 3')
+    level = "dir"
+    
+    print('运行 python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
+    os.system('python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
+    
 if __name__ == '__main__':
+    #### UDIVA ####
     # process_udiva_tiny()
     # process_udiva_full()
-    process_noxi()
+    
+    #### NOXI ####
+    ### 单线程循环处理提取人脸图片
+    # process_noxi()
+    
+    ### 多线程并行处理提取人脸图片
+    if len(sys.argv) > 1:
+        process_noxi_multiprocess(sys.argv[1])
+    else:
+        process_noxi_multiprocess() 
+    
     print('main.py done')
 
 
@@ -233,9 +390,12 @@ if __name__ == '__main__':
 # nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
 # python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
 
-# [1] 1865011
+# 多线程并行处理part3
+# conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/leenote/video_to_img/ && python3 -u main.py 3
+
+# [1] 4105955
 # ps -ef | grep "python3 -u main.py" | grep -v grep
-# ps -p 1865011
+# ps -p 4105955
 
 
 """ debug

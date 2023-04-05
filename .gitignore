@@ -8,6 +8,7 @@ leenote/slurm-*
 leenote/machine.file.*
 leenote/wandb/*
 leenote/slurm_log/gpu/backup/*
+leenote/video_to_img/machine*
 
 
 # output dir
