@@ -18,7 +18,7 @@ import  os
 import sys
 sys.path.append('../../datasets/') # 将datasets路径添加到系统路径中，这样就可以直接导入datasets下的模块了
 sys.path.append('../video_to_img/') # 将video_to_img路径添加到系统路径中，这样就可以直接导入video_to_img下的模块了
-
+import datetime
 
 def process_udiva_tiny(): # 用于遍历hpc上的tiny数据集文件夹: udiva_tiny
     # mac_animals_recordings_train_img = '/Users/lizejian/cambridge/mphil_project/learn/udiva/DeepPersonality/datasets/udiva_tiny/train/recordings/animals_recordings_train_img'
@@ -164,16 +164,18 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
     noxi_tiny_dir = '/home/zl525/rds/hpc-work/datasets/noxi_tiny'
     noxi_temp_img_dir = '/home/zl525/code/DeepPersonality/datasets/noxi_temp_test'
     
-    # video_dir_list = [noxi_full_dir]
-    video_dir_list = [noxi_temp_img_dir]
+    video_dir_list = [noxi_full_dir]
+    # video_dir_list = [noxi_temp_img_dir]
     
     count_video = 0
     for video_dir in video_dir_list:
         # video_dir = noxi_dir
         print('=============================================================================')
         print('video_dir: ', video_dir)
+        count_dir = 0
         for modal_type_dir in os.scandir(video_dir): # modal_type_dir.name: img, wav, label
             if modal_type_dir.name == "img":
+                count_session = 0
                 for session_id in sorted(os.scandir(modal_type_dir), key=lambda x: x.name):
                     session_dir = os.path.join(video_dir, modal_type_dir, session_id)
                     # 如果当前遍历到的文件夹里没有 Expert 和 Novice 前缀开头的子文件夹 就执行shell 命令
@@ -222,10 +224,10 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         align_face_id(session_dir) # session_dir e.g. DeepPersonality/datasets/noxi_full/img/001
                         pass
                 #     count_session += 1
-                #     if count_session == 1:
+                #     if count_session == 3:
                 #         break
                 # count_dir += 1
-                # if count_dir == 1:
+                # if count_dir == 3:
                 #     break
                 pass
 
@@ -236,7 +238,10 @@ def align_face_id(session_dir):
     1、session_dir目录下有一对视频对应的帧文件夹，即两个包含有人脸帧的文件夹，例如Expert和Novice文件夹，文件夹中的文件名格式为：face_1.jpg, face_2.jpg, face_3.jpg, ...
     2、分别从Expert和Novice文件夹识别出所有的文件名中下划线_右边的后缀序号的列表, 例如从Expert_video目录中的face_18.jpg文件中提取出id:18
     3、然后找出Expert和Novice中非公有的序号（例: face_18.jpg只在Expert_video目录中出现但是没有出现在Novice_vide目录中），最后删除这些序号对应的文件(例:face_18.jpg)
+    
+    经过测试，删除的速度非常快，只需要几秒钟，所以不需要考虑删除的效率问题，使用for循环遍历删除即可。
     """
+    print('\n---------------------------------------------------------------------------------------')
     # 从session_dir目录下提取出两个子文件夹名称，作为dir_name1和dir_name2
     dir_names = [dir_name for dir_name in os.listdir(session_dir) if os.path.isdir(os.path.join(session_dir, dir_name))]
     if len(dir_names) != 2:
@@ -246,7 +251,7 @@ def align_face_id(session_dir):
     
     path1 = os.path.join(session_dir, dir_name1)
     path2 = os.path.join(session_dir, dir_name2)
-    print('session_dir: ', session_dir, '\npath1: ', path1, '\npath2: ', path2)
+    # print('session_dir: ', session_dir, '\npath1: ', path1, '\npath2: ', path2)
     
     frame_files1 = set(os.listdir(path1))
     frame_files2 = set(os.listdir(path2))
@@ -346,9 +351,9 @@ def process_noxi_multiprocess(part_id=1):
         # cd /home/zl525/code/DeepPersonality/datasets/noxi_full/img
         # mkdir part1 part2 part3
         ## 当前目录下的所有文件夹一共有87个，分别为001到084文件夹以及 part1 part2 part3 文件夹. 84个文件节分为三个part: 84/3=28, 即将001-028文件夹移动到part1文件夹中，029-056文件夹移动到part2文件夹中，057-084文件夹移动到part3文件夹中
-        # mv 0{01..28} part1/
-        # mv 0{29..56} part2/
-        # mv 0{57..84} part3/
+        # mv 0{01..28} part1/ ; mv 0{29..56} part2/  ; mv 0{57..84} part3/
+        ## 人脸提取完成后，将part1, part2, part3文件夹中的文件夹合并到当前目录下, 恢复原来的文件结构
+        # mv part1/* ./  ; mv part2/* ./  ; mv part3/* ./ ; rm -rf part1/ part2/ part3/
     
     noxi_full_part1 = '/home/zl525/rds/hpc-work/datasets/noxi_full/img/part1'
     noxi_full_part2 = '/home/zl525/rds/hpc-work/datasets/noxi_full/img/part2'
@@ -368,34 +373,36 @@ def process_noxi_multiprocess(part_id=1):
     os.system('python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
     
 if __name__ == '__main__':
+    start_time = datetime.datetime.now()
+    print('main.py start, current time:', start_time.strftime('%Y-%m-%d %H:%M:%S'))
     #### UDIVA ####
     # process_udiva_tiny()
     # process_udiva_full()
     
     #### NOXI ####
     ### 单线程循环处理提取人脸图片
-    # process_noxi()
+    process_noxi()
     
     ### 多线程并行处理提取人脸图片
-    if len(sys.argv) > 1:
-        process_noxi_multiprocess(sys.argv[1])
-    else:
-        process_noxi_multiprocess() 
+    # if len(sys.argv) > 1:
+    #     process_noxi_multiprocess(sys.argv[1])
+    # else:
+    #     process_noxi_multiprocess() 
     
-    print('main.py done')
+    print('main.py done, current time:', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ', duration:', datetime.datetime.now() - start_time, 'seconds')
 
 
 
 # conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/leenote/video_to_img/
-# nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.out 2>&1 &
+# nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
 
 # 多线程并行处理part3
 # conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/leenote/video_to_img/ && python3 -u main.py 3
 
-# [1] 4105955
+# [1] 2577562
 # ps -ef | grep "python3 -u main.py" | grep -v grep
-# ps -p 4105955
+# ps -p 2577562
 
 
 """ debug

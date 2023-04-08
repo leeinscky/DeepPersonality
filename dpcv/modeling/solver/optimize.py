@@ -26,6 +26,7 @@ def crnet_solver(cfg, model):
 
 @SOLVER_REGISTRY.register()
 def adam(cfg, model):
+    # print('[optimize] model.parameters(): ', model.parameters())
     return optim.Adam(model.parameters(), lr=cfg.SOLVER.LR_INIT,)
 
 @SOLVER_REGISTRY.register()

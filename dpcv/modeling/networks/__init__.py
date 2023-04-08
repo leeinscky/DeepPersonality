@@ -22,4 +22,5 @@ from .vivit_model2 import vivit_model_udiva
 from .vivit_model3 import vivit_model3_udiva
 from .timesformer.vit import TimeSformer
 from .ssast_models import ASTModel
+from .gnn.MEFL import GraphModel
 

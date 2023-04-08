@@ -9,7 +9,8 @@ DATA:
 DATA_LOADER:
   # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
-  TRANSFORM: "udiva_frame_transforms"
+  # TRANSFORM: "udiva_frame_transforms"
+  TRANSFORM: "face_image_transform"
   TRAIN_BATCH_SIZE: 32
   VALID_BATCH_SIZE: 1
   TEST_BATCH_SIZE: 1
@@ -20,8 +21,9 @@ DATA_LOADER:
   NUM_FOLD: 5
 MODEL:
   # NAME: "resnet50_3d_model_udiva"  # UDIVA视觉: ResNet3D
-  NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
+  # NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
   # NAME: "audiovisual_resnet_lstm_udiva" # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
+  NAME: "visual_graph_representation_learning" # 视觉图表示学习
   NUM_CLASS: 4
 LOSS:
   NAME: "binary_cross_entropy"
@@ -36,8 +38,9 @@ TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
   # OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_noxi"
-  SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
-  BIMODAL_OPTION: 2
+  # SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
+  SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
+  BIMODAL_OPTION: 1
   LOG_INTERVAL: 2
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1

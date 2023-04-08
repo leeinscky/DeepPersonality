@@ -36,7 +36,7 @@ def standard_frame_transform():
 def udiva_frame_transforms():
     import torchvision.transforms as transforms
     transforms = transforms.Compose([
-        transforms.Resize(256), 
+        transforms.Resize(256),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.CenterCrop((224, 224)),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2), # 随机更改图像颜色

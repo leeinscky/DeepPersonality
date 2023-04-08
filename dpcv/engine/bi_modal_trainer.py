@@ -992,6 +992,8 @@ class BiModalTrainerUdiva(object):
             return (img_in, ), labels, session_id, segment_id
         elif self.cfg_model.NAME == "ssast_udiva":
             return(aud_in, self.cfg.TASK), labels, session_id, segment_id
+        elif self.cfg_model.NAME == "visual_graph_representation_learning":
+            return (img_in, ), labels, session_id, segment_id
         else:
             return (aud_in, img_in), labels, session_id, segment_id
     

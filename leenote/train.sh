@@ -69,7 +69,7 @@ use_wandb="False"
 
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=1
+sample_size=4
 batch_size=2
 epoch=2
 

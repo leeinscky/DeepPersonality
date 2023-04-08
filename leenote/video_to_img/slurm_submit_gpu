@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=00:06:00
+#SBATCH --time=01:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -130,6 +130,7 @@ eval $CMD
 
 # cd /home/zl525/code/DeepPersonality/leenote/video_to_img && sbatch slurm_submit_gpu
 # part1:17482549 part2:17482550 part3:17482551 6mins-test: 17482682
+# part1:17484710 part2:17484711 part3:17484732
 
 # 分析job
     # sacct -j 17479333 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
@@ -138,4 +139,4 @@ eval $CMD
 # scancel -u zl525 17479333
 
 # 查看各个part的文件数量是否在增加，从而判断是否还在运行
-# cd /home/zl525/rds/hpc-work/datasets/noxi_full/img && find . -maxdepth 1 -type d | while read dir; do count=$(find "$dir" -type f | wc -l); echo "$dir : $count"; done
+# cd /home/zl525/rds/hpc-work/datasets/noxi_full/img && find . -maxdepth 2 -type d | while read dir; do count=$(find "$dir" -type f | wc -l); echo "$dir : $count"; done

@@ -350,6 +350,8 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             # 将图片转换为tensor
             if self.transform:
                 fc1_img_tensor = self.transform(fc1_img)
+                # if i == 0:
+                    # print('\n[get_image_data] before transform, fc1_img.size:', fc1_img.size, 'type(fc1_img):', type(fc1_img), ', \nafter transform, fc1_img_tensor.size():', fc1_img_tensor.size(), 'type(fc1_img_tensor):', type(fc1_img_tensor))
             # 将图片tensor添加到fc1_imgs中
             fc1_img_tensor_list.append(fc1_img_tensor)
         # print('[get_image_data] fc1_img_tensor_list:', fc1_img_tensor_list, 'len(fc1_img_tensor_list):', len(fc1_img_tensor_list))
