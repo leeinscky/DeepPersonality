@@ -11,13 +11,14 @@ import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 
-models_dir = os.path.expanduser('checkpoints')
+# models_dir = os.path.expanduser('checkpoints')
+models_dir = os.path.expanduser('pre_trained_weights/ME-GraphAU/swin_transformer')
 model_name = {
     'swin_transformer_tiny': 'swin_tiny_patch4_window7_224.pth',
     'swin_transformer_small': 'swin_small_patch4_window7_224.pth',
     'swin_transformer_base': 'swin_base_patch4_window7_224.pth',
 }
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Mlp(nn.Module):
     def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
@@ -233,6 +234,7 @@ class SwinTransformerBlock(nn.Module):
             mask_windows = mask_windows.view(-1, self.window_size * self.window_size)
             attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
             attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
+            # print('attn_mask.shape: ', attn_mask.shape)
         else:
             attn_mask = None
 
@@ -579,8 +581,10 @@ class SwinTransformer(nn.Module):
         return x
 
     def forward(self, x):
+        print('[swin_transformer.py] forward input x shape: ', x.shape)
         x = self.forward_features(x)
         # x = self.head(x)
+        print('[swin_transformer.py] forward output x shape: ', x.shape)
         return x
 
     def flops(self):
@@ -601,10 +605,11 @@ def swin_transformer_tiny(pretrained=True, **kwargs):
     """
     if pretrained:
         kwargs['init_weights'] = False
-    model = SwinTransformer(embed_dim=96,depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24],
-                 window_size=7,drop_path_rate=0.2, **kwargs)
+    model = SwinTransformer(embed_dim=96,depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24], window_size=7,drop_path_rate=0.2, **kwargs)
+    # model = SwinTransformer(img_size=112, embed_dim=96,depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24], window_size=7,drop_path_rate=0.2, **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_tiny']))['model'])
+        print('[swin_transformer.py] loading pretrained model:', os.path.join(models_dir, model_name['swin_transformer_tiny']))
+        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_tiny']), map_location=device)['model'])
     return model
 
 
@@ -619,7 +624,7 @@ def swin_transformer_small(pretrained=True, **kwargs):
     model = SwinTransformer(embed_dim=96, depths=[ 2, 2, 18, 2 ], num_heads=[ 3, 6, 12, 24 ],
                  window_size=7,drop_path_rate=0.3, **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_small']))['model'])
+        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_small']), map_location=device)['model'])
     return model
 
 
@@ -634,7 +639,7 @@ def swin_transformer_base(pretrained=True, **kwargs):
     model = SwinTransformer(embed_dim=128, depths=[ 2, 2, 18, 2 ], num_heads=[ 4, 8, 16, 32 ],
                  window_size=7,drop_path_rate=0.5, **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_base']))['model'])
+        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['swin_transformer_base']), map_location=device)['model'])
     return model
 
 

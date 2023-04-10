@@ -10,7 +10,8 @@ DATA_LOADER:
   # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   # TRANSFORM: "udiva_frame_transforms"
-  TRANSFORM: "face_image_transform"
+  # TRANSFORM: "face_image_transform"
+  TRANSFORM: "face_image_x2_transform"
   TRAIN_BATCH_SIZE: 32
   VALID_BATCH_SIZE: 1
   TEST_BATCH_SIZE: 1
@@ -45,6 +46,8 @@ TRAIN:
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
   ACC_THRESHOLD: 0.3
+  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth"
+  PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

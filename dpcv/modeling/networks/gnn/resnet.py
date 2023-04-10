@@ -18,7 +18,8 @@ __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152
 #     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
 # }
 
-models_dir = os.path.expanduser('pre_trained_weights/resnet')
+# models_dir = os.path.expanduser('pre_trained_weights/resnet')
+models_dir = os.path.expanduser('pre_trained_weights/ME-GraphAU/resnet')
 model_name = {
     'resnet18': 'resnet18-5c106cde.pth',
     'resnet34': 'resnet34-333f7ec4.pth',
@@ -26,6 +27,7 @@ model_name = {
     'resnet101': 'resnet101-5d3b4d8f.pth',
     'resnet152': 'resnet152-b121ed2d.pth',
 }
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -108,7 +110,11 @@ class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=1000):
         super(ResNet, self).__init__()
         self.inplanes = 64
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        
+        self.channels = 3 # image channel is 3 (original)
+        # self.channels = 6 # image channel is 6 (a pair of video frames)
+        self.conv1 = nn.Conv2d(self.channels, 64, kernel_size=7, stride=2, padding=3, bias=False) 
+        
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -144,22 +150,28 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        # print('[ResNet] input x shape: ', x.shape) # [bs, 3, 224, 224]
+        print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
         x = self.conv1(x)
+        print('[ResNet] after conv1, x shape: ', x.shape) # 3 channels: [bs, 64, 56, 56]; 6 channels: [bs, 64, 56, 56]
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
+        print('[ResNet] after maxpool, x shape: ', x.shape) # 3 channels: [bs, 64, 28, 28]; 6 channels: [bs, 64, 28, 28]
 
         x = self.layer1(x)
+        print('[ResNet] after layer1, x shape: ', x.shape) # 3 channels: [bs, 256, 28, 28]; 6 channels: [bs, 256, 28, 28]
         x = self.layer2(x)
+        print('[ResNet] after layer2, x shape: ', x.shape) # 3 channels: [bs, 512, 14, 14]
         x = self.layer3(x)
+        print('[ResNet] after layer3, x shape: ', x.shape) # 3 channels: [bs, 1024, 7, 7]
         x = self.layer4(x)
+        print('[ResNet] after layer4, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]
 
         b,c,h,w = x.shape
-        # print('[ResNet] after layers, x shape: ', x.shape) # [bs, 2048, 7, 7]
+        print('[ResNet] after layers, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; 6 channels: [bs, 2048, 4, 4]
         
-        x = x.view(b,c,-1).permute(0,2,1) # [bs, 2048, 7, 7] -> [bs, 2048, 49] -> [bs, 49, 2048]
-        # print('[ResNet] output x shape: ', x.shape) # [bs, 49, 2048]
+        x = x.view(b,c,-1).permute(0,2,1) # 3 channels: [bs, 2048, 4, 4] -> [bs, 2048, 16] -> [bs, 16, 2048]
+        print('[ResNet] output x shape: ', x.shape) # 3 channels: [bs, 16, 2048]; 6 channels: [bs, 16, 2048]
         
         return x
 
@@ -196,7 +208,8 @@ def resnet50(pretrained=True, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['resnet50'])))
+        print('[resnet.py] loading pretrained model: ', os.path.join(models_dir, model_name['resnet50']))
+        model.load_state_dict(torch.load(os.path.join(models_dir, model_name['resnet50']), map_location=device))
     return model
 
 
