@@ -187,7 +187,7 @@ class Head(nn.Module):
         cl = F.normalize(cl, p=2, dim=-1) # [bs, 7, 512]
         cl = (cl * sc.view(1, 7, c)).sum(dim=-1, keepdim=False) # [bs, 7, 512] * [7, 512] 
         cl_edge = self.edge_fc(f_e) # [bs, 16, 512] -> [bs, 16, 3]
-        return cl, cl_edge, f_v, f_e # [bs, 7], [bs, 16, 3]
+        return cl, cl_edge, f_v, f_e, f_u # [bs, 7], [bs, 16, 3]
 
 
 class MEFARG(nn.Module):
@@ -226,5 +226,5 @@ class MEFARG(nn.Module):
         # x: [bs, 3, 224, 224]
         x = self.backbone(x) # x: [bs, 49, 2048]
         x = self.global_linear(x) # x: [bs, 49, 512]
-        cl, cl_edge, f_v, f_e = self.head(x)
-        return cl, cl_edge, f_v, f_e
+        cl, cl_edge, f_v, f_e, f_u = self.head(x)
+        return cl, cl_edge, f_v, f_e, f_u

@@ -171,13 +171,13 @@ class Head(nn.Module):
         print('[MEFL.py] class Head.forward, f_u.shape: ', f_u.shape, 'f_v.shape: ', f_v.shape) # f_u.shape: [bs, 12, 49, 512], f_v.shape: [bs, 12, 512]
 
         # MEFL
-        f_e = self.edge_extractor(f_u, x)
+        f_e = self.edge_extractor(f_u, x) # GEM: graph edge modeling for learning multi-dimensional edge features
         print('[MEFL.py] class Head.forward, edge_extractor 的输入参数 f_u.shape: ', f_u.shape, 'x.shape: ', x.shape, ', 计算结果 f_e.shape: ', f_e.shape) 
         # f_u.shape: [bs, 12, 49, 512], x.shape: [bs, 49, 512], 计算结果 f_e.shape: [bs, 144, 49, 512]
         f_e = f_e.mean(dim=-2)
         
         print('[MEFL.py] class Head.forward, GNN的输入参数, f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
-        f_v, f_e = self.gnn(f_v, f_e)
+        f_v, f_e = self.gnn(f_v, f_e) # Gated-GCN for graph learning with node and multi-dimensional edge features
         print('[MEFL.py] class Head.forward, after self.gnn, f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
 
         b, n, c = f_v.shape
@@ -190,7 +190,7 @@ class Head(nn.Module):
         cl = (cl * sc.view(1, n, c)).sum(dim=-1, keepdim=False)
         cl_edge = self.edge_fc(f_e)
         print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
-        return cl, cl_edge, f_v, f_e
+        return cl, cl_edge, f_v, f_e, f_u
 
 
 class MEFARG(nn.Module):
@@ -234,9 +234,9 @@ class MEFARG(nn.Module):
         print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
         x = self.global_linear(x)
         print('[MEFL.py] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
-        cl, cl_edge, f_v, f_e = self.head(x)
+        cl, cl_edge, f_v, f_e, f_u = self.head(x)
         print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
-        return cl, cl_edge, f_v, f_e
+        return cl, cl_edge, f_v, f_e, f_u
 
 
 def load_state_dict(model,path):
@@ -253,51 +253,68 @@ def load_state_dict(model,path):
     return model
 
 
-def union_au_class(au_12class, au_8class):
-    """     
-    au_12class: [bs, 12, 512]
-    au_8class: [bs, 8, 512]
-    return: [bs, 15, 512] 
+def union_au_class(au_12class, au_8class, type='v'):
     """
-    
+    if type == 'v':
+        au_12class: [bs, 12, 512]
+        au_8class: [bs, 8, 512]
+        return: [bs, 15, 512]
+    elif type == 'u':
+        au_12class: [bs, 12, 49, 512]
+        au_8class: [bs, 8, 49, 512]
+        return: [bs, 15, 49, 512]
+    """
     bs = au_12class.shape[0]
-    au_15class = torch.zeros(bs, 15, au_12class.shape[2])
-
-    # au_12class的第二个维度是12，这12个分别对应于: AU1, AU2, AU4, AU6, AU7, AU10, AU12, AU14, AU15, AU17, AU23, AU24
-    # au_8class的第二个维度是8，这8个分别对应于: AU1, AU2, AU4, AU6, AU9, AU12, AU25, AU26
-    # au_12class 和 au_8class的并集是: AU1, AU2, AU4, AU6, AU7, AU9, AU10, AU12, AU14, AU15, AU17, AU23, AU24, AU25, AU26 共15个AU
-    # au_8class 和 au_12class的不同AU是: AU9, AU25, AU26
-    # au_15class[:, 0] = au_12class[:, 0] # AU1
-    # au_15class[:, 1] = au_12class[:, 1] # AU2
-    # au_15class[:, 2] = au_12class[:, 2] # AU4
-    # au_15class[:, 3] = au_12class[:, 3] # AU6
-    # au_15class[:, 4] = au_12class[:, 4] # AU7
-    # au_15class[:, 5] = au_8class[:, 5] # AU9
-    # au_15class[:, 6] = au_12class[:, 5] # AU10
-    # au_15class[:, 7] = au_12class[:, 6] # AU12
-    # au_15class[:, 8] = au_12class[:, 7] # AU14
-    # au_15class[:, 9] = au_12class[:, 8] # AU15
-    # au_15class[:, 10] = au_12class[:, 9] # AU17
-    # au_15class[:, 11] = au_12class[:, 10] # AU23
-    # au_15class[:, 12] = au_12class[:, 11] # AU24
-    # au_15class[:, 13] = au_8class[:, 6] # AU25
-    # au_15class[:, 14] = au_8class[:, 7] # AU26
     
-    # simplified
-    au_15class[:, :5, :] = au_12class[:, :5, :] # AU1-AU7         au_15class的第1到第5列
-    au_15class[:, 5, :] = au_8class[:, 5, :] # AU9                au_15class的第6列
-    au_15class[:, 6:13, :] = au_12class[:, 5:12, :] # AU10-AU24   au_15class的第7到第13列 au_15class[:, 6:13] 是指 au_15class 在第二维中从索引 6 开始（包括第 6 列），到索引 13 结束（不包括第 13 列）的子数组。换句话说，它包含 au_15class 中的第 7-13 列。
-    au_15class[:, 13:15, :] = au_8class[:, 6:8, :] # AU25-AU26    au_15class的第14到第15列
-    
+    if type == 'v':
+        au_15class = torch.zeros(bs, 15, au_12class.shape[2])
+        # original logic
+        # au_12class的第二个维度是12，这12个分别对应于: AU1, AU2, AU4, AU6, AU7, AU10, AU12, AU14, AU15, AU17, AU23, AU24
+        # au_8class的第二个维度是8，这8个分别对应于: AU1, AU2, AU4, AU6, AU9, AU12, AU25, AU26
+        # au_12class 和 au_8class的并集是: AU1, AU2, AU4, AU6, AU7, AU9, AU10, AU12, AU14, AU15, AU17, AU23, AU24, AU25, AU26 共15个AU
+        # au_8class 和 au_12class的不同AU是: AU9, AU25, AU26
+        # au_15class[:, 0] = au_12class[:, 0] # AU1
+        # au_15class[:, 1] = au_12class[:, 1] # AU2
+        # au_15class[:, 2] = au_12class[:, 2] # AU4
+        # au_15class[:, 3] = au_12class[:, 3] # AU6
+        # au_15class[:, 4] = au_12class[:, 4] # AU7
+        # au_15class[:, 5] = au_8class[:, 5] # AU9
+        # au_15class[:, 6] = au_12class[:, 5] # AU10
+        # au_15class[:, 7] = au_12class[:, 6] # AU12
+        # au_15class[:, 8] = au_12class[:, 7] # AU14
+        # au_15class[:, 9] = au_12class[:, 8] # AU15
+        # au_15class[:, 10] = au_12class[:, 9] # AU17
+        # au_15class[:, 11] = au_12class[:, 10] # AU23
+        # au_15class[:, 12] = au_12class[:, 11] # AU24
+        # au_15class[:, 13] = au_8class[:, 6] # AU25
+        # au_15class[:, 14] = au_8class[:, 7] # AU26
+        
+        # simplified
+        au_15class[:, :5, :] = au_12class[:, :5, :] # AU1-AU7         au_15class的第1到第5列
+        au_15class[:, 5, :] = au_8class[:, 5, :] # AU9                au_15class的第6列
+        au_15class[:, 6:13, :] = au_12class[:, 5:12, :] # AU10-AU24   au_15class的第7到第13列 au_15class[:, 6:13] 是指 au_15class 在第二维中从索引 6 开始（包括第 6 列），到索引 13 结束（不包括第 13 列）的子数组。换句话说，它包含 au_15class 中的第 7-13 列。
+        au_15class[:, 13:15, :] = au_8class[:, 6:8, :] # AU25-AU26    au_15class的第14到第15列
+    elif type == 'u':
+        au_15class = torch.zeros(bs, 15, au_12class.shape[2], au_12class.shape[3])
+        au_15class[:, :5, :, :] = au_12class[:, :5, :, :] # AU1-AU7
+        au_15class[:, 5, :, :] = au_8class[:, 5, :, :] # AU9
+        au_15class[:, 6:13, :, :] = au_12class[:, 5:12, :, :] # AU10-AU24
+        au_15class[:, 13:15, :, :] = au_8class[:, 6:8, :, :] # AU25-AU26
+        
     # print('au_12class: ', au_12class, '\nau_8class: ', au_8class, '\nau_15class: ', au_15class)
     return au_15class
 
 
-def process_node(au_15class, au_4class):
+def process_node(au_15class, au_4class, type='v'):
     print('[MEFL.py] process_node, input au_15class.shape: ', au_15class.shape, 'au_4class.shape: ', au_4class.shape) # au_15class.shape: [bs, 15, 512] au_4class.shape: [bs, 4, 512]
-    # [bs, 15, 512], [bs, 4, 512] -> [bs, 19, 512]
-    au_19class = torch.cat((au_15class, au_4class), dim=1)
+    if type == 'v':
+        # [bs, 15, 512], [bs, 4, 512] -> [bs, 19, 512]
+        au_19class = torch.cat((au_15class, au_4class), dim=1)
+    elif type == 'u':
+        # [bs, 15, 49, 512], [bs, 4, 49, 512] -> [bs, 19, 512]
+        au_19class = torch.cat((au_15class, au_4class), dim=1)
     return au_19class
+
 
 class GraphModel(nn.Module):
     def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50'):
@@ -305,6 +322,7 @@ class GraphModel(nn.Module):
 
         if init_weights:
             initialize_weights(self)
+        self.edge_extractor = GEM(512, 19)
         
         ### one graph model
         # self.graph_model = MEFARG(num_classes=num_class, backbone=backbone)
@@ -325,25 +343,32 @@ class GraphModel(nn.Module):
     def forward(self, x):
         print('[MEFL.py] GraphModel.forward, input x.shape: ', x.shape) # [bs, sample_size, c, w, h] e.g. [bs, 6, 3, 112, 112]
         # 遍历每个sample_size
-        for i in range(x.shape[1]):
+        # for i in range(x.shape[1]):
+        for i in range(1):
             one_sample_feature =  x[:, i, :, :, :] # 取sample_size个中的一个sample的人脸特征: [bs, c, w, h]
             person_face_1, person_face_2 = one_sample_feature[:, 0:3, :, :], one_sample_feature[:, 3:6, :, :]
             print('[MEFL.py] GraphModel.forward, one_sample_feature.shape: ', one_sample_feature.shape, ', person_face_1.shape:', person_face_1.shape) # one_sample_feature.shape:  torch.Size([bs, channels, w, h]) , person_face_1.shape: torch.Size([bs, channels/2, w, h])
             
             # cl, cl_edge = self.graph_model(one_sample_feature)
-            cl1_12class, cl_edge1_12class, f_v_12class, f_e_12class = self.graph_model_12class(person_face_1)
-            cl1_8class, cl_edge1_8class, f_v_8class, f_e_8class = self.graph_model_8class(person_face_1)
+            cl1_12class, cl_edge1_12class, f_v_12class, f_e_12class, f_u_12class = self.graph_model_12class(person_face_1)
+            cl1_8class, cl_edge1_8class, f_v_8class, f_e_8class, f_u_8class = self.graph_model_8class(person_face_1)
             # print('[MEFL.py] GraphModel.forward, cl1_12class.shape: ', cl1_12class.shape, ', cl1_8class.shape: ', cl1_8class.shape, ', cl_edge1_12class.shape: ', cl_edge1_12class.shape, ', cl_edge1_8class.shape: ', cl_edge1_8class.shape) # cl1_12class.shape:[bs, 12], cl1_8class.shape:[bs, 8], cl_edge1_12class.shape:[bs, 144, 4], cl_edge1_8class.shape:[bs, 64, 4]
-            print('[MEFL.py] GraphModel.forward, f_v_12class.shape: ', f_v_12class.shape, ', f_e_12class.shape: ', f_e_12class.shape, ', f_v_8class.shape: ', f_v_8class.shape, ', f_e_8class.shape: ', f_e_8class.shape) 
-            f_v_15class = union_au_class(f_v_12class, f_v_8class)
-            print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape)
+            print('[MEFL.py] GraphModel.forward, f_v_12class.shape: ', f_v_12class.shape, ', f_e_12class.shape: ', f_e_12class.shape, ', f_v_8class.shape: ', f_v_8class.shape, ', f_e_8class.shape: ', f_e_8class.shape, ', f_u_12class.shape: ', f_u_12class.shape, ', f_u_8class.shape: ', f_u_8class.shape)
+            f_v_15class = union_au_class(f_v_12class, f_v_8class, type='v')
+            f_u_15class = union_au_class(f_u_12class, f_u_8class, type='u')
+            print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_u_15class.shape: ', f_u_15class.shape)
             
-            cl1_4class, cl_edge1_4class, f_v_4class, f_e_4class = self.graph_model_4class(person_face_1)
-            print('[MEFL.py] GraphModel.forward, f_v_4class.shape: ', f_v_4class.shape)
+            cl1_4class, cl_edge1_4class, f_v_4class, f_e_4class, f_u_4class = self.graph_model_4class(person_face_1)
+            print('[MEFL.py] GraphModel.forward, f_v_4class.shape: ', f_v_4class.shape, ', f_e_4class.shape: ', f_e_4class.shape)
             
             ### process node features 15 class + 4 class, and get the final node features 19 class
-            f_v_19class = process_node(f_v_15class, f_v_4class)
-            print('[MEFL.py] GraphModel.forward, f_v_19class.shape: ', f_v_19class.shape)
+            f_v_19class = process_node(f_v_15class, f_v_4class, type='v')
+            f_u_19class = process_node(f_u_15class, f_u_4class, type='u')
+            print('[MEFL.py] GraphModel.forward, f_v_19class.shape: ', f_v_19class.shape, ', f_u_19class: ', f_u_19class.shape)
+            
+            # graph edge modeling for learning multi-dimensional edge features of 19 class
+            f_e_19class = self.edge_extractor(f_u_19class, f_u_19class)
+            print('[MEFL.py] GraphModel.forward, f_e_19class.shape: ', f_e_19class.shape)
             
             # cl2, cl_edge2 = self.graph_model(person_face_2)
             # print('[MEFL.py] GraphModel.forward, cl1.shape: ', cl1.shape, ', cl_edge1.shape: ', cl_edge1.shape, ', cl2.shape: ', cl2.shape, ', cl_edge2.shape: ', cl_edge2.shape)
