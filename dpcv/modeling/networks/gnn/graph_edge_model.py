@@ -46,7 +46,7 @@ class CrossAttn(nn.Module):
 class GEM(nn.Module):
     def __init__(self, in_channels, num_classes):
         super(GEM, self).__init__()
-        print('[graph_edge_model.py] GEM, in_channels: ', in_channels, ', num_classes: ', num_classes)
+        print('[graph_edge_model.py] GEM, in_channels: ', in_channels, ', num_classes: ', num_classes) # in_channels: 512, num_classes: 19
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.FAM = CrossAttn(self.in_channels)

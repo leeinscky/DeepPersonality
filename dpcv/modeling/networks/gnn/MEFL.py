@@ -12,6 +12,8 @@ from .basic_block import *
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 from dpcv.modeling.networks.build import NETWORK_REGISTRY
 from .MEFL_gratis import MEFARG as MEFARG_GRATIS
+from .ctrgcn import Model as CTRGCN
+from .stsgcn import STSGCN
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -339,12 +341,19 @@ class GraphModel(nn.Module):
             print('[MEFL.py] MEFARG load pretrained model: ', pretrained_model)
             # self.graph_model_12class = load_state_dict(self.graph_model_12class, pretrained_model[0])
             self.graph_model_8class = load_state_dict(self.graph_model_8class, pretrained_model[1])
+        
+        # NoXi: num_class=4; Udiva: num_class=1, num_point = union(12, 8) + 4
+        self.ctr_gcn = CTRGCN(num_class=4, num_point=19, num_person=1, graph_args={'labeling_mode': 'spatial'}, in_channels=512)
+        self.linear = nn.Linear(19, 4)
+
 
     def forward(self, x):
         print('[MEFL.py] GraphModel.forward, input x.shape: ', x.shape) # [bs, sample_size, c, w, h] e.g. [bs, 6, 3, 112, 112]
+        sample_size = x.shape[1]
         # 遍历每个sample_size
-        # for i in range(x.shape[1]):
-        for i in range(1):
+        node_features, edge_features = [], []
+        for i in range(sample_size):
+        # for i in range(1):
             one_sample_feature =  x[:, i, :, :, :] # 取sample_size个中的一个sample的人脸特征: [bs, c, w, h]
             person_face_1, person_face_2 = one_sample_feature[:, 0:3, :, :], one_sample_feature[:, 3:6, :, :]
             print('[MEFL.py] GraphModel.forward, one_sample_feature.shape: ', one_sample_feature.shape, ', person_face_1.shape:', person_face_1.shape) # one_sample_feature.shape:  torch.Size([bs, channels, w, h]) , person_face_1.shape: torch.Size([bs, channels/2, w, h])
@@ -356,19 +365,20 @@ class GraphModel(nn.Module):
             print('[MEFL.py] GraphModel.forward, f_v_12class.shape: ', f_v_12class.shape, ', f_e_12class.shape: ', f_e_12class.shape, ', f_v_8class.shape: ', f_v_8class.shape, ', f_e_8class.shape: ', f_e_8class.shape, ', f_u_12class.shape: ', f_u_12class.shape, ', f_u_8class.shape: ', f_u_8class.shape)
             f_v_15class = union_au_class(f_v_12class, f_v_8class, type='v')
             f_u_15class = union_au_class(f_u_12class, f_u_8class, type='u')
-            print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_u_15class.shape: ', f_u_15class.shape)
+            print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_u_15class.shape: ', f_u_15class.shape) # f_v_15class: [bs, 15, 512], f_u_15class: [bs, 15, 49, 512]
             
             cl1_4class, cl_edge1_4class, f_v_4class, f_e_4class, f_u_4class = self.graph_model_4class(person_face_1)
-            print('[MEFL.py] GraphModel.forward, f_v_4class.shape: ', f_v_4class.shape, ', f_e_4class.shape: ', f_e_4class.shape)
+            print('[MEFL.py] GraphModel.forward, f_v_4class.shape: ', f_v_4class.shape, ', f_e_4class.shape: ', f_e_4class.shape) # f_v_4class:[bs, 4, 512] f_e_4class: [bs, 16, 512]
             
             ### process node features 15 class + 4 class, and get the final node features 19 class
             f_v_19class = process_node(f_v_15class, f_v_4class, type='v')
             f_u_19class = process_node(f_u_15class, f_u_4class, type='u')
-            print('[MEFL.py] GraphModel.forward, f_v_19class.shape: ', f_v_19class.shape, ', f_u_19class: ', f_u_19class.shape)
+            print('[MEFL.py] GraphModel.forward, f_v_19class.shape: ', f_v_19class.shape, ', f_u_19class: ', f_u_19class.shape) # f_v_19class:[bs, 19, 512], f_u_19class:[bs, 19, 49, 512]
             
             # graph edge modeling for learning multi-dimensional edge features of 19 class
             f_e_19class = self.edge_extractor(f_u_19class, f_u_19class)
-            print('[MEFL.py] GraphModel.forward, f_e_19class.shape: ', f_e_19class.shape)
+            print('[MEFL.py] GraphModel.forward, f_e_19class.shape: ', f_e_19class.shape) # [bs, 361, 49, 512]
+            f_e_19class = torch.mean(f_e_19class, dim=2) # [bs, 361, 49, 512] -> [bs, 361, 512]
             
             # cl2, cl_edge2 = self.graph_model(person_face_2)
             # print('[MEFL.py] GraphModel.forward, cl1.shape: ', cl1.shape, ', cl_edge1.shape: ', cl_edge1.shape, ', cl2.shape: ', cl2.shape, ', cl_edge2.shape: ', cl_edge2.shape)
@@ -376,8 +386,85 @@ class GraphModel(nn.Module):
             # cl = torch.cat((cl1, cl2), dim=1)
             # cl_edge = torch.cat((cl_edge1, cl_edge2), dim=1)
             # print('[MEFL.py] GraphModel.forward, cl.shape: ', cl.shape, ', cl_edge.shape: ', cl_edge.shape)
-        return f_v_19class
+            node_features.append(f_v_19class)
+            edge_features.append(f_e_19class)
+        
+        # 获得时间序列节点特征和边特征
+        final_node_feature = torch.stack(node_features, dim=1) # [bs, sample_size, 19, 512]
+        # print('[MEFL.py] GraphModel.forward, final_node_feature.shape: ', final_node_feature.shape)
+        final_edge_feature = torch.stack(edge_features, dim=1).mean(dim=1) # stack smaple_size个[bs, 361, 512] to [bs, sample_size, 361, 512], then [bs, sample_size, 361, 512] -> [bs, 361, 512]
+        adj = final_edge_feature.mean(dim=0) # [bs, 361, 512] -> [361, 512]
+        num_edges_square, edge_features_dim = adj.shape
+        adj = adj.view(int(math.sqrt(num_edges_square)), int(math.sqrt(num_edges_square)), edge_features_dim) # [361, 512] -> [19, 19, 512]
+        print('[MEFL.py] GraphModel.forward, adj.shape:', adj.shape) # [19, 19, 512]
+        adj = construct_adj(adj.detach().numpy(), 3)
+        adj = torch.from_numpy(adj).float().to(device)
+        
+        # 1. 使用ctr_gcn方法对时间图序列建模，但是该方法没有考虑边特征  Reference:
+        # final_node_feature = final_node_feature.permute(0, 3, 1, 2).unsqueeze(-1) # [bs, 512, sample_size, 19, 1] # 将final_node_feature的维度从 [bs, sample_size, num_nodes, node_features_dim] -> [bs, node_features_dim, sample_size, num_nodes, 1]
+        # ret = self.ctr_gcn(final_node_feature)
+        # print('[MEFL.py] GraphModel.forward, ret.shape: ', ret.shape)
+        
+        # 2. 使用stsgcn方法对时间图序列建模, 该方法同时考虑了节点特征和边特征 Reference: https://github.com/SmallNana/STSGCN_Pytorch
+        self.sts_gcn = STSGCN(
+            adj=adj,
+            history=sample_size,
+            num_of_vertices=final_node_feature.shape[2],
+            in_dim=final_node_feature.shape[3],
+            hidden_dims=[[64, 64, 64], [64, 64, 64], [64, 64, 64], [64, 64, 64]],
+            first_layer_embedding_size=64,
+            out_layer_dim=128,
+            activation="GLU",
+            use_mask=True,
+            temporal_emb=True,
+            spatial_emb=True,
+            # horizon=12,
+            horizon=1,
+            strides=3
+        )
+        output = self.sts_gcn(final_node_feature)
+        print('[MEFL.py] GraphModel.forward, output.shape: ', output.shape) # [bs, sample_size, 19]
+        if output.shape(1) == 1:
+            output = output.squeeze(1) # [bs, 1, 19] -> [bs, 19]   squeeze(1) 是将第1维度为1的维度去掉，即将[bs, 1, 19] -> [bs, 19]
+        else:
+            output = output.mean(dim=1) # [bs, sample_size, 19] -> [bs, 19]
+        
+        output = self.linear(output)
+        print('[MEFL.py] GraphModel.forward, after linear, output.shape:', output.shape)
+        
+        output = torch.sigmoid(output)
+        
+        return output
 
+
+
+def construct_adj(A, steps):
+    """
+    构建local 时空图
+    :param A: np.ndarray, adjacency matrix, shape is (N, N)
+    :param steps: 选择几个时间步来构建图
+    :return: new adjacency matrix: csr_matrix, shape is (N * steps, N * steps)
+    """
+    
+    N = len(A)  # 获得节点数
+    adj = np.zeros((N * steps, N * steps, A.shape[2]))
+
+    for i in range(steps):
+        """对角线代表各个时间步自己的空间图，也就是A"""
+        adj[i * N: (i + 1) * N, i * N: (i + 1) * N, :] = A
+    print('[MEFL.py] construct_adj, adj.shape: ', adj.shape)
+
+    # 关于下列这个循环的issue： https://github.com/SmallNana/STSGCN_Pytorch/issues/7  3个时间步的子图的确是相同的，但是卷积是基于“大图”进行的，随着卷积层的堆叠，顶层的输出融入也就融入了相邻时间的信息。
+    for i in range(N):
+        for k in range(steps - 1):
+            """每个节点只会连接相邻时间步的自己"""
+            adj[k * N + i, (k + 1) * N + i, :] = 1
+            adj[(k + 1) * N + i, k * N + i, :] = 1
+    for i in range(len(adj)):
+        """加入自回"""
+        adj[i, i] = 1
+    print('[MEFL.py] construct_adj, final adj.shape:', adj.shape)
+    return adj
 
 @NETWORK_REGISTRY.register()
 def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
@@ -402,7 +489,6 @@ def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
         num_class = 8
     # num_class = cfg.MODEL.NUM_CLASS
     # print('[visual_graph_representation_learning] num_class: ', num_class, ', backbone_net: ', backbone_net)
-    
     graph_model = GraphModel(num_class=num_class, pretrained_model=pretrained_model_path, backbone=backbone_net)
     graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return graph_model
