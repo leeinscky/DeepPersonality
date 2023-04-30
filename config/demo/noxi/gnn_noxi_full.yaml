@@ -3,23 +3,22 @@ DATA:
   SESSION: "NOXI"
   SAMPLE_SIZE: 16
   # SAMPLING_NAME: "SMOTE"
-  NOXI_IMG_DATA: "noxi_tiny/img"
-  NOXI_AUD_DATA: "noxi_tiny/wav"
-  NOXI_LABEL_DATA: "noxi_tiny/label/noxi_sessions_label.pkl"
+  NOXI_IMG_DATA: "noxi_full/img"
+  NOXI_AUD_DATA: "noxi_full/wav"
+  NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
 DATA_LOADER:
   # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   # TRANSFORM: "udiva_frame_transforms"
-  # TRANSFORM: "face_image_transform"
   TRANSFORM: "face_image_x2_transform"
-  TRAIN_BATCH_SIZE: 32
-  VALID_BATCH_SIZE: 1
-  TEST_BATCH_SIZE: 1
-  NUM_WORKERS: 2
+  TRAIN_BATCH_SIZE: 8
+  VALID_BATCH_SIZE: 8
+  TEST_BATCH_SIZE: 8
+  NUM_WORKERS: 1
   DATASET_NAME: "NOXI"
   DROP_LAST: False
-  PREFETCH_FACTOR: 2
-  NUM_FOLD: 2
+  PREFETCH_FACTOR: 1
+  NUM_FOLD: 5
 MODEL:
   # NAME: "resnet50_3d_model_udiva"  # UDIVA视觉: ResNet3D
   # NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
@@ -34,22 +33,19 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [50, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
+  MILESTONE: [5, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
-  # OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_noxi"
-  # SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
   SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
   BIMODAL_OPTION: 1
-  LOG_INTERVAL: 2
+  LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
-  ACC_THRESHOLD: 0.99
-  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth"
+  ACC_THRESHOLD: 0.45
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
-  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_BP4D/MEFARG_resnet50_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
+  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

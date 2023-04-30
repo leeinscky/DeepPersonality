@@ -10,6 +10,7 @@ from .resnet import resnet18, resnet50, resnet101
 from .graph import create_e_matrix
 from .graph_edge_model import GEM
 from .basic_block import *
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Gated GCN Used to Learn Multi-dimensional Edge Features and Node Features
 class GNN(nn.Module):
@@ -75,6 +76,7 @@ class GNN(nn.Module):
         bn_init(self.bne2)
 
     def forward(self, x, edge):
+        print('[MEFL_gratis.py] GNN x.device: ', x.device, ', edge.device:', edge.device)
         # device
         dev = x.get_device()
         if dev >= 0:
@@ -175,7 +177,7 @@ class Head(nn.Module):
               f_e[m,i*j,:].fill(distance.euclidean(a.cpu().detach().numpy(), b.cpu().detach().numpy())) # 将计算得到的距离存储在 f_e 张量的相应位置上
               # e.g. i=0时，计算j为0,1,2,3时 a和b之间的euclidean距离，存储在f_e[0,0,:]中;
         # 将 f_v 和 f_e 作为输入，通过图神经网络模型 gnn 进行计算，得到更新后的节点特征 f_v 和边特征 f_e。
-        f_v, f_e = self.gnn(f_v, torch.Tensor(f_e))
+        f_v, f_e = self.gnn(f_v, torch.Tensor(f_e).to(device))
 
         b, n, c = f_v.shape # b: bs, n: num_classes=4, c: 512
         flatten_f_v = torch.flatten(f_v, start_dim=1) # [bs, num_classes=4, 512] -> [bs, 4*512]

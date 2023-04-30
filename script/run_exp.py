@@ -56,9 +56,9 @@ def main():
     # print('cfg: ', cfg)
     
     # avoid CUDA out of memory
-    if cfg.MODEL.NAME == "timesformer_udiva" and cfg.DATA_LOADER.TRAIN_BATCH_SIZE >= 16 and cfg.DATA.SAMPLE_SIZE > 16:
+    if (cfg.MODEL.NAME == "timesformer_udiva" and cfg.DATA_LOADER.TRAIN_BATCH_SIZE >= 16 and cfg.DATA.SAMPLE_SIZE > 16) or cfg.MODEL.NAME == "visual_graph_representation_learning":
         print('set os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"')
-        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:1024"
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
     
     runner = ExpRunner(cfg)
     # print('runner: ', runner)

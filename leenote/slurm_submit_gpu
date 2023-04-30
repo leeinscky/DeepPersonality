@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=06:30:00
+#SBATCH --time=00:20:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -124,9 +124,9 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-model="Res3D-Visual"
-# cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
-cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
+# model="Res3D-Visual"
+# # cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
+# cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
 # model="Res18-Audio"
@@ -145,20 +145,22 @@ cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 # model="AST_Finetune"
 # cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-
+#### **************************** GNN: gnn_noxi_full.yaml **************************** ####
+model="GNN-Visual"
+cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
 # data="UDIVA"
 data="NoXi"
 epoch=5
 
-sample_size=32
+sample_size=16
 sample_size2=272
 sample_size3=288
 sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=32
+batch_size=8
 batch_size2=128
 batch_size3=128
 batch_size4=64
@@ -223,6 +225,8 @@ eval $CMD
         # 30mins test: 16866524(bs32 sp128)  16866527(bs64 sp128)
         # 2h: 16869724(bs16 sp16) 16869728(bs32 sp16) 16869731(bs32 sp32) 16869736(bs16 sp64) 16869742(bs32 sp64)
         # 5h: 16869680(bs48 sp16) 16869690(bs32 sp32) 16869692(bs32 sp64) 16869696(bs16 sp64)
+    # GNN:
+        # 18504347(30mins) 18504368
 
 
 ### To submit this script to the queue, you can use the command
@@ -231,3 +235,4 @@ eval $CMD
 # 分析job
     # sacct -j 16860995 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
     # scontrol show job 16884899
+

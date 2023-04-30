@@ -12,6 +12,7 @@ from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
 torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
 import json
+import torch.cuda.amp as amp
 
 @TRAINER_REGISTRY.register()
 class BiModalTrainer(object):
@@ -287,6 +288,7 @@ class BiModalTrainerUdiva(object):
         self.f1_metric = BinaryF1Score()
         self.best_valid_loss = 1e10
         self.LOG_INTERVAL_VALID = 10
+        self.use_half = True
 
     def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
         ''' data_loader的调用逻辑如下
@@ -345,7 +347,7 @@ class BiModalTrainerUdiva(object):
             # print('[bi_modal_trainer.py] train... inputs[0].shape=', inputs[0].shape, ', inputs[1]=', inputs[1], ', labels.shape=', labels.shape)
             # if i in [0, 1] and torch.cuda.is_available():
             #     print('before model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
-
+            '''
             # try: # refer: https://zhuanlan.zhihu.com/p/497192910
             #     # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             #     outputs = model(*inputs)
@@ -359,9 +361,11 @@ class BiModalTrainerUdiva(object):
             #                 print('after model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
             #         else:
             #             raise exception
-                
+            '''
             outputs = model(*inputs)
             # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
+            if torch.cuda.is_available() and self.use_half:
+                outputs = outputs.float() # avoid RuntimeError: "binary_cross_entropy" not implemented for 'Half'
             loss = loss_f(outputs.cpu(), labels.cpu().float())
 
             outputs = outputs.detach().cpu()
@@ -993,6 +997,8 @@ class BiModalTrainerUdiva(object):
         elif self.cfg_model.NAME == "ssast_udiva":
             return(aud_in, self.cfg.TASK), labels, session_id, segment_id
         elif self.cfg_model.NAME == "visual_graph_representation_learning":
+            if torch.cuda.is_available():
+                img_in = img_in.half()
             return (img_in, ), labels, session_id, segment_id
         else:
             return (aud_in, img_in), labels, session_id, segment_id
