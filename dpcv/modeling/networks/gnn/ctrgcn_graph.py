@@ -17,7 +17,7 @@ inward_ori_index = [(1, 2), (2, 3), (4, 3), (5, 3), (6, 5), (7, 6),
 inward = [(i - 1, j - 1) for (i, j) in inward_ori_index]
 outward = [(j, i) for (i, j) in inward]
 neighbor = inward + outward
-print('len(self_link):', len(self_link), 'len(inward):', len(inward), 'len(outward):', len(outward), 'len(neighbor):', len(neighbor))
+# print('len(self_link):', len(self_link), 'len(inward):', len(inward), 'len(outward):', len(outward), 'len(neighbor):', len(neighbor))
 # len(self_link): 19 len(inward): 19 len(outward): 19 len(neighbor): 38
 
 # def get_sgp_mat(num_in, num_out, link):

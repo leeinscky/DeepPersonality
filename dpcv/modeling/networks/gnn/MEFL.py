@@ -337,6 +337,35 @@ def process_node(au_15class, au_4class, type='v'):
     return au_19class
 
 
+def construct_adj(A, steps):
+    """
+    构建local 时空图
+    :param A: np.ndarray, adjacency matrix, shape is (N, N)
+    :param steps: 选择几个时间步来构建图
+    :return: new adjacency matrix: csr_matrix, shape is (N * steps, N * steps)
+    """
+    
+    N = len(A)  # 获得节点数
+    adj = np.zeros((N * steps, N * steps, A.shape[2]))
+
+    for i in range(steps):
+        """对角线代表各个时间步自己的空间图，也就是A"""
+        adj[i * N: (i + 1) * N, i * N: (i + 1) * N, :] = A
+    # print('[MEFL.py] construct_adj, adj.shape: ', adj.shape)
+
+    # 关于下列这个循环的issue： https://github.com/SmallNana/STSGCN_Pytorch/issues/7  3个时间步的子图的确是相同的，但是卷积是基于“大图”进行的，随着卷积层的堆叠，顶层的输出融入也就融入了相邻时间的信息。
+    for i in range(N):
+        for k in range(steps - 1):
+            """每个节点只会连接相邻时间步的自己"""
+            adj[k * N + i, (k + 1) * N + i, :] = 1
+            adj[(k + 1) * N + i, k * N + i, :] = 1
+    for i in range(len(adj)):
+        """加入自回"""
+        adj[i, i] = 1
+    # print('[MEFL.py] construct_adj, final adj.shape:', adj.shape)
+    return adj
+
+
 class GraphModel(nn.Module):
     def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50', sample_size=16, cfg=None):
         super(GraphModel, self).__init__()
@@ -457,8 +486,10 @@ class GraphModel(nn.Module):
         
         # f_v_15class = torch.cat((f_v_15class_1, f_v_15class_2), dim=1) # [bs, n_nodes(15), 512] -> [bs, n_nodes*2(30), 512] two person
         # f_e_15class = torch.cat((f_e_15class_1, f_e_15class_2), dim=1) # [bs, 361, 512] -> [bs, 722, 512] two person # TODO
+        # print('two_person_face.device: ', two_person_face.device) # if use cuda, then two_person_face.device:  cuda:0
         f_v_15class, f_e_15class = self.process_face(two_person_face)
         # print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_e_15class.shape: ', f_e_15class.shape) # [bs, 15, 512], [bs, 225, 512]
+        # print('[MEFL.py] GraphModel.forward, f_v_15class.device: ', f_v_15class.device, ', f_e_15class.device: ', f_e_15class.device) # if use cuda, then f_v_15class.device:  cuda:0 , f_e_15class.device:  cuda:0
         '''
         # cl2, cl_edge2 = self.graph_model(person_face_2)
         # print('[MEFL.py] GraphModel.forward, cl1.shape: ', cl1.shape, ', cl_edge1.shape: ', cl_edge1.shape, ', cl2.shape: ', cl2.shape, ', cl_edge2.shape: ', cl_edge2.shape)
@@ -467,12 +498,14 @@ class GraphModel(nn.Module):
         # cl_edge = torch.cat((cl_edge1, cl_edge2), dim=1)
         # print('[MEFL.py] GraphModel.forward, cl.shape: ', cl.shape, ', cl_edge.shape: ', cl_edge.shape)
         '''
-        print('[generate_frame_graph], 1-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
-        self.node_features[sample_id] = f_v_15class
-        self.edge_features[sample_id] = f_e_15class
-        # node_features[sample_id] = f_v_15class
-        # edge_features[sample_id] = f_e_15class
-        print('[generate_frame_graph], 2-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        # print('[generate_frame_graph], 1-self.node_features:', self.node_features, ', \nself.edge_features:', self.edge_features)
+        # print('[generate_frame_graph], 1-node_features:', node_features, ', \nedge_features:', edge_features)
+        self.node_features[sample_id] = f_v_15class.detach()
+        self.edge_features[sample_id] = f_e_15class.detach()
+        # node_features[sample_id] = f_v_15class.detach()
+        # edge_features[sample_id] = f_e_15class.detach()
+        # print('[generate_frame_graph], 2-self.node_features:', self.node_features)
+        # print('[generate_frame_graph], 2-node_features:', node_features, ', \nedge_features:', edge_features)
         
         # del f_v_15class, f_e_15class, f_v_15class_1, f_e_15class_1, f_v_15class_2, f_e_15class_2
         # del f_v_15class, f_e_15class
@@ -480,40 +513,51 @@ class GraphModel(nn.Module):
         if torch.cuda.is_available():
             time_start = time.time()
             gc.collect()
-            torch.cuda.empty_cache()
+            # torch.cuda.empty_cache()
             duration = round(time.time() - time_start, 3)
             if duration > 1:
                 print('[MEFL.py] GraphModel.generate_graph, current sample:', sample_id, ', gc.collect() time cost: ', duration, 's')
         
         print('[generate_frame_graph] sample_id:', sample_id, ', time cost:', round(time.time() - start_time, 3), 's')
         # return (f_v_15class.detach().cpu(), f_e_15class.detach().cpu(), sample_id)
-        return (f_v_15class, f_e_15class, sample_id)
+        # return (f_v_15class, f_e_15class, sample_id)
+        pass
 
     def generate_graph(self, x):
+        print('start generate_graph')
         start_time = time.time()
+        mp.set_start_method('spawn', force=True)
         sample_size = x.shape[1]
-        # self.node_features 初始化为含有sample_size个空张量tensor的列表
-        # empty_tensor = torch.empty((sample_size, 15, 512))
-        empty_tensor = torch.empty((0, 1))
-        self.node_features = [empty_tensor.clone() for i in range(sample_size)]
-        self.edge_features = [empty_tensor.clone() for i in range(sample_size)]
+        empty_tensor = torch.empty((0)).to(device)
+        print('[generate_graph] mp, after set_start_method, time cost:', round(time.time() - start_time, 3), 's') # GPU: 0.0 s
+        # self.node_features = mp.Manager().list([empty_tensor.clone() for i in range(sample_size)]) # 使用共享内存
+        # self.edge_features = mp.Manager().list([empty_tensor.clone() for i in range(sample_size)])
+        manager = mp.Manager()
+        self.node_features = manager.list([empty_tensor for i in range(sample_size)]) # 使用共享内存
+        self.edge_features = manager.list([empty_tensor for i in range(sample_size)])
+        print('[generate_graph] mp, after mp.Manager, time cost:', round(time.time() - start_time, 3), 's') # GPU: 5.194 s
+        # print('[MEFL.py] GraphModel.generate_graph, node_features.deivce:', node_features.device, ', edge_features.device:', edge_features.device)
         # print('[generate_graph] 1-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features, len(self.node_features), len(self.edge_features)) # self.node_features: [None, None, None, None, None, None, None, None, None, None] , self.edge_features: [None, None, None, None, None, None, None, None, None, None] 10 10
-        
+
         print('os.cpu_count():', os.cpu_count())
-        # results = []
-        mp.set_start_method('spawn')
+        print('[generate_graph] mp, before for loop, time cost:', round(time.time() - start_time, 3), 's') # GPU: 5.194 s
         processes = []
-        print('[generate_graph] after create , time cost:', round(time.time() - start_time, 3), 's')
         for sample_id in range(sample_size):
-            print('process sample:', sample_id, '...')
+            # print('process sample:', sample_id, '...')
             # time.sleep(0.1)
             p = mp.Process(target=self.generate_frame_graph, args=(x[:, sample_id, :, :, :], sample_id, self.node_features, self.edge_features))
             p.start()
             processes.append(p)
-        print('[generate_graph] mp, after for loop, time cost:', round(time.time() - start_time, 3), 's')
+            print('[generate_graph] mp, after sample_id:', sample_id, ', time cost:', round(time.time() - start_time, 3), 's') 
+            # after sample_id: 0 , time cost: 15.849 s; 
+            # after sample_id: 1 , time cost: 25.762 s; 
+            # after sample_id: 2 , time cost: 35.924 s; 
+            # after sample_id: 3 , time cost: 45.661 s ; 
+            # after sample_id: 4 , time cost: 55.93 s; .... after sample_id: 9 , time cost: 107.313 s
+        print('[generate_graph] mp, after for loop, time cost:', round(time.time() - start_time, 3), 's') # GPU: 107.313 s
         for p in processes:
             p.join()
-        print('[generate_graph] mp, after join loop, time cost:', round(time.time() - start_time, 3), 's')
+        print('[generate_graph] mp, after join loop, time cost:', round(time.time() - start_time, 3), 's') # GPU: 111.365 s
         
         # get_ret_start = time.time()
         # for ret in results:
@@ -522,8 +566,15 @@ class GraphModel(nn.Module):
         #     self.edge_features[sample_id] = f_e_15class
         # print('[generate_graph] get_ret time cost:', round(time.time() - get_ret_start, 3), 's')
         # print('[generate_graph] All subprocesses done. time cost:', round(time.time() - start_time, 3), 's')
-        print('[generate_graph] self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
-        return self.node_features, self.edge_features
+        
+        # print('[generate_graph] self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        # return self.node_features, self.edge_features
+        # return tuple(self.node_features), tuple(self.edge_features)
+        # print('[generate_graph] node_features:', node_features, ', edge_features:', edge_features)
+        # return node_features, edge_features
+        # return tuple(node_features).clone(), tuple(edge_features).clone()
+        # return tuple(node_features).clone().cpu(), tuple(edge_features).clone().cpu()
+        pass
 
     def generate_graph_cpu(self, x):
         start_time = time.time()
@@ -618,20 +669,23 @@ class GraphModel(nn.Module):
     def forward(self, x):
         forward_start = time.time()
         # print('[MEFL.py] GraphModel.forward, input x.shape: ', x.shape) # [bs, sample_size, c, w, h] e.g. [bs, 6, 3, 112, 112]
-        node_features, edge_features = self.generate_graph(x)
+        # node_features, edge_features = self.generate_graph(x)
+        self.generate_graph(x)
         sample_size_end = time.time()
         sample_size_loop_duration = round(sample_size_end - forward_start, 3)
         
+        node_features = tuple(self.node_features)
+        edge_features = tuple(self.edge_features)
         # 获得时间序列节点特征和边特征
-        final_node_feature = torch.stack(self.node_features, dim=1) # [bs, sample_size, 15, 512]
-        final_edge_feature = torch.stack(self.edge_features, dim=1).mean(dim=1) # [bs, 225, 512] stack smaple_size个[bs, 225, 512] to [bs, sample_size, 225, 512], then [bs, sample_size, 225, 512] -> [bs, 225, 512]
+        final_node_feature = torch.stack(node_features, dim=1) # [bs, sample_size, 15, 512]
+        final_edge_feature = torch.stack(edge_features, dim=1).mean(dim=1) # [bs, 225, 512] stack smaple_size个[bs, 225, 512] to [bs, sample_size, 225, 512], then [bs, sample_size, 225, 512] -> [bs, 225, 512]
         # print('final_edge_feature:', final_edge_feature.shape) # [bs, 225, 512]
         # final_edge_feature = self.linear_edge(final_edge_feature.permute(0, 2, 1)).permute(0, 2, 1)
         del node_features, edge_features
         print('[MEFL.py] GraphModel.forward, final_node_feature.shape: ', final_node_feature.shape, ', final_edge_feature.shape:', final_edge_feature.shape, final_node_feature.device, final_edge_feature.device) # [bs, sample_size, 15, 512], [bs, 900, 512]
         
         adj = final_edge_feature.mean(dim=0) # [bs, 225, 512] -> [225, 512]
-        # print('[MEFL.py] GraphModel.forward, adj.shape:', adj.shape) # [225, 512]
+        print('[MEFL.py] GraphModel.forward, adj.shape:', adj.shape) # [225, 512]
         num_edges_square, edge_features_dim = adj.shape
         adj = adj.view(int(math.sqrt(num_edges_square)), int(math.sqrt(num_edges_square)), edge_features_dim)
         # print('[MEFL.py] GraphModel.forward, 1-adj.shape:', adj.shape) # [15, 15, 512]
@@ -668,35 +722,6 @@ class GraphModel(nn.Module):
             torch.cuda.empty_cache()
         print('[MEFL.py] GraphModel.forward, iterate sample_size cost:', sample_size_loop_duration, 'seconds, sts_gcn model cost:', round(time.time() - sample_size_end, 3), 'seconds')
         return output
-
-
-def construct_adj(A, steps):
-    """
-    构建local 时空图
-    :param A: np.ndarray, adjacency matrix, shape is (N, N)
-    :param steps: 选择几个时间步来构建图
-    :return: new adjacency matrix: csr_matrix, shape is (N * steps, N * steps)
-    """
-    
-    N = len(A)  # 获得节点数
-    adj = np.zeros((N * steps, N * steps, A.shape[2]))
-
-    for i in range(steps):
-        """对角线代表各个时间步自己的空间图，也就是A"""
-        adj[i * N: (i + 1) * N, i * N: (i + 1) * N, :] = A
-    # print('[MEFL.py] construct_adj, adj.shape: ', adj.shape)
-
-    # 关于下列这个循环的issue： https://github.com/SmallNana/STSGCN_Pytorch/issues/7  3个时间步的子图的确是相同的，但是卷积是基于“大图”进行的，随着卷积层的堆叠，顶层的输出融入也就融入了相邻时间的信息。
-    for i in range(N):
-        for k in range(steps - 1):
-            """每个节点只会连接相邻时间步的自己"""
-            adj[k * N + i, (k + 1) * N + i, :] = 1
-            adj[(k + 1) * N + i, k * N + i, :] = 1
-    for i in range(len(adj)):
-        """加入自回"""
-        adj[i, i] = 1
-    # print('[MEFL.py] construct_adj, final adj.shape:', adj.shape)
-    return adj
 
 
 @NETWORK_REGISTRY.register()
