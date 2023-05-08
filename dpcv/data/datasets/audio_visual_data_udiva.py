@@ -368,7 +368,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         sample_fc2_frames = fc2_img_paths[start_frame_id:end_frame_id] # 采样方式二：按照segment_idx取sample_size个连续的帧图片
         # print('[get_image_data] sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
         if not self.check_continue(sample_fc2_frames):
-            print('[get_image_data] sample_fc2_frames is not continuous')
+            # print('[get_image_data] sample_fc2_frames is not continuous')
             self.is_continue = False
 
         fc2_img_tensor_list = []

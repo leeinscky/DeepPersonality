@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=00:20:00
+#SBATCH --time=11:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -152,16 +152,16 @@ cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
 # data="UDIVA"
 data="NoXi"
-epoch=5
+epoch=3
 
-sample_size=12
+sample_size=16
 sample_size2=272
 sample_size3=288
 sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=2
+batch_size=8
 batch_size2=128
 batch_size3=128
 batch_size4=64
