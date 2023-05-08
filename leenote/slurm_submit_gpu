@@ -121,7 +121,8 @@ JOBID=$SLURM_JOB_ID
 
 #### **************************** temp test **************************** ####
 # model="temp"
-# cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
+# # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml # UDIVA dataset
+# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml # NOXI dataset
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
 # model="Res3D-Visual"
@@ -153,14 +154,14 @@ cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 data="NoXi"
 epoch=5
 
-sample_size=16
+sample_size=12
 sample_size2=272
 sample_size3=288
 sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=8
+batch_size=2
 batch_size2=128
 batch_size3=128
 batch_size4=64
@@ -208,7 +209,7 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
-eval $CMD 
+eval $CMD
 
 
 # 1. UDIVA
@@ -226,13 +227,15 @@ eval $CMD
         # 2h: 16869724(bs16 sp16) 16869728(bs32 sp16) 16869731(bs32 sp32) 16869736(bs16 sp64) 16869742(bs32 sp64)
         # 5h: 16869680(bs48 sp16) 16869690(bs32 sp32) 16869692(bs32 sp64) 16869696(bs16 sp64)
     # GNN:
-        # 18504347(30mins) 18504368
+        # 30mins: 18740415
+        # 18740859
+        # SL3 test: 18880358
 
 
 ### To submit this script to the queue, you can use the command
 ### cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_gpu
 
 # 分析job
-    # sacct -j 16860995 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
-    # scontrol show job 16884899
+    # sacct -j 18880358 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
+    # scontrol show job 18880358
 

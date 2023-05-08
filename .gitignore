@@ -10,6 +10,7 @@ leenote/wandb/*
 leenote/slurm_log/gpu/backup/*
 leenote/video_to_img/machine*
 pre_trained_weights/*
+leenote/slurm_log/cpu/backup/
 
 # output dir
 ExpManager/

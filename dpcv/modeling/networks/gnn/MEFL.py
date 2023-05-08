@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import numpy as np
@@ -16,9 +17,12 @@ from .ctrgcn import Model as CTRGCN
 from .stsgcn import STSGCN
 import gc
 import time
+from multiprocessing import Pool
+import torch.multiprocessing as mp
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-use_half = True
+use_half = False
 
 # Gated GCN Used to Learn Multi-dimensional Edge Features and Node Features
 class GNN(nn.Module):
@@ -250,6 +254,7 @@ class MEFARG(nn.Module):
         f_v, f_u = self.head(x)
         # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
         # return cl, cl_edge, f_v, f_e, f_u
+        # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_u.shape: ', f_u.shape)
         return f_v, f_u
 
 
@@ -333,8 +338,9 @@ def process_node(au_15class, au_4class, type='v'):
 
 
 class GraphModel(nn.Module):
-    def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50', sample_size=16):
+    def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50', sample_size=16, cfg=None):
         super(GraphModel, self).__init__()
+        self.cfg = cfg
         if init_weights:
             initialize_weights(self)
         self.edge_extractor = GEM(512, 15).to(device)
@@ -361,9 +367,10 @@ class GraphModel(nn.Module):
         
         self.sts_gcn = STSGCN(
             # adj=torch.randn(15, 15).to(device),
-            adj=torch.randn(1, 1, 1).to(device), # TODO temp test
+            adj=torch.randn(1, 1, 1).to(device), # TODO
             history=sample_size,
-            num_of_vertices=15*2, # two person, 15 for each person
+            # num_of_vertices=15*2, # two person, 15 for each person
+            num_of_vertices=15,
             in_dim=512,
             hidden_dims=[[64, 64, 64], [64, 64, 64], [64, 64, 64], [64, 64, 64]],
             # hidden_dims=[[64, 64, 64]],
@@ -379,10 +386,16 @@ class GraphModel(nn.Module):
         
         # NoXi: num_class=4; Udiva: num_class=1, num_point = union(12, 8) + 4
         # self.ctr_gcn = CTRGCN(num_class=4, num_point=19, num_person=1, graph_args={'labeling_mode': 'spatial'}, in_channels=512)
-        self.linear_edge = nn.Linear(450, 900) # num_nodes * num_nodes * 2 = 15 * 15 * 2 = 450; (num_nodes * 2) * (num_nodes * 2) = 30 * 30 = 900
-        self.linear = nn.Linear(30, 4)
+        
+        # self.linear_edge = nn.Linear(450, 900) # num_nodes * num_nodes * 2 = 15 * 15 * 2 = 450; (num_nodes * 2) * (num_nodes * 2) = 30 * 30 = 900
+        # self.linear = nn.Linear(30, 4)
+        self.linear_edge = nn.Linear(225, 900)
+        self.linear = nn.Linear(15, 4)
+        
+        self.node_features, self.edge_features = [], []
 
     def process_face(self, face_image):
+        # print('[process_face] face_image: ', face_image.shape)
         # cl1_12class, cl_edge1_12class, f_v_12class, f_e_12class, f_u_12class = self.graph_model_12class(face_image)
         # cl1_8class, cl_edge1_8class, f_v_8class, f_e_8class, f_u_8class = self.graph_model_8class(face_image)
         # print('[MEFL.py] process_face, cl1_12class.shape: ', cl1_12class.shape, ', cl1_8class.shape: ', cl1_8class.shape, ', cl_edge1_12class.shape: ', cl_edge1_12class.shape, ', cl_edge1_8class.shape: ', cl_edge1_8class.shape) # cl1_12class.shape:[bs, 12], cl1_8class.shape:[bs, 8], cl_edge1_12class.shape:[bs, 144, 4], cl_edge1_8class.shape:[bs, 64, 4]
@@ -424,24 +437,162 @@ class GraphModel(nn.Module):
                 print('[MEFL.py] process_face, time cost of gc.collect: ', duration, 's')
         return f_v_15class, f_e_15class
 
-    def forward(self, x):
-        # print('[MEFL.py] GraphModel.forward, input x.shape: ', x.shape) # [bs, sample_size, c, w, h] e.g. [bs, 6, 3, 112, 112]
+    def generate_frame_graph(self, one_sample_feature, sample_id, node_features, edge_features):
+        start_time = time.time()
+        # print('[generate_frame_graph], one_sample_feature.shape: ', one_sample_feature.shape, ', sample_id: ', sample_id)
+        # one_sample_feature = x[:, i, :, :, :] # 取sample_size个中的一个sample的人脸特征: [bs, c, w, h]
+        person_face_1, person_face_2 = one_sample_feature[:, 0:3, :, :], one_sample_feature[:, 3:6, :, :]
+        # del one_sample_feature
+        # print('[MEFL.py] GraphModel.forward, person_face_1.device: ', person_face_1.device, ', person_face_2.device: ', person_face_2.device)
+        
+        # concat(person_face_1: [bs, 3, 112, 112], person_face_2: [bs, 3, 112, 112]) -> [bs, 3, 224, 224]
+        two_person_face = torch.cat((person_face_1, person_face_2), dim=2)
+        # print('[MEFL.py] GraphModel.forward, two_person_face.shape: ', two_person_face.shape) # [bs, 3, 224, 112]
+        
+        # f_v_15class_1, f_e_15class_1 = self.process_face(person_face_1) # person 1 f_v_15class_1:[bs, 19, 512] f_e_15class_1:[bs, 361, 512]
+        # f_v_15class_2, f_e_15class_2 = self.process_face(person_face_2) # person 2 f_v_15class_2:[bs, 19, 512] f_e_15class_2:[bs, 361, 512]
+        del person_face_1, person_face_2
+        # print('[MEFL.py] GraphModel.forward, f_v_15class_1.shape: ', f_v_15class_1.shape, ', f_e_15class_1.shape: ', f_e_15class_1.shape)
+        # print('[MEFL.py] GraphModel.forward, f_v_15class_1.shape: ', f_v_15class_1.shape, ', f_e_15class_1.shape: ', f_e_15class_1.shape, ', f_v_15class_2.shape: ', f_v_15class_2.shape, ', f_e_15class_2.shape: ', f_e_15class_2.shape)
+        
+        # f_v_15class = torch.cat((f_v_15class_1, f_v_15class_2), dim=1) # [bs, n_nodes(15), 512] -> [bs, n_nodes*2(30), 512] two person
+        # f_e_15class = torch.cat((f_e_15class_1, f_e_15class_2), dim=1) # [bs, 361, 512] -> [bs, 722, 512] two person # TODO
+        f_v_15class, f_e_15class = self.process_face(two_person_face)
+        # print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_e_15class.shape: ', f_e_15class.shape) # [bs, 15, 512], [bs, 225, 512]
+        '''
+        # cl2, cl_edge2 = self.graph_model(person_face_2)
+        # print('[MEFL.py] GraphModel.forward, cl1.shape: ', cl1.shape, ', cl_edge1.shape: ', cl_edge1.shape, ', cl2.shape: ', cl2.shape, ', cl_edge2.shape: ', cl_edge2.shape)
+        
+        # cl = torch.cat((cl1, cl2), dim=1)
+        # cl_edge = torch.cat((cl_edge1, cl_edge2), dim=1)
+        # print('[MEFL.py] GraphModel.forward, cl.shape: ', cl.shape, ', cl_edge.shape: ', cl_edge.shape)
+        '''
+        print('[generate_frame_graph], 1-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        self.node_features[sample_id] = f_v_15class
+        self.edge_features[sample_id] = f_e_15class
+        # node_features[sample_id] = f_v_15class
+        # edge_features[sample_id] = f_e_15class
+        print('[generate_frame_graph], 2-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        
+        # del f_v_15class, f_e_15class, f_v_15class_1, f_e_15class_1, f_v_15class_2, f_e_15class_2
+        # del f_v_15class, f_e_15class
+        
+        if torch.cuda.is_available():
+            time_start = time.time()
+            gc.collect()
+            torch.cuda.empty_cache()
+            duration = round(time.time() - time_start, 3)
+            if duration > 1:
+                print('[MEFL.py] GraphModel.generate_graph, current sample:', sample_id, ', gc.collect() time cost: ', duration, 's')
+        
+        print('[generate_frame_graph] sample_id:', sample_id, ', time cost:', round(time.time() - start_time, 3), 's')
+        # return (f_v_15class.detach().cpu(), f_e_15class.detach().cpu(), sample_id)
+        return (f_v_15class, f_e_15class, sample_id)
+
+    def generate_graph(self, x):
+        start_time = time.time()
+        sample_size = x.shape[1]
+        # self.node_features 初始化为含有sample_size个空张量tensor的列表
+        # empty_tensor = torch.empty((sample_size, 15, 512))
+        empty_tensor = torch.empty((0, 1))
+        self.node_features = [empty_tensor.clone() for i in range(sample_size)]
+        self.edge_features = [empty_tensor.clone() for i in range(sample_size)]
+        # print('[generate_graph] 1-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features, len(self.node_features), len(self.edge_features)) # self.node_features: [None, None, None, None, None, None, None, None, None, None] , self.edge_features: [None, None, None, None, None, None, None, None, None, None] 10 10
+        
+        print('os.cpu_count():', os.cpu_count())
+        # results = []
+        mp.set_start_method('spawn')
+        processes = []
+        print('[generate_graph] after create , time cost:', round(time.time() - start_time, 3), 's')
+        for sample_id in range(sample_size):
+            print('process sample:', sample_id, '...')
+            # time.sleep(0.1)
+            p = mp.Process(target=self.generate_frame_graph, args=(x[:, sample_id, :, :, :], sample_id, self.node_features, self.edge_features))
+            p.start()
+            processes.append(p)
+        print('[generate_graph] mp, after for loop, time cost:', round(time.time() - start_time, 3), 's')
+        for p in processes:
+            p.join()
+        print('[generate_graph] mp, after join loop, time cost:', round(time.time() - start_time, 3), 's')
+        
+        # get_ret_start = time.time()
+        # for ret in results:
+        #     f_v_15class, f_e_15class, sample_id = ret.get()
+        #     self.node_features[sample_id] = f_v_15class
+        #     self.edge_features[sample_id] = f_e_15class
+        # print('[generate_graph] get_ret time cost:', round(time.time() - get_ret_start, 3), 's')
+        # print('[generate_graph] All subprocesses done. time cost:', round(time.time() - start_time, 3), 's')
+        print('[generate_graph] self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        return self.node_features, self.edge_features
+
+    def generate_graph_cpu(self, x):
+        start_time = time.time()
+        sample_size = x.shape[1]
+        # self.node_features 初始化为含有sample_size个空张量tensor的列表
+        # empty_tensor = torch.empty((sample_size, 15, 512))
+        empty_tensor = torch.empty((0, 1))
+        self.node_features = [empty_tensor.clone() for i in range(sample_size)]
+        self.edge_features = [empty_tensor.clone() for i in range(sample_size)]
+        # print('[generate_graph] 1-self.node_features:', self.node_features, ', self.edge_features:', self.edge_features, len(self.node_features), len(self.edge_features)) # self.node_features: [None, None, None, None, None, None, None, None, None, None] , self.edge_features: [None, None, None, None, None, None, None, None, None, None] 10 10
+        print('os.cpu_count():', os.cpu_count())
+        results = []
+        p = Pool(sample_size)
+        print('[generate_graph] after create Pool, time cost:', round(time.time() - start_time, 3), 's')
+        for sample_id in range(sample_size):
+            # print('process sample:', sample_id, '...')
+            # time.sleep(0.1)
+            ret = p.apply_async(self.generate_frame_graph, args=(x[:, sample_id, :, :, :].detach(), sample_id, self.node_features, self.edge_features))
+            results.append(ret)
+            # ret = p.apply_async(self.generate_frame_graph, args=(x[:, sample_id, :, :, :].detach(), sample_id))
+            # print('result:', result, ', type(result):', type(result), ', result.get():', result.get(), ', type(result.get()):', type(result.get()))
+            # print('[generate_graph] ret:', ret, ', type(ret):', type(ret), ', type(ret.get()):', type(ret.get())) # ret: <multiprocessing.pool.ApplyResult object at 0x15016ca050a0>, type(ret): <class 'multiprocessing.pool.ApplyResult'>, type(ret.get()): <class 'tuple'>
+            # f_v_15class, f_e_15class = ret.get()
+            # print('[generate_graph] f_v_15class:', f_v_15class.shape, ', f_e_15class:', f_e_15class.shape) # [bs, 15, 512], [bs, 225, 512]
+            
+            # self.node_features[sample_id] = f_v_15class
+            # self.edge_features[sample_id] = f_e_15class
+        # del f_v_15class, f_e_15class
+        # print('[generate_graph] Waiting for all subprocesses done...')
+        print('[generate_graph] Pool, after for loop, time cost:', round(time.time() - start_time, 3), 's')
+        p.close()
+        print('[generate_graph] Pool, after close, time cost:', round(time.time() - start_time, 3), 's')
+        p.join()
+        print('[generate_graph] Pool, after join, time cost:', round(time.time() - start_time, 3), 's')
+        
+        get_ret_start = time.time()
+        for ret in results:
+            f_v_15class, f_e_15class, sample_id = ret.get()
+            self.node_features[sample_id] = f_v_15class
+            self.edge_features[sample_id] = f_e_15class
+        print('[generate_graph] get_ret time cost:', round(time.time() - get_ret_start, 3), 's')
+        print('[generate_graph] All subprocesses done. time cost:', round(time.time() - start_time, 3), 's')
+        # print('[generate_graph] self.node_features:', self.node_features, ', self.edge_features:', self.edge_features)
+        return self.node_features, self.edge_features
+
+    """
+    def generate_graph(self, x):
         sample_size = x.shape[1]
         node_features, edge_features = [], []
         for i in range(sample_size): # 遍历每个sample_size
             one_sample_feature = x[:, i, :, :, :] # 取sample_size个中的一个sample的人脸特征: [bs, c, w, h]
             person_face_1, person_face_2 = one_sample_feature[:, 0:3, :, :], one_sample_feature[:, 3:6, :, :]
-            del one_sample_feature
+            # del one_sample_feature
             # print('[MEFL.py] GraphModel.forward, person_face_1.device: ', person_face_1.device, ', person_face_2.device: ', person_face_2.device)
             
-            f_v_15class_1, f_e_15class_1 = self.process_face(person_face_1) # person 1 f_v_15class_1:[bs, 19, 512] f_e_15class_1:[bs, 361, 512]
-            f_v_15class_2, f_e_15class_2 = self.process_face(person_face_2) # person 2 f_v_15class_2:[bs, 19, 512] f_e_15class_2:[bs, 361, 512]
+            # concat(person_face_1: [bs, 3, 112, 112], person_face_2: [bs, 3, 112, 112]) -> [bs, 3, 224, 224]
+            two_person_face = torch.cat((person_face_1, person_face_2), dim=2)
+            # print('[MEFL.py] GraphModel.forward, two_person_face.shape: ', two_person_face.shape) # [bs, 3, 224, 112]
+            
+            # f_v_15class_1, f_e_15class_1 = self.process_face(person_face_1) # person 1 f_v_15class_1:[bs, 19, 512] f_e_15class_1:[bs, 361, 512]
+            # f_v_15class_2, f_e_15class_2 = self.process_face(person_face_2) # person 2 f_v_15class_2:[bs, 19, 512] f_e_15class_2:[bs, 361, 512]
             del person_face_1, person_face_2
+            # print('[MEFL.py] GraphModel.forward, f_v_15class_1.shape: ', f_v_15class_1.shape, ', f_e_15class_1.shape: ', f_e_15class_1.shape)
             # print('[MEFL.py] GraphModel.forward, f_v_15class_1.shape: ', f_v_15class_1.shape, ', f_e_15class_1.shape: ', f_e_15class_1.shape, ', f_v_15class_2.shape: ', f_v_15class_2.shape, ', f_e_15class_2.shape: ', f_e_15class_2.shape)
             
-            f_v_15class = torch.cat((f_v_15class_1, f_v_15class_2), dim=1) # [bs, n_nodes(15), 512] -> [bs, n_nodes*2(30), 512] two person
-            f_e_15class = torch.cat((f_e_15class_1, f_e_15class_2), dim=1) # [bs, 361, 512] -> [bs, 722, 512] two person # TODO
-            # print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_e_15class.shape: ', f_e_15class.shape)
+            # f_v_15class = torch.cat((f_v_15class_1, f_v_15class_2), dim=1) # [bs, n_nodes(15), 512] -> [bs, n_nodes*2(30), 512] two person
+            # f_e_15class = torch.cat((f_e_15class_1, f_e_15class_2), dim=1) # [bs, 361, 512] -> [bs, 722, 512] two person # TODO
+            f_v_15class, f_e_15class = self.process_face(two_person_face)
+            # print('[MEFL.py] GraphModel.forward, f_v_15class.shape: ', f_v_15class.shape, ', f_e_15class.shape: ', f_e_15class.shape) # [bs, 15, 512], [bs, 225, 512]
             '''
             # cl2, cl_edge2 = self.graph_model(person_face_2)
             # print('[MEFL.py] GraphModel.forward, cl1.shape: ', cl1.shape, ', cl_edge1.shape: ', cl_edge1.shape, ', cl2.shape: ', cl2.shape, ', cl_edge2.shape: ', cl_edge2.shape)
@@ -452,29 +603,43 @@ class GraphModel(nn.Module):
             '''
             node_features.append(f_v_15class)
             edge_features.append(f_e_15class)
-            del f_v_15class, f_e_15class, f_v_15class_1, f_e_15class_1, f_v_15class_2, f_e_15class_2
+            # del f_v_15class, f_e_15class, f_v_15class_1, f_e_15class_1, f_v_15class_2, f_e_15class_2
+            del f_v_15class, f_e_15class
             if torch.cuda.is_available():
                 time_start = time.time()
                 gc.collect()
                 torch.cuda.empty_cache()
                 duration = round(time.time() - time_start, 3)
                 if duration > 1:
-                    print('[MEFL.py] GraphModel.forward, current sample_size:', i, ', gc.collect() time cost: ', duration, 's')
-            
-        # 获得时间序列节点特征和边特征
-        final_node_feature = torch.stack(node_features, dim=1) # [bs, sample_size, 19, 512]
-        final_edge_feature = torch.stack(edge_features, dim=1).mean(dim=1) # stack smaple_size个[bs, 361, 512] to [bs, sample_size, 361, 512], then [bs, sample_size, 361, 512] -> [bs, 361, 512]
-        final_edge_feature = self.linear_edge(final_edge_feature.permute(0, 2, 1)).permute(0, 2, 1)
-        del node_features, edge_features
-        # print('[MEFL.py] GraphModel.forward, final_node_feature.shape: ', final_node_feature.shape, ', final_edge_feature.shape:', final_edge_feature.shape)
+                    print('[MEFL.py] GraphModel.generate_graph, current sample_size:', i, ', gc.collect() time cost: ', duration, 's')
+        return node_features, edge_features
+    """
+    
+    def forward(self, x):
+        forward_start = time.time()
+        # print('[MEFL.py] GraphModel.forward, input x.shape: ', x.shape) # [bs, sample_size, c, w, h] e.g. [bs, 6, 3, 112, 112]
+        node_features, edge_features = self.generate_graph(x)
+        sample_size_end = time.time()
+        sample_size_loop_duration = round(sample_size_end - forward_start, 3)
         
-        adj = final_edge_feature.mean(dim=0) # [bs, 361, 512] -> [361, 512]
+        # 获得时间序列节点特征和边特征
+        final_node_feature = torch.stack(self.node_features, dim=1) # [bs, sample_size, 15, 512]
+        final_edge_feature = torch.stack(self.edge_features, dim=1).mean(dim=1) # [bs, 225, 512] stack smaple_size个[bs, 225, 512] to [bs, sample_size, 225, 512], then [bs, sample_size, 225, 512] -> [bs, 225, 512]
+        # print('final_edge_feature:', final_edge_feature.shape) # [bs, 225, 512]
+        # final_edge_feature = self.linear_edge(final_edge_feature.permute(0, 2, 1)).permute(0, 2, 1)
+        del node_features, edge_features
+        print('[MEFL.py] GraphModel.forward, final_node_feature.shape: ', final_node_feature.shape, ', final_edge_feature.shape:', final_edge_feature.shape, final_node_feature.device, final_edge_feature.device) # [bs, sample_size, 15, 512], [bs, 900, 512]
+        
+        adj = final_edge_feature.mean(dim=0) # [bs, 225, 512] -> [225, 512]
+        # print('[MEFL.py] GraphModel.forward, adj.shape:', adj.shape) # [225, 512]
         num_edges_square, edge_features_dim = adj.shape
-        adj = adj.view(int(math.sqrt(num_edges_square)), int(math.sqrt(num_edges_square)), edge_features_dim) # [361, 512] -> [19, 19, 512]
-        # print('[MEFL.py] GraphModel.forward, 1-adj.shape:', adj.shape) # [30, 30, 512] 15 nodes for each person, 30 nodes in total
+        adj = adj.view(int(math.sqrt(num_edges_square)), int(math.sqrt(num_edges_square)), edge_features_dim)
+        # print('[MEFL.py] GraphModel.forward, 1-adj.shape:', adj.shape) # [15, 15, 512]
+        if not torch.cuda.is_available() and self.cfg.TRAIN.USE_AMP:
+            adj = adj.to(torch.float16)
         adj = construct_adj(adj.detach().cpu().numpy(), 3)
         adj = torch.from_numpy(adj).float().to(device)
-        # print('[MEFL.py] GraphModel.forward, 2-adj.shape:', adj.shape) # [30*3=90, 30*3=90, 512] because of the 3 in construct_adj(adj.detach().numpy(), 3)
+        # print('[MEFL.py] GraphModel.forward, 2-adj.shape:', adj.shape) # [15*3=45, 15*3=45, 512] because of the 3 in construct_adj(adj.detach().numpy(), 3)
         
         del final_edge_feature, num_edges_square, edge_features_dim
         if torch.cuda.is_available():
@@ -501,7 +666,7 @@ class GraphModel(nn.Module):
         del final_node_feature, adj
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-        
+        print('[MEFL.py] GraphModel.forward, iterate sample_size cost:', sample_size_loop_duration, 'seconds, sts_gcn model cost:', round(time.time() - sample_size_end, 3), 'seconds')
         return output
 
 
@@ -557,7 +722,7 @@ def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
         num_class = 8
     # num_class = cfg.MODEL.NUM_CLASS
     # print('[visual_graph_representation_learning] num_class: ', num_class, ', backbone_net: ', backbone_net)
-    graph_model = GraphModel(num_class=num_class, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE)
+    graph_model = GraphModel(num_class=num_class, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, cfg=cfg)
     if torch.cuda.is_available() and use_half:
         graph_model.half()
     graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))

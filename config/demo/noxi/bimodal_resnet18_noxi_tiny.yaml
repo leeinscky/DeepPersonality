@@ -10,8 +10,8 @@ DATA_LOADER:
   # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   # TRANSFORM: "udiva_frame_transforms"
-  # TRANSFORM: "face_image_transform"
-  TRANSFORM: "face_image_x2_transform"
+  TRANSFORM: "face_image_transform"
+  # TRANSFORM: "face_image_x2_transform"
   TRAIN_BATCH_SIZE: 32
   VALID_BATCH_SIZE: 1
   TEST_BATCH_SIZE: 1
@@ -19,7 +19,7 @@ DATA_LOADER:
   DATASET_NAME: "NOXI"
   DROP_LAST: False
   PREFETCH_FACTOR: 2
-  NUM_FOLD: 2
+  NUM_FOLD: 3
 MODEL:
   # NAME: "resnet50_3d_model_udiva"  # UDIVA视觉: ResNet3D
   # NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
@@ -42,7 +42,7 @@ TRAIN:
   # SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
   SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
   BIMODAL_OPTION: 1
-  LOG_INTERVAL: 2
+  LOG_INTERVAL: 1
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
   ACC_THRESHOLD: 0.99
@@ -50,6 +50,8 @@ TRAIN:
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_BP4D/MEFARG_resnet50_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
+  USE_AMP: True
+  USE_HALF: False
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

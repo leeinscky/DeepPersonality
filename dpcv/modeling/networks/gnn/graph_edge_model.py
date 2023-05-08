@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import math
-use_half = True
+use_half = False
 
 class CrossAttn(nn.Module):
     """ cross attention Module"""

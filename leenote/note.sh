@@ -369,38 +369,50 @@
     为了让label有变化，将005变为006 /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/005 手动重命名为 /home/zl525/code/DeepPersonality/datasets/noxi/img/006， 后续记得改回来
 
 ####### 构造tiny数据集用于测试
-cd ~/rds/hpc-work/datasets/
+    cd ~/rds/hpc-work/datasets/
 
-# 001: 复制001文件夹然后删除31-5000帧
-cp -r noxi_full/img/001/ ~/rds/hpc-work/datasets/noxi_tiny/img/
-rm ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/face_{31..5000}.jpg
-rm ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/face_{31..5000}.jpg
+    # 001: 复制001文件夹然后删除31-5000帧
+    cp -r noxi_full/img/001/ ~/rds/hpc-work/datasets/noxi_tiny/img/
+    rm ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/face_{31..5000}.jpg
+    rm ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/face_{31..5000}.jpg
 
-# 003 复制003文件夹然后删除31-5000帧
-cp -r noxi_full/img/003/ ~/rds/hpc-work/datasets/noxi_tiny/img/
-rm ~/rds/hpc-work/datasets/noxi_tiny/img/003/Expert_video/face_{31..5000}.jpg
-rm ~/rds/hpc-work/datasets/noxi_tiny/img/003/Novice_video/face_{31..5000}.jpg
+    # 003 复制003文件夹然后删除31-5000帧
+    cp -r noxi_full/img/003/ ~/rds/hpc-work/datasets/noxi_tiny/img/
+    rm ~/rds/hpc-work/datasets/noxi_tiny/img/003/Expert_video/face_{31..5000}.jpg
+    rm ~/rds/hpc-work/datasets/noxi_tiny/img/003/Novice_video/face_{31..5000}.jpg
 
-# 删除后验证
-cd ~/rds/hpc-work/datasets/noxi_tiny/img/ && tree
-
-
-# # 复制mp4后缀的视频
-# cp noxi_full/img/001/*.mp4 ~/rds/hpc-work/datasets/noxi_tiny/img/001/
-
-# # 复制 Expert_video 30张
-# mkdir -p ~/rds/hpc-work/datasets/noxi_tiny/img/Expert_video/001/
-# cp -r noxi_full/img/001/Expert_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/
-
-# # 复制 Novice_video 30张
-# mkdir -p ~/rds/hpc-work/datasets/noxi_tiny/img/Novice_video/001/
-# cp -r noxi_full/img/001/Novice_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/
+    # 删除后验证
+    cd ~/rds/hpc-work/datasets/noxi_tiny/img/ && tree
 
 
-# find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' | head -n 30 | xargs -I {} ls {}
-# find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' -print0 | sort -z | head -z -n 30 | xargs -0 -I {} ls {}
-# find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' | head -n 30 | xargs -I {} cp {} ~/rds/hpc-work/datasets/noxi_tiny/img/
+    # # 复制mp4后缀的视频
+    # cp noxi_full/img/001/*.mp4 ~/rds/hpc-work/datasets/noxi_tiny/img/001/
 
+    # # 复制 Expert_video 30张
+    # mkdir -p ~/rds/hpc-work/datasets/noxi_tiny/img/Expert_video/001/
+    cp -r noxi_full/img/001/Expert_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/
+    cp noxi_full/img/001/Expert_video/face_{31..80}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/
+    cp noxi_full/img/003/Expert_video/face_{31..50}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/003/Expert_video/
+
+    # # 复制 Novice_video 30张
+    # mkdir -p ~/rds/hpc-work/datasets/noxi_tiny/img/Novice_video/001/
+    # cp -r noxi_full/img/001/Novice_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/
+    cp noxi_full/img/001/Novice_video/face_{31..80}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/
+    cp noxi_full/img/003/Novice_video/face_{31..50}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/003/Novice_video/
+
+    # find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' | head -n 30 | xargs -I {} ls {}
+    # find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' -print0 | sort -z | head -z -n 30 | xargs -0 -I {} ls {}
+    # find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' | head -n 30 | xargs -I {} cp {} ~/rds/hpc-work/datasets/noxi_tiny/img/
+
+####### 帧id连续性测试
+    cd /home/zl525/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video
+    cp -r Expert_video/ Expert_video_oribak/
+    ls face_{*0}.jpg
+    rm face_{*0}.jpg
+    
+    cd /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/001/Novice_video
+    mv face_20.jpg /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/001/bak_Novice_video
+    mv face_30.jpg /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/001/bak_Novice_video
 
 ######## wandb上的对比实验记录 #########
 backup: 
@@ -816,4 +828,12 @@ Tag解释:
         【模型】：visual_graph_representation_learning
         【分支】：图像分支
         【调参总结】
-            1. batch_size = 1, 不会OOM； batch_size = 8, 会OOM
+            1. 不使用half半精度：bs=1, 不会OOM; bs=8,会OOM
+            2. 使用half半精度:
+                bs=8,sp=12时正常运行
+                bs=8,sp=32时会OOM
+                bs=32,sp=32时会OOM
+            3. 使用AMP:
+                bs=8,sp=16时正常运行; bs=8,sp=32时OOM
+                bs=16,sp=16时OOM
+        

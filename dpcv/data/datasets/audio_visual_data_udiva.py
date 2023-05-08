@@ -251,6 +251,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         self.mode = mode
         self.prefix1 = prefix1
         self.prefix2 = prefix2
+        self.is_continue = True
 
     def __getitem__(self, idx): # idx means the index of session in the directory
         sample = {} # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
@@ -278,8 +279,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         sample['session_id'] = session_id
         sample['segment_id'] = segment_id
         
+        sample['is_continue'] = self.is_continue
         # print('[__getitem__] dataset:', self.mode, ', idx:', idx, ', session_id:', session_id, ', segment_id:', segment_id, ', label:', label, ', label.shape:', sample['label'].shape)
-        return sample # sample是一个dict字典, {'image': [sample_size, c=6, h=224, w=224], 'audio': [2, 1, sample_size*16000], 'label.shape': [2], 'session_id': '55025', 'segment_id': '1'}
+        return sample  # sample是一个dict字典, {'image': [sample_size, c=6, h=224, w=224], 'audio': [2, 1, sample_size*16000], 'label.shape': [2], 'session_id': '55025', 'segment_id': '1'}
 
     def get_visual_input(self, idx):
         ### get image data ###
@@ -313,7 +315,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         for file in os.listdir(session_dir_path):
             if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"): # judge file is a directory and start with FC1 and not end with .mp4
                 fc1_img_dir_path = os.path.join(session_dir_path, file)
-            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix1) and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
+            if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix2) and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
                 fc2_img_dir_path = os.path.join(session_dir_path, file)
         # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path) # fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
@@ -336,7 +338,10 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         start_frame_id = int(self.sample_size) * (int(segment_idx) - 1) # 例如，如果self.sample_size=4，segment_idx=2，那么start_frame_id=4*(2-1)=4
         end_frame_id = start_frame_id + self.sample_size # 例如，如果self.sample_size=4，segment_idx=2，那么end_frame_id=4+4=8, 即[4:8]，共4个frame, 是该视频的第2个segment，第一个segment是[0:3], 第二个segment是[4:7], 第三个segment是[8:11]
         sample_fc1_frames = fc1_img_paths[start_frame_id:end_frame_id]
-        # print('[get_image_data] start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size, ', len(sample_fc1_frames):', len(sample_fc1_frames))
+        # print('[get_image_data] start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size, ', len(sample_fc1_frames):', len(sample_fc1_frames), sample_fc1_frames)
+        if not self.check_continue(sample_fc1_frames):
+            # print('[get_image_data] sample_fc1_frames is not continuous')
+            self.is_continue = False
         
         # 遍历sample_fc1_frames里的每个图片帧，将其转换为RGB模式
         fc1_img_tensor_list = []
@@ -362,7 +367,10 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # sample_fc2_frames = fc2_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 采样方式一：随机取sample_size个连续的帧图片。从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
         sample_fc2_frames = fc2_img_paths[start_frame_id:end_frame_id] # 采样方式二：按照segment_idx取sample_size个连续的帧图片
         # print('[get_image_data] sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
-        
+        if not self.check_continue(sample_fc2_frames):
+            print('[get_image_data] sample_fc2_frames is not continuous')
+            self.is_continue = False
+
         fc2_img_tensor_list = []
         for i, fc2_frame_path in enumerate(sample_fc2_frames): # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
             # print('[get_image_data] enumerate(sample_fc2_frames), fc2_frame_path:', fc2_frame_path, 'i:', i)
@@ -536,6 +544,25 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         # 规律: fbank.shape[0] = (sample_size/5) * 100 - 2
         return fbank
 
+    def check_continue(self, frames_list):
+        """ Check if the suffix ids of all frames in the list are consecutive (check if the frames_list is continuous)
+        Args:
+            frames_list (list): list of frames
+            e.g. ['xxx/face_19.jpg', 'xxx/face_20.jpg', 'xxx/face_21.jpg', 'xxx/face_22.jpg'] return True
+            e.g. ['xxx/face_19.jpg', 'xxx/face_20.jpg', 'xxx/face_21.jpg', 'xxx/face_23.jpg', ....] return False
+        """
+        # frames_list_temp1 = ['datasets/noxi_tiny/img/003/Novice_video/face_19.jpg', 'datasets/noxi_tiny/img/003/Novice_video/face_20.jpg', 'datasets/noxi_tiny/img/003/Novice_video/face_23.jpg']
+        # frames_list_temp2 = ['datasets/noxi_tiny/img/003/Novice_video/face_19.jpg', 'datasets/noxi_tiny/img/003/Novice_video/face_20.jpg', 'datasets/noxi_tiny/img/003/Novice_video/face_21.jpg']
+        # 依次frames_list_temp1，frames_list_temp2中选取一个作为frames_list
+        # frames_list = frames_list_temp1 if random.random() > 0.5 else frames_list_temp2
+        
+        frames_list = [int(frame.split('/')[-1].split('.')[0].split('_')[-1]) for frame in frames_list]
+        # print('[check_continue] frames_list:', frames_list)
+        # frames_list.sort()
+        for i in range(len(frames_list)-1):
+            if frames_list[i+1] - frames_list[i] != 1:
+                return False
+        return True
 
 class ALLSampleAudioVisualDataUdiva(AudioVisualDataUdiva):
 

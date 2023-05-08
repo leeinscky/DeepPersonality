@@ -10,9 +10,11 @@ import time
 import wandb
 from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
-torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
+# torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
+torch.set_printoptions(sci_mode=False) # 使得print时不用科学计数法
 import json
 import torch.cuda.amp as amp
+
 
 @TRAINER_REGISTRY.register()
 class BiModalTrainer(object):
@@ -288,9 +290,8 @@ class BiModalTrainerUdiva(object):
         self.f1_metric = BinaryF1Score()
         self.best_valid_loss = 1e10
         self.LOG_INTERVAL_VALID = 10
-        self.use_half = True
 
-    def train(self, data_loader, model, loss_f, optimizer, epoch_idx):
+    def train(self, data_loader, model, loss_f, optimizer, epoch_idx, scaler):
         ''' data_loader的调用逻辑如下
         # data_loader: 上一层级调用该函数时传入了: self.data_loader["train"], self.data_loader = self.build_dataloader(),  build_dataloader 函数返回的是 data_loader_dicts，
         然后：
@@ -323,7 +324,6 @@ class BiModalTrainerUdiva(object):
         '''
         lr = optimizer.param_groups[0]['lr']
         self.logger.info(f"Training: learning rate:{lr}")
-        # self.tb_writer.add_scalar("lr", lr, epoch_idx)
         optimizer.zero_grad() # 梯度清零，即将梯度变为0
         model.train()
         loss_list = []
@@ -332,8 +332,8 @@ class BiModalTrainerUdiva(object):
         epoch_total_acc = 0
         epoch_total_num = 0
         epo_iter_num = len(data_loader)
+        print('Train epo_iter_num = ', epo_iter_num)
         batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meeting
-        # print('[bi_modal_trainer] train... epo_iter_num=', epo_iter_num)
         pred_list, label_list, pred_list2, label_list2 = [], [], [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
@@ -341,13 +341,18 @@ class BiModalTrainerUdiva(object):
             # print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
             """ 1、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
                 2、如果没有使用RandomOverSampler，那么这里得到的data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据 """
-            inputs, labels, session_id, segment_id = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
+            inputs, labels, session_id, segment_id, is_continue = self.data_fmt(data) # self.data_fmt(data) 代表将data里的image, audio, label分别取出来，放到inputs，label里
+            # print('Train: is_continue:', is_continue)
+            # if torch.any(is_continue == False):
+            #     print('Train: part of data is not continuous, continue to next batch, i:', i)
+            #     continue
+            '''
             # print('[bi_modal_trainer.py] train... labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id))
             # print('[bi_modal_trainer.py] train... model.device=', model.device, 'inputs[0].device=', inputs[0].device)
             # print('[bi_modal_trainer.py] train... inputs[0].shape=', inputs[0].shape, ', inputs[1]=', inputs[1], ', labels.shape=', labels.shape)
             # if i in [0, 1] and torch.cuda.is_available():
             #     print('before model, i:', i, ', CUDA memory_summary:\n', torch.cuda.memory_summary())
-            '''
+            
             # try: # refer: https://zhuanlan.zhihu.com/p/497192910
             #     # inputs加一个*星号：表示参数数量不确定，将传入的参数存储为元组（https://blog.csdn.net/qq_42951560/article/details/112006482）。*inputs意思是将inputs里的元素分别取出来，作为model的输入参数，这里的inputs是一个元组，包含了image和audio。models里的forward函数里的参数是image和audio，所以这里的*inputs就是将image和audio分别取出来，作为model的输入参数。为什么是forward函数的参数而不是__init__函数的参数？因为forward函数是在__init__函数里被调用的，所以forward函数的参数就是__init__函数的参数。forward 会自动被调用，调用时会传入输入数据，所以forward函数的参数就是输入数据。
             #     outputs = model(*inputs)
@@ -362,11 +367,22 @@ class BiModalTrainerUdiva(object):
             #         else:
             #             raise exception
             '''
-            outputs = model(*inputs)
-            # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
-            if torch.cuda.is_available() and self.use_half:
-                outputs = outputs.float() # avoid RuntimeError: "binary_cross_entropy" not implemented for 'Half'
-            loss = loss_f(outputs.cpu(), labels.cpu().float())
+            if self.cfg.USE_AMP: # use AMP:automatic mixed precision
+                if torch.cuda.is_available():
+                    with torch.cuda.amp.autocast():
+                        outputs = model(*inputs)
+                        outputs = outputs.float()
+                        loss = loss_f(outputs.cpu(), labels.cpu().float())
+                else:
+                    with torch.autocast(device_type="cpu", dtype=torch.bfloat16):
+                        outputs = model(*inputs)
+                        outputs = outputs.float()
+                        loss = loss_f(outputs.cpu(), labels.cpu().float())
+            else:
+                outputs = model(*inputs) # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
+                if self.cfg.USE_HALF and torch.cuda.is_available(): # use half precision
+                    outputs = outputs.float() # avoid RuntimeError: "binary_cross_entropy" not implemented for 'Half'
+                loss = loss_f(outputs.cpu(), labels.cpu().float())
 
             outputs = outputs.detach().cpu()
             labels = labels.detach().cpu()
@@ -374,9 +390,9 @@ class BiModalTrainerUdiva(object):
                 if session_id is not None and segment_id is not None:
                     session_id = session_id.detach().cpu()
                     segment_id = segment_id.detach().cpu()
-                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1), session_id.unsqueeze(1), segment_id.unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} TIME:{time.strftime("%H:%M:%S", time.localtime())}***********')
                 else:
-                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} ***********')
+                    print(f'{torch.cat([outputs, labels.argmax(dim=-1).unsqueeze(1)], dim=1)}, *********** Epo[{(epoch_idx+1):0>3}/{self.cfg.MAX_EPOCH:0>3}] Iter[{(i + 1):0>3}/{epo_iter_num:0>3}], train loss:{loss.item():.4f} TIME:{time.strftime("%H:%M:%S", time.localtime())}***********')
                 
             '''
             # batch_size = 3时
@@ -427,9 +443,13 @@ class BiModalTrainerUdiva(object):
             # outputs.size()= torch.Size([1, 2]) , labels.size()= torch.Size([1, 2])
             # loss= tensor(0.6941, grad_fn=<BinaryCrossEntropyBackward0>) # 计算过程: 0.4929*log(0.4929)+(1-0.4929)*log(1-0.4929)=0.6941
             '''
-            # self.tb_writer.add_scalar("loss", loss.item(), i) # loss.item()是将loss转换成float类型，即tensor转换成float类型，add_scalar()是将loss写入到tensorboard里, i是第
-            loss.backward() # loss.backward()是将loss反向传播，即计算loss对每个参数的梯度，即loss对每个参数的偏导数
-            optimizer.step() # step()是将梯度更新到参数上，即将loss对每个参数的偏导数更新到参数上， 即 w = w - lr * gradient, 其中lr是学习率，gradient是loss对每个参数的偏导数，即loss对每个参数的梯度， w是模型的参数
+            if self.cfg.USE_AMP and scaler is not None:
+                scaler.scale(loss).backward() # 为了梯度放大. Multiplies (‘scales’) a tensor or list of tensors by the scale factor.
+                scaler.step(optimizer) # 首先把梯度的值unscale回来. 如果梯度的值不是 infs 或者 NaNs, 那么调用optimizer.step()来更新权重, 否则，忽略step调用，从而保证权重不更新（不被破坏）
+                scaler.update() # Updates the scale factor. 如果没有出现inf或NaN,那么权重正常更新，并且当连续多次(growth_interval指定)没有出现inf或NaN，则scaler.update()会将scaler的大小增加(乘上growth_factor)
+            else:
+                loss.backward()
+                optimizer.step()
 
             iter_end_time = time.time()
             iter_time = iter_end_time - iter_start_time
@@ -478,11 +498,6 @@ class BiModalTrainerUdiva(object):
                 1-abs: [[0.39302874 0.39302874]
                         [0.6539037  0.6539037 ]] # acc平均值: 0.39302874+0.39302874+0.6539037+0.6539037/4=2.09386488/4=0.52346622
             '''
-            
-            # 因为我们需要预测的是认识/不认识，属于分类问题而不是回归问题，所以计算acc的方式为：acc = (y_pred.argmax(dim=1) == y_true).float()
-            # outputs = outputs.detach().cpu()
-            # labels = labels.detach().cpu()
-            
             #### 计算指标：acc
             batch_total_acc = (outputs.argmax(dim=-1) == labels.argmax(dim=-1)).sum() # 当前batch里分类预测正确的样本数
             batch_total_num = outputs.shape[0] # 当前batch的样本总数
@@ -536,7 +551,7 @@ class BiModalTrainerUdiva(object):
                 eta = int(eta) # 将eta转换成int类型
                 eta_string = f"{eta // 3600}h:{eta % 3600 // 60}m:{eta % 60}s"  # 将eta转换成时分秒的形式
                 self.logger.info(
-                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] Batch Loss: {:.4f} Acc:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) ETA:{}".format(
+                    "Train: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] Batch Loss:{:.4f} Acc:{:.4f} ({}/{}) Epo current ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1:{:.4f} ({:.4f}) ETA:{} TIME:{}".format(
                         epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo 
                         i + 1, epo_iter_num,                 # Iter
                         iter_time,                           # IterTime
@@ -546,6 +561,7 @@ class BiModalTrainerUdiva(object):
                         batch_auc, batch_auc2, # AUC
                         f1, f1_2,                            # F1
                         eta_string,                          # ETA
+                        time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                     ))
         #### 计算指标：epoch loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num
@@ -564,13 +580,14 @@ class BiModalTrainerUdiva(object):
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2)) """
 
         self.logger.info(
-            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Loss:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score: {:.4f} ({:.4f})".
+            "Train: Epo[{:0>3}/{:0>3}] Epo Summary Loss:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score: {:.4f} ({:.4f}) TIME:{}".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_loss, # Epo Loss
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
                 epoch_auc, epoch_auc2, # Epo AUC
                 f1, f1_2, # Epo F1_Score
+                time.strftime("%H:%M:%S", time.localtime()), # Current TIME
             ))
         
         if self.cfg.USE_WANDB:
@@ -599,11 +616,32 @@ class BiModalTrainerUdiva(object):
             pred_list, label_list, pred_list2, label_list2 = [], [], [], []
             batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meetingafter
             for i, data in enumerate(data_loader):
-                inputs, labels, session_id, segment_id = self.data_fmt(data) # labels:[batch_size, 2], session_id:[batch_size], segment_id:[batch_size] e.g. session_id: tensor([1080, ... 1080]) segment_id: tensor([ 1,  2, 3, ... 32])
-                # print('[bi_modal_trainer.py] valid... labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id), ', session_id:', session_id, ', segment_id:', segment_id)
+                inputs, labels, session_id, segment_id, is_continue = self.data_fmt(data) # labels:[batch_size, 2], session_id:[batch_size], segment_id:[batch_size] e.g. session_id: tensor([1080, ... 1080]) segment_id: tensor([ 1,  2, 3, ... 32])
+                # print('Valid: is_continue:', is_continue)
+                # if torch.any(is_continue == False):
+                #     print('Valid: part of data is not continuous, continue to next batch')
+                #     continue
                 
-                outputs = model(*inputs)
-                loss = loss_f(outputs.cpu(), labels.cpu().float())
+                # outputs = model(*inputs)
+                # loss = loss_f(outputs.cpu(), labels.cpu().float())
+                self.cfg.USE_AMP = False # TODO 
+                if self.cfg.USE_AMP:
+                    if torch.cuda.is_available():
+                        with torch.cuda.amp.autocast():
+                            outputs = model(*inputs)
+                            outputs = outputs.float()
+                            print('[valid] outputs:', outputs, ', labels:', labels) # 出现了nan
+                            loss = loss_f(outputs.cpu(), labels.cpu().float())
+                    else:
+                        with torch.autocast(device_type="cpu", dtype=torch.bfloat16):
+                            outputs = model(*inputs)
+                            outputs = outputs.float()
+                            loss = loss_f(outputs.cpu(), labels.cpu().float())
+                else:
+                    outputs = model(*inputs) 
+                    if self.cfg.USE_HALF and torch.cuda.is_available():
+                        outputs = outputs.float() # avoid RuntimeError: "binary_cross_entropy" not implemented for 'Half'
+                    loss = loss_f(outputs.cpu(), labels.cpu().float())
                 
                 outputs = outputs.detach().cpu()
                 labels = labels.detach().cpu()
@@ -640,12 +678,13 @@ class BiModalTrainerUdiva(object):
                 
                 if i % self.LOG_INTERVAL_VALID == self.LOG_INTERVAL_VALID - 1:
                     self.logger.info(
-                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] Batch Loss: {:.4f} Batch Acc:{:.4f} ({}/{}) Epo Current Acc:{:.4f} ({}/{})".format(
+                        "Valid: Epo[{:0>3}/{:0>3}] Iter[{:0>3}/{:0>3}] Batch Loss: {:.4f} Batch Acc:{:.4f} ({}/{}) Epo Current Acc:{:.4f} ({}/{}) TIME:{}".format(
                             epoch_idx + 1, self.cfg.MAX_EPOCH,   # Epo
                             i + 1, epo_iter_num,                 # Iter
                             float(loss.item()),                  # LOSS
                             float(batch_acc), batch_total_acc, batch_total_num,  # Batch ACC
                             epoch_current_acc, epoch_total_acc, epoch_total_num, # Epo Current ACC
+                            time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                             # batch_auc, batch_auc2, # AUC  AUC:{:.4f} ({:.4f})  由于valid时shuffle=False，所以是按照segment从1递增顺序进行测试，每个batch里label的值要么都是1，或者都是0，导致batch的AUC一直=0，因此不计算batch里的AUC，只看整个epoch的AUC
                             # f1, f1_2, # F1 F1:{:.4f} ({:.4f}) 
                         ))
@@ -674,7 +713,7 @@ class BiModalTrainerUdiva(object):
         self.clt.record_valid_loss(loss_batch_list) # loss over batches
         self.clt.record_valid_acc(acc_batch_list)  # acc over batches
         if epoch_summary_acc > self.clt.best_valid_acc: # 如果当前的epoch_summary_acc大于之前的最好的epoch_summary_acc #TODO 0.6667 > 0.6667, need atol=1e-4
-            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best_valid_acc: {self.clt.best_valid_acc:.4f}, will save model') # type(self.clt.best_valid_acc): <class 'int'>
+            print(f'Valid: Current epoch summary acc:{epoch_summary_acc:.4f} > best_valid_acc: {self.clt.best_valid_acc:.4f}, will save model, TIME:{time.strftime("%H:%M:%S", time.localtime())}') # type(self.clt.best_valid_acc): <class 'int'>
             self.clt.update_best_acc(epoch_summary_acc)
             self.clt.update_model_save_flag(1)   # 1表示需要保存模型
         else:
@@ -690,13 +729,14 @@ class BiModalTrainerUdiva(object):
         f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2)) """
         
         self.logger.info(
-            "Valid: Epo[{:0>3}/{:0>3}] Val Epo Summary LOSS:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score:{:.4f} ({:.4f})".
+            "Valid: Epo[{:0>3}/{:0>3}] Val Epo Summary LOSS:{:.4f} ACC:{:.4f} ({}/{}) AUC:{:.4f} ({:.4f}) F1_Score:{:.4f} ({:.4f}) TIME:{}".
             format(
                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                 epoch_summary_loss,                # Epo Loss
                 epoch_summary_acc, epoch_total_acc, epoch_total_num, # Epo Summary Acc
                 epoch_auc, epoch_auc2, # Epo AUC
                 f1, f1_2, # Epo F1_Score
+                time.strftime("%H:%M:%S", time.localtime()), # Current TIME
             ))
         if self.cfg.USE_WANDB:
             wandb.log({
@@ -728,8 +768,9 @@ class BiModalTrainerUdiva(object):
             session_result = {}
             # for data in tqdm(data_loader): # 遍历data_loader
             for i, data in enumerate(data_loader):
-                inputs, labels, session_id, segment_id = self.data_fmt(data) # labels: [batch_size, 2], session_id: torch.Size([batch_size]), segment_id: torch.Size([batch_size]), e.g. when bs=6, session_id: tensor([8105., 8105., 8105., 8105., 8105., 8105.]) , segment_id: tensor([1., 2., 3., 4., 5., 6.])
+                inputs, labels, session_id, segment_id, is_continue = self.data_fmt(data) # labels: [batch_size, 2], session_id: torch.Size([batch_size]), segment_id: torch.Size([batch_size]), e.g. when bs=6, session_id: tensor([8105., 8105., 8105., 8105., 8105., 8105.]) , segment_id: tensor([1., 2., 3., 4., 5., 6.])
                 # print('[bi_modal_trainer.test]. labels.shape=', labels.shape, ', session_id.shape=', session_id.shape, ', segment_id.shape=', segment_id.shape, ', type(session_id)=', type(session_id), ', type(segment_id)=', type(segment_id), ', session_id:', session_id, ', segment_id:', segment_id)
+                # print('Test: is_continue:', is_continue)
                 
                 outputs = model(*inputs)
                 # print('[deeppersonality/dpcv/engine/bi_modal_trainer.py] BiModalTrainerUdiva.test() 正在test... outputs=', outputs, 'labels=', labels, ' inputs[0].size()=', inputs[0].size(), ' inputs[1].size()=', inputs[1].size())
@@ -789,7 +830,7 @@ class BiModalTrainerUdiva(object):
         #### 计算指标：session ACC  即每个session层面的ACC，分母是测试集中session的个数，分子是预测正确的session的个数。如果测试集有N个session，每个session有M个segment，对于某个session，将所有segments的outputs的第0列概率值求平均作为Known的概率值，第1列概率值求平均作为Unknown的概率值，如果Known的概率值大于Unknown的概率值，则认为该session的预测值为Known，否则为Unknown，最后与该session的真实label进行比较，如果相同则认为该session的预测正确，否则认为该session的预测错误，最后计算所有session的预测正确率
         if epoch_idx is not None:
             if epoch_idx % 3 == 0:
-                print(f'Test: Epo[{(epoch_idx + 1):0>3}/{ self.cfg.MAX_EPOCH:0>3}] final session predict:{session_result}')
+                print(f'Test: Epo[{(epoch_idx + 1):0>3}/{ self.cfg.MAX_EPOCH:0>3}] final session predict:{session_result} TIME:{time.strftime("%H:%M:%S", time.localtime())}')
         # 遍历session_result，计算每个session对应的ACC。计算方式：对于每个session的predict，将其所有segment的outputs的第0列概率值求平均作为Known的概率值，将其所有segment的outputs的第1列概率值求平均作为Unknown的概率值，如果Known的概率值大于Unknown的概率值，则认为该session的label为Known，否则认为该session的label为Unknown，最后与该session的真实label进行比较，如果相同则认为该session的预测正确，否则认为该session的预测错误，最后计算所有session的预测正确率
         session_total_acc, session_total_num, session_acc = 0, 0, 0
         session_pred_list, session_label_list = [], [] 
@@ -853,13 +894,14 @@ class BiModalTrainerUdiva(object):
         # f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         if epoch_idx is not None:
-            self.logger.info("Test: Epo[{:0>3}/{:0>3}] Test Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f}) Session Acc:{:.4f} ({}/{}) Session AUC: {:.4f}".format(
+            self.logger.info("Test: Epo[{:0>3}/{:0>3}] Test Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f}) Session Acc:{:.4f} ({}/{}) Session AUC: {:.4f} TIME:{}".format(
                                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                                 test_acc, total_acc, total_num,    # Epo ACC
                                 epoch_auc, epoch_auc2, # Epo AUC
                                 f1, f1_2, # Epo F1_Score
                                 session_acc, session_total_acc, session_total_num, # Session ACC
                                 session_auc, # Session AUC
+                                time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                             ))
             if self.cfg.USE_WANDB:
                 wandb.log({
@@ -872,11 +914,12 @@ class BiModalTrainerUdiva(object):
                     "test_session_auc": float(session_auc),
                     "epoch": epoch_idx + 1})
         else:
-            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f}) Final Session Acc:{:.4f} ({}/{}) Final Session AUC:{:.4f}\n".format(
+            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f}) Final Session Acc:{:.4f} ({}/{}) Final Session AUC:{:.4f} TIME:{}\n".format(
                 test_acc, total_acc, total_num,  # Epo ACC
                 epoch_auc, epoch_auc2,           # Epo AUC
                 session_acc, session_total_acc, session_total_num, # Session ACC
                 session_auc,                     # Session AUC
+                time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                 ))
             if self.cfg.USE_WANDB:
                 wandb.log({
@@ -955,12 +998,12 @@ class BiModalTrainerUdiva(object):
                     data[k] = v.to(self.device)
             if self.cfg.BIMODAL_OPTION == 1:
                 aud_in = None
-                img_in, labels, session_id, segment_id = data["image"], data["label"], data["session_id"], data["segment_id"]
+                img_in, labels, session_id, segment_id, is_continue = data["image"], data["label"], data["session_id"], data["segment_id"], data["is_continue"]
             elif self.cfg.BIMODAL_OPTION == 2:
-                aud_in, labels, session_id, segment_id = data["audio"], data["label"], data["session_id"], data["segment_id"]
+                aud_in, labels, session_id, segment_id, is_continue = data["audio"], data["label"], data["session_id"], data["segment_id"], data["is_continue"]
                 img_in = None
             elif self.cfg.BIMODAL_OPTION == 3:
-                img_in, aud_in, labels, session_id, segment_id = data["image"], data["audio"], data["label"], data["session_id"], data["segment_id"]
+                img_in, aud_in, labels, session_id, segment_id, is_continue = data["image"], data["audio"], data["label"], data["session_id"], data["segment_id"], data["is_continue"]
             else:
                 raise ValueError("BIMODAL_OPTION should be 1, 2 or 3. not {}".format(self.cfg.BIMODAL_OPTION))
         elif isinstance(data, list):
@@ -984,24 +1027,24 @@ class BiModalTrainerUdiva(object):
         # 不同的模型需要不同的维度格式，这里根据不同的模型进行数据格式的转换
         if self.cfg_model.NAME == "resnet50_3d_model_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
-            return (img_in, ), labels, session_id, segment_id
+            return (img_in, ), labels, session_id, segment_id, is_continue
         elif self.cfg_model.NAME == "vivit_model_udiva":
-            return (img_in, ), labels, session_id, segment_id # img_in: [batch, time, channel, height, width]
+            return (img_in, ), labels, session_id, segment_id, is_continue # img_in: [batch, time, channel, height, width]
         elif self.cfg_model.NAME == "vivit_model3_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # img_in: [batch, channel, time, height, width], # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
             # print('[data_fmt] img_in.device: ', img_in.device, ', labels.device: ', labels.device)
-            return (img_in, ), labels, session_id, segment_id
+            return (img_in, ), labels, session_id, segment_id, is_continue
         elif self.cfg_model.NAME == "timesformer_udiva":
             img_in = img_in.permute(0, 2, 1, 3, 4) # 将输入的数据从 [batch, time, channel, height, width] 转换为 [batch, channel, time, height, width] e.g. 4 * 16 * 6 * 224 * 224 -> 4 * 6 * 16 * 224 * 224
-            return (img_in, ), labels, session_id, segment_id
+            return (img_in, ), labels, session_id, segment_id, is_continue
         elif self.cfg_model.NAME == "ssast_udiva":
-            return(aud_in, self.cfg.TASK), labels, session_id, segment_id
+            return(aud_in, self.cfg.TASK), labels, session_id, segment_id, is_continue
         elif self.cfg_model.NAME == "visual_graph_representation_learning":
-            if torch.cuda.is_available():
+            if self.cfg.USE_HALF and torch.cuda.is_available():
                 img_in = img_in.half()
-            return (img_in, ), labels, session_id, segment_id
+            return (img_in, ), labels, session_id, segment_id, is_continue
         else:
-            return (aud_in, img_in), labels, session_id, segment_id
+            return (aud_in, img_in), labels, session_id, segment_id, is_continue
     
     def full_test_data_fmt(self, data):
         images, wav, label = data["image"], data["audio"], data["label"]

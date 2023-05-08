@@ -50,6 +50,8 @@ class ExpRunner:
 
         self.collector = TrainSummary()
         self.trainer = self.build_trainer()
+        
+        self.scaler = self.build_scaler()
 
     def build_dataloader(self):
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_dataloader')
@@ -71,6 +73,14 @@ class ExpRunner:
     def build_scheduler(self):
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] def build_scheduler')
         return build_scheduler(self.cfg, self.optimizer)
+
+    def build_scaler(self):
+        if torch.cuda.is_available():
+            scaler = torch.cuda.amp.GradScaler()
+        else:
+            scaler = None
+        scaler = None
+        return scaler
 
     def build_trainer(self):
         # print('[deeppersonality/dpcv/experiment/exp_runner.py] 开始执行 def build_trainer')
@@ -170,7 +180,7 @@ class ExpRunner:
                 
                 ### 1. train
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
-                self.trainer.train(dataloader["train"], self.model, self.loss_f, self.optimizer, epoch)
+                self.trainer.train(dataloader["train"], self.model, self.loss_f, self.optimizer, epoch, self.scaler)
                 
                 ## 2. valid
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start valid...     ==================================')

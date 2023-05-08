@@ -145,6 +145,9 @@ __C.TRAIN.SAVED_MODEL_DIR = ""
 __C.TRAIN.START_FOLD = 0 # start fold for cross validation
 __C.TRAIN.CROSS_RESUME = "" # resume cross validation
 
+__C.TRAIN.USE_AMP = False # use automatic mixed precision
+__C.TRAIN.USE_HALF = False # use half precision
+
 # ------------------------------------------- step 7:  test config node ------------------------------------------------
 __C.TEST = CfgNode()
 __C.TEST.TEST_ONLY = False

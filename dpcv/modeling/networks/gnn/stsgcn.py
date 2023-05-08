@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-use_half = True
+use_half = False
 
 class gcn_operation(nn.Module):
     def __init__(self, adj, in_dim, out_dim, num_vertices, activation='GLU'):
@@ -36,11 +36,12 @@ class gcn_operation(nn.Module):
         :param mask:(3*N, 3*N)
         :return: (3*N, B, Cout)
         """
+        # print('[stsgcn.py]gcn_operation x:', x.shape) # [45, 2, 64]
         if adj is not None:
             self.adj = adj
         
         adj = self.adj
-        #print('[stsgcn.py]gcn_operation adj:', adj.shape)
+        # print('[stsgcn.py]gcn_operation adj:', adj.shape) # [45, 45, 512]
         if mask is not None:
             adj = adj.to(mask.device) * mask
         

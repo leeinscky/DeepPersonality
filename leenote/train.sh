@@ -69,7 +69,7 @@ use_wandb="False"
 
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=12
+sample_size=10
 batch_size=2
 epoch=1
 
@@ -83,7 +83,7 @@ learning_rate=0.0001
 cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
 # cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
-python3 -u ./script/run_exp.py --cfg_file $cfg_file \
+python3 ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \
 --max_epoch $epoch \
 --bs $batch_size \

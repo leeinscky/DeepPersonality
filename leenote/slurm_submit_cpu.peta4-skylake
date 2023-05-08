@@ -19,7 +19,7 @@
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
 #SBATCH --ntasks=32
 #! How much wallclock time will be required?
-#SBATCH --time=1:00:00
+#SBATCH --time=12:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -118,9 +118,9 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-model="Res3D-Visual"
-# cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
-cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
+# model="Res3D-Visual"
+# # cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
+# cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
 # model="Res18-Audio"
@@ -139,17 +139,21 @@ cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 # model="AST_Finetune"
 # cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-data="NoXi"
-epoch=1
+#### **************************** GNN: gnn_noxi_full.yaml **************************** ####
+model="GNN-Visual"
+cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
-sample_size=128
+data="NoXi"
+epoch=5
+
+sample_size=64
 sample_size2=272
 sample_size3=288
 sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=64
+batch_size=8
 batch_size2=128
 batch_size3=128
 batch_size4=64
@@ -204,7 +208,7 @@ eval $CMD
 # cd /home/zl525/code/DeepPersonality/leenote && sbatch slurm_submit_cpu.peta4-skylake
 
 # 分析job
-    # sacct -j 16861849 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
+    # sacct -j 18883474 --format=JobID,Start,End,Elapsed,REQCPUS,ALLOCTRES%30;
 
 # UDIVA dataset
     # ResNet3D: 14800438 14800443 
