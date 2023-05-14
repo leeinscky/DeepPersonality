@@ -163,7 +163,7 @@ class ExpRunner:
         # for fold_id in range(cfg.TRAIN.START_FOLD, cfg.DATA_LOADER.NUM_FOLD):
         for fold_id in range(cfg.DATA_LOADER.NUM_FOLD):
             print('\n================================== start K-fold cross validation, fold_id:', fold_id, '==================================')
-            dataloader = build_dataloader(self.cfg, fold_id)
+            self.dataloader = build_dataloader(self.cfg, fold_id)
             
             cfg = self.cfg.TRAIN
             if cfg.CROSS_RESUME:
@@ -180,12 +180,12 @@ class ExpRunner:
                 
                 ### 1. train
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start train... {datetime.now()} ==================================') 
-                self.trainer.train(dataloader["train"], self.model, self.loss_f, self.optimizer, epoch, self.scaler)
+                self.trainer.train(self.dataloader["train"], self.model, self.loss_f, self.optimizer, epoch, self.scaler)
                 
                 ## 2. valid
                 print(f'\n==================================Fold:{fold_id} Epo:{epoch+1} [train_epochs] start valid...     ==================================')
                 if epoch % cfg.VALID_INTERVAL == 0: # if epoch % 1 == 0 即每个epoch都进行验证
-                    best_valid_loss, best_valid_acc= self.trainer.valid(dataloader["valid"], self.model, self.loss_f, self.scheduler, epoch)
+                    best_valid_loss, best_valid_acc= self.trainer.valid(self.dataloader["valid"], self.model, self.loss_f, self.scheduler, epoch)
                 if cfg.TRAINER != "SSASTTrainer": # SSASTTrainer 的学习率调整已经在valid函数里面进行，此处不需要再进行学习率调整
                     self.scheduler.step() # 每个epoch都进行学习率调整
                 
@@ -242,7 +242,6 @@ class ExpRunner:
                     self.collector.best_valid_acc,
                     self.collector.best_epoch,
                 ))
-
 
     def train(self):
         # cfg = self.cfg.TRAIN
