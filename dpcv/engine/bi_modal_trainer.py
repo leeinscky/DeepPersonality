@@ -1066,6 +1066,8 @@ class BiModalTrainerUdiva(object):
             if self.cfg.USE_HALF and torch.cuda.is_available():
                 img_in = img_in.half()
             return (img_in, ), labels, session_id, segment_id, is_continue
+        elif self.cfg_model.NAME == "audio_graph_representation_learning":
+            return (aud_in, ), labels, session_id, segment_id, is_continue
         else:
             return (aud_in, img_in), labels, session_id, segment_id, is_continue
     
