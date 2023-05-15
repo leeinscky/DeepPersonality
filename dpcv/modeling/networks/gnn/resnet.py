@@ -151,28 +151,28 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
+        # print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
         x = self.conv1(x)
-        print('[ResNet] after conv1, x shape: ', x.shape) # 3 channels: [bs, 64, 56, 56]; 6 channels: [bs, 64, 56, 56]
+        # print('[ResNet] after conv1, x shape: ', x.shape) # 3 channels: [bs, 64, 56, 56]; 6 channels: [bs, 64, 56, 56]
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        print('[ResNet] after maxpool, x shape: ', x.shape) # 3 channels: [bs, 64, 28, 28]; 6 channels: [bs, 64, 28, 28]
+        # print('[ResNet] after maxpool, x shape: ', x.shape) # 3 channels: [bs, 64, 28, 28]; 6 channels: [bs, 64, 28, 28]
 
         x = self.layer1(x)
-        print('[ResNet] after layer1, x shape: ', x.shape) # 3 channels: [bs, 256, 28, 28]; 6 channels: [bs, 256, 28, 28]
+        # print('[ResNet] after layer1, x shape: ', x.shape) # 3 channels: [bs, 256, 28, 28]; 6 channels: [bs, 256, 28, 28]
         x = self.layer2(x)
-        print('[ResNet] after layer2, x shape: ', x.shape) # 3 channels: [bs, 512, 14, 14]
+        # print('[ResNet] after layer2, x shape: ', x.shape) # 3 channels: [bs, 512, 14, 14]
         x = self.layer3(x)
-        print('[ResNet] after layer3, x shape: ', x.shape) # 3 channels: [bs, 1024, 7, 7]
+        # print('[ResNet] after layer3, x shape: ', x.shape) # 3 channels: [bs, 1024, 7, 7]
         x = self.layer4(x)
-        print('[ResNet] after layer4, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]
+        # print('[ResNet] after layer4, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]
 
         b,c,h,w = x.shape
-        print('[ResNet] after layers, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; 6 channels: [bs, 2048, 4, 4]
+        # print('[ResNet] after layers, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; 6 channels: [bs, 2048, 4, 4]
         
         x = x.view(b,c,-1).permute(0,2,1) # 3 channels: [bs, 2048, 4, 4] -> [bs, 2048, 16] -> [bs, 16, 2048]
-        print('[ResNet] output x shape: ', x.shape) # 3 channels: [bs, 16, 2048]; 6 channels: [bs, 16, 2048]
+        # print('[ResNet] output x shape: ', x.shape) # 3 channels: [bs, 16, 2048]; 6 channels: [bs, 16, 2048]
         
         return x
 

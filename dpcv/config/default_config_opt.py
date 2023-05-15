@@ -104,6 +104,9 @@ __C.MODEL.PRETRAIN = False
 __C.MODEL.NUM_CLASS = 2
 __C.MODEL.SPECTRUM_CHANNEL = 50
 __C.MODEL.RETURN_FEATURE = False
+__C.MODEL.AU_CLASS = [12,]
+__C.MODEL.BACKBONE_INPUT = 'frame'
+__C.MODEL.PREDICTION_FEAT = 'cl'
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()
