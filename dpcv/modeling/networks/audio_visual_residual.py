@@ -11,10 +11,12 @@ from dpcv.modeling.module.bi_modal_resnet_module import aud_conv1x9, aud_conv1x1
 from dpcv.modeling.module.bi_modal_resnet_module_udiva import AudioVisualResNetUdiva, AudInitStageUdiva
 from dpcv.modeling.module.bi_modal_resnet_module_udiva import VisInitStageUdiva, BiModalBasicBlockUdiva
 from dpcv.modeling.module.bi_modal_resnet_module_udiva import aud_conv1x9_udiva, aud_conv1x1_udiva, vis_conv3x3_udiva, vis_conv1x1_udiva
-
+from dpcv.modeling.networks.resnet_3d import Bottleneck, ResNet3DUdiva
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 from dpcv.modeling.networks.build import NETWORK_REGISTRY
 
+def get_inplanes():
+    return [64, 128, 256, 512]
 
 class AudioVisualResNet18(nn.Module):
 
@@ -126,17 +128,19 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
             layers=[2, 2, 2, 2], # 2, 2, 2, 2 are the number of layers in each layer, 这里的2, 2, 2, 2是每一层的卷积层数
             branch_type='audio'
         )
-        self.visual_branch = AudioVisualResNetUdiva(
-            in_channels=6, init_stage=VisInitStageUdiva,
-            block=BiModalBasicBlockUdiva, conv=[vis_conv3x3_udiva, vis_conv1x1_udiva],
-            channels=[32, 64, 128, 256],
-            layers=[2, 2, 2, 2],
-            branch_type='visual'
-        )
+        # self.visual_branch = AudioVisualResNetUdiva(
+        #     in_channels=6, init_stage=VisInitStageUdiva,
+        #     block=BiModalBasicBlockUdiva, conv=[vis_conv3x3_udiva, vis_conv1x1_udiva],
+        #     channels=[32, 64, 128, 256],
+        #     layers=[2, 2, 2, 2],
+        #     branch_type='visual'
+        # )
+        self.visual_branch = ResNet3DUdiva(Bottleneck, [3, 4, 6, 3], get_inplanes(), n_classes=num_class, return_feat=True)
         if self.bimodal_option == 1 or self.bimodal_option == 2:
             self.linear = nn.Linear(256, num_class)
         else:
             self.linear = nn.Linear(512, num_class)
+        self.vis_linear = nn.Linear(2048, 256)
         
         # 打印模型的权重
         # self.print_model_weights(self.audio_branch)
@@ -186,8 +190,12 @@ class AudioVisualResNet18LSTMUdiva(nn.Module):  # UDIVA: ResNet-LSTM模型结构
             # print('model forward... both audio and visual branch, aud_input.shape: ', aud_input.shape, ' vis_input.shape: ', vis_input.shape)
             aud_x = self.audio_branch(aud_input)
             vis_x = self.visual_branch(vis_input)
+            # print('[AudioVisualResNet18LSTMUdiva] 1-aud_x:', aud_x.shape, ' vis_x:', vis_x.shape) # aud_x:[bs, 256, 1, 1]  vis_x:[bs, 256]
             aud_x = aud_x.view(aud_x.size(0), -1)
-            feat = torch.cat([aud_x, vis_x], dim=-1) # feat.shape: [batch_size, 512]，也就是把aud_x和vis_x拼接在了一起
+            vis_x = self.vis_linear(vis_x)
+            # print('[AudioVisualResNet18LSTMUdiva] 2-aud_x:', aud_x.shape, ' vis_x:', vis_x.shape) # aud_x:[bs, 256]
+            feat = torch.cat([aud_x, vis_x], dim=-1) # [bs, 256] + [bs, 256] -> feat.shape: [batch_size, 512]，
+            # print('[AudioVisualResNet18LSTMUdiva] feat:', feat.shape)
         else:
             raise ValueError("bimodal_option should be 1, 2 or 3. not {}".format(self.bimodal_option))
         # print('model forward... feat.shape: ', feat.shape)
@@ -274,6 +282,7 @@ def audiovisual_resnet_udiva(cfg=None): # UDIVA音频+视觉: 纯ResNet模型结
 
 @NETWORK_REGISTRY.register()
 def audiovisual_resnet_lstm_udiva(cfg=None): # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
+    assert cfg.TRAIN.BIMODAL_OPTION == 3, "cfg.TRAIN.BIMODAL_OPTION should be 3 for audiovisual_resnet_lstm_udiva"
     multi_modal_model = AudioVisualResNet18LSTMUdiva(return_feat=cfg.MODEL.RETURN_FEATURE, bimodal_option=cfg.TRAIN.BIMODAL_OPTION, num_class=cfg.MODEL.NUM_CLASS) #  cfg.MODEL.RETURN_FEATURE = False
     multi_modal_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return multi_modal_model

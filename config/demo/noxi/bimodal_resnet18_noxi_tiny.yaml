@@ -21,18 +21,19 @@ DATA_LOADER:
   PREFETCH_FACTOR: 2
   NUM_FOLD: 3
 MODEL:
-  # NAME: "resnet50_3d_model_udiva"             # UDIVA视觉: ResNet3D
-  # NAME: "audio_resnet_udiva"                  # UDIVA音频分支: 纯ResNet模型结构
-  # NAME: "audiovisual_resnet_lstm_udiva"       # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
-  # NAME: "visual_graph_representation_learning"    # 视觉图表示学习
-  NAME: "audio_graph_representation_learning"     # 音频图表示学习
-  # NAME: "audiovisual_graph_representation_learning" # 视觉+音频融合 图表示学习
+  # NAME: "resnet50_3d_model_udiva"                   # CNN 视觉: ResNet50_3D
+  # NAME: "audio_resnet_udiva"                        # CNN 音频: ResNet18
+  # NAME: "audiovisual_resnet_lstm_udiva"             # CNN 音频+视觉: ResNet18 + ResNet50_3D
+  # NAME: "visual_graph_representation_learning"      # GNN 视觉 图表示学习
+  NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
+  # NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
   NUM_CLASS: 4
-  AU_CLASS: [8] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
+  AU_CLASS: [12] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
   BACKBONE_INPUT: 'video' # frame:输入MEFARG backbone的数据是每一帧图像; video:输入MEFARG backbone的数据是每一段视频，即图像序列
   PREDICTION_FEAT: 'cl_edge' # 预测时使用的特征 cl:使用MEFARG返回的cl; cl_edge:使用MEFARG返回的cl_edge; f_v:使用MEFARG返回的f_v; f_e:使用MEFARG返回的f_e
 LOSS:
-  NAME: "binary_cross_entropy"
+  # NAME: "binary_cross_entropy" # binary outcome
+  NAME: "cross_entropy" # single label, multiple classes refer: https://towardsdatascience.com/deep-learning-which-loss-and-activation-functions-should-i-use-ac02f1c56aa8
 SOLVER:
   NAME: "adam"
   SCHEDULER: "multi_step_scale"
@@ -46,7 +47,7 @@ TRAIN:
   # OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_noxi"
   # SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
   SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
-  BIMODAL_OPTION: 2 # 1: visual 2: audio # 3: both
+  BIMODAL_OPTION: 2       # 1: visual 2: audio # 3: both
   LOG_INTERVAL: 1
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1

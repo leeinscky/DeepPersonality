@@ -213,9 +213,11 @@ class Head(nn.Module):
         if self.modal == 'visual':
             return f_v, f_u
         elif self.modal == 'visual_simple':
-            return f_v, f_e, cl, cl_edge
+            # return f_v, f_e, cl, cl_edge
+            return cl, cl_edge
         elif self.modal == 'audio':
-            return f_v, f_u, cl, cl_edge
+            # return f_v, f_u, cl, cl_edge
+            return cl, cl_edge
         else:
             raise ValueError('modal should be visual or audio')
 
@@ -285,15 +287,19 @@ class MEFARG(nn.Module):
             f_v, f_u = self.head(x)
             return f_v, f_u
         elif self.modal == 'visual_simple':
-            f_v, f_e, cl, cl_edge = self.head(x)
+            # f_v, f_e, cl, cl_edge = self.head(x)
+            cl, cl_edge = self.head(x)
             # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
             # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
-            return f_v, f_e, cl, cl_edge
+            # return f_v, f_e, cl, cl_edge
+            return cl, cl_edge
         elif self.modal == 'audio':
-            f_v, f_e, cl, cl_edge = self.head(x)
+            # f_v, f_e, cl, cl_edge = self.head(x)
+            cl, cl_edge = self.head(x)
             # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
             # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
-            return f_v, f_e, cl, cl_edge
+            # return f_v, f_e, cl, cl_edge
+            return cl, cl_edge
         else:
             raise ValueError('modal should be visual or audio')
 
@@ -813,7 +819,7 @@ class GraphModel(nn.Module):
 
 class VisualGraphModel(nn.Module):
     """视觉图模型"""
-    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12], cfg=None):
+    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, backbone='resnet50_3d', sample_size=16, au_class=[12], cfg=None):
         super(VisualGraphModel, self).__init__()
         self.return_feature = return_feat
         assert isinstance(au_class, list) and len(au_class) == 1
@@ -822,21 +828,24 @@ class VisualGraphModel(nn.Module):
         self.cfg = cfg
         if init_weights:
             initialize_weights(self)
-        self.graph_model_12class = MEFARG(num_classes=AU_12CLASS, backbone="resnet50_3d", modal='visual_simple', cfg=self.cfg).to(device)
-        self.graph_model_8class = MEFARG(num_classes=AU_8CLASS, backbone="resnet50_3d", modal='visual_simple', cfg=self.cfg).to(device)
+        # self.graph_model_12class = MEFARG(num_classes=AU_12CLASS, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
+        # self.graph_model_8class = MEFARG(num_classes=AU_8CLASS, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
+        self.visual_graph_model = MEFARG(num_classes=self.au_class, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
         self.fc = nn.Linear(self.au_class, self.num_class)
     
     def forward(self, x):
         # print('[VisualGraphModel] input x:', x.shape) # [bs, sample_size, 6(3*2person=6), 112, 112]
-        if self.au_class == 12:
-            f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
-        elif self.au_class == 8:
-            f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
-        # elif self.au_class == 15: # TODO
+        # if self.au_class == 12:
         #     f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
+        # elif self.au_class == 8:
         #     f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
-        else:
-            raise Exception('VisualGraphModel.forward, au_class error!')
+        # # elif self.au_class == 15: # TODO
+        # #     f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
+        # #     f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
+        # else:
+        #     raise Exception('VisualGraphModel.forward, au_class error!')
+        # f_v, f_e, cl, cl_edge = self.visual_graph_model(x) 
+        cl, cl_edge = self.visual_graph_model(x) 
         # print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
@@ -847,9 +856,13 @@ class VisualGraphModel(nn.Module):
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
         # print('[VisualGraphModel] output x:', x.shape)
-        x = torch.sigmoid(x)
+        if self.cfg.LOSS.NAME == "binary_cross_entropy":
+            x = torch.sigmoid(x)
         if self.return_feature:
-            return x, f_v, f_e, cl, cl_edge
+            # return x, f_v, f_e, cl, cl_edge
+            return cl, cl_edge
+        else:
+            del cl, cl_edge
         return x
 
 class AudioGraphModel(nn.Module):
@@ -863,12 +876,13 @@ class AudioGraphModel(nn.Module):
         self.cfg = cfg
         if init_weights:
             initialize_weights(self)
-        self.audio_graph_model = MEFARG(num_classes=self.au_class, backbone="resnet50", modal='audio').to(device)
+        self.audio_graph_model = MEFARG(num_classes=self.au_class, backbone=backbone, modal='audio').to(device)
         self.fc = nn.Linear(self.au_class, self.num_class)
     
     def forward(self, x):
         # print('[AudioGraphModel] input x:', x.shape) # [bs, 2(1*2person=2), 1, 32000(sample_size/5*16000)] 5 is downsample, so duration=samples/5 seconds, sample_rate=16000(num of features per second), so last dim=duration*sample_rate
-        f_v, f_e, cl, cl_edge = self.audio_graph_model(x)
+        # f_v, f_e, cl, cl_edge = self.audio_graph_model(x)
+        cl, cl_edge = self.audio_graph_model(x)
         # print('[AudioGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape, 'self.au_class:', self.au_class)
         
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
@@ -879,30 +893,36 @@ class AudioGraphModel(nn.Module):
             x = self.fc(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
-        # print('[AudioGraphModel] output x:', x.shape)
-        x = torch.sigmoid(x)
+        print('[AudioGraphModel] output x:', x.shape)
+        if self.cfg.LOSS.NAME == "binary_cross_entropy":
+            x = torch.sigmoid(x)
         if self.return_feature:
-            return x, f_v, f_e, cl, cl_edge
+            # return x, f_v, f_e, cl, cl_edge
+            return cl, cl_edge
+        else:
+            del cl, cl_edge
         return x
 
 class AudioVisualGraphModel(nn.Module):
     """ 视觉和音频融合的图模型 """
     def __init__(self, init_weights=True, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12,12], cfg=None):
         super(AudioVisualGraphModel, self).__init__()
-        assert isinstance(au_class, list) and len(au_class) == 2
+        assert isinstance(au_class, list) and len(au_class) == 2, 'au_class must be a list with 2 elements for AudioVisualGraphModel!'
         self.audio_au_class, self.visual_au_class = au_class[0], au_class[1]
         self.cfg = cfg
         self.num_class = num_class
         if init_weights:
             initialize_weights(self)
-        self.audio_graph_model = AudioGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone=backbone, sample_size=sample_size, au_class=[self.audio_au_class], cfg=cfg).to(device)
-        self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone=backbone, sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
+        self.audio_graph_model = AudioGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone="resnet50", sample_size=sample_size, au_class=[self.audio_au_class], cfg=cfg).to(device)
+        self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone="resnet50_3d", sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
         self.fc = nn.Linear(self.audio_au_class+self.visual_au_class, num_class)
     
     def forward(self, audio_input, visual_input):
         # print('[AudioVisualGraphModel] input audio_input:', audio_input.shape, ', visual_input:', visual_input.shape)
-        x_audio, f_v_audio, f_e_audio, cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
-        x_visual, f_v_visual, f_e_visual, cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
+        # x_audio, f_v_audio, f_e_audio, cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
+        # x_visual, f_v_visual, f_e_visual, cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
+        cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
+        cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
         # print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
         # print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
         
@@ -917,10 +937,19 @@ class AudioVisualGraphModel(nn.Module):
         else:
             raise Exception('AudioVisualGraphModel.forward, cfg.MODEL.PREDICTION_FEAT error!')
         # print('[AudioVisualGraphModel] after cat, x:', x.shape)
+        del cl_audio, cl_edge_audio, cl_visual, cl_edge_visual
+        if torch.cuda.is_available():
+            time_start = time.time()
+            gc.collect()
+            torch.cuda.empty_cache()
+            duration = round(time.time() - time_start, 3)
+            if duration > 1:
+                print('[MEFL.py] AudioVisualGraphModel, time cost of gc.collect: ', duration, 's')
         self.fc = nn.Linear(x.shape[1], self.num_class).to(device)
         x = self.fc(x)
         # print('[AudioVisualGraphModel] output x:', x.shape)
-        x = torch.sigmoid(x)
+        if self.cfg.LOSS.NAME == "binary_cross_entropy":
+            x = torch.sigmoid(x)
         return x
 
 @NETWORK_REGISTRY.register()
@@ -936,10 +965,11 @@ def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
         pretrained_model_path = None
     # print('[visual_graph_representation_learning] pretrained_model_path: ', pretrained_model_path)
     
-    if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "resnet50"
-    elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "swin_transformer_tiny"
+    # if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "resnet50"
+    # elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "swin_transformer_tiny"
+    backbone_net = "resnet50_3d"
     
     # if 'BP4D' in cfg.TRAIN.PRE_TRAINED_MODEL:
     #     num_class = 12
@@ -970,10 +1000,11 @@ def audio_graph_representation_learning(cfg=None): # 音频图表示学习
         pretrained_model_path = None
     # print('[visual_graph_representation_learning] pretrained_model_path: ', pretrained_model_path)
     
-    if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "resnet50"
-    elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "swin_transformer_tiny"
+    # if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "resnet50"
+    # elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "swin_transformer_tiny"
+    backbone_net = "resnet50"
     
     graph_model = AudioGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
     if torch.cuda.is_available() and cfg.TRAIN.USE_HALF:
@@ -994,12 +1025,13 @@ def audiovisual_graph_representation_learning(cfg=None): # 视觉+音频融合 �
         pretrained_model_path = None
     # print('[visual_graph_representation_learning] pretrained_model_path: ', pretrained_model_path)
     
-    if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "resnet50"
-    elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        backbone_net = "swin_transformer_tiny"
+    # if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "resnet50"
+    # elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     backbone_net = "swin_transformer_tiny"
+    # backbone_net = "resnet50"
     
-    graph_model = AudioVisualGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
+    graph_model = AudioVisualGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
     if torch.cuda.is_available() and cfg.TRAIN.USE_HALF:
         graph_model.half()
     graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))

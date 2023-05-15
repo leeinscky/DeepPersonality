@@ -220,7 +220,7 @@ class ResNet(nn.Module):
         return x
 
 # 用于Udiva数据集的ResNet3D模型
-class ResNetUdiva(nn.Module):
+class ResNet3DUdiva(nn.Module):
     def __init__(
         self,
         block,
@@ -235,6 +235,7 @@ class ResNetUdiva(nn.Module):
         widen_factor=1.0,
         n_classes=2,
         init_weights=True,
+        return_feat=False,
     ):
         super().__init__()
 
@@ -242,6 +243,7 @@ class ResNetUdiva(nn.Module):
 
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
+        self.return_feat = return_feat
 
         self.conv1 = nn.Conv3d(
             n_input_channels,
@@ -261,6 +263,7 @@ class ResNetUdiva(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(block_inplanes[3] * block.expansion, n_classes)
+        self.feat_fc = nn.Linear(block_inplanes[3] * block.expansion, 512)
 
         if init_weights:
             initialize_weights(self)
@@ -316,39 +319,39 @@ class ResNetUdiva(nn.Module):
     def forward(self, x):
         # 手动构造一个假输入
         # x = torch.randn(4, 3, 16, 224, 224) # batch_size, channel, time/sample_size, height, width
-        # print('[ResNetUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
+        # print('[ResNet3DUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
         
         x = self.conv1(x)
-        # print('[ResNetUdiva] after conv1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
+        # print('[ResNet3DUdiva] after conv1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         x = self.bn1(x)
-        # print('[ResNetUdiva] after bn1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
+        # print('[ResNet3DUdiva] after bn1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         x = self.relu(x)
-        # print('[ResNetUdiva] after relu, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
+        # print('[ResNet3DUdiva] after relu, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         if not self.no_max_pool:
             x = self.maxpool(x)
 
         x = self.layer1(x)
-        # print('[ResNetUdiva] after layer1, x.shape: ', x.shape) # batch_size, 256, 5, 56, 56
+        # print('[ResNet3DUdiva] after layer1, x.shape: ', x.shape) # batch_size, 256, 5, 56, 56
         x = self.layer2(x)
-        # print('[ResNetUdiva] after layer2, x.shape: ', x.shape) # batch_size, 512, 3, 28, 28
+        # print('[ResNet3DUdiva] after layer2, x.shape: ', x.shape) # batch_size, 512, 3, 28, 28
         x = self.layer3(x)
-        # print('[ResNetUdiva] after layer3, x.shape: ', x.shape) # batch_size, 1024, 2, 14, 14
+        # print('[ResNet3DUdiva] after layer3, x.shape: ', x.shape) # batch_size, 1024, 2, 14, 14
         x = self.layer4(x)
-        # print('[ResNetUdiva] after layer4, x.shape: ', x.shape) # batch_size, 2048, 1, 7, 7
+        # print('[ResNet3DUdiva] after layer4, x.shape: ', x.shape) # batch_size, 2048, 1, 7, 7
 
         x = self.avgpool(x)
-        # print('[ResNetUdiva] after avgpool, x.shape: ', x.shape) # batch_size, 2048, 1, 1, 1
+        # print('[ResNet3DUdiva] after avgpool, x.shape: ', x.shape) # batch_size, 2048, 1, 1, 1
 
         x = x.view(x.size(0), -1)
-        # print('[ResNetUdiva] after view, x.shape: ', x.shape) # batch_size, 2048
-        
+        # print('[ResNet3DUdiva] after view, x.shape: ', x.shape) # batch_size, 2048
+        if self.return_feat:
+            return x
         x = self.fc(x)
-        # print('[ResNetUdiva] after fc x.shape: ', x.shape) # batch_size, n_classes(2)
-        # print('[ResNetUdiva] after fc x: ', x)
-        # 添加激活函数 softmax，将输出值限制在0-1之间
+        # print('[ResNet3DUdiva] after fc x.shape: ', x.shape) # batch_size, n_classes(2)
+        # print('[ResNet3DUdiva] after fc x: ', x)
         x = F.softmax(x, dim=1)
-        # print('[ResNetUdiva] after softmax, x: ', x)
-        # print('[ResNetUdiva] after softmax, x.shape: ', x.shape)
+        # print('[ResNet3DUdiva] after softmax, x: ', x)
+        # print('[ResNet3DUdiva] after softmax, x.shape: ', x.shape)
         
         return x
 
@@ -377,7 +380,8 @@ def resnet50_3d_model(cfg):
 
 @NETWORK_REGISTRY.register()
 def resnet50_3d_model_udiva(cfg):
-    model = ResNetUdiva(Bottleneck, [3, 4, 6, 3], get_inplanes(), n_classes=cfg.MODEL.NUM_CLASS)
+    assert cfg.TRAIN.BIMODAL_OPTION == 1, "cfg.TRAIN.BIMODAL_OPTION should be 1 for resnet50_3d_model_udiva"
+    model = ResNet3DUdiva(Bottleneck, [3, 4, 6, 3], get_inplanes(), n_classes=cfg.MODEL.NUM_CLASS)
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
 if __name__ == "__main__":

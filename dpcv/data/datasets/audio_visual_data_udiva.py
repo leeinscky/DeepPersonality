@@ -564,6 +564,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 return False
         return True
 
+
 class ALLSampleAudioVisualDataUdiva(AudioVisualDataUdiva):
 
     def __getitem__(self, idx):
