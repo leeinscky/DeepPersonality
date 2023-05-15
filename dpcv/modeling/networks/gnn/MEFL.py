@@ -7,22 +7,27 @@ from torch.autograd import Variable
 import math
 from .swin_transformer import swin_transformer_tiny, swin_transformer_small, swin_transformer_base
 from .resnet import resnet18, resnet50, resnet101
+from .resnet_3d import resnet50_3d
 from .graph import create_e_matrix
 from .graph_edge_model import GEM
 from .basic_block import *
 from dpcv.modeling.module.weight_init_helper import initialize_weights
 from dpcv.modeling.networks.build import NETWORK_REGISTRY
-from .MEFL_gratis import MEFARG as MEFARG_GRATIS
-from .ctrgcn import Model as CTRGCN
+# from .MEFL_gratis import MEFARG as MEFARG_GRATIS
+# from .ctrgcn import Model as CTRGCN
 from .stsgcn import STSGCN
 import gc
 import time
 from multiprocessing import Pool
 import torch.multiprocessing as mp
-
+import wandb
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 use_half = False
+AU_12CLASS = 12
+AU_8CLASS = 8
+AU_15CLASS = 15
+
 
 # Gated GCN Used to Learn Multi-dimensional Edge Features and Node Features
 class GNN(nn.Module):
@@ -146,7 +151,7 @@ class GNN(nn.Module):
 
 
 class Head(nn.Module):
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, modal):
         super(Head, self).__init__()
         # The head of network
         # Input: the feature maps x from backbone
@@ -156,7 +161,7 @@ class Head(nn.Module):
         #          3. Gated-GCN for graph learning with node and multi-dimensional edge features
         # sc: individually calculate cosine similarity between node features and a trainable vector.
         # edge fc: for edge prediction
-
+        self.modal = modal # visual or audio
         self.in_channels = in_channels
         self.num_classes = num_classes
         class_linear_layers = []
@@ -167,7 +172,7 @@ class Head(nn.Module):
         self.edge_extractor = GEM(self.in_channels, self.num_classes)
         self.gnn = GNN(self.in_channels, self.num_classes)
         self.sc = nn.Parameter(torch.FloatTensor(torch.zeros(self.num_classes, self.in_channels)))
-        self.edge_fc = nn.Linear(self.in_channels, 4)
+        self.edge_fc = nn.Linear(self.in_channels, 1)
         self.relu = nn.ReLU()
 
         nn.init.xavier_uniform_(self.edge_fc.weight)
@@ -205,13 +210,33 @@ class Head(nn.Module):
         cl_edge = self.edge_fc(f_e)
         # print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
         # return cl, cl_edge, f_v, f_e, f_u
-        return f_v, f_u
+        if self.modal == 'visual':
+            return f_v, f_u
+        elif self.modal == 'visual_simple':
+            return f_v, f_e, cl, cl_edge
+        elif self.modal == 'audio':
+            return f_v, f_u, cl, cl_edge
+        else:
+            raise ValueError('modal should be visual or audio')
 
 
 class MEFARG(nn.Module):
-    def __init__(self, num_classes=12, backbone='swin_transformer_base'):
+    def __init__(self, num_classes=12, backbone='swin_transformer_base', modal='visual', cfg=None):
         super(MEFARG, self).__init__()
         # print('[MEFL.py] class MEFARG.__init__ backbone: ', backbone)
+        self.modal = modal
+        if self.modal == 'visual':
+            self.channels = 3
+            self.use_pretrained_backbone = True
+        elif self.modal == 'visual_simple':
+            self.channels = 6
+            self.use_pretrained_backbone = False
+        elif self.modal == 'audio':
+            self.channels = 2
+            self.use_pretrained_backbone = False
+        else:
+            raise ValueError('modal should be visual or audio or visual_simple')
+        self.cfg = cfg
         if 'transformer' in backbone:
             if backbone == 'swin_transformer_tiny':
                 self.backbone = swin_transformer_tiny()
@@ -228,9 +253,11 @@ class MEFARG(nn.Module):
                 self.backbone = resnet18()
             elif backbone == 'resnet101':
                 self.backbone = resnet101()
+            elif backbone == 'resnet50_3d':
+                self.backbone = resnet50_3d(pretrained=self.use_pretrained_backbone, in_channels=self.channels, n_classes=self.cfg.MODEL.NUM_CLASS)
             else:
-                self.backbone = resnet50() # pretrained=True
-                # self.backbone = resnet50(pretrained=False) # pretrained=False
+                # self.backbone = resnet50() # pretrained=True
+                self.backbone = resnet50(pretrained=self.use_pretrained_backbone, in_channels=self.channels) # pretrained=False
             self.in_channels = self.backbone.fc.weight.shape[1]
             self.out_channels = self.in_channels // 4
             self.backbone.fc = None
@@ -240,22 +267,35 @@ class MEFARG(nn.Module):
         # print('[MEFL.py] class MEFARG.__init__ self.in_channels:', self.in_channels, 'self.out_channels:', self.out_channels)
         # MEFARG_resnet101_BP4D_fold1.pth: 2048, 512; MEFARG_resnet50_BP4D_fold1.pth: 2048, 512;
         self.global_linear = LinearBlock(self.in_channels, self.out_channels)
-        self.head = Head(self.out_channels, num_classes)
+        self.head = Head(self.out_channels, num_classes, self.modal)
 
     def forward(self, x):
         # x: b d c
-        # x = torch.randn(2, 3, 112, 112) # or x = torch.randn(2, 3, 224, 224) # TODO temp test
-        # print('[MEFL.py] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
+        # x = torch.randn(2, 3, 112, 112) # or x = torch.randn(2, 3, 224, 224) # temp test
+        # [bs, sample_size, 6(3*2person=6), 112, 112] -> [bs, 6(3*2person=6), sample_size, 112, 112]
+        if self.modal == 'visual_simple':
+            x = x.permute(0, 2, 1, 3, 4) # .contiguous()
+        print('[MEFL.py] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
         x = self.backbone(x)
-        # print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
+        print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
         x = self.global_linear(x)
         # print('[MEFL.py] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
         # cl, cl_edge, f_v, f_e, f_u = self.head(x)
-        f_v, f_u = self.head(x)
-        # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
-        # return cl, cl_edge, f_v, f_e, f_u
-        # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_u.shape: ', f_u.shape)
-        return f_v, f_u
+        if self.modal == 'visual':
+            f_v, f_u = self.head(x)
+            return f_v, f_u
+        elif self.modal == 'visual_simple':
+            f_v, f_e, cl, cl_edge = self.head(x)
+            print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
+            return f_v, f_e, cl, cl_edge
+        elif self.modal == 'audio':
+            f_v, f_e, cl, cl_edge = self.head(x)
+            print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
+            return f_v, f_e, cl, cl_edge
+        else:
+            raise ValueError('modal should be visual or audio')
 
 
 def load_state_dict(model,path):
@@ -384,8 +424,8 @@ class GraphModel(nn.Module):
         1. swin_transformer: backbone="swin_transformer_tiny" 和 "swin_transformer_small" 时，输出的特征维度都是384；当backbone="swin_transformer_base"时，输出的特征维度是512
         2. resnet: backbone="resnet50" 
         '''
-        self.graph_model_12class = MEFARG(num_classes=12, backbone="resnet50").to(device) 
-        self.graph_model_8class = MEFARG(num_classes=8, backbone="resnet50").to(device)
+        self.graph_model_12class = MEFARG(num_classes=12, backbone="resnet50", modal='visual').to(device)
+        self.graph_model_8class = MEFARG(num_classes=8, backbone="resnet50", modal='visual').to(device)
         ### graph model for 4 nodes features, refer to the paper: https://arxiv.org/pdf/2211.12482.pdf
         # self.graph_model_4class = MEFARG_GRATIS(num_classes=4, backbone="resnet50").to(device)
         # print('[MEFL.py] self.graph_model_12class device:', next(self.graph_model_12class.parameters()).device, 'self.graph_model_8class device: ', next(self.graph_model_8class.parameters()).device)
@@ -714,7 +754,6 @@ class GraphModel(nn.Module):
         edge_features = torch.cat((edge_features_1, edge_features_2), dim=2) # [bs, sample_size, 450, 512]
         # print('[MEFL.py] GraphModel.generate_graph, after cat, node_features.shape:', node_features.shape, ', edge_features.shape:', edge_features.shape)
         return node_features, edge_features
-    
 
     def forward(self, x):
         forward_start = time.time()
@@ -769,12 +808,124 @@ class GraphModel(nn.Module):
         del node_features, adj
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-        # print('[MEFL.py] GraphModel.forward, iterate sample_size cost:', sample_size_loop_duration, 'seconds, sts_gcn model cost:', round(time.time() - sample_size_end, 3), 'seconds')
+        print('[MEFL.py] GraphModel.forward, iterate sample_size cost:', sample_size_loop_duration, 'seconds, sts_gcn model cost:', round(time.time() - sample_size_end, 3), 'seconds')
         return output
 
+class VisualGraphModel(nn.Module):
+    """视觉图模型"""
+    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12], cfg=None):
+        super(VisualGraphModel, self).__init__()
+        self.return_feature = return_feat
+        assert isinstance(au_class, list) and len(au_class) == 1
+        self.au_class = au_class[0]
+        self.num_class = num_class
+        self.cfg = cfg
+        if init_weights:
+            initialize_weights(self)
+        self.graph_model_12class = MEFARG(num_classes=AU_12CLASS, backbone="resnet50_3d", modal='visual_simple', cfg=self.cfg).to(device)
+        self.graph_model_8class = MEFARG(num_classes=AU_8CLASS, backbone="resnet50_3d", modal='visual_simple', cfg=self.cfg).to(device)
+        self.fc = nn.Linear(self.au_class, self.num_class)
+    
+    def forward(self, x):
+        print('[VisualGraphModel] input x:', x.shape) # [bs, sample_size, 6(3*2person=6), 112, 112]
+        if self.au_class == 12:
+            f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
+        elif self.au_class == 8:
+            f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
+        # elif self.au_class == 15: # TODO
+        #     f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
+        #     f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
+        else:
+            raise Exception('VisualGraphModel.forward, au_class error!')
+        print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
+        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+             x = self.fc(cl)
+        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+            cl_edge = cl_edge.squeeze(-1)
+            self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
+            x = self.fc(cl_edge)
+        else:
+            raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
+        print('[VisualGraphModel] output x:', x.shape)
+        x = torch.sigmoid(x)
+        if self.return_feature:
+            return x, f_v, f_e, cl, cl_edge
+        return x
+
+class AudioGraphModel(nn.Module):
+    """ 音频图模型 """
+    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12], cfg=None):
+        super(AudioGraphModel, self).__init__()
+        self.return_feature = return_feat
+        assert isinstance(au_class, list) and len(au_class) == 1
+        self.num_class = num_class
+        self.au_class = au_class[0]
+        self.cfg = cfg
+        if init_weights:
+            initialize_weights(self)
+        self.audio_graph_model = MEFARG(num_classes=self.au_class, backbone="resnet50", modal='audio').to(device)
+        self.fc = nn.Linear(self.au_class, self.num_class)
+    
+    def forward(self, x):
+        print('[AudioGraphModel] input x:', x.shape) # [bs, 2(1*2person=2), 1, 32000(sample_size/5*16000)] 5 is downsample, so duration=samples/5 seconds, sample_rate=16000(num of features per second), so last dim=duration*sample_rate
+        f_v, f_e, cl, cl_edge = self.audio_graph_model(x)
+        print('[AudioGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape, 'self.au_class:', self.au_class)
+        
+        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+             x = self.fc(cl)
+        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+            cl_edge = cl_edge.squeeze(-1)
+            self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
+            x = self.fc(cl_edge)
+        else:
+            raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
+        print('[AudioGraphModel] output x:', x.shape)
+        x = torch.sigmoid(x)
+        if self.return_feature:
+            return x, f_v, f_e, cl, cl_edge
+        return x
+
+class AudioVisualGraphModel(nn.Module):
+    """ 视觉和音频融合的图模型 """
+    def __init__(self, init_weights=True, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12,12], cfg=None):
+        super(AudioVisualGraphModel, self).__init__()
+        assert isinstance(au_class, list) and len(au_class) == 2
+        self.audio_au_class, self.visual_au_class = au_class[0], au_class[1]
+        self.cfg = cfg
+        self.num_class = num_class
+        if init_weights:
+            initialize_weights(self)
+        self.audio_graph_model = AudioGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone=backbone, sample_size=sample_size, au_class=[self.audio_au_class], cfg=cfg).to(device)
+        self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone=backbone, sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
+        self.fc = nn.Linear(self.audio_au_class+self.visual_au_class, num_class)
+    
+    def forward(self, audio_input, visual_input):
+        print('[AudioVisualGraphModel] input audio_input:', audio_input.shape, ', visual_input:', visual_input.shape)
+        x_audio, f_v_audio, f_e_audio, cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
+        x_visual, f_v_visual, f_e_visual, cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
+        print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
+        print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
+        
+        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+            x = torch.cat((cl_audio, cl_visual), dim=1)
+        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+            x = torch.cat((cl_edge_audio.squeeze(-1), cl_edge_visual.squeeze(-1)), dim=1)
+        # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_v':
+        #     x = torch.cat((f_v_audio, f_v_visual), dim=1) # TODO
+        # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_e':
+        #     x = torch.cat((f_e_audio, f_e_visual), dim=1) # TODO
+        else:
+            raise Exception('AudioVisualGraphModel.forward, cfg.MODEL.PREDICTION_FEAT error!')
+        print('[AudioVisualGraphModel] after cat, x:', x.shape)
+        self.fc = nn.Linear(x.shape[1], self.num_class).to(device)
+        x = self.fc(x)
+        print('[AudioVisualGraphModel] output x:', x.shape)
+        x = torch.sigmoid(x)
+        return x
 
 @NETWORK_REGISTRY.register()
 def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
+    assert cfg.TRAIN.BIMODAL_OPTION == 1, "cfg.TRAIN.BIMODAL_OPTION should be 1 for visual_graph_representation_learning"
     if cfg.TRAIN.PRE_TRAINED_MODEL:
         # 如果 cfg.TRAIN.PRE_TRAINED_MODEL中包含分号; 则构建一个列表，以分号分隔，将多个预训练模型的路径保存到列表中
         if ';' in cfg.TRAIN.PRE_TRAINED_MODEL:
@@ -790,14 +941,66 @@ def visual_graph_representation_learning(cfg=None): # 视觉图表示学习
     elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
         backbone_net = "swin_transformer_tiny"
     
-    if 'BP4D' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        num_class = 12
-    elif 'DISFA' in cfg.TRAIN.PRE_TRAINED_MODEL:
-        num_class = 8
-    # num_class = cfg.MODEL.NUM_CLASS
+    # if 'BP4D' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     num_class = 12
+    # elif 'DISFA' in cfg.TRAIN.PRE_TRAINED_MODEL:
+    #     num_class = 8
     # print('[visual_graph_representation_learning] num_class: ', num_class, ', backbone_net: ', backbone_net)
-    graph_model = GraphModel(num_class=num_class, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, cfg=cfg)
-    if torch.cuda.is_available() and use_half:
+    
+    if cfg.MODEL.BACKBONE_INPUT == 'frame': # 方法1. 输入MEFARG backbone的数据是每一帧图像
+        graph_model = GraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
+    elif cfg.MODEL.BACKBONE_INPUT == 'video': # 方法2. 输入MEFARG backbone的数据是每一段视频，即图像序列
+        graph_model = VisualGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
+    
+    if torch.cuda.is_available() and cfg.TRAIN.USE_HALF:
+        graph_model.half()
+    graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return graph_model
+
+@NETWORK_REGISTRY.register()
+def audio_graph_representation_learning(cfg=None): # 音频图表示学习
+    assert cfg.TRAIN.BIMODAL_OPTION == 2, "cfg.TRAIN.BIMODAL_OPTION should be 2 for audio_graph_representation_learning"
+    if cfg.TRAIN.PRE_TRAINED_MODEL:
+        # 如果 cfg.TRAIN.PRE_TRAINED_MODEL中包含分号; 则构建一个列表，以分号分隔，将多个预训练模型的路径保存到列表中
+        if ';' in cfg.TRAIN.PRE_TRAINED_MODEL:
+            pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL.split(';')
+        else:
+            pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL
+    else:
+        pretrained_model_path = None
+    # print('[visual_graph_representation_learning] pretrained_model_path: ', pretrained_model_path)
+    
+    if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
+        backbone_net = "resnet50"
+    elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
+        backbone_net = "swin_transformer_tiny"
+    
+    graph_model = AudioGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
+    if torch.cuda.is_available() and cfg.TRAIN.USE_HALF:
+        graph_model.half()
+    graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    return graph_model
+
+@NETWORK_REGISTRY.register()
+def audiovisual_graph_representation_learning(cfg=None): # 视觉+音频融合 图表示学习
+    assert cfg.TRAIN.BIMODAL_OPTION == 3, "cfg.TRAIN.BIMODAL_OPTION should be 3 for audiovisual_graph_representation_learning"
+    if cfg.TRAIN.PRE_TRAINED_MODEL:
+        # 如果 cfg.TRAIN.PRE_TRAINED_MODEL中包含分号; 则构建一个列表，以分号分隔，将多个预训练模型的路径保存到列表中
+        if ';' in cfg.TRAIN.PRE_TRAINED_MODEL:
+            pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL.split(';')
+        else:
+            pretrained_model_path = cfg.TRAIN.PRE_TRAINED_MODEL
+    else:
+        pretrained_model_path = None
+    # print('[visual_graph_representation_learning] pretrained_model_path: ', pretrained_model_path)
+    
+    if 'resnet50' in cfg.TRAIN.PRE_TRAINED_MODEL:
+        backbone_net = "resnet50"
+    elif 'swin_tiny' in cfg.TRAIN.PRE_TRAINED_MODEL:
+        backbone_net = "swin_transformer_tiny"
+    
+    graph_model = AudioVisualGraphModel(num_class=cfg.MODEL.NUM_CLASS, pretrained_model=pretrained_model_path, backbone=backbone_net, sample_size=cfg.DATA.SAMPLE_SIZE, au_class=cfg.MODEL.AU_CLASS, cfg=cfg)
+    if torch.cuda.is_available() and cfg.TRAIN.USE_HALF:
         graph_model.half()
     graph_model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
     return graph_model

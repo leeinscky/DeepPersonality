@@ -107,12 +107,13 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000):
+    def __init__(self, block, layers, in_channels, num_classes=1000):
         super(ResNet, self).__init__()
         self.inplanes = 64
-        
-        self.channels = 3 # image channel is 3 (original)
+        # self.channels = 3 # image channel is 3 (original)
         # self.channels = 6 # image channel is 6 (a pair of video frames)
+        # self.channels = 2 # audio channel is 2 (a pair of audio frames)
+        self.channels = in_channels
         self.conv1 = nn.Conv2d(self.channels, 64, kernel_size=7, stride=2, padding=3, bias=False) 
         
         self.bn1 = nn.BatchNorm2d(64)
@@ -150,7 +151,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        ## print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
+        # print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
         x = self.conv1(x)
         # print('[ResNet] after conv1, x shape: ', x.shape) # 3 channels: [bs, 64, 56, 56]; 6 channels: [bs, 64, 56, 56]
         x = self.bn1(x)
@@ -200,13 +201,13 @@ def resnet34(pretrained=True, **kwargs):
     return model
 
 
-def resnet50(pretrained=True, **kwargs):
+def resnet50(pretrained=True, in_channels=3, **kwargs):
     """Constructs a ResNet-50 model.
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
+    model = ResNet(Bottleneck, [3, 4, 6, 3], in_channels, **kwargs)
     if pretrained:
         print('[resnet.py] loading pretrained ResNet model: ', os.path.join(models_dir, model_name['resnet50']))
         model.load_state_dict(torch.load(os.path.join(models_dir, model_name['resnet50']), map_location=device))
