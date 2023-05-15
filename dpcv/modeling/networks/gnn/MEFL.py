@@ -275,9 +275,9 @@ class MEFARG(nn.Module):
         # [bs, sample_size, 6(3*2person=6), 112, 112] -> [bs, 6(3*2person=6), sample_size, 112, 112]
         if self.modal == 'visual_simple':
             x = x.permute(0, 2, 1, 3, 4) # .contiguous()
-        print('[MEFL.py] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
+        # print('[MEFL.py] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
         x = self.backbone(x)
-        print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
+        # print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
         x = self.global_linear(x)
         # print('[MEFL.py] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
         # cl, cl_edge, f_v, f_e, f_u = self.head(x)
@@ -286,13 +286,13 @@ class MEFARG(nn.Module):
             return f_v, f_u
         elif self.modal == 'visual_simple':
             f_v, f_e, cl, cl_edge = self.head(x)
-            print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
+            # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
             return f_v, f_e, cl, cl_edge
         elif self.modal == 'audio':
             f_v, f_e, cl, cl_edge = self.head(x)
-            print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
+            # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
             return f_v, f_e, cl, cl_edge
         else:
             raise ValueError('modal should be visual or audio')
@@ -827,7 +827,7 @@ class VisualGraphModel(nn.Module):
         self.fc = nn.Linear(self.au_class, self.num_class)
     
     def forward(self, x):
-        print('[VisualGraphModel] input x:', x.shape) # [bs, sample_size, 6(3*2person=6), 112, 112]
+        # print('[VisualGraphModel] input x:', x.shape) # [bs, sample_size, 6(3*2person=6), 112, 112]
         if self.au_class == 12:
             f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
         elif self.au_class == 8:
@@ -837,7 +837,7 @@ class VisualGraphModel(nn.Module):
         #     f_v, f_e, cl, cl_edge = self.graph_model_8class(x)
         else:
             raise Exception('VisualGraphModel.forward, au_class error!')
-        print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
+        # print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
         elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
@@ -846,7 +846,7 @@ class VisualGraphModel(nn.Module):
             x = self.fc(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
-        print('[VisualGraphModel] output x:', x.shape)
+        # print('[VisualGraphModel] output x:', x.shape)
         x = torch.sigmoid(x)
         if self.return_feature:
             return x, f_v, f_e, cl, cl_edge
@@ -867,9 +867,9 @@ class AudioGraphModel(nn.Module):
         self.fc = nn.Linear(self.au_class, self.num_class)
     
     def forward(self, x):
-        print('[AudioGraphModel] input x:', x.shape) # [bs, 2(1*2person=2), 1, 32000(sample_size/5*16000)] 5 is downsample, so duration=samples/5 seconds, sample_rate=16000(num of features per second), so last dim=duration*sample_rate
+        # print('[AudioGraphModel] input x:', x.shape) # [bs, 2(1*2person=2), 1, 32000(sample_size/5*16000)] 5 is downsample, so duration=samples/5 seconds, sample_rate=16000(num of features per second), so last dim=duration*sample_rate
         f_v, f_e, cl, cl_edge = self.audio_graph_model(x)
-        print('[AudioGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape, 'self.au_class:', self.au_class)
+        # print('[AudioGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape, 'self.au_class:', self.au_class)
         
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
@@ -879,7 +879,7 @@ class AudioGraphModel(nn.Module):
             x = self.fc(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
-        print('[AudioGraphModel] output x:', x.shape)
+        # print('[AudioGraphModel] output x:', x.shape)
         x = torch.sigmoid(x)
         if self.return_feature:
             return x, f_v, f_e, cl, cl_edge
@@ -900,11 +900,11 @@ class AudioVisualGraphModel(nn.Module):
         self.fc = nn.Linear(self.audio_au_class+self.visual_au_class, num_class)
     
     def forward(self, audio_input, visual_input):
-        print('[AudioVisualGraphModel] input audio_input:', audio_input.shape, ', visual_input:', visual_input.shape)
+        # print('[AudioVisualGraphModel] input audio_input:', audio_input.shape, ', visual_input:', visual_input.shape)
         x_audio, f_v_audio, f_e_audio, cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
         x_visual, f_v_visual, f_e_visual, cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
-        print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
-        print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
+        # print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
+        # print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
         
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
             x = torch.cat((cl_audio, cl_visual), dim=1)
@@ -916,10 +916,10 @@ class AudioVisualGraphModel(nn.Module):
         #     x = torch.cat((f_e_audio, f_e_visual), dim=1) # TODO
         else:
             raise Exception('AudioVisualGraphModel.forward, cfg.MODEL.PREDICTION_FEAT error!')
-        print('[AudioVisualGraphModel] after cat, x:', x.shape)
+        # print('[AudioVisualGraphModel] after cat, x:', x.shape)
         self.fc = nn.Linear(x.shape[1], self.num_class).to(device)
         x = self.fc(x)
-        print('[AudioVisualGraphModel] output x:', x.shape)
+        # print('[AudioVisualGraphModel] output x:', x.shape)
         x = torch.sigmoid(x)
         return x
 

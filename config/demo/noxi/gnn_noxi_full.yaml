@@ -13,8 +13,8 @@ DATA_LOADER:
   TRANSFORM: "face_image_transform"
   # TRANSFORM: "face_image_x2_transform"
   TRAIN_BATCH_SIZE: 8
-  VALID_BATCH_SIZE: 8
-  TEST_BATCH_SIZE: 8
+  VALID_BATCH_SIZE: 16
+  TEST_BATCH_SIZE: 16
   NUM_WORKERS: 1
   DATASET_NAME: "NOXI"
   DROP_LAST: False
@@ -24,8 +24,13 @@ MODEL:
   # NAME: "resnet50_3d_model_udiva"  # UDIVA视觉: ResNet3D
   # NAME: "audio_resnet_udiva" # UDIVA音频分支: 纯ResNet模型结构
   # NAME: "audiovisual_resnet_lstm_udiva" # UDIVA音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
-  NAME: "visual_graph_representation_learning" # 视觉图表示学习
+  # NAME: "visual_graph_representation_learning"    # 视觉图表示学习
+  NAME: "audio_graph_representation_learning"     # 音频图表示学习
+  # NAME: "audiovisual_graph_representation_learning" # 视觉+音频融合 图表示学习
   NUM_CLASS: 4
+  AU_CLASS: [12] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
+  BACKBONE_INPUT: 'video' # frame:输入MEFARG backbone的数据是每一帧图像; video:输入MEFARG backbone的数据是每一段视频，即图像序列
+  PREDICTION_FEAT: 'cl' # 预测时使用的特征 cl:使用MEFARG返回的cl; cl_edge:使用MEFARG返回的cl_edge; f_v:使用MEFARG返回的f_v; f_e:使用MEFARG返回的f_e
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
@@ -34,12 +39,12 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [5, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
+  MILESTONE: [2, 5, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
   SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
-  BIMODAL_OPTION: 1
+  BIMODAL_OPTION: 2
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1

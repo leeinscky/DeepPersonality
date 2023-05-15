@@ -418,6 +418,8 @@
 backup: 
     sp16- ; sp32- ; sp48- ; sp64- ; sp80- ; sp96-
 
+##查看HPC机器剩余磁盘空间额度的命令: quota
+
 Tag解释:
     1. testjob: 提交正式slurm作业前的预测试，运行时间短，用于测试sbatch脚本是否能跑通
     2. experiment-x: 正式slurm作业，将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示

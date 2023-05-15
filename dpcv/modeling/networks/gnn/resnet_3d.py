@@ -313,10 +313,10 @@ class ResNetUdiva(nn.Module):
     def forward(self, x):
         # 手动构造一个假输入
         # x = torch.randn(4, 3, 16, 224, 224) # batch_size, channel, time/sample_size, height, width
-        print('[ResNetUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
+        # print('[ResNetUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
         
         x = self.conv1(x)
-        print('[ResNetUdiva] after conv1, x.shape: ', x.shape) # batch_size, 64, sample_size, 56, 56
+        # print('[ResNetUdiva] after conv1, x.shape: ', x.shape) # batch_size, 64, sample_size, 56, 56
         x = self.bn1(x)
         # print('[ResNetUdiva] after bn1, x.shape: ', x.shape) # batch_size, 64, sample_size, 112, 112
         x = self.relu(x)
@@ -325,19 +325,19 @@ class ResNetUdiva(nn.Module):
             x = self.maxpool(x)
 
         x = self.layer1(x)
-        print('[ResNetUdiva] after layer1, x.shape: ', x.shape) # batch_size, 256, 5, 28, 28
+        # print('[ResNetUdiva] after layer1, x.shape: ', x.shape) # batch_size, 256, 5, 28, 28
         x = self.layer2(x)
-        print('[ResNetUdiva] after layer2, x.shape: ', x.shape) # batch_size, 512, 3, 14, 14
+        # print('[ResNetUdiva] after layer2, x.shape: ', x.shape) # batch_size, 512, 3, 14, 14
         x = self.layer3(x)
-        print('[ResNetUdiva] after layer3, x.shape: ', x.shape) # batch_size, 1024, 2, 7, 7
+        # print('[ResNetUdiva] after layer3, x.shape: ', x.shape) # batch_size, 1024, 2, 7, 7
         x = self.layer4(x)
-        print('[ResNetUdiva] after layer4, x.shape: ', x.shape) # batch_size, 2048, 1, 4, 4
+        # print('[ResNetUdiva] after layer4, x.shape: ', x.shape) # batch_size, 2048, 1, 4, 4
         # x = self.avgpool(x)
         # print('[ResNetUdiva] after avgpool, x.shape: ', x.shape) # batch_size, 2048, 1, 1, 1
 
         b,c,t,h,w = x.shape
         x = x.view(b,c,-1).permute(0,2,1) # same operation as in resnet.py
-        print('[ResNetUdiva] final x.shape: ', x.shape)
+        # print('[ResNetUdiva] final x.shape: ', x.shape)
         return x
 
 def get_3d_resnet_model(model_depth, **kwargs):

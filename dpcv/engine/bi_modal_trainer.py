@@ -513,9 +513,9 @@ class BiModalTrainerUdiva(object):
             outputs = torch.round(outputs * 1000000) / 1000000 # 小数点后保留6位
             labels = labels.type(torch.int64)
             
-            print('outputs:', outputs, outputs.shape, '\nlabels:', labels, labels.shape)
-            print('outputs[:, 0]:', outputs[:, 0], ', outputs.argmax(dim=-1)=', outputs.argmax(dim=-1)) # [:, 0] 表示在张量的第一个维度上选择所有的元素，并在第二个维度上选择索引为 0 的元素。即选取张量的所有行（第一个维度）和第一列（第二个维度）的元素。
-            print('labels[:, 0]:', labels[:, 0], 'labels.argmax(dim=-1):', labels.argmax(dim=-1))
+            # print('outputs:', outputs, outputs.shape, '\nlabels:', labels, labels.shape)
+            # print('outputs[:, 0]:', outputs[:, 0], ', outputs.argmax(dim=-1)=', outputs.argmax(dim=-1)) # [:, 0] 表示在张量的第一个维度上选择所有的元素，并在第二个维度上选择索引为 0 的元素。即选取张量的所有行（第一个维度）和第一列（第二个维度）的元素。
+            # print('labels[:, 0]:', labels[:, 0], 'labels.argmax(dim=-1):', labels.argmax(dim=-1))
             pred_list.extend(outputs[:, 0].tolist())
             label_list.extend(labels[:, 0].tolist())
             pred_list2.extend(outputs.tolist()) # pred_list2.extend(outputs.argmax(dim=-1).tolist())
