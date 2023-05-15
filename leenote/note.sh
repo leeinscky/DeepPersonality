@@ -423,16 +423,16 @@ Tag解释:
     2. experiment-x: 正式slurm作业，将wandb上每个实验的tag设置为experiment-x, x 是一个数字，代表对应的实验目的，不同id对应的对比实验目的不一样，用于周会展示
 
 1. Project: DeepPersonality
-    experiment-1 ResNet3D-Visual: 
+    experiment-1 ResNet3D-Visual: tag更新为udiva-visual-cnn
         【模型】：resnet50_3d_model_udiva 
         【分支】：视觉分支
         【变量】：控制其他超参数不变，递增sample_size，观察acc的变化
-    experiment-2 ResNet3D-Visual: 
+    experiment-2 ResNet3D-Visual: tag更新为udiva-visual-cnn-1
         【相比于上一个实验的变化】：相比于experiment-1，增加了auc、f1score指标，
         【模型】： resnet50_3d_model_udiva 
         【分支】：视觉分支
         【变量】：控制其他超参数不变，递增sample_size，观察auc的变化
-        【子实验-experiment-2_1】 增加session_acc指标，quarter_acc指标, 用于周会展示
+        【子实验-experiment-2_1 tag更新为udiva-visual-cnn-2】 增加session_acc指标，quarter_acc指标, 用于周会展示
             30mins test: 15629279 15629280 15629281 15629401
             bs8: sp144(OOM❌)
             bs16:
@@ -474,14 +474,14 @@ Tag解释:
             48 16 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.5
             32 16 {"8105":[1,1,1,1],"56109":[0,0,0,0],"66067":[1,1,1,1],"86087":[1,1,1,1],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[1,1,1,1],"105117":[0,1,0,0],"111130":[0,0,0,0],"137138":[0,0,0,0]} 0.5455 0.3333
             64 32 {"8105":[0,0,0,0],"56109":[0,0,0,0],"66067":[1,1,1,1],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.3333
-        【子实验-experiment-2_2】 将数据集从Udiva 改为 NoXi 
+        【子实验-experiment-2_2 tag更新为noxi-visual-cnn】 将数据集从Udiva 改为 NoXi 
             视觉分支训练时很容易OOM，记录OOM的参数配置，以便后续调参
             bs=16: sp=64(✅)
             bs=32: sp=32(✅)    sp=64(✅)    sp=80(OOM❌)      sp=96(OOM❌)  sp=112(OOM❌) sp=128(OOM❌)
             bs=48: sp=16(✅)    sp=64(OOM❌)
             bs=64: sp=48(OOM❌) sp=64(OOM❌) sp=128(OOM❌)
 
-    experiment-3 ResNet18-Audio: 
+    experiment-3 ResNet18-Audio: tag更新为udiva-audio-cnn
         【相比于上一个实验的变化】：相比于experiment-2，从视觉分支改为音频分支，且模型改为audio_resnet_udiva, 且数据集进行了过采样避免不均衡
         【模型】： audio_resnet_udiva
         【分支】：音频分支
@@ -499,7 +499,7 @@ Tag解释:
             bs32:(sp112 不会OOM gpu 12mins跑完) sp16-15096292 ; sp32-15096293 ; sp48-15096294 ; sp64-15096295 ; sp80-15096304 ; sp96-15096305
             bs48:(sp96 不会OOM gpu 12mins跑完) sp16-15096345 ; sp32-15096347 ; sp48-15096348 ; sp64-15096349 ; sp80-15096350 ; sp96-15096351
 
-        【子实验-experiment-3_1】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
+        【子实验-experiment-3_1 tag更新为 udiva-audio-cnn-1】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
             test: 15652018
             sample_size=16
             sample_size2=32
@@ -572,7 +572,7 @@ Tag解释:
             32 128 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[0,0,1,0],"86089":[1,1,1,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.3636 0.7778
             48 48 {"8105":[0,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,1],"86087":[1,0,1,1],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.7222
             64 48 {"8105":[0,0,0,0],"56109":[1,1,0,1],"66067":[1,0,1,0],"86087":[0,0,1,0],"86089":[0,0,0,1],"87088":[1,1,1,1],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[1,1,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.5455 0.6667
-        【子实验-experiment-3_2】 数据集从Udiva改为NoXi数据集
+        【子实验-experiment-3_2 tag更新为 noxi-audio-cnn】 数据集从Udiva改为NoXi数据集
             # 【重要】NOXI数据集耗时分析，用于设置epoch具体值参考：
                 # 当sp=32,bs=8 , 20mins跑完了7个epoch, (预估10个epoch需要 20mins*10/7=28.57mins，即大约半小时) 5折交叉验证，每折如果跑10个epoch，一共需要跑50个epoch，预估需要跑5*30mins=150mins，即大约2.5个小时
                 # 当bs=8, sp=32, epoch=10, 总计耗时2h 5mins; 当bs=8, sp=48, epoch=10, 总计耗时1h 23mins; 当bs=8, sp=112, epoch=10, 总计耗时37mins; 规律: sample_size越大，耗时越少
@@ -760,7 +760,7 @@ Tag解释:
             Submitted batch job 16531452
             Submitted batch job 16531459
 
-    experiment-4 Transformer-Visual: 
+    experiment-4 Transformer-Visual: tag更新为udiva-visual-transformer
         【相比于上一个实验的变化】：相比于experiment-3，使用Transformer模型:timesformer_udiva 来处理视觉分支
         【模型】：timesformer_udiva
         【分支】：视觉分支
@@ -773,7 +773,7 @@ Tag解释:
             当batch_size=16,sample_size>=32时，timesformer跑不起来，CUDA OOM
             当batch_size=8,sample_size>=48时，timesformer跑不起来，CUDA OOM
             当batch_size=4,sample_size>=80时，timesformer跑不起来，CUDA OOM
-    experiment-5_1 Transformer-Audio 预训练: 
+    experiment-5_1 Transformer-Audio 预训练: tag更新为udiva-audio-transformer-pretrain
         【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, 预训练阶段
         【模型】：ssast_udiva - 预训练阶段 https://github.com/YuanGongND/ssast
         【分支】：音频分支
@@ -781,7 +781,7 @@ Tag解释:
         【GPU job id】30mins test: 15149208(finished✅) 
                 bs16: sp16-15149222
         【CPU job id】bs16&8: 15149495
-    experiment-5_2 Transformer-Audio 调优: 
+    experiment-5_2 Transformer-Audio 调优: tag更新为udiva-audio-transformer-finetune
         【相比于上一个实验的变化】：相比于experiment-34，使用音频Transformer模型:ssast_udiva 来处理音频分支, fine tunning调优阶段
         【模型】： ssast_udiva - fine tunning调优阶段 https://github.com/YuanGongND/ssast 和5_1区别，有pretrain参数
         【分支】：音频分支
@@ -792,7 +792,7 @@ Tag解释:
                 bs32: sp16-15167983(success✅) ; sp32-15168511(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
                 bs48: sp16-15168733(success✅) ; sp32-15168758(CUDA OOM❌) ; sp48- ; sp64- ; sp80- ; sp96-
         
-        【子实验-experiment-5_3】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
+        【子实验-experiment-5_3 tag更新为 udiva-audio-transformer-finetune-1】 增加session_acc指标，quarter_acc指标, 增加 train_epoch_summary_loss, val_epoch_summary_loss 用于周会展示
             sample_size=16
             sample_size2=16
             sample_size3=16
@@ -824,7 +824,7 @@ Tag解释:
             32 8 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.7778
             16 8 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.7222
             16 32 {"8105":[1,0,0,0],"56109":[1,1,1,1],"66067":[0,0,0,0],"86087":[0,0,0,0],"86089":[0,0,0,0],"87088":[0,0,0,0],"87089":[0,0,0,0],"88089":[0,0,0,0],"105117":[0,0,0,0],"111130":[0,0,0,0],"137138":[1,1,1,1]} 0.1818 0.6667
-    experiment-6 GNN-Visual:
+    experiment-6 GNN-Visual: tag更新为noxi-visual-graph
         【模型】：visual_graph_representation_learning
         【分支】：图像分支
         【调参总结】
