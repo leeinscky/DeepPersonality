@@ -371,7 +371,7 @@ class BiModalTrainerUdiva(object):
             #             raise exception
             '''
             if self.cfg_model.NUM_CLASS == 2: 
-                temp_labels = labels
+                temp_labels = labels.float()
             else:
                 temp_labels = labels.argmax(dim=-1)
             if self.cfg.USE_AMP: # use AMP:automatic mixed precision
@@ -379,21 +379,19 @@ class BiModalTrainerUdiva(object):
                     with torch.cuda.amp.autocast():
                         outputs = model(*inputs)
                         outputs = outputs.float()
-                        if self.loss_name == "binary_cross_entropy":
-                            temp_labels = temp_labels.float()
                         # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
                         loss = loss_f(outputs.cpu(), temp_labels.cpu())
                 else:
                     with torch.autocast(device_type="cpu", dtype=torch.bfloat16):
                         outputs = model(*inputs)
                         outputs = outputs.float()
-                        loss = loss_f(outputs.cpu(), temp_labels.cpu().float())
+                        loss = loss_f(outputs.cpu(), temp_labels.cpu())
             else:
                 outputs = model(*inputs) # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
                 # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
                 if self.cfg.USE_HALF and torch.cuda.is_available(): # use half precision
                     outputs = outputs.float() # avoid RuntimeError: "binary_cross_entropy" not implemented for 'Half'
-                loss = loss_f(outputs.cpu(), temp_labels.cpu().float())
+                loss = loss_f(outputs.cpu(), temp_labels.cpu())
             del temp_labels
             outputs = outputs.detach().cpu()
             labels = labels.detach().cpu()

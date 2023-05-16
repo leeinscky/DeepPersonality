@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -125,9 +125,9 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml # NOXI dataset
 
 #### **************************** ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
-# model="Res3D-Visual"
-# # cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
-# cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
+model="Res3D-Visual"
+# cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
+cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
 # model="Res18-Audio"
@@ -151,8 +151,8 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
 #### **************************** GNN: gnn_noxi_full.yaml Audio **************************** ####
-model="GNN-Audio"
-cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
+# model="GNN-Audio"
+# cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
 # data="UDIVA"
 data="NoXi"
@@ -165,7 +165,7 @@ sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=16
+batch_size=8
 batch_size2=128
 batch_size3=128
 batch_size4=64

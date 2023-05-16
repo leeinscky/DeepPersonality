@@ -7,9 +7,8 @@ DATA:
   NOXI_AUD_DATA: "noxi_full/wav"
   NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
 DATA_LOADER:
-  # NAME: "bimodal_resnet_lstm_data_loader_udiva" 
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
-  TRANSFORM: "udiva_frame_transforms"
+  TRANSFORM: "face_image_transform"
   TRAIN_BATCH_SIZE: 32
   VALID_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 32
@@ -19,29 +18,34 @@ DATA_LOADER:
   PREFETCH_FACTOR: 1
   NUM_FOLD: 3
 MODEL:
-  NAME: "resnet50_3d_model_udiva"         # 视觉: ResNet3D
-  # NAME: "audio_resnet_udiva"            # 音频: 纯ResNet模型结构
-  # NAME: "audiovisual_resnet_lstm_udiva" # 音频+视觉: ResNet-LSTM模型结构：加入了LSTM层处理视觉分支的图片特征序列
+  NAME: "resnet50_3d_model_udiva"                   # CNN 视觉: ResNet50_3D
+  # NAME: "audio_resnet_udiva"                        # CNN 音频: ResNet18
+  # NAME: "audiovisual_resnet_lstm_udiva"             # CNN 音频+视觉: ResNet18 + ResNet50_3D
+  # NAME: "visual_graph_representation_learning"      # GNN 视觉 图表示学习
+  # NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
+  # NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
   NUM_CLASS: 4
 LOSS:
-  NAME: "binary_cross_entropy"
+  NAME: "cross_entropy"
 SOLVER:
   NAME: "adam"
   SCHEDULER: "multi_step_scale"
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  MILESTONE: [5, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
+  MILESTONE: [3, 5, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 1
+  BIMODAL_OPTION: 1       # 1: visual 2: audio # 3: both
   SAVED_MODEL_DIR: "saved_model/deeppersonality/resnet_3d_noxi"
-  BIMODAL_OPTION: 1
-  LOG_INTERVAL: 50
+  LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
-  ACC_THRESHOLD: 0.35
-  CROSS_RESUME: "saved_model/deeppersonality/resnet_3d_noxi/03-30_02-21_sp32_bs32_ep5/checkpoint_fold0_acc0.3622_ep0.pkl"
+  ACC_THRESHOLD: 0.45
+  # CROSS_RESUME: "saved_model/deeppersonality/resnet_3d_noxi/03-30_02-21_sp32_bs32_ep5/checkpoint_fold0_acc0.3622_ep0.pkl"
+  USE_AMP: True
+  USE_HALF: False
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False

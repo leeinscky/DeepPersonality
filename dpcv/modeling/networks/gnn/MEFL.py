@@ -893,7 +893,7 @@ class AudioGraphModel(nn.Module):
             x = self.fc(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
-        print('[AudioGraphModel] output x:', x.shape)
+        # print('[AudioGraphModel] output x:', x.shape)
         if self.cfg.LOSS.NAME == "binary_cross_entropy":
             x = torch.sigmoid(x)
         if self.return_feature:

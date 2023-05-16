@@ -25,8 +25,8 @@ MODEL:
   # NAME: "audio_resnet_udiva"                        # CNN 音频: ResNet18
   # NAME: "audiovisual_resnet_lstm_udiva"             # CNN 音频+视觉: ResNet18 + ResNet50_3D
   # NAME: "visual_graph_representation_learning"      # GNN 视觉 图表示学习
-  NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
-  # NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
+  # NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
+  NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
   NUM_CLASS: 4
   AU_CLASS: [12] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
   BACKBONE_INPUT: 'video' # frame:输入MEFARG backbone的数据是每一帧图像; video:输入MEFARG backbone的数据是每一段视频，即图像序列
@@ -44,10 +44,10 @@ SOLVER:
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
+  BIMODAL_OPTION: 3       # 1: visual 2: audio # 3: both
   # OUTPUT_DIR: "results/demo/unified_frame_images/bimodal_resnet_noxi"
-  # SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
-  SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
-  BIMODAL_OPTION: 2       # 1: visual 2: audio # 3: both
+  SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet_noxi"
+  # SAVED_MODEL_DIR: "saved_model/deeppersonality/graph_visual"
   LOG_INTERVAL: 1
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
@@ -56,7 +56,7 @@ TRAIN:
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_BP4D/MEFARG_resnet50_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
-  USE_AMP: True
+  USE_AMP: False
   USE_HALF: False
 TEST:
   COMPUTE_PCC: False
