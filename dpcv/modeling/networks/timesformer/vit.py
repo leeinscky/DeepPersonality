@@ -366,6 +366,7 @@ class TimeSformer(nn.Module):
 
 @NETWORK_REGISTRY.register()
 def timesformer_udiva(cfg):
+    # download pretrained_model TimeSformer_divST_16x16_448_K400 here: https://github.com/facebookresearch/TimeSformer
     model = TimeSformer(img_size=224, num_classes=cfg.MODEL.NUM_CLASS, num_frames=16, attention_type='divided_space_time',  
                         pretrained_model='/home/zl525/code/DeepPersonality/dpcv/modeling/networks/timesformer/pretrained/TimeSformer_divST_16x16_448_K400.pyth')
     return model.to(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
