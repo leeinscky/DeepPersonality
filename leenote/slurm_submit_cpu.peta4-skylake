@@ -19,7 +19,7 @@
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
 #SBATCH --ntasks=32
 #! How much wallclock time will be required?
-#SBATCH --time=12:00:00
+#SBATCH --time=10:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -124,7 +124,7 @@ JOBID=$SLURM_JOB_ID
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
 model="Res18-Audio"
-# model="Res18-Visual"
+# model="Res18-AudioVisual"
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
@@ -144,7 +144,7 @@ cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 # cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
 
 data="NoXi"
-epoch=5
+epoch=10
 
 sample_size=64
 sample_size2=272
@@ -153,7 +153,7 @@ sample_size4=304
 sample_size5=320
 sample_size6=336
 
-batch_size=64
+batch_size=32
 batch_size2=128
 batch_size3=128
 batch_size4=64

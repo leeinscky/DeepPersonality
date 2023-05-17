@@ -33,7 +33,7 @@ TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 1
   BIMODAL_OPTION: 1       # 1: visual 2: audio # 3: both
-  SAVED_MODEL_DIR: "saved_model/deeppersonality/resnet_3d_noxi"
+  SAVED_MODEL_DIR: "saved_model/deeppersonality/resnet_3d_noxi_full_visual"
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1

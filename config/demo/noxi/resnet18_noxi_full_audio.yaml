@@ -9,19 +9,21 @@ DATA:
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_noxi"
   TRANSFORM: "face_image_transform"
-  TRAIN_BATCH_SIZE: 32
+  TRAIN_BATCH_SIZE: 64
   VALID_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 32
   NUM_WORKERS: 1
   DATASET_NAME: "NOXI"
   DROP_LAST: False
-  PREFETCH_FACTOR: 1
+  PREFETCH_FACTOR: 2
   NUM_FOLD: 3
 MODEL:
-  NAME: "resnet50_3d_model_udiva" # CNN 视觉: ResNet50_3D
+  # NAME: "resnet50_3d_model_udiva"                   # CNN 视觉: ResNet50_3D
+  NAME: "audio_resnet_udiva"                        # CNN 音频: ResNet18
+  # NAME: "audiovisual_resnet_lstm_udiva"             # CNN 音频+视觉: ResNet18 + ResNet50_3D
   NUM_CLASS: 4
 LOSS:
-  NAME: "cross_entropy"
+  NAME: "cross_entropy" # single label, multiple classes refer: https://towardsdatascience.com/deep-learning-which-loss-and-activation-functions-should-i-use-ac02f1c56aa8
 SOLVER:
   NAME: "adam"
   SCHEDULER: "multi_step_scale"
@@ -31,15 +33,14 @@ SOLVER:
   MILESTONE: [2, 4, 6, 8, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
-  MAX_EPOCH: 1
-  BIMODAL_OPTION: 1       # 1: visual 2: audio # 3: both
-  SAVED_MODEL_DIR: "saved_model/deeppersonality/resnet_3d_noxi"
+  MAX_EPOCH: 2
+  BIMODAL_OPTION: 2       # 1: visual 2: audio # 3: both
+  SAVED_MODEL_DIR: "saved_model/deeppersonality/resnet18_noxi_full_audio"
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
-  ACC_THRESHOLD: 0.4
-  # CROSS_RESUME: "saved_model/deeppersonality/resnet_3d_noxi/03-30_02-21_sp32_bs32_ep5/checkpoint_fold0_acc0.3622_ep0.pkl"
-  USE_AMP: True
+  ACC_THRESHOLD: 0.45
+  USE_AMP: False
   USE_HALF: False
 TEST:
   COMPUTE_PCC: False

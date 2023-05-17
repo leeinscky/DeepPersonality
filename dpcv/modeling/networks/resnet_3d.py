@@ -317,7 +317,6 @@ class ResNet3DUdiva(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        # 手动构造一个假输入
         # x = torch.randn(4, 3, 16, 224, 224) # batch_size, channel, time/sample_size, height, width
         # print('[ResNet3DUdiva] 0-input x.shape: ', x.shape) # batch_size, 6(channel), sample_size, 224, 224
         

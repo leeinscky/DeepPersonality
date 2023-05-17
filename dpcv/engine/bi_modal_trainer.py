@@ -335,7 +335,6 @@ class BiModalTrainerUdiva(object):
         epoch_total_num = 0
         epo_iter_num = len(data_loader)
         print('Train epo_iter_num = ', epo_iter_num)
-        # batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meeting
         f1, f1_2 = -1, -1
         pred_list, label_list = [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
@@ -597,6 +596,7 @@ class BiModalTrainerUdiva(object):
         #### 计算指标：epoch loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num
         # print('loss_list:', loss_list, ', len(loss_list):', len(loss_list), ', train_loss:', train_loss, ', batch_loss_sum:', batch_loss_sum, ', epo_iter_num:', epo_iter_num)
+        print('Train: len(loss_list):', len(loss_list), ', epoch_summary_loss:', epoch_summary_loss, ', batch_loss_sum:', batch_loss_sum, ', epo_iter_num:', epo_iter_num)
         
         #### 计算指标：acc
         epoch_summary_acc = epoch_total_acc / epoch_total_num
@@ -632,8 +632,7 @@ class BiModalTrainerUdiva(object):
             wandb.log({
                 "train_epoch_summary_loss": float(epoch_summary_loss), # 记录当前epoch全部batch遍历完后的总体loss
                 "train_epoch_summary_acc": float(epoch_summary_acc),  # 记录当前epoch全部batch遍历完后的总体acc
-                "train_epoch_summary_auc": float(epoch_auc), # 比epoch_auc2更准确的auc
-                "train_epoch_summary_auc2": float(epoch_auc2),
+                "train_epoch_summary_auc": float(epoch_auc), # auc
                 "train_epoch_summary_f1_score": float(f1), # 比f1_2更准确的f1
                 "train_epoch_summary_f1_score2": float(f1_2),
                 "epoch": epoch_idx + 1})
@@ -652,7 +651,6 @@ class BiModalTrainerUdiva(object):
             epoch_total_num = 0
             epo_iter_num = len(data_loader)
             pred_list, label_list, pred_list2 = [], [], []
-            # batch_auc, batch_auc2, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1, -1 # TODO delete this line after week meeting
             f1, f1_2= -1, -1
             for i, data in enumerate(data_loader):
                 inputs, labels, session_id, segment_id, is_continue = self.data_fmt(data) # labels:[batch_size, 2], session_id:[batch_size], segment_id:[batch_size] e.g. session_id: tensor([1080, ... 1080]) segment_id: tensor([ 1,  2, 3, ... 32])
@@ -807,7 +805,6 @@ class BiModalTrainerUdiva(object):
                 "val_epoch_summary_loss": float(epoch_summary_loss),
                 "val_epoch_summary_acc": float(epoch_summary_acc),
                 "val_epoch_summary_auc": float(epoch_auc),
-                "val_epoch_summary_auc2": float(epoch_auc2),
                 # "val_epoch_summary_f1": float(f1),
                 # "val_epoch_summary_f1_2": float(f1_2),
                 "epoch": epoch_idx + 1,
@@ -824,7 +821,6 @@ class BiModalTrainerUdiva(object):
             total_num = 0
             test_acc = 0
             pred_list, label_list, pred_list2 = [], [], []
-            # session_auc, f1, f1_2, epoch_auc, epoch_auc2 = -1, -1, -1, -1, -1 # TODO delete this line after week meetingafter
             f1, f1_2 = -1, -1
             session_result = {}
             # for data in tqdm(data_loader): # 遍历data_loader
@@ -971,18 +967,16 @@ class BiModalTrainerUdiva(object):
             epoch_auc = auroc(pred2, label, task="multiclass", num_classes=self.cfg_model.NUM_CLASS)
         else:
             raise Exception('Invalid NUM_CLASS')
-        epoch_auc2 = -1
-        
         
         #### 计算指标：F1 score
         # f1 = self.f1_metric(torch.tensor(pred_list), torch.tensor(label_list))
         # f1_2 = self.f1_metric(torch.tensor(pred_list2), torch.tensor(label_list2))
         
         if epoch_idx is not None:
-            self.logger.info("Test: Epo[{:0>3}/{:0>3}] Test Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} ({:.4f}) Epo F1_Score: {:.4f} ({:.4f}) Session Acc:{:.4f} ({}/{}) Session AUC: {:.4f} TIME:{}".format(
+            self.logger.info("Test: Epo[{:0>3}/{:0>3}] Test Epo Summary Acc:{:.4f} ({}/{}) Epo AUC: {:.4f} Epo F1_Score: {:.4f} ({:.4f}) Session Acc:{:.4f} ({}/{}) Session AUC: {:.4f} TIME:{}".format(
                                 epoch_idx + 1, self.cfg.MAX_EPOCH, # Epoch
                                 test_acc, total_acc, total_num,    # Epo ACC
-                                epoch_auc, epoch_auc2, # Epo AUC
+                                epoch_auc, # Epo AUC
                                 f1, f1_2, # Epo F1_Score
                                 session_acc, session_total_acc, session_total_num, # Session ACC
                                 session_auc, # Session AUC
@@ -992,16 +986,15 @@ class BiModalTrainerUdiva(object):
                 wandb.log({
                     "test_acc": float(test_acc),
                     "test_auc": float(epoch_auc),
-                    "test_auc2": float(epoch_auc2),
                     "test_f1": float(f1),
                     "test_f1_2": float(f1_2),
                     "test_session_acc": float(session_acc),
                     "test_session_auc": float(session_auc),
                     "epoch": epoch_idx + 1})
         else:
-            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} ({:.4f}) Final Session Acc:{:.4f} ({}/{}) Final Session AUC:{:.4f} TIME:{}\n".format(
+            self.logger.info("Test only: Final Acc:{:.4f} ({}/{}) Final AUC:{:.4f} Final Session Acc:{:.4f} ({}/{}) Final Session AUC:{:.4f} TIME:{}\n".format(
                 test_acc, total_acc, total_num,  # Epo ACC
-                epoch_auc, epoch_auc2,           # Epo AUC
+                epoch_auc,           # Epo AUC
                 session_acc, session_total_acc, session_total_num, # Session ACC
                 session_auc,                     # Session AUC
                 time.strftime("%H:%M:%S", time.localtime()), # Current TIME
