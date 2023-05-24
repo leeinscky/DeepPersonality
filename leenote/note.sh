@@ -194,6 +194,7 @@
         unlink /home/zl525/code/DeepPersonality/datasets/noxi_tiny
 
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_tiny /home/zl525/code/DeepPersonality/datasets/
+        ln -s /home/zl525/rds/hpc-work/datasets/noxi_medium /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_full /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_temp_test /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/pretrained_models/ME-GraphAU/ /home/zl525/code/DeepPersonality/pre_trained_weights/
@@ -368,7 +369,7 @@
 # TODO
     为了让label有变化，将005变为006 /home/zl525/code/DeepPersonality/datasets/noxi_tiny/img/005 手动重命名为 /home/zl525/code/DeepPersonality/datasets/noxi/img/006， 后续记得改回来
 
-####### 构造tiny数据集用于测试
+####### 构造tiny数据集用于测试, 构造medium中等数据集用于中等规模数据集测试
     cd ~/rds/hpc-work/datasets/
 
     # 001: 复制001文件夹然后删除31-5000帧
@@ -393,12 +394,23 @@
     cp -r noxi_full/img/001/Expert_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/
     cp noxi_full/img/001/Expert_video/face_{31..80}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Expert_video/
     cp noxi_full/img/003/Expert_video/face_{31..50}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/003/Expert_video/
+        # medium数据集【重要】
+        mkdir -p ~/rds/hpc-work/datasets/noxi_medium/img/001/Expert_video/
+        mkdir -p ~/rds/hpc-work/datasets/noxi_medium/img/003/Expert_video/
+        cp ~/rds/hpc-work/datasets/noxi_full/img/001/Expert_video/face_{1..200}.jpg ~/rds/hpc-work/datasets/noxi_medium/img/001/Expert_video/
+        cp ~/rds/hpc-work/datasets/noxi_full/img/003/Expert_video/face_{1..200}.jpg ~/rds/hpc-work/datasets/noxi_medium/img/003/Expert_video/
 
     # # 复制 Novice_video 30张
     # mkdir -p ~/rds/hpc-work/datasets/noxi_tiny/img/Novice_video/001/
     # cp -r noxi_full/img/001/Novice_video/face_{1..30}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/
     cp noxi_full/img/001/Novice_video/face_{31..80}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/001/Novice_video/
     cp noxi_full/img/003/Novice_video/face_{31..50}.jpg ~/rds/hpc-work/datasets/noxi_tiny/img/003/Novice_video/
+        # medium数据集【重要】
+        mkdir -p ~/rds/hpc-work/datasets/noxi_medium/img/001/Novice_video/
+        mkdir -p ~/rds/hpc-work/datasets/noxi_medium/img/003/Novice_video/
+        cp ~/rds/hpc-work/datasets/noxi_full/img/001/Novice_video/face_{1..200}.jpg ~/rds/hpc-work/datasets/noxi_medium/img/001/Novice_video/
+        cp ~/rds/hpc-work/datasets/noxi_full/img/003/Novice_video/face_{1..200}.jpg ~/rds/hpc-work/datasets/noxi_medium/img/003/Novice_video/
+        
 
     # find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' | head -n 30 | xargs -I {} ls {}
     # find noxi_full/img/001/Expert_video/ -name 'face_*.jpg' -print0 | sort -z | head -z -n 30 | xargs -0 -I {} ls {}

@@ -883,6 +883,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
         batch_size = cfg.DATA_LOADER.TEST_BATCH_SIZE
         shuffle=False
     # print('[audio_visual_data_udiva.py] batch_size: ', batch_size, ' mode: ', mode)
+    print('[audio_visual_data_udiva.py] num_workers:', cfg.DATA_LOADER.NUM_WORKERS, ', prefetch_factor:', cfg.DATA_LOADER.PREFETCH_FACTOR, ', pin_memory:', cfg.DATA_LOADER.PIN_MEMORY)
     data_loader = DataLoader(
         dataset=dataset, 
         batch_size=batch_size,
@@ -890,6 +891,7 @@ def bimodal_resnet_lstm_data_loader_noxi(cfg, mode, fold_id=None): # NoXi datase
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
         drop_last=cfg.DATA_LOADER.DROP_LAST,
         prefetch_factor=cfg.DATA_LOADER.PREFETCH_FACTOR,
+        pin_memory=cfg.DATA_LOADER.PIN_MEMORY,
     )
     return data_loader
 
@@ -1026,6 +1028,7 @@ def bimodal_resnet_lstm_data_loader_udiva(cfg, mode): # 基于AudioVisualDataUdi
         num_workers=cfg.DATA_LOADER.NUM_WORKERS,  # cfg.NUM_WORKS
         drop_last=cfg.DATA_LOADER.DROP_LAST,
         prefetch_factor=cfg.DATA_LOADER.PREFETCH_FACTOR,
+        pin_memory=cfg.DATA_LOADER.PIN_MEMORY,
     )
     return data_loader
 

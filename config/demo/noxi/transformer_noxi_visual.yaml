@@ -3,12 +3,12 @@ DATA:
   SESSION: "NOXI"
   SAMPLE_SIZE: 16
   # SAMPLING_NAME: "BorderlineSMOTE"
-  # NOXI_IMG_DATA: "noxi_full/img"
-  # NOXI_AUD_DATA: "noxi_full/wav"
-  # NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
-  NOXI_IMG_DATA: "noxi_tiny/img"
-  NOXI_AUD_DATA: "noxi_tiny/wav"
-  NOXI_LABEL_DATA: "noxi_tiny/label/noxi_sessions_label.pkl"
+  NOXI_IMG_DATA: "noxi_full/img"
+  NOXI_AUD_DATA: "noxi_full/wav"
+  NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
+  # NOXI_IMG_DATA: "noxi_tiny/img"
+  # NOXI_AUD_DATA: "noxi_tiny/wav"
+  # NOXI_LABEL_DATA: "noxi_tiny/label/noxi_sessions_label.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_noxi" 
   TRANSFORM: "face_image_transform"
@@ -44,6 +44,7 @@ TRAIN:
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
+  ACC_THRESHOLD: 0.4
   USE_AMP: True
   USE_HALF: False
 TEST:

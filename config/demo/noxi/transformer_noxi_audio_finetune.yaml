@@ -3,12 +3,12 @@ DATA:
   SESSION: "NOXI"
   SAMPLE_SIZE: 16
   # SAMPLING_NAME: "BorderlineSMOTE"
-  # NOXI_IMG_DATA: "noxi_full/img"
-  # NOXI_AUD_DATA: "noxi_full/wav"
-  # NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
-  NOXI_IMG_DATA: "noxi_tiny/img"
-  NOXI_AUD_DATA: "noxi_tiny/wav"
-  NOXI_LABEL_DATA: "noxi_tiny/label/noxi_sessions_label.pkl"
+  NOXI_IMG_DATA: "noxi_full/img"
+  NOXI_AUD_DATA: "noxi_full/wav"
+  NOXI_LABEL_DATA: "noxi_full/label/noxi_sessions_label.pkl"
+  # NOXI_IMG_DATA: "noxi_tiny/img"
+  # NOXI_AUD_DATA: "noxi_tiny/wav"
+  # NOXI_LABEL_DATA: "noxi_tiny/label/noxi_sessions_label.pkl"
 DATA_LOADER:
   NAME: "bimodal_resnet_lstm_data_loader_noxi" 
   TRANSFORM: "face_image_transform"
@@ -41,10 +41,10 @@ TRAIN:
   MAX_EPOCH: 2
   BIMODAL_OPTION: 2  # 1: visual 2: audio # 3: both
   SAVED_MODEL_DIR: "saved_model/deeppersonality/transformer_noxi_audio_finetune"
-  
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
+  ACC_THRESHOLD: 0.4
   PRE_TRAINED_MODEL: "./pre_trained_weights/SSAST/save_mask01-tiny-f16-t16-epo300-lr0.0005-m400-pretrain_mpc-udiva/models/best_audio_model.pth"
   TASK: "ft_avgtok"
   USE_AMP: True

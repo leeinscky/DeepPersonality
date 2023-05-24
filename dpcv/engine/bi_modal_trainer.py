@@ -10,8 +10,8 @@ import time
 import wandb
 from torchmetrics.functional import auroc
 from torchmetrics.classification import BinaryF1Score
-# torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
-torch.set_printoptions(sci_mode=False) # 使得print时不用科学计数法
+torch.set_printoptions(sci_mode=False, linewidth=800) # 使得print时不用科学计数法
+# torch.set_printoptions(sci_mode=False) # 使得print时不用科学计数法
 import json
 import torch.cuda.amp as amp
 
@@ -283,6 +283,7 @@ class BiModalTrainerUdiva(object):
         self.cfg_model = cfg.MODEL
         self.loss_name = cfg.LOSS.NAME
         self.dataset_name = cfg.DATA_LOADER.DATASET_NAME
+        self.non_blocking = cfg.DATA_LOADER.NON_BLOCKING
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.clt = collector
         self.logger = logger
@@ -339,6 +340,7 @@ class BiModalTrainerUdiva(object):
         pred_list, label_list = [], []
         for i, data in enumerate(data_loader): # i代表第几个batch, data代表第i个batch的数据 # 通过看日志，当执行下面这行 for i, data in enumerate(data_loader)语句时，会调用 AudioVisualData(VideoData)类里的 __getitem__ 函数，紧接着调用def get_ocean_label()函数， 具体原因参考：https://www.geeksforgeeks.org/how-to-use-a-dataloader-in-pytorch/
             iter_start_time = time.time()
+            iter_start_time_print = time.strftime("%H:%M:%S", time.localtime())
             # print('[bi_modal_trainer.py] train... type(data)=', type(data), ', len(data)=', len(data)) # type(data)= <class 'list'> , len(data)= 2
             # print('[bi_modal_trainer.py] train... data[0].shape=',  data[0].shape, ', data[1].shape=', data[1].shape, ' type(data[0]):', type(data[0]), ', type(data[1]):', type(data[1])) # type(data[0]): <class 'torch.Tensor'> , type(data[1]): <class 'torch.Tensor'>
             """ 1、如果data_loader中使用了RandomOverSampler，那么这里得到的data就是一个list，list里有两个元素，分别是image和audio，image的shape:[batch_size, sample_size, c, h, w] e.g.[8, 16, 6, 224, 224]  label.shape: [batch_size, 2]
@@ -465,6 +467,7 @@ class BiModalTrainerUdiva(object):
                 optimizer.step()
             
             iter_end_time = time.time()
+            iter_end_time_print = time.strftime("%H:%M:%S", time.localtime())
             iter_time = iter_end_time - iter_start_time
 
             loss_list.append(loss.item())
@@ -522,6 +525,7 @@ class BiModalTrainerUdiva(object):
             
             acc_avg = batch_acc.numpy()
             acc_avg_list.append(acc_avg)
+            acc_time = time.strftime("%H:%M:%S", time.localtime())
             
             outputs = torch.round(outputs * 1000000) / 1000000 # 小数点后保留6位
             labels = labels.type(torch.int64)
@@ -556,7 +560,7 @@ class BiModalTrainerUdiva(object):
                 batch_auc = auroc(outputs.type(torch.float32), labels.argmax(dim=-1), task='multiclass', num_classes=4)
                 pred_list.extend(outputs.tolist())
                 label_list.extend(labels.argmax(dim=-1).tolist())
-            
+            auc_time = time.strftime("%H:%M:%S", time.localtime())
             #### 计算指标：F1
             # f1 = self.f1_metric(outputs[:, 0], labels[:, 0]) # 最好用这个，详见：https://www.notion.so/MPhil-Project-b3de240fa9d64832b26795439d0142d9?pvs=4#3820c783cbc947cb83c1c5dd0d91434b
             # f1_2 = self.f1_metric(outputs.argmax(dim=-1), labels.argmax(dim=-1))
@@ -573,6 +577,7 @@ class BiModalTrainerUdiva(object):
                     "learning rate": lr,
                     "epoch": epoch_idx + 1,
                 })
+            wandb_time = time.strftime("%H:%M:%S", time.localtime())
 
             if i % self.cfg.LOG_INTERVAL == self.cfg.LOG_INTERVAL - 1: #  self.cfg.LOG_INTERVAL = 10，即每10个batch打印一次loss和acc_avg
                 remain_iter = epo_iter_num - i # epo_iter_num(一个epoch里的batch数)-当前的batch数=剩余的batch数
@@ -593,6 +598,13 @@ class BiModalTrainerUdiva(object):
                         eta_string,                          # ETA
                         time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                     ))
+            log_time = time.strftime("%H:%M:%S", time.localtime())
+            print("Train: IterTime:[{:.2f}s] iter_start_time:{} iter_end_time:{} acc_time:{} auc_time:{} wandb_time:{} log_time:{}".format(
+                iter_time,
+                iter_start_time_print, iter_end_time_print,
+                acc_time, auc_time, 
+                wandb_time, log_time,
+                ))
         #### 计算指标：epoch loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num
         # print('loss_list:', loss_list, ', len(loss_list):', len(loss_list), ', train_loss:', train_loss, ', batch_loss_sum:', batch_loss_sum, ', epo_iter_num:', epo_iter_num)
@@ -1073,7 +1085,7 @@ class BiModalTrainerUdiva(object):
             # 1、如果data_loader中没有使用RandomOverSampler data就是一个dict，dict里有image audio label 这几个key，分别对应image,audio,label的数据
             for k, v in data.items(): # Python 字典(Dictionary) items() 函数以列表返回可遍历的(键, 值) 元组数组。
                 if k in ["image", "audio"]:
-                    data[k] = v.to(self.device)
+                    data[k] = v.to(self.device, non_blocking=self.non_blocking)
             if self.cfg.BIMODAL_OPTION == 1:
                 aud_in = None
                 img_in, labels, session_id, segment_id, is_continue = data["image"], data["label"], data["session_id"], data["segment_id"], data["is_continue"]

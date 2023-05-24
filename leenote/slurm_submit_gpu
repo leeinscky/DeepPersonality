@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=06:00:00
+#SBATCH --time=00:20:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -124,72 +124,79 @@ JOBID=$SLURM_JOB_ID
 # # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml # UDIVA dataset
 # cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml # NOXI dataset
 
-#### **************************** CNN视觉 ResNet 3D: resnet_3d_udiva_full.yaml **************************** ####
+#### **************************** CNN 视觉 ResNet 3D **************************** ####
 # model="Res3D-Visual"
-# # cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
-# cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset #TODO delete after complete job
-# # cfg_file=./config/demo/noxi/resnet_3d_noxi_full_visual.yaml   # NOXI dataset
+# # # cfg_file=./config/demo/resnet_3d_udiva_full.yaml     # UDIVA dataset
+# cfg_file=./config/demo/noxi/resnet_3d_noxi_full_visual.yaml   # NOXI dataset
 
-#### **************************** CNN音频 ResNet18: bimodal_resnet18_udiva_full.yaml ***************** ####
+#### **************************** CNN 音频 ResNet18 ***************** ####
 # model="Res18-Audio"
 # # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/noxi/resnet18_noxi_full_audio.yaml
 
-#### **************************** CNN音频+视觉融合 ResNet18: bimodal_resnet18_udiva_full.yaml ***************** ####
+#### **************************** CNN 音频+视觉融合 ***************** ####
 # model="Res18-AudioVisual"
 # # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/noxi/resnet18_noxi_full_audiovisual.yaml
 
-#### **************************** 视觉Transformer: transformer_udiva.yaml **************************** ####
-# model="ViT"
-# cfg_file=./config/demo/transformer_udiva.yaml
+#### **************************** 视觉Transformer **************************** ####
+# model="Transformer-Visual"
+# # cfg_file=./config/demo/transformer_udiva.yaml          # UDIVA dataset
+# cfg_file=./config/demo/noxi/transformer_noxi_visual.yaml # NoXi dataset
 
-#### **************************** 音频Transformer SSAST: ssast_udiva.yaml **************************** ####
+#### **************************** 音频Transformer **************************** ####
 # model="AST_Pretrain"
 # cfg_file=./config/demo/ssast_pretrain_udiva.yaml # 预训练
 
 # model="AST_Finetune"
-# cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
+# # cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
+# cfg_file=./config/demo/noxi/transformer_noxi_audio_finetune.yaml   # 微调
 
-#### **************************** GNN: gnn_noxi_full_visual.yaml 视觉 **************************** ####
+#### **************************** GNN 视觉 **************************** ####
 # model="GNN-Visual"
 # cfg_file=./config/demo/noxi/gnn_noxi_full_visual.yaml
 
-#### **************************** GNN: gnn_noxi_full_audio.yaml 音频 **************************** ####
+#### **************************** GNN 音频 **************************** ####
 # model="GNN-Audio"
 # cfg_file=./config/demo/noxi/gnn_noxi_full_audio.yaml
 
-#### **************************** GNN: gnn_noxi_full_audiovisual.yaml 音频+视觉融合 **************************** ####
-# model="GNN-AudioVisual"
-# cfg_file=./config/demo/noxi/gnn_noxi_full_audiovisual.yaml
+#### **************************** GNN 音频+视觉融合 **************************** ####
+model="GNN-AudioVisual"
+cfg_file=./config/demo/noxi/gnn_noxi_full_audiovisual.yaml
 
 
 # data="UDIVA"
 data="NoXi"
 epoch=8
 
-sample_size=32
-sample_size2=272
-sample_size3=288
-sample_size4=304
-sample_size5=320
-sample_size6=336
+batch_size=8
+sample_size=16
 
-batch_size=16
-batch_size2=128
-batch_size3=128
-batch_size4=64
-batch_size5=64
-batch_size6=64
+num_workers=1
+prefetch_factor=3
+num_fold=3
+max_split_size_mb=128
+
+# batch_size2=128
+# batch_size3=128
+# batch_size4=64
+# batch_size5=64
+# batch_size6=64
+
+# sample_size2=272
+# sample_size3=288
+# sample_size4=304
+# sample_size5=320
+# sample_size6=336
 
 learning_rate=0.0005
-learning_rate2=0.0005
-learning_rate3=0.0005
-learning_rate4=0.0005
-learning_rate5=0.0005
-learning_rate6=0.0005
+# learning_rate2=0.0005
+# learning_rate3=0.0005
+# learning_rate4=0.0005
+# learning_rate5=0.0005
+# learning_rate6=0.0005
 
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/gpu/noxi/${model}/slurm-${JOBID}_${data}_${model}_bs${batch_size}_sp${sample_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate --num_workers $num_workers --prefetch_factor $prefetch_factor --num_fold $num_fold --max_split_size_mb $max_split_size_mb > ./leenote/slurm_log/gpu/noxi/${model}/slurm-${JOBID}_${data}_${model}_bs${batch_size}_sp${sample_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &

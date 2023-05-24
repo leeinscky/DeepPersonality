@@ -37,7 +37,12 @@ def setup():
     if args.use_wandb:
         cfg.TRAIN.USE_WANDB = (args.use_wandb == 'True')
         # print('type(cfg.TRAIN.USE_WANDB): ', type(cfg.TRAIN.USE_WANDB))
-
+    if args.num_workers:
+        cfg.DATA_LOADER.NUM_WORKERS = args.num_workers
+    if args.prefetch_factor:
+        cfg.DATA_LOADER.PREFETCH_FACTOR = args.prefetch_factor
+    if args.num_fold:
+        cfg.DATA_LOADER.NUM_FOLD = args.num_fold
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
     return args
@@ -57,9 +62,9 @@ def main():
     
     # avoid CUDA out of memory
     if (cfg.MODEL.NAME == "timesformer_udiva" and cfg.DATA_LOADER.TRAIN_BATCH_SIZE >= 16 and cfg.DATA.SAMPLE_SIZE > 16) or cfg.MODEL.NAME in ["visual_graph_representation_learning", "audio_graph_representation_learning", "audiovisual_graph_representation_learning"]:
-        print('set os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:32"')
-        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:32"
-    
+        print('set os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:{}"'.format(args.max_split_size_mb))
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:{}" .format(args.max_split_size_mb)
+    print('os.environ["PYTORCH_CUDA_ALLOC_CONF"] is:', os.environ["PYTORCH_CUDA_ALLOC_CONF"])
     runner = ExpRunner(cfg)
     # print('runner: ', runner)
     if args.test_only:

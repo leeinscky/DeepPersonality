@@ -89,6 +89,30 @@ def parse_args():
         default="True",
         help='use wandb to log',
     )
+    parser.add_argument(
+        '--num_workers',
+        type=int,
+        default=None,
+        help='NUM_WORKERS for dataloader',
+    )
+    parser.add_argument(
+        '--prefetch_factor',
+        type=int,
+        default=None,
+        help='PREFETCH_FACTOR for dataloader',
+    )
+    parser.add_argument(
+        '--num_fold',
+        type=int,
+        default=None,
+        help='num of fold for cross validation',
+    )
+    parser.add_argument(
+        '--max_split_size_mb',
+        type=int,
+        default=32,
+        help='os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:xxx"',
+    )
     args = parser.parse_args()
     return args
 
