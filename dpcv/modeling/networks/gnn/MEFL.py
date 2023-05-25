@@ -172,7 +172,10 @@ class Head(nn.Module):
         self.edge_extractor = GEM(self.in_channels, self.num_classes)
         self.gnn = GNN(self.in_channels, self.num_classes)
         self.sc = nn.Parameter(torch.FloatTensor(torch.zeros(self.num_classes, self.in_channels)))
-        self.edge_fc = nn.Linear(self.in_channels, 1)
+        if self.modal == 'visual':
+            self.edge_fc = nn.Linear(self.in_channels, 4)
+        else:
+            self.edge_fc = nn.Linear(self.in_channels, 1)
         self.relu = nn.ReLU()
 
         nn.init.xavier_uniform_(self.edge_fc.weight)
@@ -413,7 +416,7 @@ def construct_adj(A, steps):
 
 
 class GraphModel(nn.Module):
-    def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50', sample_size=16, cfg=None):
+    def __init__(self, init_weights=True, num_class=2, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12], cfg=None):
         super(GraphModel, self).__init__()
         self.cfg = cfg
         if init_weights:

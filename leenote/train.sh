@@ -72,13 +72,13 @@ use_wandb="False"
 
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=8
-batch_size=2
+sample_size=10
+batch_size=1
 epoch=1
 num_workers=2
 prefetch_factor=2
 num_fold=3
-max_split_size_mb=128
+max_split_size_mb=32
 
 # sample_size=256
 # batch_size=128
