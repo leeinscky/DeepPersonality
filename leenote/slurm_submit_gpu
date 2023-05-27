@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=00:20:00
+#SBATCH --time=00:10:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -169,13 +169,13 @@ cfg_file=./config/demo/noxi/gnn_noxi_full_audiovisual.yaml
 data="NoXi"
 epoch=8
 
-batch_size=8
-sample_size=16
+batch_size=4
+sample_size=32
 
 num_workers=1
-prefetch_factor=3
+prefetch_factor=1
 num_fold=3
-max_split_size_mb=128
+max_split_size_mb=32
 
 # batch_size2=128
 # batch_size3=128
@@ -221,7 +221,7 @@ echo "Current directory: `pwd`"
 if [ "$SLURM_JOB_NODELIST" ]; then
         #! Create a machine file:
         export NODEFILE=`generate_pbs_nodefile`
-        cat $NODEFILE | uniq > machine.file.$JOBID
+        # cat $NODEFILE | uniq > machine.file.$JOBID
         echo -e "\nNodes allocated:\n================"
         echo `cat machine.file.$JOBID | sed -e 's/\..*$//g'`
 fi
