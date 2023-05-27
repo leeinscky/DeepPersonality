@@ -19,6 +19,8 @@ import sys
 sys.path.append('../../datasets/') # 将datasets路径添加到系统路径中，这样就可以直接导入datasets下的模块了
 sys.path.append('../video_to_img/') # 将video_to_img路径添加到系统路径中，这样就可以直接导入video_to_img下的模块了
 import datetime
+from multiprocessing import Pool
+import time
 
 def process_udiva_tiny(): # 用于遍历hpc上的tiny数据集文件夹: udiva_tiny
     # mac_animals_recordings_train_img = '/Users/lizejian/cambridge/mphil_project/learn/udiva/DeepPersonality/datasets/udiva_tiny/train/recordings/animals_recordings_train_img'
@@ -93,16 +95,20 @@ def process_udiva_full(): # 用于遍历hpc上的全量数据集文件夹: udiva
                     and not os.path.exists(os.path.join(video_dir, task_dir, session_id, 'FC2_T')) \
                     ):
                     
-                    ######## 处理方式0. 检查压缩包: 如果有FC1_和FC2_前缀开头的tar.gz文件，就执行解压命令, 无需运行udiva_video_to_face.py提取人脸
+                    ######## 处理方式0. 检查压缩包: 如果有FC1_和FC2_前缀开头的tar.gz文件，就执行解压命令或删除命令, 无需运行udiva_video_to_face.py提取人脸
                     # os.chdir(session_dir) # change to session_dir
                     # print('change dir: current dir is ', os.getcwd())
                     # for FC_name in [ 'FC1_A/',  'FC2_A/',  'FC1_G/',  'FC2_G/',  'FC1_L/',  'FC2_L/',  'FC1_T/',  'FC2_T/']:
                     #     if os.path.exists(session_dir + '/' + FC_name[:-1] + '.tar.gz'): # e.g. 如果存在 FC1_A.tar.gz 文件，就执行解压命令
                     #         ### 解压
-                    #         untar_command = 'tar -zxvf ' + FC_name[:-1] + '.tar.gz' + ' >/dev/null 2>&1'
-                    #         print('session_id: ', session_id.name, '执行解压命令：', untar_command)
+                    #         # untar_command = 'tar -zxvf ' + FC_name[:-1] + '.tar.gz' + ' >/dev/null 2>&1'
+                    #         # print('session_id: ', session_id.name, '执行解压命令：', untar_command)
                     #         # os.system(untar_command)
-                    
+                            
+                    #         ### 删除压缩包
+                    #         rm_command = 'rm ' + FC_name[:-1] + '.tar.gz'
+                    #         print('session_id: ', session_id.name, '执行删除命令：', rm_command)
+                    #         os.system(rm_command)
                 
                     ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
                     # print('session_id: ', session_id, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + os.path.join(video_dir, task_dir, session_id) + ' --output-dir ' + os.path.join(video_dir, task_dir, session_id), ' --frame-num ' + frame_num)
@@ -164,9 +170,14 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
     noxi_tiny_dir = '/home/zl525/rds/hpc-work/datasets/noxi_tiny'
     noxi_temp_img_dir = '/home/zl525/code/DeepPersonality/datasets/noxi_temp_test'
     
-    video_dir_list = [noxi_full_dir]
-    # video_dir_list = [noxi_temp_img_dir]
+    # video_dir_list = [noxi_full_dir]
+    video_dir_list = [noxi_temp_img_dir]
     
+    # num_process = multiprocessing.cpu_count() - 1
+    num_process = 2
+    num_process = print('num_process:', num_process) # login-icelake.hpc.cam.ac.uk: num_process: 38
+    pool = Pool(num_process)
+
     count_video = 0
     for video_dir in video_dir_list:
         # video_dir = noxi_dir
@@ -189,8 +200,21 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         #     print('rename')
                         #     os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
                         
-                        continue
-                        
+                        ####### 处理方式0. 检查压缩包: 如果有Expert_和Novice_前缀开头的tar.gz文件，就执行解压命令或删除命令, 无需运行udiva_video_to_face.py提取人脸
+                        os.chdir(session_dir) # change to session_dir
+                        print('change dir: current dir is ', os.getcwd())
+                        for people_name in [ 'Expert_video/',  'Novice_video/']:
+                            if os.path.exists(session_dir + '/' + people_name[:-1] + '.tar.gz') and (os.path.exists(os.path.join(session_dir, people_name)) == False): # e.g. 如果存在 Expert_video.tar.gz 压缩包 且 不存在 Expert_video/ 文件夹
+                                ### 解压
+                                untar_command = 'tar -zxvf ' + people_name[:-1] + '.tar.gz' + ' >/dev/null 2>&1'
+                                print('session_id: ', session_id.name, '执行解压命令：', untar_command)
+                                os.system(untar_command)
+                                
+                                ### 删除压缩包
+                                rm_command = 'rm ' + people_name[:-1] + '.tar.gz'
+                                print('session_id: ', session_id.name, '执行删除命令：', rm_command)
+                                os.system(rm_command)
+                            
                         ######## 处理方式1. 从mp4视频文件中提取完整帧图片，不是人脸图片，即包含了背景
                         # print('session_id: ', session_id.name, ', 运行 python3 ./udiva_video_to_image.py --video-dir ' + session_dir + ' --output-dir ' + session_dir, ' --frame-num ' + frame_num)
                         # os.system('python3 ./udiva_video_to_image.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
@@ -200,8 +224,9 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         # os.system('python3 ./udiva_video_to_face.py --video-dir '  + session_dir +  ' --output-dir '  + session_dir + ' --frame-num ' + frame_num)
 
                         ####### 处理方式2.2. 从mp4视频文件中提取人脸图片，即不包含背景，使用的模型：MTCNN, Reference: Script for Video Face Extraction https://github.com/liaorongfan/DeepPersonality/blob/main/datasets/README.md
-                        print('session_id: ', session_id.name, ', 运行 python3 video_to_face/face_img_extractor.py --video-path ' + session_dir + ' --output-dir ' + session_dir)
-                        os.system('python3 video_to_face/face_img_extractor.py --video-path '  + session_dir +  ' --output-dir '  + session_dir)
+                        # print('session_id: ', session_id.name, ', 运行 python3 video_to_face/face_img_extractor.py --video-path ' + session_dir + ' --output-dir ' + session_dir)
+                        # os.system('python3 video_to_face/face_img_extractor.py --video-path '  + session_dir +  ' --output-dir '  + session_dir)
+                        pass
                     else:
                         # print('session_id: ', session_id.name, '已经存在Expert 和 Novice前缀开头的子文件夹')
                         
@@ -212,25 +237,80 @@ def process_noxi(): # 用于遍历hpc上的NoXI数据集文件夹: noxi  (/home/
                         #     print('rename: ', session_id, ' -> ', session_id_new)
                         #     os.rename(os.path.join(video_dir, modal_type_dir, session_id), os.path.join(video_dir, modal_type_dir, session_id_new))
                         
-                        ######## 1. 删除FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹
-                        # print('session_id: ', session_id, '已经存在Expert和Novice前缀开头的子文件夹，准备删除')
+                        ####### 1. 删除FC1_ 前缀的文件夹 和 FC2_前缀开头的子文件夹
+                        # print('session_id: ', session_id.name, '已经存在Expert和Novice前缀开头的子文件夹，准备删除')
                         # for dir_name in ['Expert_video/', 'Novice_video/']:
                         #     processed_frame_dir = os.path.join(video_dir, session_id, dir_name)
                         #     if os.path.exists(processed_frame_dir):
-                        #         print('session_id: ', session_id, '执行命令： rm -rf ' + processed_frame_dir)
-                        #         os.system('rm -rf ' + processed_frame_dir)
+                        #         print('session_id: ', session_id.name, '执行命令： rm -rf ' + processed_frame_dir)
+                        #         # os.system('rm -rf ' + processed_frame_dir)
                         
                         ######## 2. 后置处理: 对齐Expert和Novice的人脸帧数id，使得两个文件夹中的人脸帧数id是一致的, 即Expert和Novice文件夹中的所有人脸都是一一对应的，时间上是一致的。
-                        align_face_id(session_dir) # session_dir e.g. DeepPersonality/datasets/noxi_full/img/001
+                        # align_face_id(session_dir) # session_dir e.g. DeepPersonality/datasets/noxi_full/img/001
+                        
+                        # ####### 3. 将 Expert_ 前缀和 Novice_ 前缀开头的子文件夹压缩成tar.gz文件, 并删除原来的Expert_ 前缀和 Novice_  前缀开头的子文件夹
+                        print('session_id: ', session_id.name, '已经存在Expert_和Novice_前缀开头的子文件夹，准备压缩成tar.gz文件并删除原先Expert_和Novice_前缀开头的文件夹')
+                        os.chdir(session_dir) # change to session_dir
+                        print('change dir: current dir is ', os.getcwd())
+                        people_dir_list = ['Expert_video/', 'Novice_video/']
+                        ##### 处理方式3.1. 多线程并行压缩打包 (速度快)
+                        # pool.apply_async(convert_img_dir_to_targz, args=(session_dir, people_dir_list))
+                        convert_img_dir_to_targz(session_dir, people_dir_list)
+                        
+                        ##### 处理方式3.2. 单线程串行压缩打包（速度慢）
+                        # for people_name in ['Expert_video/', 'Novice_video/']:
+                        #     # session_dir = os.path.join(video_dir, modal_type_dir, session_id)
+                        #     people_dir = os.path.join(session_dir, people_name)
+                        #     if os.path.exists(people_dir) and (os.path.exists(session_dir + '/' + people_name[:-1] + '.tar.gz') == False): # e.g. 如果存在 Expert_video/ 文件夹 且 不存在Expert_video.tar.gz压缩包，就执行压缩命令
+                        #         ### 压缩打包
+                        #         # tar_command = 'tar -zcvf ' + session_dir + '/' + people_name[:-1] + '.tar.gz ' + people_dir
+                        #         tar_command = 'tar -zcvf ' + people_name[:-1] + '.tar.gz ' + people_name + ' >/dev/null 2>&1'
+                        #         print('session_id: ', session_id.name, '执行压缩命令：', tar_command)
+                        #         os.system(tar_command)
+                                
+                        #         ### 删除原来的文件夹
+                        #         rm_command = 'rm -rf ' + people_dir
+                        #         print('session_id: ', session_id.name, '执行删除命令：', rm_command)
+                        #         os.system(rm_command)
                         pass
-                #     count_session += 1
-                #     if count_session == 3:
-                #         break
-                # count_dir += 1
-                # if count_dir == 3:
-                #     break
+                    count_session += 1
+                    if count_session == 2:
+                        break
+                count_dir += 1
+                if count_dir == 2:
+                    break
                 pass
+    print('Waiting for all subprocesses done...')
+    pool.close()
+    pool.join()
+    print('All subprocesses done.')
 
+def convert_img_dir_to_targz(session_dir, people_dir_list):
+    """将包含人脸图片的文件夹压缩成tar.gz文件，并删除原来的文件夹
+    例如：将datasets/noxi_temp_test/img/001/目录下的 Expert_video/文件夹压缩成 Expert_video.tar.gz文件，并删除原来的Expert_video/文件夹
+
+    Args:
+        session_dir (): e.g. /home/zl525/rds/hpc-work/datasets/noxi_full/img/001
+        people_dir_list (): e.g. ['Expert_video/', 'Novice_video/']
+    """
+    session_id = session_dir.split('/')[-1]
+    print('[convert_img_dir_to_targz] session_id:', session_id, ', session_dir: ', session_dir, ', people_dir_list: ', people_dir_list)
+    # time.sleep(60)
+    for people_name in people_dir_list:
+        people_dir = os.path.join(session_dir, people_name)
+        if os.path.exists(people_dir) and (os.path.exists(session_dir + '/' + people_name[:-1] + '.tar.gz') == False): # e.g. 如果存在 Expert_video/ 文件夹 且 不存在Expert_video.tar.gz压缩包，就执行压缩命令
+            targz_name = os.path.join(session_dir, people_name[:-1] + '.tar.gz')
+            ### 压缩打包
+            # tar_command = 'tar -zcvf ' + people_name[:-1] + '.tar.gz ' + people_dir + ' >/dev/null 2>&1'
+            tar_command = 'tar -zcvf ' + targz_name + ' ' + people_dir + ' >/dev/null 2>&1'
+            # session_id = session_dir.split('/')[-1]
+            print('session_id: ', session_id, '执行压缩命令：', tar_command)
+            os.system(tar_command)
+            
+            ### 删除原来的文件夹
+            rm_command = 'rm -rf ' + people_dir
+            print('session_id: ', session_id, '执行删除命令：', rm_command)
+            os.system(rm_command)
 
 def align_face_id(session_dir):
     """
@@ -281,6 +361,7 @@ def align_face_id(session_dir):
             # os.remove(file_to_delete)
     pass
 
+
 '''
 def align_face_id(session_dir, dir_name1, dir_name2):
     """
@@ -319,11 +400,12 @@ def align_face_id(session_dir, dir_name1, dir_name2):
             # os.remove(file_to_delete)
 '''
 
+
 def process_noxi_multiprocess(part_id=1):
     """process noxi dataset, extract face images from videos, using multiprocess
        经过测试，如果上一次的nohup处理中断了，可以直接再次运行本函数，因为 face_img_extractor.py 中有相应的判断逻辑，即如果已经存在对应的人脸图片face_{cnt}.jpg，就不会再次提取保存到对应的文件夹中，详见def reduce_frame_rate(self, fps_new)函数的实现 
     """
-    # some test commands:
+    ###################################### some test commands: ######################################
     # 复制文件夹
     # cp -r /home/zl525/code/DeepPersonality/datasets/noxi_full/img/003 /home/zl525/rds/hpc-work/datasets/noxi_temp_test/img
     
@@ -371,7 +453,8 @@ def process_noxi_multiprocess(part_id=1):
     
     print('运行 python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
     os.system('python3 video_to_face/face_img_extractor.py --video-path ' + video_path + ' --level ' + level)
-    
+
+
 if __name__ == '__main__':
     start_time = datetime.datetime.now()
     print('main.py start, current time:', start_time.strftime('%Y-%m-%d %H:%M:%S'))
@@ -394,14 +477,16 @@ if __name__ == '__main__':
 
 
 # conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/leenote/video_to_img/
-# nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
-# python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
+# 1. 测试脚本： python3 main.py > main.log
+# 2. nohup后台跑脚本：nohup python3 -u main.py >nohup_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+# 备注: python nohup运行时print不输出显示，解决办法：https://blog.csdn.net/voidfaceless/article/details/106363925
 
 # 多线程并行处理part3
 # conda activate DeepPersonality && cd /home/zl525/code/DeepPersonality/leenote/video_to_img/ && python3 -u main.py 3
 
 # [1] 2577562
 # ps -ef | grep "python3 -u main.py" | grep -v grep
+# ps -ef | grep "python3 main.py" | grep -v grep
 # ps -p 2577562
 
 
