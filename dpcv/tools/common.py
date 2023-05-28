@@ -113,6 +113,42 @@ def parse_args():
         default=32,
         help='os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:xxx"',
     )
+    parser.add_argument(
+        '--au_class',
+        type=str,
+        default="12,8",
+        help='AU class',
+    )
+    parser.add_argument(
+        '--backbone_input',
+        type=str,
+        default="video",
+        help='backbone input: video or frame',
+    )
+    parser.add_argument(
+        '--prediction_feat',
+        type=str,
+        default="cl_edge",
+        help='prediction feature: cl_edge or cl',
+    )
+    parser.add_argument(
+        '--fusion_type',
+        type=str,
+        default="feature_fusion",
+        help='fusion type: feature_fusion or decision_fusion',
+    )
+    parser.add_argument(
+        '--use_amp',
+        type=str,
+        default="False",
+        help='use Pytorch AMP',
+    )
+    parser.add_argument(
+        '--use_half',
+        type=str,
+        default="False",
+        help='use half precision',
+    )
     args = parser.parse_args()
     return args
 

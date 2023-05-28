@@ -41,8 +41,8 @@ DATA_LOADER:
   TRANSFORM: "face_image_transform"
   # TRANSFORM: "face_image_x2_transform"
   TRAIN_BATCH_SIZE: 16
-  VALID_BATCH_SIZE: 32
-  TEST_BATCH_SIZE: 32
+  VALID_BATCH_SIZE: 8
+  TEST_BATCH_SIZE: 8
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
   NUM_WORKERS: 2
@@ -77,7 +77,7 @@ TRAIN:
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_BP4D/MEFARG_resnet50_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
   # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
-  USE_AMP: True
+  USE_AMP: False
   USE_HALF: False
 TEST:
   COMPUTE_PCC: False

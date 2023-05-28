@@ -43,6 +43,24 @@ def setup():
         cfg.DATA_LOADER.PREFETCH_FACTOR = args.prefetch_factor
     if args.num_fold:
         cfg.DATA_LOADER.NUM_FOLD = args.num_fold
+    if args.au_class:
+        # 如果args.au_class是"12,8"这样的字符串，需要转换成[12, 8]这样的列表; 如果args.au_class是"12"这样的字符串，需要转换成[12]这样的列表; 
+        if ',' in args.au_class:
+            cfg.MODEL.AU_CLASS = [int(i) for i in args.au_class.split(',')]
+        else:
+            cfg.MODEL.AU_CLASS = [int(args.au_class)]
+        print('args.au_class:', args.au_class, 'type(args.au_class):', type(args.au_class), ', cfg.MODEL.AU_CLASS:', cfg.MODEL.AU_CLASS, 'type(cfg.MODEL.AU_CLASS):', type(cfg.MODEL.AU_CLASS))
+        # cfg.MODEL.AU_CLASS = args.au_class
+    if args.backbone_input:
+        cfg.MODEL.BACKBONE_INPUT = args.backbone_input
+    if args.prediction_feat:
+        cfg.MODEL.PREDICTION_FEAT = args.prediction_feat
+    if args.fusion_type:
+        cfg.MODEL.FUSION_TYPE = args.fusion_type
+    if args.use_amp:
+        cfg.TRAIN.USE_AMP = (args.use_amp == 'True')
+    if args.use_half:
+        cfg.TRAIN.USE_HALF = (args.use_half == 'True')
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
     return args

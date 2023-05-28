@@ -28,7 +28,7 @@ MODEL:
   # NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
   # NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
   NUM_CLASS: 4
-  AU_CLASS: [12,] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
+  AU_CLASS: [12,] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素, 第一个元素是visual的AU个数，第二个元素是audio的元素个数。[12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; e.g. [12,8]: visual 取12个au图节点, audio 取8个au图节点
   BACKBONE_INPUT: 'frame' # frame:输入MEFARG backbone的数据是每一帧图像; video:输入MEFARG backbone的数据是每一段视频，即图像序列
   PREDICTION_FEAT: 'cl_edge' # 预测时使用的特征 cl:使用MEFARG返回的cl; cl_edge:使用MEFARG返回的cl_edge; f_v:使用MEFARG返回的f_v; f_e:使用MEFARG返回的f_e
 LOSS:

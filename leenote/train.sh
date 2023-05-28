@@ -72,24 +72,26 @@ use_wandb="False"
 
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml **************************** ####
-sample_size=10
+sample_size=8
 batch_size=1
 epoch=1
 num_workers=2
 prefetch_factor=2
 num_fold=3
 max_split_size_mb=32
-
-# sample_size=256
-# batch_size=128
-# epoch=1
-
+au_class="12,8" # 单模态时列表只有一个元素，多模态时有2个元素, 第一个元素是visual的AU个数，第二个元素是audio的元素个数。e.g. [12,8]: visual 取12个au图节点, audio 取8个au图节点
+backbone_input='video' # 'video' or 'frame'
+prediction_feat='cl_edge' # 'cl_edge' or 'cl'
+fusion_type='feature_fusion' # 'feature_fusion' or 'decision_fusion'
+use_amp='True'
 learning_rate=0.0001
+
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
 # cfg_file=./config/demo/bimodal_resnet18_udiva_tiny.yaml
 # cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_tiny.yaml
 # cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
-cfg_file=./config/demo/udiva/gnn_udiva_full_audio.yaml
+# cfg_file=./config/demo/udiva/gnn_udiva_full_audio.yaml
+cfg_file=./config/demo/udiva/gnn_udiva_full_audiovisual.yaml
 
 python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --sample_size $sample_size \
@@ -101,6 +103,12 @@ python3 -u ./script/run_exp.py --cfg_file $cfg_file \
 --prefetch_factor $prefetch_factor \
 --num_fold $num_fold \
 --max_split_size_mb $max_split_size_mb \
+--au_class $au_class \
+--backbone_input $backbone_input \
+--prediction_feat $prediction_feat \
+--fusion_type $fusion_type \
+--use_amp $use_amp \
 >leenote/train.log 2>&1
 
 
+# ps -ef | grep "train.sh"

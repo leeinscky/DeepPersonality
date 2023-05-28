@@ -109,6 +109,7 @@ __C.MODEL.RETURN_FEATURE = False
 __C.MODEL.AU_CLASS = [12,]
 __C.MODEL.BACKBONE_INPUT = 'frame'
 __C.MODEL.PREDICTION_FEAT = 'cl'
+__C.MODEL.FUSION_TYPE = 'feature_fusion'
 
 # ------------------------------------------ step 4 : loss config node -------------------------------------------------
 __C.LOSS = CfgNode()

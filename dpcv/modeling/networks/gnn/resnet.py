@@ -110,6 +110,7 @@ class ResNet(nn.Module):
     def __init__(self, block, layers, in_channels, num_classes=1000):
         super(ResNet, self).__init__()
         self.inplanes = 64
+        # print('[ResNet] in_channels: ', in_channels)
         # self.channels = 3 # image channel is 3 (original)
         # self.channels = 6 # image channel is 6 (a pair of video frames)
         # self.channels = 2 # audio channel is 2 (a pair of audio frames)
@@ -151,7 +152,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        # print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]
+        # print('[ResNet] input x shape: ', x.shape) # 3 channels: [bs, 3, 112, 112]; 6 channels: [bs, 6, 112, 112]; audio: [bs, 2, 1, 51200]
         x = self.conv1(x)
         # print('[ResNet] after conv1, x shape: ', x.shape) # 3 channels: [bs, 64, 56, 56]; 6 channels: [bs, 64, 56, 56]
         x = self.bn1(x)
@@ -166,24 +167,25 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         # print('[ResNet] after layer3, x shape: ', x.shape) # 3 channels: [bs, 1024, 7, 7]
         x = self.layer4(x)
-        # print('[ResNet] after layer4, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]
+        # print('[ResNet] after layer4, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; audio: [bs, 2048, 1, 1600]
 
         b,c,h,w = x.shape
-        # print('[ResNet] after layers, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; 6 channels: [bs, 2048, 4, 4]
+        # print('[ResNet] after layers, x shape: ', x.shape) # 3 channels: [bs, 2048, 4, 4]; 6 channels: [bs, 2048, 4, 4]; audio: [bs, 2048, 1, 1600]
         
         x = x.view(b,c,-1).permute(0,2,1) # 3 channels: [bs, 2048, 4, 4] -> [bs, 2048, 16] -> [bs, 16, 2048]
-        # print('[ResNet] output x shape: ', x.shape) # 3 channels: [bs, 16, 2048]; 6 channels: [bs, 16, 2048]
+        # print('[ResNet] output x shape: ', x.shape) # 3 channels: [bs, 16, 2048]; 6 channels: [bs, 16, 2048]; audio: [bs, 1600, 2048]
         
         return x
 
 
-def resnet18(pretrained=True, **kwargs):
+def resnet18(pretrained=True, in_channels=3, **kwargs):
     """Constructs a ResNet-18 model.
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+    # print('[ResNet] def resnet18, in_channels: ', in_channels)
+    model = ResNet(BasicBlock, [2, 2, 2, 2],  in_channels, **kwargs)
     if pretrained:
         model.load_state_dict(torch.load(os.path.join(models_dir, model_name['resnet18'])))
     return model
@@ -209,7 +211,7 @@ def resnet50(pretrained=True, in_channels=3, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], in_channels, **kwargs)
     if pretrained:
-        print('[resnet.py] loading pretrained ResNet model: ', os.path.join(models_dir, model_name['resnet50']))
+        # print('[resnet.py] loading pretrained ResNet model: ', os.path.join(models_dir, model_name['resnet50']))
         model.load_state_dict(torch.load(os.path.join(models_dir, model_name['resnet50']), map_location=device))
     return model
 

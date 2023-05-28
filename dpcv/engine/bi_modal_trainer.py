@@ -380,7 +380,7 @@ class BiModalTrainerUdiva(object):
                     with torch.cuda.amp.autocast():
                         outputs = model(*inputs)
                         outputs = outputs.float()
-                        # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
+                        # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', temp_labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
                         loss = loss_f(outputs.cpu(), temp_labels.cpu())
                 else:
                     with torch.autocast(device_type="cpu", dtype=torch.bfloat16):
@@ -599,12 +599,14 @@ class BiModalTrainerUdiva(object):
                         time.strftime("%H:%M:%S", time.localtime()), # Current TIME
                     ))
             log_time = time.strftime("%H:%M:%S", time.localtime())
-            print("Train: IterTime:[{:.2f}s] iter_start_time:{} iter_end_time:{} acc_time:{} auc_time:{} wandb_time:{} log_time:{}".format(
-                iter_time,
-                iter_start_time_print, iter_end_time_print,
-                acc_time, auc_time, 
-                wandb_time, log_time,
-                ))
+            if i % 100 == 99: # 每100个batch打印一次
+                print("Train: Iter[{:0>3}/{:0>3}] IterTime:[{:.2f}s] iter_start_time:{} iter_end_time:{} acc_time:{} auc_time:{} wandb_time:{} log_time:{}".format(
+                    i + 1, epo_iter_num,
+                    iter_time,
+                    iter_start_time_print, iter_end_time_print,
+                    acc_time, auc_time, 
+                    wandb_time, log_time,
+                    ))
         #### 计算指标：epoch loss
         epoch_summary_loss = batch_loss_sum / epo_iter_num
         # print('loss_list:', loss_list, ', len(loss_list):', len(loss_list), ', train_loss:', train_loss, ', batch_loss_sum:', batch_loss_sum, ', epo_iter_num:', epo_iter_num)

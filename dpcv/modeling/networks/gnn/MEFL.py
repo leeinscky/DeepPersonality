@@ -182,7 +182,7 @@ class Head(nn.Module):
         nn.init.xavier_uniform_(self.sc)
 
     def forward(self, x):
-        # print('\n[MEFL.py] class Head.forward, input x.shape: ', x.shape) # x.shape: [bs, 49, 512]
+        # print('\n[MEFL.py] class Head.forward, input x.shape: ', x.shape) # x.shape: [bs, 16, 512] for decision fusion or [bs, 1616, 512] for feature fusion
         
         # AFG
         f_u = []
@@ -226,22 +226,38 @@ class Head(nn.Module):
 
 
 class MEFARG(nn.Module):
-    def __init__(self, num_classes=12, backbone='swin_transformer_base', modal='visual', cfg=None):
+    def __init__(self, num_classes=12, visual_backbone='swin_transformer_base', audio_backbone='resnet50', modal='visual', cfg=None):
         super(MEFARG, self).__init__()
-        # print('[MEFL.py] class MEFARG.__init__ backbone: ', backbone)
+        # print('[MEFL.py] class MEFARG.__init__ visual_backbone: ', visual_backbone)
         self.modal = modal
         if self.modal == 'visual':
             self.channels = 3
+            if audio_backbone is not None:
+                self.audio_channels = 2
             self.use_pretrained_backbone = True
         elif self.modal == 'visual_simple':
-            self.channels = 6
+            self.visual_channels = 6
+            if audio_backbone is not None:
+                self.audio_channels = 2
             self.use_pretrained_backbone = False
         elif self.modal == 'audio':
-            self.channels = 2
+            self.audio_channels = 2
             self.use_pretrained_backbone = False
         else:
             raise ValueError('modal should be visual or audio or visual_simple')
         self.cfg = cfg
+        self.visual_backbone, self.audio_backbone = None, None
+        if visual_backbone is not None:
+            self.visual_backbone = self.generate_backbone(visual_backbone, self.visual_channels)
+        if audio_backbone is not None:
+            self.audio_backbone = self.generate_backbone(audio_backbone, self.audio_channels)
+        # print('[MEFL.py] class MEFARG.__init__ self.in_channels:', self.in_channels, 'self.out_channels:', self.out_channels)
+        # MEFARG_resnet101_BP4D_fold1.pth: 2048, 512; MEFARG_resnet50_BP4D_fold1.pth: 2048, 512;
+        self.global_linear = LinearBlock(self.in_channels, self.out_channels)
+        # print('[MEFARG] self.out_channels: ', self.out_channels, 'num_classes: ', num_classes, 'self.modal: ', self.modal)
+        self.head = Head(self.out_channels, num_classes, self.modal)
+
+    def generate_backbone(self, backbone, channels):
         if 'transformer' in backbone:
             if backbone == 'swin_transformer_tiny':
                 self.backbone = swin_transformer_tiny()
@@ -252,39 +268,37 @@ class MEFARG(nn.Module):
             self.in_channels = self.backbone.num_features
             self.out_channels = self.in_channels // 2
             self.backbone.head = None
-
         elif 'resnet' in backbone:
             if backbone == 'resnet18':
-                self.backbone = resnet18()
+                self.backbone = resnet18(in_channels=channels)
             elif backbone == 'resnet101':
                 self.backbone = resnet101()
             elif backbone == 'resnet50_3d':
-                self.backbone = resnet50_3d(pretrained=self.use_pretrained_backbone, in_channels=self.channels, n_classes=self.cfg.MODEL.NUM_CLASS)
+                self.backbone = resnet50_3d(pretrained=self.use_pretrained_backbone, in_channels=channels, n_classes=self.cfg.MODEL.NUM_CLASS)
             else:
                 # self.backbone = resnet50() # pretrained=True
-                self.backbone = resnet50(pretrained=self.use_pretrained_backbone, in_channels=self.channels) # pretrained=False
+                self.backbone = resnet50(pretrained=self.use_pretrained_backbone, in_channels=channels) # pretrained=False
             self.in_channels = self.backbone.fc.weight.shape[1]
             self.out_channels = self.in_channels // 4
             self.backbone.fc = None
         else:
             raise Exception("Error: wrong backbone name: ", backbone)
+        return self.backbone
 
-        # print('[MEFL.py] class MEFARG.__init__ self.in_channels:', self.in_channels, 'self.out_channels:', self.out_channels)
-        # MEFARG_resnet101_BP4D_fold1.pth: 2048, 512; MEFARG_resnet50_BP4D_fold1.pth: 2048, 512;
-        self.global_linear = LinearBlock(self.in_channels, self.out_channels)
-        self.head = Head(self.out_channels, num_classes, self.modal)
-
-    def forward(self, x):
+    def decision_fusion_forward(self, x):
         # x: b d c
         # x = torch.randn(2, 3, 112, 112) # or x = torch.randn(2, 3, 224, 224) # temp test
         # [bs, sample_size, 6(3*2person=6), 112, 112] -> [bs, 6(3*2person=6), sample_size, 112, 112]
         if self.modal == 'visual_simple':
             x = x.permute(0, 2, 1, 3, 4) # .contiguous()
-        # print('[MEFL.py] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
-        x = self.backbone(x)
-        # print('[MEFL.py] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
+        # print('[decision_fusion_forward] MEFARG.forward, input x.shape: ', x.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
+        if self.visual_backbone:
+            x = self.visual_backbone(x)
+        elif self.audio_backbone:
+            x = self.audio_backbone(x)
+        # print('[decision_fusion_forward] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
         x = self.global_linear(x)
-        # print('[MEFL.py] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
+        # print('[decision_fusion_forward] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
         # cl, cl_edge, f_v, f_e, f_u = self.head(x)
         if self.modal == 'visual':
             f_v, f_u = self.head(x)
@@ -292,19 +306,68 @@ class MEFARG(nn.Module):
         elif self.modal == 'visual_simple':
             # f_v, f_e, cl, cl_edge = self.head(x)
             cl, cl_edge = self.head(x)
-            # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
+            # print('[decision_fusion_forward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[decision_fusion_forward] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
             # return f_v, f_e, cl, cl_edge
             return cl, cl_edge
         elif self.modal == 'audio':
             # f_v, f_e, cl, cl_edge = self.head(x)
             cl, cl_edge = self.head(x)
-            # print('[MEFL.py] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            # print('[MEFL.py] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
+            # print('[decision_fusion_forward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[decision_fusion_forward] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
             # return f_v, f_e, cl, cl_edge
             return cl, cl_edge
         else:
             raise ValueError('modal should be visual or audio')
+
+    def feature_fusion_foward(self, x, y):
+        """
+        Args:
+            x (tensor): visual input
+            y (tensor): audio input
+        """
+        # x: b d c
+        # x = torch.randn(2, 3, 112, 112) # or x = torch.randn(2, 3, 224, 224) # temp test
+        # [bs, sample_size, 6(3*2person=6), 112, 112] -> [bs, 6(3*2person=6), sample_size, 112, 112]
+        if self.modal == 'visual_simple':
+            x = x.permute(0, 2, 1, 3, 4) # .contiguous()
+        # print('[feature_fusion_foward] MEFARG.forward, input x.shape: ', x.shape, 'y.shape:', y.shape) # 3 channels: x.shape=[bs, 3, 112, 112]; 6 channels: x.shape=[bs, 6, 112, 112]
+        x = self.visual_backbone(x)
+        # print('[feature_fusion_foward] MEFARG.forward, after backbone, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 2048]; 6 channels: x.shape=[bs, 16, 2048]
+        y = self.audio_backbone(y)
+        # print('[feature_fusion_foward] MEFARG.forward, after backbone, y.shape: ', y.shape)
+        
+        x = torch.cat((x, y), dim=1)
+        # print('[feature_fusion_foward] MEFARG.forward, after cat, x.shape: ', x.shape)
+        x = self.global_linear(x)
+        # print('[feature_fusion_foward] MEFARG.forward, after global_linear, x.shape: ', x.shape) # 3 channels: x.shape=[bs, 16, 512]; 6 channels: x.shape=[bs, 16, 512]
+        # cl, cl_edge, f_v, f_e, f_u = self.head(x)
+        if self.modal == 'visual':
+            f_v, f_u = self.head(x)
+            return f_v, f_u
+        elif self.modal == 'visual_simple':
+            # f_v, f_e, cl, cl_edge = self.head(x)
+            cl, cl_edge = self.head(x)
+            # print('[feature_fusion_foward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
+            # return f_v, f_e, cl, cl_edge
+            return cl, cl_edge
+        elif self.modal == 'audio':
+            # f_v, f_e, cl, cl_edge = self.head(x)
+            cl, cl_edge = self.head(x)
+            # print('[feature_fusion_foward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
+            # print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, num_class], cl_edge.shape: [bs, num_class*num_class, num_class]
+            # return f_v, f_e, cl, cl_edge
+            return cl, cl_edge
+        else:
+            raise ValueError('modal should be visual or audio')
+    
+    def forward(self, x, y=None):
+        if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion' and y is not None:
+            ret1, ret2 = self.feature_fusion_foward(x, y)
+        else:
+            ret1, ret2 = self.decision_fusion_forward(x)
+        return ret1, ret2
 
 
 def load_state_dict(model,path):
@@ -439,7 +502,7 @@ class GraphModel(nn.Module):
         # self.graph_model_4class = MEFARG_GRATIS(num_classes=4, backbone="resnet50").to(device)
         # print('[MEFL.py] self.graph_model_12class device:', next(self.graph_model_12class.parameters()).device, 'self.graph_model_8class device: ', next(self.graph_model_8class.parameters()).device)
         if pretrained_model is not None:
-            print('[MEFL.py] MEFARG load pretrained model: ', pretrained_model)
+            # print('[MEFL.py] MEFARG load pretrained model: ', pretrained_model)
             self.graph_model_12class = load_state_dict(self.graph_model_12class, pretrained_model[0])
             self.graph_model_8class = load_state_dict(self.graph_model_8class, pretrained_model[1])
         
@@ -497,7 +560,7 @@ class GraphModel(nn.Module):
         
         # graph edge modeling for learning multi-dimensional edge features of 19 class
         f_e_19class = self.edge_extractor(f_u_19class, f_u_19class)
-        print('[MEFL.py] process_face, f_e_19class.shape: ', f_e_19class.shape) # [bs, 361, 49, 512]
+        # print('[MEFL.py] process_face, f_e_19class.shape: ', f_e_19class.shape) # [bs, 361, 49, 512]
         f_e_19class = torch.mean(f_e_19class, dim=2) # [bs, 361, 49, 512] -> [bs, 361, 512]
         '''
         # graph edge modeling for learning multi-dimensional edge features of 15 class
@@ -822,7 +885,7 @@ class GraphModel(nn.Module):
 
 class VisualGraphModel(nn.Module):
     """视觉图模型"""
-    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, backbone='resnet50_3d', sample_size=16, au_class=[12], cfg=None):
+    def __init__(self, init_weights=True, return_feat=False, num_class=4, pretrained_model=None, visual_backbone='resnet50_3d', audio_backbone='resnet50', sample_size=16, au_class=[12], cfg=None):
         super(VisualGraphModel, self).__init__()
         self.return_feature = return_feat
         assert isinstance(au_class, list) and len(au_class) == 1
@@ -833,10 +896,35 @@ class VisualGraphModel(nn.Module):
             initialize_weights(self)
         # self.graph_model_12class = MEFARG(num_classes=AU_12CLASS, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
         # self.graph_model_8class = MEFARG(num_classes=AU_8CLASS, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
-        self.visual_graph_model = MEFARG(num_classes=self.au_class, backbone=backbone, modal='visual_simple', cfg=self.cfg).to(device)
+        if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion':
+            self.visual_graph_model = MEFARG(num_classes=self.au_class, visual_backbone=visual_backbone, audio_backbone=audio_backbone, modal='visual_simple', cfg=self.cfg).to(device)
+        elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion':
+            self.visual_graph_model = MEFARG(num_classes=self.au_class, visual_backbone=visual_backbone, audio_backbone=None, modal='visual_simple', cfg=self.cfg).to(device)
         self.fc = nn.Linear(self.au_class, self.num_class)
+        
+        # au_class="8,12", backbone_input='video', prediction_feat='cl_edge', fusion_type='feature_fusion': in_channels = 64
+        # au_class="8,12", backbone_input='video', prediction_feat='cl', fusion_type='feature_fusion': self.fc_edge not used
+        
+        # au_class="8,12", backbone_input='video', prediction_feat='cl_edge', fusion_type='decision_fusion': in_channels = 64
+        # au_class="12,8", backbone_input='video', prediction_feat='cl_edge', fusion_type='decision_fusion': in_channels = 144
+        
+        # if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion':
+        #     if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+        #         in_channels = self.au_class
+        #     elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+        #         in_channels = self.au_class * self.au_class
+        # elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion':
+        #     if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+        #         in_channels = self.au_class
+        #     elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge': 
+        #         in_channels = self.au_class * self.au_class
+        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+            in_channels = self.au_class
+        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+            in_channels = self.au_class * self.au_class
+        self.fc_edge = nn.Linear(in_channels, self.num_class)
     
-    def forward(self, x):
+    def forward(self, x, y=None):
         # print('[VisualGraphModel] input x:', x.shape) # [bs, sample_size, 6(3*2person=6), 112, 112]
         # if self.au_class == 12:
         #     f_v, f_e, cl, cl_edge = self.graph_model_12class(x)
@@ -848,14 +936,19 @@ class VisualGraphModel(nn.Module):
         # else:
         #     raise Exception('VisualGraphModel.forward, au_class error!')
         # f_v, f_e, cl, cl_edge = self.visual_graph_model(x) 
-        cl, cl_edge = self.visual_graph_model(x) 
+        if y is not None:
+            # print('[VisualGraphModel] input y:', y.shape) # e.g. [bs, 2(2 person), 1, 51200]
+            cl, cl_edge = self.visual_graph_model(x, y)
+        else:
+            cl, cl_edge = self.visual_graph_model(x)
         # print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
         elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
             cl_edge = cl_edge.squeeze(-1)
-            self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
-            x = self.fc(cl_edge)
+            # self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
+            # print('[VisualGraphModel] cl_edge:', cl_edge.shape)
+            x = self.fc_edge(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
         # print('[VisualGraphModel] output x:', x.shape)
@@ -879,8 +972,27 @@ class AudioGraphModel(nn.Module):
         self.cfg = cfg
         if init_weights:
             initialize_weights(self)
-        self.audio_graph_model = MEFARG(num_classes=self.au_class, backbone=backbone, modal='audio').to(device)
+        self.audio_graph_model = MEFARG(num_classes=self.au_class, visual_backbone=None, audio_backbone=backbone, modal='audio', cfg=cfg).to(device)
         self.fc = nn.Linear(self.au_class, self.num_class)
+        
+        # au_class="12,8", backbone_input='video', prediction_feat='cl', fusion_type='feature_fusion': in_channels = 12
+        # au_class="8,12", backbone_input='video', prediction_feat='cl_edge', fusion_type='decision_fusion': in_channels = 144
+        # au_class="12,8", backbone_input='video', prediction_feat='cl_edge', fusion_type='decision_fusion': in_channels = 64
+        # if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion':
+        #     if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+        #         in_channels = self.au_class
+        #     elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+        #         in_channels = self.au_class * self.au_class # self.au_class 的平方
+        # elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion':
+        #     if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+        #         in_channels = self.au_class
+        #     elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge': 
+        #         in_channels = self.au_class * self.au_class # self.au_class 的平方
+        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+            in_channels = self.au_class
+        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge': 
+            in_channels = self.au_class * self.au_class # self.au_class 的平方
+        self.fc_edge = nn.Linear(in_channels, self.num_class)
     
     def forward(self, x):
         # print('[AudioGraphModel] input x:', x.shape) # [bs, 2(1*2person=2), 1, 32000(sample_size/5*16000)] 5 is downsample, so duration=samples/5 seconds, sample_rate=16000(num of features per second), so last dim=duration*sample_rate
@@ -892,8 +1004,9 @@ class AudioGraphModel(nn.Module):
              x = self.fc(cl)
         elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
             cl_edge = cl_edge.squeeze(-1)
-            self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
-            x = self.fc(cl_edge)
+            # print('[AudioGraphModel] cl_edge:', cl_edge.shape)
+            # self.fc = nn.Linear(cl_edge.shape[-1], self.num_class).to(device)
+            x = self.fc_edge(cl_edge)
         else:
             raise Exception('cfg.MODEL.PREDICTION_FEAT error!')
         # print('[AudioGraphModel] output x:', x.shape)
@@ -911,36 +1024,65 @@ class AudioVisualGraphModel(nn.Module):
     def __init__(self, init_weights=True, num_class=4, pretrained_model=None, backbone='resnet50', sample_size=16, au_class=[12,12], cfg=None):
         super(AudioVisualGraphModel, self).__init__()
         assert isinstance(au_class, list) and len(au_class) == 2, 'au_class must be a list with 2 elements for AudioVisualGraphModel!'
-        self.audio_au_class, self.visual_au_class = au_class[0], au_class[1]
+        self.visual_au_class, self.audio_au_class = au_class[0], au_class[1]
         self.cfg = cfg
         self.num_class = num_class
         if init_weights:
             initialize_weights(self)
         self.audio_graph_model = AudioGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone="resnet50", sample_size=sample_size, au_class=[self.audio_au_class], cfg=cfg).to(device)
-        self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, backbone="resnet50_3d", sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
-        self.fc = nn.Linear(self.audio_au_class+self.visual_au_class, num_class)
+        # if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion': # 将2个单模态的特征融合, 此时需要设置视觉和音频的backbone: visual_backbone, audio_backbone
+        #     self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, visual_backbone="resnet50_3d", audio_backbone="resnet50", sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
+        # elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion': # 将2个单模态的决策融合, 此时只需要设置视觉单模态的backbone: visual_backbone
+        #     self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, visual_backbone="resnet50_3d", audio_backbone=None, sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
+        self.visual_graph_model = VisualGraphModel(return_feat=True, num_class=num_class, pretrained_model=pretrained_model, visual_backbone="resnet50_3d", audio_backbone="resnet50", sample_size=sample_size, au_class=[self.visual_au_class], cfg=cfg).to(device)
+        
+        # au_class="12,8", backbone_input='video', prediction_feat='cl_edge', fusion_type='feature_fusion': in_channels = 64
+        # au_class="12,8", backbone_input='video', prediction_feat='cl', fusion_type='feature_fusion': in_channels = 8
+        
+        # au_class="12,8", backbone_input='video', prediction_feat='cl', fusion_type='decision_fusion': in_channels = 20 (12+8=20)
+        # au_class="12,8", backbone_input='video', prediction_feat='cl_edge', fusion_type='decision_fusion': in_channels = 208 (144+64=208)
+        if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion':
+            if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+                in_channels = self.visual_au_class
+            elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+                in_channels = self.visual_au_class * self.visual_au_class
+        elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion':
+            if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+                in_channels = self.audio_au_class + self.visual_au_class
+            elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge': 
+                in_channels = self.audio_au_class * self.audio_au_class + self.visual_au_class * self.visual_au_class # self.audio_au_class 的 平方 + self.visual_au_class 的 平方
+        self.fc = nn.Linear(in_channels, num_class)
     
     def forward(self, audio_input, visual_input):
         # print('[AudioVisualGraphModel] input audio_input:', audio_input.shape, ', visual_input:', visual_input.shape)
         # x_audio, f_v_audio, f_e_audio, cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
         # x_visual, f_v_visual, f_e_visual, cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
-        cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
-        cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
-        # print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
-        # print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
+        if self.cfg.MODEL.FUSION_TYPE == 'feature_fusion':
+            cl_audio_visual, cl_edge_audio_visual = self.visual_graph_model(visual_input, audio_input)
+            # print('[AudioVisualGraphModel] cl_audio_visual:', cl_audio_visual.shape, ', cl_edge_audio_visual:', cl_edge_audio_visual.shape)
+            if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+                x = cl_audio_visual
+            elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+                x = cl_edge_audio_visual.squeeze(-1)
+        elif self.cfg.MODEL.FUSION_TYPE == 'decision_fusion':
+            cl_audio, cl_edge_audio = self.audio_graph_model(audio_input)
+            cl_visual, cl_edge_visual = self.visual_graph_model(visual_input)
+            # print('[AudioVisualGraphModel] x_audio:', x_audio.shape, ', f_v_audio:', f_v_audio.shape, ', f_e_audio:', f_e_audio.shape, ', cl_audio:', cl_audio.shape, ', cl_edge_audio:', cl_edge_audio.shape)
+            # print('[AudioVisualGraphModel] x_visual:', x_visual.shape, ', f_v_visual:', f_v_visual.shape, ', f_e_visual:', f_e_visual.shape, ', cl_visual:', cl_visual.shape, ', cl_edge_visual:', cl_edge_visual.shape)
+            # print('[AudioVisualGraphModel] cl_edge_audio:', cl_edge_audio.shape, cl_edge_audio, ', cl_edge_visual:', cl_edge_visual.shape, cl_edge_visual)
+            if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
+                x = torch.cat((cl_audio, cl_visual), dim=1)
+            elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
+                x = torch.cat((cl_edge_audio.squeeze(-1), cl_edge_visual.squeeze(-1)), dim=1)
+            # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_v':
+            #     x = torch.cat((f_v_audio, f_v_visual), dim=1) # TODO
+            # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_e':
+            #     x = torch.cat((f_e_audio, f_e_visual), dim=1) # TODO
+            else:
+                raise Exception('AudioVisualGraphModel.forward, cfg.MODEL.PREDICTION_FEAT error!')
+            # print('[AudioVisualGraphModel] after cat, x:', x.shape, x)
+            del cl_audio, cl_edge_audio, cl_visual, cl_edge_visual
         
-        if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
-            x = torch.cat((cl_audio, cl_visual), dim=1)
-        elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':
-            x = torch.cat((cl_edge_audio.squeeze(-1), cl_edge_visual.squeeze(-1)), dim=1)
-        # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_v':
-        #     x = torch.cat((f_v_audio, f_v_visual), dim=1) # TODO
-        # elif self.cfg.MODEL.PREDICTION_FEAT == 'f_e':
-        #     x = torch.cat((f_e_audio, f_e_visual), dim=1) # TODO
-        else:
-            raise Exception('AudioVisualGraphModel.forward, cfg.MODEL.PREDICTION_FEAT error!')
-        # print('[AudioVisualGraphModel] after cat, x:', x.shape)
-        del cl_audio, cl_edge_audio, cl_visual, cl_edge_visual
         if torch.cuda.is_available():
             time_start = time.time()
             gc.collect()
@@ -948,11 +1090,17 @@ class AudioVisualGraphModel(nn.Module):
             duration = round(time.time() - time_start, 3)
             if duration > 1:
                 print('[MEFL.py] AudioVisualGraphModel, time cost of gc.collect: ', duration, 's')
-        self.fc = nn.Linear(x.shape[1], self.num_class).to(device)
+        
+        # print('[AudioVisualGraphModel] before fc x:', x.shape)
+        # self.fc = nn.Linear(x.shape[1], self.num_class).to(device)
         x = self.fc(x)
-        # print('[AudioVisualGraphModel] output x:', x.shape)
+        # print('[AudioVisualGraphModel] after fc x:', x.shape, x)
         if self.cfg.LOSS.NAME == "binary_cross_entropy":
-            x = torch.sigmoid(x)
+            if self.cfg.TRAIN.USE_AMP is True:
+                x = torch.sigmoid(x.float())
+            else:
+                x = torch.sigmoid(x)
+        # print('[AudioVisualGraphModel] final output x:', x.shape, x)
         return x
 
 @NETWORK_REGISTRY.register()
