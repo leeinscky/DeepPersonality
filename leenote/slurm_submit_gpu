@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=06:10:00
+#SBATCH --time=00:20:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -172,9 +172,9 @@ data="UDIVA"
 
 epoch=8
 
-batch_size=4
+batch_size=8
 sample_size=16
-num_workers=2
+num_workers=1
 prefetch_factor=4
 
 max_split_size_mb=32
@@ -184,7 +184,7 @@ backbone_input='video' # 'video' or 'frame'
 
 prediction_feat='cl_edge' # 'cl_edge' or 'cl'
 fusion_type='feature_fusion' # 'feature_fusion' or 'decision_fusion'
-use_amp='False' # 'True' or 'False'
+use_amp='True' # 'True' or 'False'
 
 # batch_size2=128
 # batch_size3=128

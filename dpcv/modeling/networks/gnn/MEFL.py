@@ -31,8 +31,9 @@ AU_15CLASS = 15
 
 # Gated GCN Used to Learn Multi-dimensional Edge Features and Node Features
 class GNN(nn.Module):
-    def __init__(self, in_channels, num_classes):
+    def __init__(self, in_channels, num_classes, cfg=None):
         super(GNN, self).__init__()
+        self.cfg = cfg
         self.in_channels = in_channels
         self.num_classes = num_classes
         # GNN Matrix: E x N
@@ -115,10 +116,15 @@ class GNN(nn.Module):
         # print('[MEFL.py] GNN, Vix.dtype:', Vix.dtype, ', Vjx.dtype:', Vjx.dtype, ', e.dtype:', e.dtype, ', start.dtype:', start.dtype, ', end.dtype:', end.dtype)
         # Vix.dtype: torch.float16 , Vjx.dtype: torch.float16 , e.dtype: torch.float16 , start.dtype: torch.float32 , end.dtype: torch.float32
         edge = edge + self.act(self.bne1(torch.einsum('ev, bvc -> bec', (end, Vix)) + torch.einsum('ev, bvc -> bec',(start, Vjx)) + e))  # E x d_out
-
+        print('[MEFL.py] GNN, after self.act, edge.shape:', edge.shape, edge)
+        if self.cfg.TRAIN.USE_AMP:
+            edge = edge.float() # half precision to float precision
         e = self.sigmoid(edge)
+        print('[MEFL.py] GNN, after self.act, e.shape:', e.shape, e)
         b, _, c = e.shape
         e = e.view(b,self.num_classes, self.num_classes, c)
+        if self.cfg.TRAIN.USE_AMP:
+            e = e.float()
         e = self.softmax(e)
         e = e.view(b, -1, c)
 
@@ -134,24 +140,35 @@ class GNN(nn.Module):
         Vjx = self.B2(x)  # V x d_out
         e = self.E2(edge)  # E x d_out
         edge = edge + self.act(self.bne2(torch.einsum('ev, bvc -> bec', (end, Vix)) + torch.einsum('ev, bvc -> bec', (start, Vjx)) + e))  # E x d_out
+        print('[MEFL.py] GNN, after self.bne2, edge.shape:', edge.shape, edge)
 
+        if self.cfg.TRAIN.USE_AMP:
+            edge = edge.float() # half precision to float precision
         e = self.sigmoid(edge)
+        print('[MEFL.py] GNN, after self.sigmoid, e.shape:', e.shape, e)
         b, _, c = e.shape
         e = e.view(b, self.num_classes, self.num_classes, c)
+        if self.cfg.TRAIN.USE_AMP:
+            e = e.float()
         e = self.softmax(e)
+        print('[MEFL.py] GNN, after self.softmax, e.shape:', e.shape, e)
         e = e.view(b, -1, c)
 
         Ujx = self.V2(x)  # V x H_out
         Ujx = torch.einsum('ev, bvc -> bec', (start, Ujx))  # E x H_out
         Uix = self.U2(x)  # V x H_out
+        print('[MEFL.py] GNN, after self.U2, Uix.shape:', Uix.shape, Uix)
+        
         x = Uix + torch.einsum('ve, bec -> bvc', (end.t(), e * Ujx)) / self.num_classes  # V x H_out
+        print('[MEFL.py] GNN, after Uix + torch.einsum, x.shape:', x.shape, x)
+        
         x = self.act(res + self.bnv2(x))
-        ## print('[MEFL.py] GNN, output x.shape:', x.shape, ', edge.shape:', edge.shape)
+        print('[MEFL.py] GNN, output x.shape:', x.shape, x, ', edge.shape:', edge.shape, edge)
         return x, edge
 
 
 class Head(nn.Module):
-    def __init__(self, in_channels, num_classes, modal):
+    def __init__(self, in_channels, num_classes, modal, cfg=None):
         super(Head, self).__init__()
         # The head of network
         # Input: the feature maps x from backbone
@@ -162,6 +179,7 @@ class Head(nn.Module):
         # sc: individually calculate cosine similarity between node features and a trainable vector.
         # edge fc: for edge prediction
         self.modal = modal # visual or audio
+        self.cfg = cfg
         self.in_channels = in_channels
         self.num_classes = num_classes
         class_linear_layers = []
@@ -170,7 +188,7 @@ class Head(nn.Module):
             class_linear_layers += [layer]
         self.class_linears = nn.ModuleList(class_linear_layers)
         self.edge_extractor = GEM(self.in_channels, self.num_classes)
-        self.gnn = GNN(self.in_channels, self.num_classes)
+        self.gnn = GNN(self.in_channels, self.num_classes, cfg=self.cfg)
         self.sc = nn.Parameter(torch.FloatTensor(torch.zeros(self.num_classes, self.in_channels)))
         if self.modal == 'visual':
             self.edge_fc = nn.Linear(self.in_channels, 4)
@@ -198,20 +216,20 @@ class Head(nn.Module):
         # f_u.shape: [bs, 12, 49, 512], x.shape: [bs, 49, 512], 计算结果 f_e.shape: [bs, 144, 49, 512]
         f_e = f_e.mean(dim=-2)
         
-        # print('[MEFL.py] class Head.forward, GNN的输入参数, f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
+        print('[MEFL.py] class Head.forward, GNN的输入参数, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
         f_v, f_e = self.gnn(f_v, f_e) # Gated-GCN for graph learning with node and multi-dimensional edge features
-        # print('[MEFL.py] class Head.forward, after self.gnn, f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
+        print('[MEFL.py] class Head.forward, after self.gnn, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
 
         b, n, c = f_v.shape
         sc = self.sc
         sc = self.relu(sc)
         sc = F.normalize(sc, p=2, dim=-1)
         cl = F.normalize(f_v, p=2, dim=-1) # cl means class logits
-        # print('[MEFL.py] class Head.forward, after F.normalize, cl.shape: ', cl.shape, 'sc.shape: ', sc.shape) # cl.shape: [bs, 12, 512], sc.shape: [12, 512]
+        print('[MEFL.py] class Head.forward, after F.normalize, cl.shape: ', cl.shape, cl, 'sc.shape: ', sc.shape, sc) # cl.shape: [bs, 12, 512], sc.shape: [12, 512]
         
         cl = (cl * sc.view(1, n, c)).sum(dim=-1, keepdim=False)
         cl_edge = self.edge_fc(f_e)
-        # print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
+        print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
         # return cl, cl_edge, f_v, f_e, f_u
         if self.modal == 'visual':
             return f_v, f_u
@@ -255,7 +273,7 @@ class MEFARG(nn.Module):
         # MEFARG_resnet101_BP4D_fold1.pth: 2048, 512; MEFARG_resnet50_BP4D_fold1.pth: 2048, 512;
         self.global_linear = LinearBlock(self.in_channels, self.out_channels)
         # print('[MEFARG] self.out_channels: ', self.out_channels, 'num_classes: ', num_classes, 'self.modal: ', self.modal)
-        self.head = Head(self.out_channels, num_classes, self.modal)
+        self.head = Head(self.out_channels, num_classes, self.modal, cfg=self.cfg)
 
     def generate_backbone(self, backbone, channels):
         if 'transformer' in backbone:
@@ -349,7 +367,7 @@ class MEFARG(nn.Module):
             # f_v, f_e, cl, cl_edge = self.head(x)
             cl, cl_edge = self.head(x)
             # print('[feature_fusion_foward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            # print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, 'cl_edge.shape: ', cl_edge.shape)
+            print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge)
             # return f_v, f_e, cl, cl_edge
             return cl, cl_edge
         elif self.modal == 'audio':
@@ -941,7 +959,7 @@ class VisualGraphModel(nn.Module):
             cl, cl_edge = self.visual_graph_model(x, y)
         else:
             cl, cl_edge = self.visual_graph_model(x)
-        # print('[VisualGraphModel] f_v:', f_v.shape, ', f_e:', f_e.shape, ', cl:', cl.shape, ', cl_edge:', cl_edge.shape)
+        print('[VisualGraphModel] 1 - cl:', cl.shape, cl, ', cl_edge:', cl_edge.shape, cl_edge)
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
         elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':

@@ -286,7 +286,27 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
     def get_visual_input(self, idx):
         ### get image data ###
         # print('[get_visual_input] dataloader random idx = ', idx) # idx 和 get_ocean_label(self, index) 里的index含义一样，表示video目录里的第几个video样本
-        fc1_img_tensor_list, fc2_img_tensor_list, session_id, segment_id = self.get_image_data(idx)
+        # fc1_img_tensor_list, fc2_img_tensor_list, session_id, segment_id = self.get_image_data(idx)
+        
+        # while True:
+        #     try:
+        #         fc1_img_tensor_list, fc2_img_tensor_list, session_id, segment_id = self.get_image_data(idx)
+        #         break  # 如果没有报错，则跳出循环
+        #     except Exception as e:
+        #         print(f"[get_visual_input] Error occurred: {e}")
+        #         idx += random.randint(1, 10)  # 将 idx 随机增加 1 到 10 的值
+        
+        while True:
+            try:
+                fc1_img_tensor_list, fc2_img_tensor_list, session_id, segment_id = self.get_image_data(idx)
+                if len(fc1_img_tensor_list) != len(fc2_img_tensor_list):
+                    raise IndexError("[get_visual_input] Lengths of fc1_img_tensor_list and fc2_img_tensor_list do not match. idx:", idx)
+                break  # 如果没有报错，则跳出循环
+            except Exception as e:
+                print(f"[get_visual_input] Error occurred: {e}")
+                idx += random.randint(1, 10)  # 将 idx 随机增加 1 到 10 的值
+                print('[get_visual_input] dataloader new random idx is:', idx)
+        
         img_tensor_list = []
         # print('[get_visual_input] len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))
         for i in range(len(fc1_img_tensor_list)):
@@ -317,7 +337,10 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 fc1_img_dir_path = os.path.join(session_dir_path, file)
             if os.path.isdir(os.path.join(session_dir_path, file)) and file.startswith(self.prefix2) and not file.endswith(".mp4"): # judge file is a directory and start with FC2 and not end with .mp4
                 fc2_img_dir_path = os.path.join(session_dir_path, file)
-        # print('[audio_visual_data_udiva.py]- get_image_data idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path) # fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
+        # fc1_img_dir_path = 'datasets/udiva_full/train/recordings/talk_recordings_train_img/035040/FC1_T' # temp test 复现DataLoader报错: TypeError: cannot unpack non-iterable NoneType object
+        # fc2_img_dir_path = 'datasets/udiva_full/train/recordings/talk_recordings_train_img/035040/FC2_T' # temp test 复现DataLoader报错: TypeError: cannot unpack non-iterable NoneType object
+        # segment_idx = 80 # start_frame_id = 16 * 79 = 1264  # temp test 复现DataLoader报错: TypeError: cannot unpack non-iterable NoneType object
+        # print('[get_image_data] idx:', idx, 'fc1_img_dir_path:', fc1_img_dir_path, "fc2_img_dir_path:", fc2_img_dir_path) # fc1_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC1_A     fc2_img_dir_path: datasets/udiva_tiny/train/recordings/animals_recordings_train_img/055128/FC2_A
 
         fc1_img_paths = glob.glob(fc1_img_dir_path + "/*.jpg") # fc1_img_paths是FC1_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc1_img_paths): 7228
         fc2_img_paths = glob.glob(fc2_img_dir_path + "/*.jpg") # fc2_img_paths是FC2_A目录下所有的jpg图像文件路径的集合。 例如：train session id=055128, len(fc2_img_paths): 7228
@@ -338,7 +361,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         start_frame_id = int(self.sample_size) * (int(segment_idx) - 1) # 例如，如果self.sample_size=4，segment_idx=2，那么start_frame_id=4*(2-1)=4
         end_frame_id = start_frame_id + self.sample_size # 例如，如果self.sample_size=4，segment_idx=2，那么end_frame_id=4+4=8, 即[4:8]，共4个frame, 是该视频的第2个segment，第一个segment是[0:3], 第二个segment是[4:7], 第三个segment是[8:11]
         sample_fc1_frames = fc1_img_paths[start_frame_id:end_frame_id]
-        # print('[get_image_data] start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size, ', len(sample_fc1_frames):', len(sample_fc1_frames), sample_fc1_frames)
+        # print('[get_image_data] start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size, ', len(sample_fc1_frames):', len(sample_fc1_frames), ', sample_fc1_frames:', sample_fc1_frames)
         if not self.check_continue(sample_fc1_frames):
             # print('[get_image_data] sample_fc1_frames is not continuous')
             self.is_continue = False
@@ -350,8 +373,8 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             try:
                 fc1_img = Image.open(fc1_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
             except Exception as e:
-                # print('[audio_visual_data_udiva.py]exception:', e, 'fc1_frame_path:', fc1_frame_path)
-                return None
+                print('[get_image_data] exception:', e, 'fc1_frame_path:', fc1_frame_path, ', start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id, ', segment_idx:', segment_idx, ', self.sample_size:', self.sample_size)
+                continue
             # 将图片转换为tensor
             if self.transform:
                 fc1_img_tensor = self.transform(fc1_img)
@@ -366,7 +389,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         fc2_img_paths.sort(key=lambda x: int(x.split('_')[-1].split('.')[0])) # 将fc2_img_paths中所有的图片按照后缀数字升序排序，然后随机取出连续的sample_size个图片帧
         # sample_fc2_frames = fc2_img_paths[self.frame_idx:self.frame_idx + self.sample_size] # 采样方式一：随机取sample_size个连续的帧图片。从所有的frame中按照self.frame_idx开始，取出sample_size个frame，即随机取出sample_size个图片
         sample_fc2_frames = fc2_img_paths[start_frame_id:end_frame_id] # 采样方式二：按照segment_idx取sample_size个连续的帧图片
-        # print('[get_image_data] sample_fc2_frames:', sample_fc2_frames, 'len(sample_fc2_frames):', len(sample_fc2_frames))
+        # print('[get_image_data] len(sample_fc2_frames):', len(sample_fc2_frames), ', sample_fc2_frames:', sample_fc2_frames)
         if not self.check_continue(sample_fc2_frames):
             # print('[get_image_data] sample_fc2_frames is not continuous')
             self.is_continue = False
@@ -374,17 +397,19 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         fc2_img_tensor_list = []
         for i, fc2_frame_path in enumerate(sample_fc2_frames): # 遍历sample_fc2_frames里的每个图片帧，将其转换为RGB模式
             # print('[get_image_data] enumerate(sample_fc2_frames), fc2_frame_path:', fc2_frame_path, 'i:', i)
+            # fc2_frame_path = 'datasets/udiva_full/train/recordings/talk_recordings_train_img/035040/FC2_T/face_1352.jpg' # TODO temp test 复现DataLoader报错: TypeError: cannot unpack non-iterable NoneType object
             try:
                 fc2_img = Image.open(fc2_frame_path).convert("RGB") # PIL.Image.open() 打开图片，返回一个Image对象，Image对象有很多方法，如：Image.show()，Image.save()，Image.convert()等，Image.convert()用于转换图片模式，如：RGB，L等，为了方便后续处理，这里转换为RGB模式，即3通道
             except Exception as e:
-                # print('[audio_visual_data_udiva.py]exception:', e, 'fc2_frame_path:', fc2_frame_path)
-                return None
+                print('[get_image_data] exception:', e, 'fc2_frame_path:', fc2_frame_path, 'i:', i, ', start_frame_id:', start_frame_id, ', end_frame_id:', end_frame_id)
+                continue
             if self.transform: # 将图片转换为tensor
                 fc2_img_tensor = self.transform(fc2_img)
             fc2_img_tensor_list.append(fc2_img_tensor) # 将图片tensor添加到fc2_imgs中
-        # print('[audio_visual_data_udiva.py]- get_image_data len(fc1_img_tensor_list):', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list))
+        # print('[get_image_data] final len(fc1_img_tensor_list):', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list):', len(fc2_img_tensor_list), ', session_id:', session_id, ', segment_idx:', segment_idx)
         # ************************* get fc2 image - done *************************
         
+        # print('[get_image_data] return session_id:', session_id, 'segment_idx:', segment_idx)
         return fc1_img_tensor_list, fc2_img_tensor_list, int(session_id), int(segment_idx)
 
     def get_audio_input(self, idx):
