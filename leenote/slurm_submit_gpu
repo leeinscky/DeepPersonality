@@ -22,7 +22,7 @@
 #! Note that the job submission script will enforce no more than 32 cpus per GPU.
 #SBATCH --gres=gpu:1
 #! How much wallclock time will be required?
-#SBATCH --time=00:10:00
+#SBATCH --time=06:10:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -162,20 +162,23 @@ JOBID=$SLURM_JOB_ID
 
 #### **************************** GNN 音频+视觉融合 **************************** ####
 model="GNN-AudioVisual"
-cfg_file=./config/demo/noxi/gnn_noxi_full_audiovisual.yaml
+# cfg_file=./config/demo/noxi/gnn_noxi_full_audiovisual.yaml
+cfg_file=./config/demo/udiva/gnn_udiva_full_audiovisual.yaml
 
+data_dir='udiva'
+data="UDIVA"
+# data_dir='noxi'
+# data="NoXi"
 
-# data="UDIVA"
-data="NoXi"
 epoch=8
 
-batch_size=4
-sample_size=32
+batch_size=8
+sample_size=16
 
-num_workers=1
-prefetch_factor=1
-num_fold=3
+num_workers=2
+prefetch_factor=5
 max_split_size_mb=32
+# num_fold=3
 
 # batch_size2=128
 # batch_size3=128
@@ -196,7 +199,7 @@ learning_rate=0.0005
 # learning_rate5=0.0005
 # learning_rate6=0.0005
 
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate --num_workers $num_workers --prefetch_factor $prefetch_factor --num_fold $num_fold --max_split_size_mb $max_split_size_mb > ./leenote/slurm_log/gpu/noxi/${model}/slurm-${JOBID}_${data}_${model}_bs${batch_size}_sp${sample_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate --num_workers $num_workers --prefetch_factor $prefetch_factor --num_fold $num_fold --max_split_size_mb $max_split_size_mb > ./leenote/slurm_log/gpu/${data_dir}/${model}/slurm-${JOBID}_${data}_${model}_bs${batch_size}_sp${sample_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/gpu/slurm-${JOBID}_${data}_${model}_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &

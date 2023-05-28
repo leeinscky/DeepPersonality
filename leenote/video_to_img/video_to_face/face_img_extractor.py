@@ -200,15 +200,15 @@ if __name__ == "__main__":
         # 关于process 个数的设置，参考：https://stackoverflow.com/a/20039972 
         print('cpu_count:', multiprocessing.cpu_count(), ', os.cpu_count():', os.cpu_count()) # login-icelake.hpc.cam.ac.uk: cpu_count: 76 , os.cpu_count(): 76
         # num_process = multiprocessing.cpu_count() // 2
-        # num_process = 2
         # num_process = multiprocessing.cpu_count() - 1
-        num_process = 29
+        # num_process = 29 # for NoXi dataset
+        num_process = 39 # for UDIVA training dataset, since part1 has 38 videos, part2 has 38 videos, part3 has 39 videos, so choose the max one
         print('num_process:', num_process) # login-icelake.hpc.cam.ac.uk: num_process: 38
         
         p = Pool(num_process) # 理论上这里process的数量可以设置为multiprocessing.cpu_count() - 1, 即76-1=75（机器: login-icelake.hpc.cam.ac.uk）
         for d in data_root_ls_pt:
             print('process ', d, '...')
-            time.sleep(1)
+            time.sleep(0.2)
             p.apply_async(run_on_videos, args=(d, d, args.level))
             # run_on_videos(
             #     video_dir=d,

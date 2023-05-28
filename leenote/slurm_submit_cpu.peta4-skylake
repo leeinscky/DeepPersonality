@@ -19,7 +19,7 @@
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
 #SBATCH --ntasks=32
 #! How much wallclock time will be required?
-#SBATCH --time=10:00:00
+#SBATCH --time=00:30:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=NONE
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -123,10 +123,10 @@ JOBID=$SLURM_JOB_ID
 # cfg_file=./config/demo/noxi/resnet_3d_noxi_full.yaml   # NOXI dataset
 
 #### **************************** model1 ResNet: bimodal_resnet18_udiva_full.yaml ***************** ####
-model="Res18-Audio"
-# model="Res18-AudioVisual"
-# cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
-cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
+# model="Res18-Audio"
+# # model="Res18-AudioVisual"
+# # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml
+# cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 
 #### **************************** Transformer: transformer_udiva.yaml **************************** ####
 # model="ViT"
@@ -139,35 +139,43 @@ cfg_file=./config/demo/noxi/bimodal_resnet18_noxi_full.yaml
 # model="AST_Finetune"
 # cfg_file=./config/demo/ssast_finetune_udiva.yaml   # 微调
 
-#### **************************** GNN: gnn_noxi_full.yaml **************************** ####
-# model="GNN-Visual"
-# cfg_file=./config/demo/noxi/gnn_noxi_full.yaml
+#### **************************** GNN 音频 **************************** ####
+model="GNN-Audio"
+cfg_file=./config/demo/udiva/gnn_udiva_full_audio.yaml
 
-data="NoXi"
+data_dir='udiva'
+data="UDIVA"
+
+# data_dir='noxi'
+# data="NoXi"
+
 epoch=10
+batch_size=16
+sample_size=16
 
-sample_size=64
-sample_size2=272
-sample_size3=288
-sample_size4=304
-sample_size5=320
-sample_size6=336
+num_workers=2
+prefetch_factor=8
 
-batch_size=32
-batch_size2=128
-batch_size3=128
-batch_size4=64
-batch_size5=64
-batch_size6=64
+# batch_size2=128
+# batch_size3=128
+# batch_size4=64
+# batch_size5=64
+# batch_size6=64
+
+# sample_size2=272
+# sample_size3=288
+# sample_size4=304
+# sample_size5=320
+# sample_size6=336
 
 learning_rate=0.0005
-learning_rate2=0.0005
-learning_rate3=0.0005
-learning_rate4=0.0005
-learning_rate5=0.0005
-learning_rate6=0.0005
+# learning_rate2=0.0005
+# learning_rate3=0.0005
+# learning_rate4=0.0005
+# learning_rate5=0.0005
+# learning_rate6=0.0005
 
-srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/cpu/noxi/${model}/slurm-${JOBID}_${data}_${model}_sp${sample_size}_bs${batch_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
+srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size --max_epoch $epoch --bs $batch_size --lr $learning_rate > ./leenote/slurm_log/cpu/${data_dir}/${model}/slurm-${JOBID}_${data}_${model}_sp${sample_size}_bs${batch_size}_ep${epoch}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size2 --max_epoch $epoch --bs $batch_size2 --lr $learning_rate2 > ./leenote/slurm_log/cpu/slurm-${JOBID}_${data}_${model}_sp${sample_size2}_bs${batch_size2}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size3 --max_epoch $epoch --bs $batch_size3 --lr $learning_rate3 > ./leenote/slurm_log/cpu/slurm-${JOBID}_${data}_${model}_sp${sample_size3}_bs${batch_size3}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &
 # srun --nodes=1 --ntasks=1 python3 ./script/run_exp.py --cfg_file $cfg_file --sample_size $sample_size4 --max_epoch $epoch --bs $batch_size4 --lr $learning_rate4 > ./leenote/slurm_log/cpu/slurm-${JOBID}_${data}_${model}_sp${sample_size4}_bs${batch_size4}_`date +'%m-%d-%H:%M:%S'`.log 2>&1 &

@@ -37,19 +37,25 @@ DATA:
   VALID_LABEL_DATA: "udiva_full/val/label/sessions_val.pkl"
   TEST_LABEL_DATA: "udiva_full/test/label/sessions_test.pkl"
 DATA_LOADER:
-  NAME: "bimodal_resnet_lstm_data_loader_udiva" 
-  # TRANSFORM: "udiva_frame_transforms"
+  NAME: "bimodal_resnet_lstm_data_loader_udiva"
   TRANSFORM: "face_image_transform"
+  # TRANSFORM: "face_image_x2_transform"
   TRAIN_BATCH_SIZE: 16
   VALID_BATCH_SIZE: 32
   TEST_BATCH_SIZE: 32
-  NUM_WORKERS: 2
   DATASET_NAME: "UDIVA"
   DROP_LAST: False
+  NUM_WORKERS: 2
   PREFETCH_FACTOR: 2
+  PIN_MEMORY: True
 MODEL:
-  NAME: "audio_resnet_udiva"
-  # NAME: "audiovisual_resnet_lstm_udiva"
+  # NAME: "visual_graph_representation_learning"      # GNN 视觉 图表示学习
+  NAME: "audio_graph_representation_learning"       # GNN 音频 图表示学习
+  # NAME: "audiovisual_graph_representation_learning" # GNN 视觉+音频融合 图表示学习
+  NUM_CLASS: 2
+  AU_CLASS: [12] # 列表结构，单模态时列表只有一个元素，多模态时有2个元素 [12]: 12个au图节点; [8]:8个au图节点; [15]: 取并集15个au图节点; [12,8]: audio 取12个au图节点, visual 取8个au图节点
+  BACKBONE_INPUT: 'video' # frame:输入MEFARG backbone的数据是每一帧图像(stsgcn); video:输入MEFARG backbone的数据是每一段视频，即图像序列
+  PREDICTION_FEAT: 'cl_edge' # 预测时使用的特征 cl:使用MEFARG返回的cl; cl_edge:使用MEFARG返回的cl_edge; f_v:使用MEFARG返回的f_v; f_e:使用MEFARG返回的f_e
 LOSS:
   NAME: "binary_cross_entropy"
 SOLVER:
@@ -58,16 +64,21 @@ SOLVER:
   LR_INIT: 0.001
   WEIGHT_DECAY: 0.0005
   MOMENTUM: 0.9
-  # MILESTONE: [50, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
-  MILESTONE: [5, 10, 30, 100, 200, 250]
+  MILESTONE: [1, 2, 4, 6, 8, 10, 20, 100, 200, 300, 400, 500, 540, 550, 560, 570, 580, 590]
 TRAIN:
   TRAINER: "BiModalTrainerUdiva"
   MAX_EPOCH: 2
   BIMODAL_OPTION: 2  # 1: visual 2: audio # 3: both
-  SAVED_MODEL_DIR: "saved_model/deeppersonality/bimodal_resnet18_udiva"
+  SAVED_MODEL_DIR: "saved_model/deeppersonality/udiva-audio-graph"
   LOG_INTERVAL: 10
   VALID_INTERVAL: 1
   TEST_INTERVAL: 1
+  ACC_THRESHOLD: 0.7
+  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_swin_tiny_BP4D/MEFARG_swin_tiny_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
+  PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_BP4D/MEFARG_resnet50_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
+  # PRE_TRAINED_MODEL: "pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet101_BP4D/MEFARG_resnet101_BP4D_fold1.pth;pre_trained_weights/ME-GraphAU/ME-GraphAU_resnet50_DISFA/MEFARG_resnet50_DISFA_fold1.pth"
+  USE_AMP: False
+  USE_HALF: False
 TEST:
   COMPUTE_PCC: False
   COMPUTE_CCC: False
