@@ -172,8 +172,8 @@ data="UDIVA"
 
 epoch=8
 
-batch_size=8
-sample_size=16
+batch_size=4
+sample_size=20
 num_workers=1
 prefetch_factor=4
 
@@ -184,7 +184,7 @@ backbone_input='video' # 'video' or 'frame'
 
 prediction_feat='cl_edge' # 'cl_edge' or 'cl'
 fusion_type='feature_fusion' # 'feature_fusion' or 'decision_fusion'
-use_amp='True' # 'True' or 'False'
+use_amp='False' # 'True' or 'False'
 
 # batch_size2=128
 # batch_size3=128

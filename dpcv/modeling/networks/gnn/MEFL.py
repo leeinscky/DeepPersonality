@@ -116,11 +116,11 @@ class GNN(nn.Module):
         # print('[MEFL.py] GNN, Vix.dtype:', Vix.dtype, ', Vjx.dtype:', Vjx.dtype, ', e.dtype:', e.dtype, ', start.dtype:', start.dtype, ', end.dtype:', end.dtype)
         # Vix.dtype: torch.float16 , Vjx.dtype: torch.float16 , e.dtype: torch.float16 , start.dtype: torch.float32 , end.dtype: torch.float32
         edge = edge + self.act(self.bne1(torch.einsum('ev, bvc -> bec', (end, Vix)) + torch.einsum('ev, bvc -> bec',(start, Vjx)) + e))  # E x d_out
-        print('[MEFL.py] GNN, after self.act, edge.shape:', edge.shape, edge)
+        # print('[MEFL.py] GNN, after self.act, edge.shape:', edge.shape, edge)
         if self.cfg.TRAIN.USE_AMP:
             edge = edge.float() # half precision to float precision
         e = self.sigmoid(edge)
-        print('[MEFL.py] GNN, after self.act, e.shape:', e.shape, e)
+        # print('[MEFL.py] GNN, after self.act, e.shape:', e.shape, e)
         b, _, c = e.shape
         e = e.view(b,self.num_classes, self.num_classes, c)
         if self.cfg.TRAIN.USE_AMP:
@@ -140,30 +140,30 @@ class GNN(nn.Module):
         Vjx = self.B2(x)  # V x d_out
         e = self.E2(edge)  # E x d_out
         edge = edge + self.act(self.bne2(torch.einsum('ev, bvc -> bec', (end, Vix)) + torch.einsum('ev, bvc -> bec', (start, Vjx)) + e))  # E x d_out
-        print('[MEFL.py] GNN, after self.bne2, edge.shape:', edge.shape, edge)
+        # print('[MEFL.py] GNN, after self.bne2, edge.shape:', edge.shape, edge)
 
         if self.cfg.TRAIN.USE_AMP:
             edge = edge.float() # half precision to float precision
         e = self.sigmoid(edge)
-        print('[MEFL.py] GNN, after self.sigmoid, e.shape:', e.shape, e)
+        # print('[MEFL.py] GNN, after self.sigmoid, e.shape:', e.shape, e)
         b, _, c = e.shape
         e = e.view(b, self.num_classes, self.num_classes, c)
         if self.cfg.TRAIN.USE_AMP:
             e = e.float()
         e = self.softmax(e)
-        print('[MEFL.py] GNN, after self.softmax, e.shape:', e.shape, e)
+        # print('[MEFL.py] GNN, after self.softmax, e.shape:', e.shape, e)
         e = e.view(b, -1, c)
 
         Ujx = self.V2(x)  # V x H_out
         Ujx = torch.einsum('ev, bvc -> bec', (start, Ujx))  # E x H_out
         Uix = self.U2(x)  # V x H_out
-        print('[MEFL.py] GNN, after self.U2, Uix.shape:', Uix.shape, Uix)
+        # print('[MEFL.py] GNN, after self.U2, Uix.shape:', Uix.shape, Uix)
         
         x = Uix + torch.einsum('ve, bec -> bvc', (end.t(), e * Ujx)) / self.num_classes  # V x H_out
-        print('[MEFL.py] GNN, after Uix + torch.einsum, x.shape:', x.shape, x)
+        # print('[MEFL.py] GNN, after Uix + torch.einsum, x.shape:', x.shape, x)
         
         x = self.act(res + self.bnv2(x))
-        print('[MEFL.py] GNN, output x.shape:', x.shape, x, ', edge.shape:', edge.shape, edge)
+        # print('[MEFL.py] GNN, output x.shape:', x.shape, x, ', edge.shape:', edge.shape, edge)
         return x, edge
 
 
@@ -216,20 +216,20 @@ class Head(nn.Module):
         # f_u.shape: [bs, 12, 49, 512], x.shape: [bs, 49, 512], 计算结果 f_e.shape: [bs, 144, 49, 512]
         f_e = f_e.mean(dim=-2)
         
-        print('[MEFL.py] class Head.forward, GNN的输入参数, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
+        # print('[MEFL.py] class Head.forward, GNN的输入参数, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
         f_v, f_e = self.gnn(f_v, f_e) # Gated-GCN for graph learning with node and multi-dimensional edge features
-        print('[MEFL.py] class Head.forward, after self.gnn, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
+        # print('[MEFL.py] class Head.forward, after self.gnn, f_v.shape: ', f_v.shape, f_v, 'f_e.shape: ', f_e.shape, f_e) # f_v.shape: [bs, 12, 512], f_e.shape: [bs, 144, 512]
 
         b, n, c = f_v.shape
         sc = self.sc
         sc = self.relu(sc)
         sc = F.normalize(sc, p=2, dim=-1)
         cl = F.normalize(f_v, p=2, dim=-1) # cl means class logits
-        print('[MEFL.py] class Head.forward, after F.normalize, cl.shape: ', cl.shape, cl, 'sc.shape: ', sc.shape, sc) # cl.shape: [bs, 12, 512], sc.shape: [12, 512]
+        # print('[MEFL.py] class Head.forward, after F.normalize, cl.shape: ', cl.shape, cl, 'sc.shape: ', sc.shape, sc) # cl.shape: [bs, 12, 512], sc.shape: [12, 512]
         
         cl = (cl * sc.view(1, n, c)).sum(dim=-1, keepdim=False)
         cl_edge = self.edge_fc(f_e)
-        print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
+        # print('[MEFL.py] class Head.forward, final return cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge) # cl.shape: [bs, 12], cl_edge.shape: [bs, 144, 4]
         # return cl, cl_edge, f_v, f_e, f_u
         if self.modal == 'visual':
             return f_v, f_u
@@ -367,7 +367,7 @@ class MEFARG(nn.Module):
             # f_v, f_e, cl, cl_edge = self.head(x)
             cl, cl_edge = self.head(x)
             # print('[feature_fusion_foward] MEFARG.forward, final f_v.shape: ', f_v.shape, 'f_e.shape: ', f_e.shape)
-            print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge)
+            # print('[feature_fusion_foward] MEFARG.forward, after head, cl.shape: ', cl.shape, cl, 'cl_edge.shape: ', cl_edge.shape, cl_edge)
             # return f_v, f_e, cl, cl_edge
             return cl, cl_edge
         elif self.modal == 'audio':
@@ -959,7 +959,7 @@ class VisualGraphModel(nn.Module):
             cl, cl_edge = self.visual_graph_model(x, y)
         else:
             cl, cl_edge = self.visual_graph_model(x)
-        print('[VisualGraphModel] 1 - cl:', cl.shape, cl, ', cl_edge:', cl_edge.shape, cl_edge)
+        # print('[VisualGraphModel] 1 - cl:', cl.shape, cl, ', cl_edge:', cl_edge.shape, cl_edge)
         if self.cfg.MODEL.PREDICTION_FEAT == 'cl':
              x = self.fc(cl)
         elif self.cfg.MODEL.PREDICTION_FEAT == 'cl_edge':

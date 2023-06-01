@@ -380,6 +380,8 @@ class BiModalTrainerUdiva(object):
                     with torch.cuda.amp.autocast():
                         outputs = model(*inputs)
                         outputs = outputs.float()
+                        if torch.isnan(outputs).any():
+                            continue
                         # print('[bi_modal_trainer.py] train... outputs=', outputs, 'labels=', temp_labels, ' outputs.size()', outputs.size(),  '  labels.size()=', labels.size())
                         loss = loss_f(outputs.cpu(), temp_labels.cpu())
                 else:

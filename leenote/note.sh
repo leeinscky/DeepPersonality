@@ -197,6 +197,7 @@
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_medium /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_full /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/datasets/noxi_temp_test /home/zl525/code/DeepPersonality/datasets/
+        ln -s /home/zl525/rds/hpc-work/datasets/udiva_medium /home/zl525/code/DeepPersonality/datasets/
         ln -s /home/zl525/rds/hpc-work/pretrained_models/ME-GraphAU/ /home/zl525/code/DeepPersonality/pre_trained_weights/
 # 创建模型checkpoint保存文件夹的软链接
     ln -s /home/zl525/rds/hpc-work/runresults/deeppersonality /home/zl525/code/DeepPersonality/saved_model/

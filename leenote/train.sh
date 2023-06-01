@@ -83,7 +83,7 @@ au_class="12,8" # 单模态时列表只有一个元素，多模态时有2个元�
 backbone_input='video' # 'video' or 'frame'
 prediction_feat='cl_edge' # 'cl_edge' or 'cl'
 fusion_type='feature_fusion' # 'feature_fusion' or 'decision_fusion'
-use_amp='True'
+use_amp='False'
 learning_rate=0.0001
 
 # cfg_file=./config/demo/bimodal_resnet18_udiva_full.yaml

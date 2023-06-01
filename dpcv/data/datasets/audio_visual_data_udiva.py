@@ -252,6 +252,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
         self.prefix1 = prefix1
         self.prefix2 = prefix2
         self.is_continue = True
+        self.idx = 0
 
     def __getitem__(self, idx): # idx means the index of session in the directory
         sample = {} # 因为__getitem__ 需要传入参数 idx，所以返回的sample也是一个session对应的img，wav，label
@@ -264,7 +265,7 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
             sample['audio'] = wav # [2, 1, (sample_size / 5) x 16000 = duration_seconds x 16000]
         elif self.cfg.TRAIN.BIMODAL_OPTION == 3:
             img, session_id_img, segment_id_img = self.get_visual_input(idx)
-            wav, session_id_wav, segment_id_wav = self.get_audio_input(idx)
+            wav, session_id_wav, segment_id_wav = self.get_audio_input(self.idx)
             assert session_id_img == session_id_wav and segment_id_img == segment_id_wav, 'session_id_img != session_id_wav or segment_id_img != segment_id_wav'
             sample['image'] = img
             sample['audio'] = wav
@@ -304,8 +305,9 @@ class AudioVisualLstmDataUdiva(VideoDataUdiva): # 基于AudioVisualDataUdiva 增
                 break  # 如果没有报错，则跳出循环
             except Exception as e:
                 print(f"[get_visual_input] Error occurred: {e}")
-                idx += random.randint(1, 10)  # 将 idx 随机增加 1 到 10 的值
+                idx += random.randint(1, 5)  # 将 idx 随机增加 1 到 5 的值
                 print('[get_visual_input] dataloader new random idx is:', idx)
+        self.idx = idx
         
         img_tensor_list = []
         # print('[get_visual_input] len(fc1_img_tensor_list) = ', len(fc1_img_tensor_list), 'len(fc2_img_tensor_list) = ', len(fc2_img_tensor_list))

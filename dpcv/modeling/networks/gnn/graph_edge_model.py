@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import math
+import torch.nn.functional as F
+import time
+import gc
 use_half = False
 
 class CrossAttn(nn.Module):
@@ -39,9 +42,20 @@ class CrossAttn(nn.Module):
         key = self.linear_k(x)
         value = self.linear_v(x)
         # print('[graph_edge_model.py] CrossAttn, after linear, query.shape: ', query.shape, ', key.shape: ', key.shape, ', value.shape: ', value.shape)
+        
+        query = F.normalize(query, p=2, dim=1) # avoid inf after torch.matmul(query, key.transpose(-2, -1))
+        key = F.normalize(key, p=2, dim=1)
         dots = torch.matmul(query, key.transpose(-2, -1)) * self.scale
         attn = self.attend(dots)
         # print('[graph_edge_model.py] CrossAttn, after matmul, dots.shape: ', dots.shape, ', attn.shape: ', attn.shape)
+        del query, key, dots, y, x
+        if torch.cuda.is_available():
+            time_start = time.time()
+            gc.collect()
+            torch.cuda.empty_cache()
+            duration = round(time.time() - time_start, 3)
+            if duration > 1:
+                print('[CrossAttn] time cost of gc.collect: ', duration, 's')
         out = torch.matmul(attn, value)
         # print('[graph_edge_model.py] CrossAttn, after matmul, out.shape: ', out.shape)
         return out
